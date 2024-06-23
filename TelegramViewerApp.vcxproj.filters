@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>qml;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>qrc;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TelegramQuickView\src\gui\core\ScrollBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\media\player\MediaPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\settings\MainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\core\ImagePushButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicScrollArea.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicIconChannelButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\core\winapi\MouseDetector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\core\winapi\MessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\core\winapi\FileIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\core\winapi\AutoRunRegistryUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicImageButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\media\EnhancedSlider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\media\player\VideoStateWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\media\VolumeButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\media\ClickableLabel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TelegramQuickView\src\gui\media\VolumeClickableLabel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TelegramQuickView\src\core\winapi\FileIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TelegramQuickView\src\core\winapi\MouseDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TelegramQuickView\src\core\winapi\MessageHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TelegramQuickView\src\core\winapi\AutoRunRegistryUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TelegramQuickView\src\gui\settings\DynamicImageButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TelegramQuickView\src\core\winapi\Exceptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />
+    <None Include="TelegramQuickView\src\qss\VideoSliderStyle.qss" />
+    <None Include="TelegramQuickView\src\qss\AudioSliderStyle.qss" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="TelegramQuickView\src\gui\core\ScrollBar.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\media\player\MediaPlayer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\settings\MainWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\core\ImagePushButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\settings\DynamicScrollArea.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\settings\DynamicIconChannelButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\core\WidgetsHider.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\media\EnhancedSlider.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\media\player\VideoStateWidget.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\media\VolumeButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\media\ClickableLabel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TelegramQuickView\src\gui\media\VolumeClickableLabel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="TelegramQuickView\assets\images\speaker.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="TelegramQuickView\assets\images\speaker_white.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="TelegramQuickView\assets\images\play.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="TelegramQuickView\assets\images\stop.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="TelegramQuickView\assets\images\repeat.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
