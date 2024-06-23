@@ -105,6 +105,11 @@
     <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />
     <None Include="TelegramQuickView\src\qss\VideoSliderStyle.qss" />
     <None Include="TelegramQuickView\src\qss\AudioSliderStyle.qss" />
+    <None Include=".gitignore" />
+    <None Include=".gitattributes" />
+    <None Include="README.md" />
+    <None Include="history_extractor.session" />
+    <None Include="history_extractor.session-journal" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TelegramQuickView\src\gui\core\ScrollBar.h">

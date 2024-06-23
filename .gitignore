@@ -3,7 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
 # User-specific files
+*.history_extractor.session
+*.history_extractor.session-journal
 *.rsuser
 *.suo
 *.user
