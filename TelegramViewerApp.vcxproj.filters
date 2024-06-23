@@ -108,8 +108,6 @@
     <None Include=".gitignore" />
     <None Include=".gitattributes" />
     <None Include="README.md" />
-    <None Include="history_extractor.session" />
-    <None Include="history_extractor.session-journal" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TelegramQuickView\src\gui\core\ScrollBar.h">

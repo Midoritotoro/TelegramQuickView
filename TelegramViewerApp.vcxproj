@@ -71,8 +71,6 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
-    <None Include="history_extractor.session" />
-    <None Include="history_extractor.session-journal" />
     <None Include="README.md" />
     <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />
     <None Include="TelegramQuickView\src\qss\AudioSliderStyle.qss" />
