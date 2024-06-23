@@ -5,8 +5,8 @@
 
 
 # User-specific files
-.history_extractor.session
-.history_extractor.session-journal
+/history_extractor.session
+/history_extractor.session-journal
 *.rsuser
 *.suo
 *.user
