@@ -1,4 +1,12 @@
 ﻿#include "MediaPlayer.h"
+
+#include <QGridLayout>
+#include <QGraphicsProxyWidget>
+#include <QDir>
+#include <QMimeDatabase>
+
+#include <Windows.h>
+
 #define VideoBegin 0
 
 

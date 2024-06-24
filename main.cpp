@@ -6,7 +6,7 @@
 #pragma pop_macro("slots")
 
 #include "TelegramQuickView/src/core/winapi/AutoRunRegistryUtils.h"
-#include "TelegramQuickView/src/gui/settings/MainWindow.h"
+#include "TelegramQuickView/src/gui/core/ScrollBar.h"
 
 int __cdecl main(int argc, char* argv[]) 
 {
@@ -18,9 +18,7 @@ int __cdecl main(int argc, char* argv[])
 
 
 	QApplication app(argc, argv);
-	MainWindow window;
+	ScrollBar window;
 	window.show();
 	return app.exec();
-
-	return 0;
 }

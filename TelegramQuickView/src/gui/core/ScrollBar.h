@@ -5,14 +5,14 @@
 
 #include <windows.h>
 
-#include "../settings/DynamicIconChannelButton.h"
-#include "../settings/DynamicScrollArea.h"
+#include "../settings/IconChannelLabel.h"
 
 class ScrollBar: public QWidget
 {
 private:
 	Q_OBJECT
-	DynamicScrollArea* ScrollArea = nullptr, * IconScrollArea = nullptr;
+	int ScreenHeight, ScreenWidth;
+	QScrollArea* ScrollArea = nullptr, * IconScrollArea = nullptr;
 	QGridLayout* GridLayout = nullptr, * mainLayout = nullptr;
 	QVBoxLayout* vLayout = nullptr;
 	QWidget* mainWidget = nullptr, * vMainWidget = nullptr;
@@ -21,7 +21,7 @@ public:
 	ScrollBar(QWidget* parent = nullptr);
 	~ScrollBar();
 	void CreateScrollBar();
-	void CreateTelegramChannelWidget(const QString channelName, const QImage& image, QWidget* parent = nullptr);
+	void CreateTelegramChannelWidget(const QString channelName, const QString imagePath, QWidget* parent = nullptr);
 private slots:
-	void DynamicIconButton_clicked();
+	void IconChannelLabel_clicked();
 };

@@ -15,6 +15,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::CreateMainWindow()
 {
+
 	GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
 	channelOptionsMenuBar = new QMenuBar(this);

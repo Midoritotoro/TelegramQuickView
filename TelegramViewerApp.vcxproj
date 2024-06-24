@@ -35,22 +35,17 @@
     <ClCompile Include="TelegramQuickView\src\core\winapi\MouseDetector.cpp" />
     <ClCompile Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\ClickableLabel.cpp" />
-    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicIconChannelButton.cpp" />
-    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicImageButton.cpp" />
-    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicScrollArea.cpp" />
+    <ClCompile Include="TelegramQuickView\src\gui\settings\IconChannelLabel.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\EnhancedSlider.cpp" />
-    <ClCompile Include="TelegramQuickView\src\gui\core\ImagePushButton.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\settings\MainWindow.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\player\MediaPlayer.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\core\ScrollBar.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\player\VideoStateWidget.cpp" />
-    <ClCompile Include="TelegramQuickView\src\gui\media\VolumeButton.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\VolumeClickableLabel.cpp" />
     <QtMoc Include="TelegramQuickView\src\gui\media\player\VideoStateWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TelegramQuickView\src\gui\media\VolumeClickableLabel.h" />
-    <QtMoc Include="TelegramQuickView\src\gui\media\VolumeButton.h" />
     <QtMoc Include="TelegramQuickView\src\gui\media\EnhancedSlider.h" />
     <QtMoc Include="TelegramQuickView\src\gui\core\WidgetsHider.h" />
     <ClInclude Include="TelegramQuickView\src\core\winapi\AutoRunRegistryUtils.h" />
@@ -60,10 +55,7 @@
     <ClInclude Include="TelegramQuickView\src\core\winapi\MouseDetector.h" />
     <ClInclude Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.h" />
     <QtMoc Include="TelegramQuickView\src\gui\media\ClickableLabel.h" />
-    <ClInclude Include="TelegramQuickView\src\gui\settings\DynamicImageButton.h" />
-    <QtMoc Include="TelegramQuickView\src\gui\settings\DynamicIconChannelButton.h" />
-    <QtMoc Include="TelegramQuickView\src\gui\settings\DynamicScrollArea.h" />
-    <QtMoc Include="TelegramQuickView\src\gui\core\ImagePushButton.h" />
+    <QtMoc Include="TelegramQuickView\src\gui\settings\IconChannelLabel.h" />
     <QtMoc Include="TelegramQuickView\src\gui\settings\MainWindow.h" />
     <QtMoc Include="TelegramQuickView\src\gui\media\player\MediaPlayer.h" />
     <QtMoc Include="TelegramQuickView\src\gui\core\ScrollBar.h" />

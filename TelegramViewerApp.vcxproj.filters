@@ -32,13 +32,7 @@
     <ClCompile Include="TelegramQuickView\src\gui\settings\MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TelegramQuickView\src\gui\core\ImagePushButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicScrollArea.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicIconChannelButton.cpp">
+    <ClCompile Include="TelegramQuickView\src\gui\settings\IconChannelLabel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.cpp">
@@ -56,25 +50,19 @@
     <ClCompile Include="TelegramQuickView\src\core\winapi\AutoRunRegistryUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TelegramQuickView\src\gui\settings\DynamicImageButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TelegramQuickView\src\gui\media\EnhancedSlider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TelegramQuickView\src\gui\media\player\VideoStateWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TelegramQuickView\src\gui\media\VolumeButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TelegramQuickView\src\gui\media\ClickableLabel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TelegramQuickView\src\gui\media\VolumeClickableLabel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,9 +80,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TelegramQuickView\src\core\winapi\AutoRunRegistryUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TelegramQuickView\src\gui\settings\DynamicImageButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TelegramQuickView\src\core\winapi\Exceptions.h">
@@ -119,13 +104,7 @@
     <QtMoc Include="TelegramQuickView\src\gui\settings\MainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="TelegramQuickView\src\gui\core\ImagePushButton.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="TelegramQuickView\src\gui\settings\DynamicScrollArea.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="TelegramQuickView\src\gui\settings\DynamicIconChannelButton.h">
+    <QtMoc Include="TelegramQuickView\src\gui\settings\IconChannelLabel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="TelegramQuickView\src\gui\core\WidgetsHider.h">
@@ -136,9 +115,6 @@
     </QtMoc>
     <QtMoc Include="TelegramQuickView\src\gui\media\player\VideoStateWidget.h">
       <Filter>Source Files</Filter>
-    </QtMoc>
-    <QtMoc Include="TelegramQuickView\src\gui\media\VolumeButton.h">
-      <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="TelegramQuickView\src\gui\media\ClickableLabel.h">
       <Filter>Header Files</Filter>

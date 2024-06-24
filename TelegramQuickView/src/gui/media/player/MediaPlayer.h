@@ -1,18 +1,12 @@
 ﻿#pragma once
 
-#include <QtWidgets>
 #include <QMediaPlayer>
-#include <qaudiooutput.h>
-#include <QSlider>
-#include <QDir>
-#include <QCoreApplication>
+#include <QAudioOutput>
 #include <QGraphicsView>
-#include <QGraphicsScene>
 #include <QGraphicsVideoItem>
-#include <QGraphicsProxyWidget>
-#include <QPropertyAnimation>
-#include <Windows.h>
-#include <QMimeData>
+#include <QGraphicsGridLayout>
+#include <QToolButton>
+#include <QGraphicsWidget>
 
 #include "../../core/WidgetsHider.h"
 #include "../VolumeClickableLabel.h"
