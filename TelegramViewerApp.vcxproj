@@ -73,8 +73,8 @@
     <None Include=".gitignore" />
     <None Include="README.md" />
     <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />
-    <None Include="TelegramQuickView\src\qss\AudioSliderStyle.qss" />
-    <None Include="TelegramQuickView\src\qss\VideoSliderStyle.qss" />
+    <None Include="TelegramQuickView\src\сss\AudioSliderStyle.сss" />
+    <None Include="TelegramQuickView\src\сss\VideoSliderStyle.сss" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="TelegramQuickView\assets\images\play.png" />

@@ -133,9 +133,9 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	videoStateWidget->setStyleSheet("background-color: transparent");
 	videoStateWidget->setFixedSize(screenWidth / 60, screenHeight / 40);
 
-	QDir qssDir(currentPath + "/../../TelegramQuickView/src/qss/");
-	QString VideoSliderStyle = qssDir.absolutePath() + "/VideoSliderStyle.qss";
-	QString AudioSliderStyle = qssDir.absolutePath() + "/AudioSliderStyle.qss";
+	QDir qssDir(currentPath + "/../../TelegramQuickView/src/сss/");
+	QString VideoSliderStyle = qssDir.absolutePath() + "/VideoSliderStyle.сss";
+	QString AudioSliderStyle = qssDir.absolutePath() + "/AudioSliderStyle.сss";
 
 	QFile VideoSliderStyleFile(VideoSliderStyle);
 	QFile AudioSliderStyleFile(AudioSliderStyle);
