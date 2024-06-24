@@ -103,8 +103,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />
-    <None Include="TelegramQuickView\src\сss\VideoSliderStyle.сss" />
-    <None Include="TelegramQuickView\src\сss\AudioSliderStyle.сss" />
+    <None Include="TelegramQuickView\src\css\VideoSliderStyle.css" />
+    <None Include="TelegramQuickView\src\css\AudioSliderStyle.css" />
     <None Include=".gitignore" />
     <None Include=".gitattributes" />
     <None Include="README.md" />
