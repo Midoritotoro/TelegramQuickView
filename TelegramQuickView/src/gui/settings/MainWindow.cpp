@@ -54,48 +54,14 @@ void MainWindow::CreateMainWindow()
 
 void MainWindow::on_AddChannelsButton_click()
 {
-	DWORD Count = 0;
-	std::string TelegramChannels = TelegramParserTargetLineEdit->text().toStdString();
-	LPWSTR wstr = NULL;
-	int wstrlength = 0;
-	int wideCharCount = 0;
-	WCHAR s[2] = TEXT(",");
-	bool ChannelsSuccessfullyWriten;
-
-	wideCharCount = MultiByteToWideChar(CP_ACP, 0, TelegramChannels.c_str(), -1, NULL, 0);
-	wstr = new wchar_t[wideCharCount];
-	MultiByteToWideChar(CP_ACP, 0, TelegramChannels.c_str(), -1, wstr, wideCharCount);
-	wstrlength = lstrlen(wstr);
-
-	if (wstr[wstrlength - 1] != *s) {
-		wstr[wstrlength] = *s;
-	}
-
-	ChannelsSuccessfullyWriten = WriteChannelsToFile(wstr, false);
-	delete[] wstr;
+	LPWSTR TelegramChannels = (LPWSTR)TelegramParserTargetLineEdit->text().utf16();
+	WriteChannelsToFile(TelegramChannels, false);
 }
 
 void MainWindow::on_ReplaceChannelsButton_click()
 {
-	DWORD Count = 0;
-	std::string TelegramChannels = TelegramParserTargetLineEdit->text().toStdString();
-	LPWSTR wstr = NULL;
-	int wstrlength = 0;
-	int wideCharCount = 0;
-	WCHAR s[2] = TEXT(",");
-	bool ChannelsSuccessfullyWriten;
-
-	wideCharCount = MultiByteToWideChar(CP_ACP, 0, TelegramChannels.c_str(), -1, NULL, 0);
-	wstr = new wchar_t[wideCharCount];
-	MultiByteToWideChar(CP_ACP, 0, TelegramChannels.c_str(), -1, wstr, wideCharCount);
-	wstrlength = lstrlen(wstr);
-
-	if (wstr[wstrlength - 1] != *s) {
-		wstr[wstrlength] = *s;
-	}
-
-	ChannelsSuccessfullyWriten = WriteChannelsToFile(wstr, true);
-	delete[] wstr;
+	LPWSTR TelegramChannels = (LPWSTR)TelegramParserTargetLineEdit->text().utf16();
+	WriteChannelsToFile(TelegramChannels, true);
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click()

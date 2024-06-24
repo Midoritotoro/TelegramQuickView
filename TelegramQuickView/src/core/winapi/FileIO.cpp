@@ -4,7 +4,7 @@ bool WriteChannelsToFile(LPCWSTR channels, bool replaceCurrentChannels)
 {
 	LPCWSTR FileName = TEXT("TargetChannels.txt");
 	HANDLE File = NULL;
-	DWORD lpNumberOfBytesWritten = NULL, Count = NULL, dwSize = NULL;
+	DWORD lpNumberOfBytesWritten, Count, dwSize;
 
 	File = CreateFile(FileName, GENERIC_WRITE | GENERIC_READ, 0, NULL, replaceCurrentChannels ? TRUNCATE_EXISTING : OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (File == INVALID_HANDLE_VALUE) {
@@ -35,7 +35,6 @@ char* ReadChannelsFromFile() {
 
     if (file == INVALID_HANDLE_VALUE)
         return NULL;
-
     DWORD fileSize = GetFileSize(file, NULL);
     if (fileSize == INVALID_FILE_SIZE)
     {

@@ -77,6 +77,10 @@ class Sleuth:
         try:
             await self.__validate_date()
             await self.__check_download_path()
+            await self.__client.connect()
+           # phone_code = await self.__client.send_code_request(self.phone_number) // without console
+           # phone_code_hash = phone_code.phone_code_hash
+           # await self.__client.sign_in(self.phone, code=code, phone_code_hash=phone_code_hash)
             await self.__client.start(self.phone_number)
 
             await self.get_messages()
