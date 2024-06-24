@@ -19,7 +19,7 @@ private:
 	QHBoxLayout* hBoxLayout = nullptr;
 public:
 	ScrollBar(QWidget* parent = nullptr);
-	~ScrollBar();;
+	~ScrollBar();
 	void CreateScrollBar();
 	void CreateTelegramChannelWidget(const QString channelName, const QString imagePath, QWidget* parent = nullptr);
 private slots:
