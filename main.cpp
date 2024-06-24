@@ -17,7 +17,7 @@ int __cdecl main(int argc, char* argv[])
 		return -1;
 
 
-	QApplication app(argc, argv);
+	QApplication app(argc, argv);;
 	ScrollBar window;
 	window.show();
 	return app.exec();
