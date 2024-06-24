@@ -16,7 +16,7 @@ private:
 	QGridLayout* GridLayout = nullptr, * mainLayout = nullptr;
 	QVBoxLayout* vLayout = nullptr;
 	QWidget* mainWidget = nullptr, * vMainWidget = nullptr;
-	QHBoxLayout* hBoxLayout = nullptr;;
+	QHBoxLayout* hBoxLayout = nullptr;
 public:
 	ScrollBar(QWidget* parent = nullptr);
 	~ScrollBar();
