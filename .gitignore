@@ -5,6 +5,7 @@
 
 
 # User-specific files
+*.txt
 *.session
 *.session-journal
 *.rsuser
