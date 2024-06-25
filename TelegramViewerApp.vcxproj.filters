@@ -32,9 +32,6 @@
     <ClCompile Include="TelegramQuickView\src\gui\settings\MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TelegramQuickView\src\gui\settings\IconChannelLabel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -104,9 +101,6 @@
     <QtMoc Include="TelegramQuickView\src\gui\settings\MainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="TelegramQuickView\src\gui\settings\IconChannelLabel.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="TelegramQuickView\src\gui\core\WidgetsHider.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -137,6 +131,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="TelegramQuickView\assets\images\repeat.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="TelegramQuickView\assets\images\chat_background.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="TelegramQuickView\assets\images\chat_background.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

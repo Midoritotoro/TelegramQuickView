@@ -11,13 +11,15 @@
 int __cdecl main(int argc, char* argv[]) 
 {
 	AllocConsole();
-	if (!IS_MINIMUM_WINDOWS_VERSION)
+	if (!IS_MINIMUM_WINDOWS_VERSION) {
 		MessageBox(NULL, L"Приложение работает на версиях Windows выше 10", L"Ошибка", MB_OK);
+		return -1;
+	}
 	if (!addParserToRegistryAutoRun())
 		return -1;
 
 
-	QApplication app(argc, argv);;
+	QApplication app(argc, argv);
 	ScrollBar window;
 	window.show();
 	return app.exec();

@@ -35,7 +35,6 @@
     <ClCompile Include="TelegramQuickView\src\core\winapi\MouseDetector.cpp" />
     <ClCompile Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\ClickableLabel.cpp" />
-    <ClCompile Include="TelegramQuickView\src\gui\settings\IconChannelLabel.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\EnhancedSlider.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\settings\MainWindow.cpp" />
     <ClCompile Include="TelegramQuickView\src\gui\media\player\MediaPlayer.cpp" />
@@ -55,7 +54,6 @@
     <ClInclude Include="TelegramQuickView\src\core\winapi\MouseDetector.h" />
     <ClInclude Include="TelegramQuickView\src\core\parser\python\call\PythonCaller.h" />
     <QtMoc Include="TelegramQuickView\src\gui\media\ClickableLabel.h" />
-    <QtMoc Include="TelegramQuickView\src\gui\settings\IconChannelLabel.h" />
     <QtMoc Include="TelegramQuickView\src\gui\settings\MainWindow.h" />
     <QtMoc Include="TelegramQuickView\src\gui\media\player\MediaPlayer.h" />
     <QtMoc Include="TelegramQuickView\src\gui\core\ScrollBar.h" />
@@ -69,6 +67,8 @@
     <None Include="TelegramQuickView\src\css\VideoSliderStyle.css" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="TelegramQuickView\assets\images\chat_background.jpg" />
+    <Image Include="TelegramQuickView\assets\images\chat_background.png" />
     <Image Include="TelegramQuickView\assets\images\play.png" />
     <Image Include="TelegramQuickView\assets\images\repeat.png" />
     <Image Include="TelegramQuickView\assets\images\speaker.png" />
