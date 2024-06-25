@@ -14,6 +14,9 @@ void ScrollBar::CreateScrollBar()
     int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 
     setGeometry(screenWidth - width(), 0, width(), screenHeight);
+    setWindowFlag(Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_TranslucentBackground);
+    setStyleSheet("color: rgba(1, 0, 0, 0)");
 
     QString currentPath = QCoreApplication::applicationDirPath();
     QDir assetsDir(currentPath + "/../../TelegramQuickView/assets/images");
@@ -28,6 +31,8 @@ void ScrollBar::CreateScrollBar()
     chatList = new QListWidget(chatListWidget);
 
     chatListWidget->setContentsMargins(0, 0, 0, 0);
+    chatList->setAutoScroll(false);
+    chatList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     chatGridLayout->setContentsMargins(0, 0, 0, 0);
     chatGridLayout->setSpacing(0);
 
@@ -70,7 +75,6 @@ void ScrollBar::CreateScrollBar()
 
 }
 
-
 void ScrollBar::adjustTextWidth(QLabel* label)
 {
     QFontMetrics metrics(label->font());
@@ -82,8 +86,6 @@ void ScrollBar::createChat(const QString imagePath, const QString chatName)
 {
     QListWidgetItem* chatItem = new QListWidgetItem(chatList);
     QWidget* chatWidget = new QWidget();
-    chatList->setAutoScroll(false);
-    chatList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     QHBoxLayout* chatLayout = new QHBoxLayout(chatWidget);
     ClickableLabel* _IconChannelLabel = new ClickableLabel();
     QLabel* chatNameLabel = new QLabel(chatName);
