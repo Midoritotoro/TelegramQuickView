@@ -17,13 +17,13 @@ void ScrollBar::CreateScrollBar()
 
     QString currentPath = QCoreApplication::applicationDirPath();
     QDir assetsDir(currentPath + "/../../TelegramQuickView/assets/images");
+    QDir cssDir(currentPath + "/../../TelegramQuickView/src/css/");
     QString chatBackgroundPath = assetsDir.absolutePath() + "/chat_background.jpg";
     QString imagePath = "C:\\Users\\danya\\Downloads\\avatar.jpg";
+    QString ChannelsScrollAreaStyle = cssDir.absolutePath() + "/ChannelsScrollAreaStyle.css";
+    QFile ChannelsScrollAreaStyleFile(ChannelsScrollAreaStyle);
 
     chatListWidget = new QWidget(this);
-
-    setCentralWidget(chatListWidget);
-
     chatGridLayout = new QGridLayout(chatListWidget);
     chatList = new QListWidget(chatListWidget);
 
@@ -32,9 +32,9 @@ void ScrollBar::CreateScrollBar()
     chatGridLayout->setSpacing(0);
 
     setContentsMargins(0, 0, 0, 0);
+    setCentralWidget(chatListWidget);
     QWidget* _MessageField = new QWidget();
     QVBoxLayout* messageLayout = new QVBoxLayout(_MessageField);
-
 
     _MessageField->setStyleSheet("background-color: #0e1621;");
 
@@ -51,6 +51,7 @@ void ScrollBar::CreateScrollBar()
     messageScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _MessageField->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+    chatScrollArea->setWidget(chatList);
     chatGridLayout->addWidget(chatScrollArea, 0, 0);
     chatScrollArea->setStyleSheet("border: none");
     chatGridLayout->addWidget(messageScrollArea, 0, 1);
@@ -60,7 +61,13 @@ void ScrollBar::CreateScrollBar()
     chatListWidget->setLayout(chatGridLayout);
 
     for (int i = 0; i < 100; i++)
-        createChat(imagePath, "ChatGPT | Midjourney            ");
+        createChat(imagePath, "ChatGPT | Midjourney | Gemini");
+
+    if (ChannelsScrollAreaStyleFile.open(QFile::ReadOnly)) {
+        chatScrollArea->setStyleSheet(ChannelsScrollAreaStyleFile.readAll());
+        ChannelsScrollAreaStyleFile.close();
+    }
+    
 }
 
 
@@ -84,8 +91,8 @@ void ScrollBar::createChat(const QString imagePath, const QString chatName)
     chatList->setItemWidget(chatItem, chatWidget);
     chatList->setStyleSheet("background-color: #17212b;");
 
-    _IconChannelLabel->setFixedSize((height() / 18) * 0.8, (height() / 18) * 0.8);
-    chatNameLabel->setFixedWidth(width() / 3 - (chatLayout->contentsMargins().left() + chatLayout->contentsMargins().right()) - _IconChannelLabel->width());
+    _IconChannelLabel->setFixedSize(50, 50);
+    chatNameLabel->setFixedWidth(width() / 3 - (chatLayout->contentsMargins().left() + chatLayout->contentsMargins().right()) - _IconChannelLabel->width() - chatScrollArea->verticalScrollBar()->minimumWidth());
     adjustTextWidth(chatNameLabel);
 
     _IconChannelLabel->setBackgroundRole(QPalette::Dark);
@@ -100,7 +107,4 @@ void ScrollBar::createChat(const QString imagePath, const QString chatName)
 
     chatLayout->addWidget(_IconChannelLabel);
     chatLayout->addWidget(chatNameLabel);
-
-    chatGridLayout->addWidget(chatList,0, 0);
-    chatScrollArea->setWidget(chatList);
 }

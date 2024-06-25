@@ -90,6 +90,7 @@
     <None Include=".gitignore" />
     <None Include=".gitattributes" />
     <None Include="README.md" />
+    <None Include="TelegramQuickView\src\css\ChannelsScrollAreaStyle.css" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TelegramQuickView\src\gui\core\ScrollBar.h">

@@ -64,6 +64,7 @@
     <None Include="README.md" />
     <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />
     <None Include="TelegramQuickView\src\css\AudioSliderStyle.css" />
+    <None Include="TelegramQuickView\src\css\ChannelsScrollAreaStyle.css" />
     <None Include="TelegramQuickView\src\css\VideoSliderStyle.css" />
   </ItemGroup>
   <ItemGroup>
