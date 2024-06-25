@@ -96,11 +96,13 @@ void ScrollBar::CreateScrollBar() {
     QScrollArea* chatScrollArea = new QScrollArea(chatListWidget);
     chatScrollArea->setWidgetResizable(true);
     chatScrollArea->setWidget(chatList);
+    chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     QScrollArea* messageScrollArea = new QScrollArea(this);
     messageScrollArea->setWidgetResizable(true);
     messageScrollArea->setWidget(_MessageField);
+    messageScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     messageScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     _MessageField->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
