@@ -63,7 +63,7 @@ private:
     inline void ControlVisibility(bool Show)
     {
         foreach (QWidget* widget, _qWidgetList) {
-            Show ? widget->show() : widget->hide();
+            widget->setVisible(Show);
         }
         Show ? emit widgetsShowed() : emit widgetsHidden();
     }

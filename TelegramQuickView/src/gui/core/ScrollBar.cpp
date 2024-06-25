@@ -42,20 +42,20 @@ void ScrollBar::CreateScrollBar()
     chatScrollArea = new QScrollArea(chatListWidget);
     chatScrollArea->setWidgetResizable(true);
     chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     messageScrollArea = new QScrollArea(this);
     messageScrollArea->setWidgetResizable(true);
     messageScrollArea->setWidget(_MessageField);
     messageScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    messageScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    messageScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     _MessageField->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     chatScrollArea->setWidget(chatList);
     chatGridLayout->addWidget(chatScrollArea, 0, 0);
     chatScrollArea->setStyleSheet("border: none");
     chatGridLayout->addWidget(messageScrollArea, 0, 1);
-
+    chatScrollArea->setContentsMargins(0, 0, 0,0);
     chatScrollArea->setFixedWidth(width() / 3);
 
     chatListWidget->setLayout(chatGridLayout);
@@ -67,7 +67,7 @@ void ScrollBar::CreateScrollBar()
         chatScrollArea->setStyleSheet(ChannelsScrollAreaStyleFile.readAll());
         ChannelsScrollAreaStyleFile.close();
     }
-    
+
 }
 
 
@@ -82,6 +82,8 @@ void ScrollBar::createChat(const QString imagePath, const QString chatName)
 {
     QListWidgetItem* chatItem = new QListWidgetItem(chatList);
     QWidget* chatWidget = new QWidget();
+    chatList->setAutoScroll(false);
+    chatList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     QHBoxLayout* chatLayout = new QHBoxLayout(chatWidget);
     ClickableLabel* _IconChannelLabel = new ClickableLabel();
     QLabel* chatNameLabel = new QLabel(chatName);

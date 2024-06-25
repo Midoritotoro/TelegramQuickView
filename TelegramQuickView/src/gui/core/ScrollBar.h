@@ -3,6 +3,8 @@
 #include <QtWidgets>
 #include <QtCore>
 
+#include <atomic>
+
 #include <windows.h>
 
 class ScrollBar: public QMainWindow
