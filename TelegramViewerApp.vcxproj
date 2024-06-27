@@ -61,6 +61,8 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include="ContactPage.qml" />
+    <None Include="ConversationPage.qml" />
     <None Include="main.qml" />
     <None Include="README.md" />
     <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />

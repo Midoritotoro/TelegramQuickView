@@ -94,6 +94,12 @@
     <None Include="main.qml">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="ContactPage.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="ConversationPage.qml">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TelegramQuickView\src\gui\core\ScrollBar.h">
