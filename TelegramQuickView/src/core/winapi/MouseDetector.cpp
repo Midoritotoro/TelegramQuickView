@@ -29,10 +29,10 @@ DWORD WINAPI MouseDetector::CheckMousePosition(LPVOID lpParam)
 		int ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 		int menuThresholdWidthRatio = ScreenWidth / 64;
 		if (lpThreadParameters->direction == Direction::Right && (ScreenWidth - lpCursorPointParameters.x) <= menuThresholdWidthRatio && (ScreenWidth - lpCursorPointParameters.x) > EDGE_OF_SCREEN_POSITION) {
-			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), L"Мышь находится в правой части экрана \n");
+			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), TEXT("Мышь находится в правой части экрана \n"));
 		}
 		else if (lpThreadParameters->direction == Direction::Left && lpCursorPointParameters.x <= menuThresholdWidthRatio && lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION) {
-			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), L"Мышь находится в левой части экрана \n");
+			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), TEXT("Мышь находится в левой части экрана \n"));
 		}
 		Sleep(200);
 	}

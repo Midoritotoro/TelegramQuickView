@@ -1,4 +1,4 @@
-﻿#include "AutoRunRegistryUtils.h"
+#include "AutoRunRegistryUtils.h"
 
 bool IsWindowsGreaterThen(int version)
 {
@@ -22,12 +22,13 @@ BOOL addParserToRegistryAutoRun()
 {
     TCHAR szExeName[MAX_PATH];
     TCHAR fileName[12] = L"\\parser.exe";
-    GetModuleFileName(NULL, szExeName, MAX_PATH);
+    rsize_t stringSize = MAX_PATH;
+    GetModuleFileName(NULL, szExeName, stringSize);
 
-    if (FAILED(PathCchRemoveFileSpec(szExeName, MAX_PATH)))
+    if (FAILED(PathCchRemoveFileSpec(szExeName, stringSize)))
         return FALSE;
 
-    _tcscat_s(szExeName, MAX_PATH, fileName);
+    _tcscat_s(szExeName, stringSize, fileName);
     SetRegistryAutoRunKey(szExeName);
     return TRUE;
 

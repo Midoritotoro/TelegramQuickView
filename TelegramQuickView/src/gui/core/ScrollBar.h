@@ -7,11 +7,22 @@
 
 #include <windows.h>
 
-class ScrollBar: public QMainWindow
+class MessagesArea : public QWidget
 {
 private:
 	Q_OBJECT
-	QWidget* chatListWidget = nullptr;
+		QListView* _ChatView = nullptr;
+	QStandardItemModel* _ChatModel = nullptr;
+public:
+	MessagesArea(QWidget* parent = nullptr);
+	void addMessage(const QString& text);
+};
+
+class ScrollBar : public QMainWindow
+{
+private:
+	Q_OBJECT
+		QWidget* chatListWidget = nullptr;
 	QGridLayout* chatGridLayout = nullptr;
 	QScrollArea* chatScrollArea = nullptr, * messageScrollArea = nullptr;
 	QListWidget* chatList = nullptr;
@@ -20,4 +31,6 @@ public:
 	void CreateScrollBar();
 	void adjustTextWidth(QLabel* label);
 	void createChat(const QString imagePath, const QString chatName);
+public slots:
+	void on_channelLabelClicked();
 };

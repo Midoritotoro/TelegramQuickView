@@ -1,11 +1,12 @@
-﻿#include <QApplication>
+﻿#include "TelegramQuickView/src/core/winapi/AutoRunRegistryUtils.h"
+
+#include <QApplication>
 
 #pragma push_macro("slots")
 #undef slots
 #include "TelegramQuickView/src/core/parser/python/call/PythonCaller.h"
 #pragma pop_macro("slots")
 
-#include "TelegramQuickView/src/core/winapi/AutoRunRegistryUtils.h"
 #include "TelegramQuickView/src/gui/core/ScrollBar.h"
 
 int __cdecl main(int argc, char* argv[]) 

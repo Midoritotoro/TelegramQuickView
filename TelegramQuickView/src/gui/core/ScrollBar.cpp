@@ -2,13 +2,49 @@
 
 #include "../media/ClickableLabel.h"
 
-ScrollBar::ScrollBar(QWidget* parent) :
-	QMainWindow(parent)
+MessagesArea::MessagesArea(QWidget* parent) :
+    QWidget(parent)
 {
-	CreateScrollBar();
+    QGridLayout* grid = new QGridLayout(this);
+    _ChatView = new QListView();
+    _ChatModel = new QStandardItemModel();
+
+    grid->addWidget(_ChatView);
+
+    _ChatModel->insertColumn(0);
+    _ChatView->setModel(_ChatModel);
+    _ChatView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    addMessage("QStandardItemModel.Убрать editable по умолчанию. « : Март 16, 2009, 16 : 45 » Здравствуйте. Для QTreeView я использую QStandardItemModel.По умолчанию все элементы можно редактировать.Как это убрать ?nКак менять флаги или установить возможность редактирования что - то не нашёл.");
+
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+
+    setWindowFlag(Qt::FramelessWindowHint);
+    setGeometry(screenWidth - (width() * 0.7), 0, width() * 0.7, screenHeight);
 }
 
-void ScrollBar::CreateScrollBar() 
+void MessagesArea::addMessage(const QString& text)
+{
+    int newRow = _ChatModel->rowCount();
+
+    QFont boldFont;
+    boldFont.setBold(true);
+
+    _ChatModel->insertRows(newRow, 1);
+    _ChatModel->setData(_ChatModel->index(newRow, 0), text, Qt::DisplayRole);
+    _ChatModel->setData(_ChatModel->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
+
+    _ChatView->scrollToBottom();
+}
+
+ScrollBar::ScrollBar(QWidget* parent) :
+    QMainWindow(parent)
+{
+    CreateScrollBar();
+}
+
+void ScrollBar::CreateScrollBar()
 {
     int screenHeight = GetSystemMetrics(SM_CYSCREEN);
     int screenWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -57,10 +93,10 @@ void ScrollBar::CreateScrollBar()
     _MessageField->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     chatScrollArea->setWidget(chatList);
-    chatGridLayout->addWidget(chatScrollArea, 0, 0);
+    chatGridLayout->addWidget(chatScrollArea, 0, 0, 1, 1);
     chatScrollArea->setStyleSheet("border: none");
-    chatGridLayout->addWidget(messageScrollArea, 0, 1);
-    chatScrollArea->setContentsMargins(0, 0, 0,0);
+    chatGridLayout->addWidget(messageScrollArea, 0, 1, 1, 1);
+    chatScrollArea->setContentsMargins(0, 0, 0, 0);
     chatScrollArea->setFixedWidth(width() / 3);
 
     chatListWidget->setLayout(chatGridLayout);
@@ -111,4 +147,32 @@ void ScrollBar::createChat(const QString imagePath, const QString chatName)
 
     chatLayout->addWidget(_IconChannelLabel);
     chatLayout->addWidget(chatNameLabel);
+
+    QWidget* currentMessageField = new QWidget();
+    QVBoxLayout* messageLayout = new QVBoxLayout(currentMessageField);
+    currentMessageField->setStyleSheet("background-color: #0e1621;");
+
+    QScrollArea* currentMessageScrollArea = new QScrollArea(this);
+
+    currentMessageScrollArea->setWidgetResizable(true);
+    currentMessageScrollArea->setWidget(currentMessageField);
+    currentMessageScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    currentMessageScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    currentMessageField->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    chatGridLayout->addWidget(currentMessageField, 0, 1, 1, 1);
+
+    connect(_IconChannelLabel, &ClickableLabel::clicked, this, [this]() {
+        on_channelLabelClicked();
+        });
+}
+
+void ScrollBar::on_channelLabelClicked()
+{
+    QLayoutItem* item = chatGridLayout->itemAtPosition(0, 1);
+    item->widget()->hide();
+
+    ClickableLabel* channelLabel = (ClickableLabel*)sender();
+
 }

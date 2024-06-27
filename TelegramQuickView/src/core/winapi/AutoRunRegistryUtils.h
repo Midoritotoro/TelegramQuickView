@@ -1,19 +1,20 @@
-﻿#pragma once
+#pragma once
 
 #ifndef UNICODE
-#define UNICODE
+	#define UNICODE
+#endif
+
+#ifndef _UNICODE
+	#define _UNICODE
 #endif
 
 #include <windows.h>
-#include <stdio.h>
 #include <tchar.h>
+
 #include <pathcch.h>
 #pragma comment(lib, "Pathcch.lib")
 
-#include "Exceptions.h"
 #include "MessageHandler.h"
-
-
 
 #define MINIMUM_WINDOWS_VERSION NTDDI_WIN10
 
