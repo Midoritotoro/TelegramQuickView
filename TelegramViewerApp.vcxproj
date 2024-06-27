@@ -61,14 +61,15 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
-    <None Include="ContactPage.qml" />
-    <None Include="ConversationPage.qml" />
-    <None Include="main.qml" />
+    <None Include="TelegramQuickView\src\gui\qml\ContactPage.qml" />
+    <None Include="TelegramQuickView\src\gui\qml\ConversationPage.qml" />
+    <None Include="TelegramQuickView\src\gui\qml\main.qml" />
     <None Include="README.md" />
     <None Include="TelegramQuickView\src\core\parser\python\code\TelegramRobber.py" />
     <None Include="TelegramQuickView\src\css\AudioSliderStyle.css" />
     <None Include="TelegramQuickView\src\css\ChannelsScrollAreaStyle.css" />
     <None Include="TelegramQuickView\src\css\VideoSliderStyle.css" />
+    <None Include="TelegramQuickView\src\gui\qml\ChatToolBar.qml" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="TelegramQuickView\assets\images\chat_background.jpg" />
@@ -78,6 +79,9 @@
     <Image Include="TelegramQuickView\assets\images\speaker.png" />
     <Image Include="TelegramQuickView\assets\images\speaker_white.png" />
     <Image Include="TelegramQuickView\assets\images\stop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="TelegramQuickView\src\gui\qml\qml.qrc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{51A5EC7B-635E-4E1F-903F-247C4FE9158C}</ProjectGuid>
@@ -111,7 +115,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.7.0_msvc2019_64</QtInstall>
-    <QtModules>core;gui;qml;quick;widgets;concurrent;multimedia;multimediawidgets</QtModules>
+    <QtModules>core;gui;qml;quick;widgets;concurrent;multimedia;multimediawidgets;sql;xml</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CProperties|x64'" Label="QtSettings">

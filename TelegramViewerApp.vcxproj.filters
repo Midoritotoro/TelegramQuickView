@@ -91,13 +91,16 @@
     <None Include=".gitattributes" />
     <None Include="README.md" />
     <None Include="TelegramQuickView\src\css\ChannelsScrollAreaStyle.css" />
-    <None Include="main.qml">
+    <None Include="TelegramQuickView\src\gui\qml\main.qml">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="ContactPage.qml">
+    <None Include="TelegramQuickView\src\gui\qml\ContactPage.qml">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="ConversationPage.qml">
+    <None Include="TelegramQuickView\src\gui\qml\ConversationPage.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="TelegramQuickView\src\gui\qml\ChatToolBar.qml">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
@@ -149,5 +152,10 @@
     <Image Include="TelegramQuickView\assets\images\chat_background.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="TelegramQuickView\src\gui\qml\qml.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
   </ItemGroup>
 </Project>

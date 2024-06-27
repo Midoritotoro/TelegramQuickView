@@ -1,9 +1,10 @@
 import QtQuick
 import QtQuick.Controls
+import qml
 
 Page {
     anchors.fill: parent
-    header: ToolBar {
+    header: ChatToolBar {
     Label {
         text: qsTr("Contacts")
         font.pixelSize: 20

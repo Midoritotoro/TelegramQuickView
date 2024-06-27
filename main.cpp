@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("main.qml")));
+    engine.load(QUrl(QStringLiteral("TelegramQuickView/src/gui/qml/main.qml")));
 
     return app.exec();
 }
