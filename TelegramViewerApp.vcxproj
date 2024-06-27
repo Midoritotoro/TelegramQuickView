@@ -80,9 +80,6 @@
     <Image Include="TelegramQuickView\assets\images\speaker_white.png" />
     <Image Include="TelegramQuickView\assets\images\stop.png" />
   </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="TelegramQuickView\src\gui\qml\qml.qrc" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{51A5EC7B-635E-4E1F-903F-247C4FE9158C}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
@@ -117,6 +114,7 @@
     <QtInstall>6.7.0_msvc2019_64</QtInstall>
     <QtModules>core;gui;qml;quick;widgets;concurrent;multimedia;multimediawidgets;sql;xml</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
+    <QtPlugin>true</QtPlugin>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CProperties|x64'" Label="QtSettings">
     <QtInstall>6.7.0_msvc2019_64</QtInstall>
