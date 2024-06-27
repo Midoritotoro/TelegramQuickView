@@ -58,13 +58,13 @@ Page {
                     height: parent.height
                     color: "grey"
                     visible: !sentByMe
+                    onClicked: root.StackView.view.push("ConversationPage.qml", { inConversationWith: modelData })
                 }
 
                 Rectangle {
                     width: 80
                     height: 40
                     color: sentByMe ? "lightgrey" : "steelblue"
-
                     Label {
                         anchors.centerIn: parent
                         text: index

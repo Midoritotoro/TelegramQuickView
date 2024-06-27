@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 
-
 Page {
     anchors.fill: parent
     header: ToolBar {
@@ -25,12 +24,9 @@ ListView {
         width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
         height: avatar.implicitHeight
         leftPadding: avatar.implicitWidth + 32
-        onClicked: root.StackView.view.push("ConversationPage.qml", { inConversationWith: modelData })
         Image {
             id: avatar
             source: "TelegramQuickView/assets/images/" + modelData + ".jpg"
-
- 
         }
     }
 }
