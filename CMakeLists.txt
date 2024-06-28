@@ -20,6 +20,8 @@ find_package(PYTHON_LIBRARIES)
 include_directories(src/)
 
 add_executable(TelegramQuickView main.cpp
+			#cpp
+
 			src/core/parser/python/call/PythonCaller.cpp
 			src/core/winapi/AutoRunRegistryUtils.cpp
 			src/core/winapi/FileIO.cpp
@@ -33,7 +35,22 @@ add_executable(TelegramQuickView main.cpp
 			src/gui/media/player/MediaPlayer.cpp
 			src/gui/media/player/VideoStateWidget.cpp
 			src/gui/settings/MainWindow.cpp
-			)
+			
+			#qml
+
+			src/gui/qml/ChatToolBar.qml
+			src/gui/qml/ContactPage.qml
+			src/gui/qml/ConversationPage.qml
+			src/gui/qml/main.qml
+
+			#qrc
+
+			src/gui/qml/qml.qrc
+
+			#python
+
+			src/core/parser/python/code/TelegramRobber.py
+)
 
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
