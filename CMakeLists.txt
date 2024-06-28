@@ -20,14 +20,25 @@ find_package(PYTHON_LIBRARIES)
 include_directories(src/)
 
 add_executable(TelegramQuickView main.cpp
-				src/core/parser/python/call/PythonCaller.cpp)
+			src/core/parser/python/call/PythonCaller.cpp
+			src/core/winapi/AutoRunRegistryUtils.cpp
+			src/core/winapi/FileIO.cpp
+			src/core/winapi/MessageHandler.cpp
+			src/core/winapi/MouseDetector.cpp
+			)
 
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Qml)
+find_package(Qt6 REQUIRED COMPONENTS Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Sql)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Qml)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Multimedia)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Sql)
 target_link_libraries(${PROJECT_NAME} PRIVATE Python3::Python)
 
 qt_standard_project_setup()
