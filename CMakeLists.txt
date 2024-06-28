@@ -25,6 +25,14 @@ add_executable(TelegramQuickView main.cpp
 			src/core/winapi/FileIO.cpp
 			src/core/winapi/MessageHandler.cpp
 			src/core/winapi/MouseDetector.cpp
+			src/gui/core/ScrollBar.cpp
+			src/gui/core/WidgetsHider.h
+			src/gui/media/ClickableLabel.cpp
+			src/gui/media/EnhancedSlider.cpp
+			src/gui/media/VolumeClickableLabel.cpp
+			src/gui/media/player/MediaPlayer.cpp
+			src/gui/media/player/VideoStateWidget.cpp
+			src/gui/settings/MainWindow.cpp
 			)
 
 
