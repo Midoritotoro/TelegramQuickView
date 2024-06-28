@@ -65,8 +65,6 @@ add_executable(TelegramQuickView main.cpp
 			#python
 
 			src/core/parser/python/code/TelegramRobber.py
-
-			GUI_MOC
 )
 
 find_package(Qt6 REQUIRED COMPONENTS Core)
