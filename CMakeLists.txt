@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.14)
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -7,40 +7,74 @@ endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(AUTORCC ON)
+set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
 
-set(QT6_DIR, "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
+project("TelegramQuickView" LANGUAGES C CXX)
 
-project ("TelegramQuickView" LANGUAGES C CXX)
+find_package(Qt6 REQUIRED COMPONENTS 
+			Core
+			Widgets
+			Qml
+			Multimedia
+			MultimediaWidgets
+			Sql
+			Quick
+			Xml
+)
 
-include_directories(src/)
-
-
-file(GLOB PROJECT_SOURCES "*.cpp")
-
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-
-find_package(Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Qml)
-find_package(Qt6 REQUIRED COMPONENTS Multimedia)
-find_package(Qt6 REQUIRED COMPONENTS MultimediaWidgets)
-find_package(Qt6 REQUIRED COMPONENTS Sql)
-find_package(Qt6 REQUIRED COMPONENTS Quick)
-find_package(Qt6 REQUIRED COMPONENTS Xml)
-
+qt_standard_project_setup()
 find_package(Python3 COMPONENTS Development REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Qml)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Multimedia)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::MultimediaWidgets)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Sql)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Quick)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Xml)
+
+add_executable(${PROJECT_NAME} main.cpp
+			src/core/sql/SqlContactModel.cpp
+			src/core/sql/SqlContactModel.h
+			src/core/sql/SqlConversationModel.cpp
+			src/core/sql/SqlConversationModel.h
+
+			src/core/parser/python/call/PythonCaller.cpp
+			src/core/parser/python/call/PythonCaller.h
+
+			src/core/winapi/AutoRunRegistryUtils.cpp
+			src/core/winapi/AutoRunRegistryUtils.h
+			src/core/winapi/MouseDetector.cpp
+			src/core/winapi/MouseDetector.h
+			src/core/winapi/FileIO.cpp
+			src/core/winapi/FileIO.h
+			src/core/winapi/MessageHandler.cpp
+			src/core/winapi/MessageHandler.h
+
+			src/gui/core/ScrollBar.cpp
+			src/gui/core/ScrollBar.h
+			src/gui/core/WidgetsHider.h
+
+			src/gui/media/ClickableLabel.cpp
+			src/gui/media/ClickableLabel.h
+			src/gui/media/EnhancedSlider.cpp
+			src/gui/media/EnhancedSlider.h
+			src/gui/media/VolumeClickableLabel.cpp
+			src/gui/media/VolumeClickableLabel.h
+
+			src/gui/media/player/MediaPlayer.cpp
+			src/gui/media/player/MediaPlayer.h
+			src/gui/media/player/VideoStateWidget.cpp
+			src/gui/media/player/VideoStateWidget.h
+
+			src/gui/settings/MainWindow.cpp
+			src/gui/settings/MainWindow.h
+)
+				
+
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+					Qt6::Core
+					Qt6::Widgets
+					Qt6::Qml
+					Qt6::Multimedia
+					Qt6::MultimediaWidgets
+					Qt6::Sql
+					Qt6::Quick
+					Qt6::Xml
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Python3::Python)
 
