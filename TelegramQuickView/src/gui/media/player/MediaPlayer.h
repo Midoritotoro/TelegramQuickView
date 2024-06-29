@@ -1,17 +1,25 @@
-﻿#pragma once
+#pragma once
 
-#include <QMediaPlayer>
 #include <QAudioOutput>
-#include <QGraphicsView>
-#include <QGraphicsVideoItem>
 #include <QGraphicsGridLayout>
-#include <QToolButton>
+#include <QGraphicsVideoItem>
+#include <QGraphicsView>
 #include <QGraphicsWidget>
+#include <QMediaPlayer>
+#include <QToolButton>
+
+#include "../EnhancedSlider.h"
+#include "../VolumeClickableLabel.h"
+
+#include <QDir>
+#include <QGraphicsProxyWidget>
+#include <QGridLayout>
+#include <QMimeDatabase>
 
 #include "../../core/WidgetsHider.h"
-#include "../VolumeClickableLabel.h"
-#include "../EnhancedSlider.h"
+#include "../ClickableLabel.h"
 #include "./VideoStateWidget.h"
+#include <Windows.h>
 
 class MediaPlayer : public QWidget
 {
@@ -19,17 +27,17 @@ private:
 	Q_OBJECT
 	QMediaPlayer* MediaPlayerWidget = nullptr;
 	QAudioOutput* audioOutput = nullptr;
-	QSlider* VideoSlider = nullptr, * AudioSlider = nullptr;
+	EnhancedSlider* VideoSlider = nullptr, *AudioSlider = nullptr;
 	QGraphicsView* GraphicsView = nullptr;
 	QGraphicsScene* GraphicsScene = nullptr;
 	QGraphicsVideoItem* GraphicsVideoItem = nullptr;
 	QGraphicsGridLayout* grid = nullptr, * toolLayout = nullptr, * containerLayout = nullptr;
 	QGraphicsWidget* form = nullptr, * containerWidget = nullptr, * toolWidget = nullptr, * GraphicsVolumeClickableLabel = nullptr,
-				   * GraphicsAudioSlider = nullptr,* GraphicsVideoSlider = nullptr, * GraphicsVideoTimeLabel = nullptr;
+				   * GraphicsAudioSlider = nullptr,* GraphicsVideoSlider = nullptr, * GraphicsVideoTimeLabel = nullptr, * GraphicsVideoStopButton = nullptr,
+				   * GraphicsVideoPlayButton = nullptr;
 	QToolButton* minButton = nullptr,* closeButton = nullptr, * maxButton = nullptr;
 	QLabel* videoTimeLabel = nullptr;
 	ClickableLabel *videoRepeatClickableLabel = nullptr, *videoStopClickableLabel = nullptr, *videoPlayClickableLabel = nullptr, * _VolumeClickableLabel = nullptr;
-	QGraphicsWidget* GraphicsVideoStopButton = nullptr, * GraphicsVideoPlayButton = nullptr;
 	VideoStateWidget* videoStateWidget = nullptr;
 	bool doubleClicked = false, _allowChangeVideoState = true;
 public:
