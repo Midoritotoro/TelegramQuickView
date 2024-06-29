@@ -1,11 +1,4 @@
-﻿#include "MediaPlayer.h"
-
-#include <QGridLayout>
-#include <QGraphicsProxyWidget>
-#include <QDir>
-#include <QMimeDatabase>
-
-#include <Windows.h>
+#include "MediaPlayer.h"
 
 #define VideoBegin 0
 
@@ -237,7 +230,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 	connect(VideoSlider, &QSlider::sliderReleased, [this]() {
 		connect(MediaPlayerWidget, &QMediaPlayer::positionChanged, VideoSlider, &QSlider::setValue);
-		_sleep(1);
+		Sleep(1);
 		MediaPlayerWidget->play();
 		});
 
