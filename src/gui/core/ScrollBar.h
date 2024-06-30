@@ -11,7 +11,7 @@ class MessagesArea : public QWidget
 {
 private:
 	Q_OBJECT
-		QListView* _ChatView = nullptr;
+	QListView* _ChatView = nullptr;
 	QStandardItemModel* _ChatModel = nullptr;
 public:
 	MessagesArea(QWidget* parent = nullptr);
@@ -22,7 +22,7 @@ class ScrollBar : public QMainWindow
 {
 private:
 	Q_OBJECT
-		QWidget* chatListWidget = nullptr;
+	QWidget* chatListWidget = nullptr;
 	QGridLayout* chatGridLayout = nullptr;
 	QScrollArea* chatScrollArea = nullptr, * messageScrollArea = nullptr;
 	QListWidget* chatList = nullptr;

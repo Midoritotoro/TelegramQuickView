@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.14)
+﻿cmake_minimum_required (VERSION 3.14)
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -63,6 +63,21 @@ add_executable(${PROJECT_NAME} main.cpp
 			src/gui/settings/MainWindow.cpp
 			src/gui/settings/MainWindow.h
 )
+
+set(qml_resource_files
+    "src/gui/qml/ChatToolBar.qml"
+    "src/gui/qml/ContactPage.qml"
+    "src/gui/qml/ConversationPage.qml"
+    "src/gui/qml/main.qml"
+    "src/gui/qml/themes.conf"
+)
+
+qt6_add_resources(TelegramQuickView "qml"
+    PREFIX
+        "/"
+    FILES
+        ${qml_resource_files}
+)
 				
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -74,6 +89,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 					Qt6::Sql
 					Qt6::Quick
 					Qt6::Xml
+)
+
+set_source_files_properties("assets/images/avatar.jpg"
+    PROPERTIES QT_RESOURCE_ALIAS "avatar.jpg"
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Python3::Python)

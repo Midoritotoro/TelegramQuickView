@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
-import qml
+import sql.SqlConversationModel
 
 Page {
     id: root
@@ -54,7 +54,7 @@ Page {
 
                     Image {
                         id: avatar
-                        source: !sentByMe ? "qrc:/" + model.author.replace(" ", "_") + ".png" : ""
+                        source: ""
                     }
 
                     Rectangle {
@@ -111,3 +111,4 @@ Page {
         }
     }
 }
+

@@ -4,7 +4,7 @@
 
 #include <QApplication>
 #include <QTimer>
-#include <QSlider>
+
 
 class WidgetsHider : public QObject
 {
