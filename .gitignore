@@ -5,6 +5,7 @@
 
 
 # User-specific files
+*.json
 *.txt
 *.session
 *.session-journal
