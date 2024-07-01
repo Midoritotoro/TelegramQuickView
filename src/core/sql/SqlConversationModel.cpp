@@ -36,13 +36,10 @@ SqlConversationModel::SqlConversationModel(QObject* parent) :
 }
 
 
-void SqlConversationModel::sendMessage(const QString& recipient, const QString& message)
+void SqlConversationModel::sendMessage(const QString& author, const QString& message, const QString& timestamp)
 {
-    const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
-
     QSqlRecord newRecord = record();
-    newRecord.setValue("author", "Me");
-    newRecord.setValue("recipient", recipient);
+    newRecord.setValue("author", author);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
     if (!insertRecord(rowCount(), newRecord)) {

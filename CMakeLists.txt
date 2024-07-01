@@ -9,7 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
 
-project("TelegramQuickView" LANGUAGES C CXX)
+project("TelegramQuickView" LANGUAGES C CXX Python)
 
 find_package(Python3 COMPONENTS Development REQUIRED)
 
@@ -26,44 +26,49 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES src/core/parser/python/call/PythonCaller.cpp src/core/parser/python/main.cpp)
+SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/parser/main.cpp)
+
+
 SET(MAIN_SOURCES  main.cpp
-			
+	src/core/sql/SqlConversationModel.cpp
+	src/core/sql/SqlConversationModel.h
 
-			src/core/sql/SqlConversationModel.cpp
-			src/core/sql/SqlConversationModel.h
+	src/core/winapi/AutoRunRegistryUtils.cpp
+	src/core/winapi/AutoRunRegistryUtils.h
+	src/core/winapi/MouseDetector.cpp
+	src/core/winapi/MouseDetector.h
+	src/core/winapi/FileIO.cpp
+	src/core/winapi/FileIO.h
+	src/core/winapi/MessageHandler.cpp
+	src/core/winapi/MessageHandler.h
 
-			src/core/winapi/AutoRunRegistryUtils.cpp
-			src/core/winapi/AutoRunRegistryUtils.h
-			src/core/winapi/MouseDetector.cpp
-			src/core/winapi/MouseDetector.h
-			src/core/winapi/FileIO.cpp
-			src/core/winapi/FileIO.h
-			src/core/winapi/MessageHandler.cpp
-			src/core/winapi/MessageHandler.h
+	src/gui/core/ScrollBar.cpp
+	src/gui/core/ScrollBar.h
+	src/gui/core/WidgetsHider.h
 
-			src/gui/core/ScrollBar.cpp
-			src/gui/core/ScrollBar.h
-			src/gui/core/WidgetsHider.h
+	src/gui/media/ClickableLabel.cpp
+	src/gui/media/ClickableLabel.h
+	src/gui/media/EnhancedSlider.cpp
+	src/gui/media/EnhancedSlider.h
+	src/gui/media/VolumeClickableLabel.cpp
+	src/gui/media/VolumeClickableLabel.h
 
-			src/gui/media/ClickableLabel.cpp
-			src/gui/media/ClickableLabel.h
-			src/gui/media/EnhancedSlider.cpp
-			src/gui/media/EnhancedSlider.h
-			src/gui/media/VolumeClickableLabel.cpp
-			src/gui/media/VolumeClickableLabel.h
+	src/gui/media/player/MediaPlayer.cpp
+	src/gui/media/player/MediaPlayer.h
+	src/gui/media/player/VideoStateWidget.cpp
+	src/gui/media/player/VideoStateWidget.h
 
-			src/gui/media/player/MediaPlayer.cpp
-			src/gui/media/player/MediaPlayer.h
-			src/gui/media/player/VideoStateWidget.cpp
-			src/gui/media/player/VideoStateWidget.h
-
-			src/gui/settings/MainWindow.cpp
-			src/gui/settings/MainWindow.h)
+	src/gui/settings/MainWindow.cpp
+	src/gui/settings/MainWindow.h
+)
 
 add_executable(Parser ${PARSER_SOURCES})
 target_include_directories(Parser PUBLIC ${Python3_INCLUDE_DIRS})
 target_link_libraries(Parser PRIVATE ${Python3_LIBRARIES})
+SET(CMAKE_CXX_FLAGS "-O0")
+SET(CMAKE_C_FLAGS "-O0")
+target_link_directories(${PROJECT_NAME} PRIVATE
+        ${Python3_LIBRARY_DIRS})
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
@@ -78,6 +83,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 					Qt6::Xml
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
+
+execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED
+               RESULT_VARIABLE result
+               OUTPUT_VARIABLE output
+               ERROR_VARIABLE error)
 
 set(qml_resource_files
     "src/gui/qml/ChatToolBar.qml"

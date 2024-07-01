@@ -1,9 +1,12 @@
 ﻿#include "PythonCaller.h"
+#include <iostream>
+
 
 PythonCaller::PythonCaller(const char* apiHash, const char* phoneNumber, const char* downloadPath, long long apiId, const char* pythonFilePath) : m_PyApiHash(apiHash), m_PyPhoneNumber(phoneNumber), m_PyApiId(apiId), m_PyDownloadPath(downloadPath) {
     Py_Initialize();
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
+    std::cout << pythonFilePath;
     PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
     PyErr_Print();
 };
