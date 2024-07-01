@@ -4,7 +4,6 @@
 #include <QtCore>
 #include <QtQml>
 
-#include "src/core/sql/SqlContactModel.h"
 #include "src/core/sql/SqlConversationModel.h"
 #include <Windows.h>
 
@@ -35,7 +34,6 @@ int main(int argc, char* argv[])
     AllocConsole();
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<SqlContactModel>("sql.SqlContactModel", 1, 0, "SqlContactModel");
     qmlRegisterType<SqlConversationModel>("sql.SqlConversationModel", 1, 0, "SqlConversationModel");
 
     connectToDatabase();

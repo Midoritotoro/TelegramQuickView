@@ -28,8 +28,8 @@ qt_standard_project_setup()
 
 SET(PARSER_SOURCES src/core/parser/python/call/PythonCaller.cpp src/core/parser/python/main.cpp)
 SET(MAIN_SOURCES  main.cpp
-			src/core/sql/SqlContactModel.cpp
-			src/core/sql/SqlContactModel.h
+			
+
 			src/core/sql/SqlConversationModel.cpp
 			src/core/sql/SqlConversationModel.h
 
@@ -81,7 +81,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
 
 set(qml_resource_files
     "src/gui/qml/ChatToolBar.qml"
-    "src/gui/qml/ContactPage.qml"
     "src/gui/qml/ConversationPage.qml"
     "src/gui/qml/main.qml"
     "src/gui/qml/themes.conf"
@@ -107,8 +106,8 @@ SET_SOURCE_FILES_PROPERTIES(
 )
 
 set(CMAKE_INSTALL_PREFIX "D:/TelegramQuickView/")
-install(TARGETS Parser DESTINATION out)
-install(TARGETS TelegramQuickView DESTINATION out)
+install(TARGETS Parser DESTINATION out/build)
+install(TARGETS TelegramQuickView DESTINATION out/build)
 
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

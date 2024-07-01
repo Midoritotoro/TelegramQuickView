@@ -9,7 +9,7 @@ ApplicationWindow {
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: ContactPage {}
+        initialItem: ConversationPage {}
     }
 }
   

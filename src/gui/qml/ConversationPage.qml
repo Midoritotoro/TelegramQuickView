@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
+// listView.model.sendMessage(inConversationWith, messageField.text);
 import sql.SqlConversationModel
 
 Page {
@@ -33,19 +34,16 @@ Page {
             id: listView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.margins: pane.leftPadding + messageField.leftPadding
             displayMarginBeginning: 40
             displayMarginEnd: 40
             verticalLayoutDirection: ListView.BottomToTop
             spacing: 12
-            model: SqlConversationModel {
-                recipient: inConversationWith
-            }
+            model: SqlConversationModel {}
             delegate: Column {
                 anchors.right: sentByMe ? listView.contentItem.right : undefined
                 spacing: 6
 
-                readonly property bool sentByMe: model.recipient !== "Me"
+                readonly property bool sentByMe: false
 
                 Row {
                     id: messageRow
@@ -82,32 +80,6 @@ Page {
             }
 
             ScrollBar.vertical: ScrollBar {}
-        }
-
-        Pane {
-            id: pane
-            Layout.fillWidth: true
-
-            RowLayout {
-                width: parent.width
-
-                TextArea {
-                    id: messageField
-                    Layout.fillWidth: true
-                    placeholderText: qsTr("Compose message")
-                    wrapMode: TextArea.Wrap
-                }
-
-                Button {
-                    id: sendButton
-                    text: qsTr("Send")
-                    enabled: messageField.length > 0
-                    onClicked: {
-                        listView.model.sendMessage(inConversationWith, messageField.text);
-                        messageField.text = "";
-                    }
-                }
-            }
         }
     }
 }
