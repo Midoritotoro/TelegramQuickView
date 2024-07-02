@@ -10,6 +10,7 @@
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QFile>
 
 #include "../../core/winapi/MouseDetector.h"
 
@@ -20,10 +21,10 @@ private:
 	Q_OBJECT
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
 	MouseDetector* mouseDetector = nullptr;
+	QFile jsonFile;
 public:
 	MainWindow(QWidget* parent = nullptr);
 
-	QByteArray& getUserData();
 	QJsonDocument& getJsonDocument();
 	
 	void clearChannelsJsonArray();

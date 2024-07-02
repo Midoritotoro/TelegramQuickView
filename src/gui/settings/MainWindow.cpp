@@ -1,7 +1,6 @@
 ﻿#include "MainWindow.h"
 
 #include <QPushButton>
-#include <QFile>
 #include <QRegularExpression>
 #include <QJsonArray>
 #include <QDir>
@@ -46,27 +45,24 @@ MainWindow::MainWindow(QWidget* parent) :
 	connect(AddChannelsButton, SIGNAL(clicked()), this, SLOT(on_AddChannelsButton_click()));
 	connect(ReplaceChannelsButton, SIGNAL(clicked()), this, SLOT(on_ReplaceChannelsButton_click()));
 	connect(GetChannelsFromFileButton, SIGNAL(clicked()), this, SLOT(on_GetChannelsFromFileButton_click()));
-}
 
-QByteArray& MainWindow::getUserData() {
-	QByteArray data;
 	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
 	if (!writeDir.mkpath("."))
-		return data;
+		return;
 
 	const QString fileName = writeDir.absolutePath() + "\\userData.json";
-	QFile jsonFile(fileName);
 
-	jsonFile.open(QIODevice::ReadWrite | QIODevice::Text);
-	data = jsonFile.readAll();
-	jsonFile.close();
-	return data;
+	jsonFile.setFileName(fileName);
 }
 
 QJsonDocument& MainWindow::getJsonDocument() {
 	QJsonDocument jsonDocument;
-	QByteArray& jsonData = getUserData();
+	QByteArray jsonData;
+
+	jsonFile.open(QIODevice::ReadWrite | QIODevice::Text);
+	jsonData = jsonFile.readAll();
+	jsonFile.close();
 	
 	jsonDocument = QJsonDocument::fromJson(jsonData);
 	return jsonDocument;
@@ -74,7 +70,8 @@ QJsonDocument& MainWindow::getJsonDocument() {
 
 void MainWindow::clearChannelsJsonArray() {
 	QJsonArray jsonArray;
-	QJsonDocument& jsonDocument = getJsonDocument();
+
+	QJsonDocument jsonDocument = getJsonDocument();
 
 	jsonArray = jsonDocument.array();
 
@@ -85,22 +82,30 @@ void MainWindow::clearChannelsJsonArray() {
 		jsonArray.removeAt(index);
 
 	jsonDocument.setArray(jsonArray);
+	jsonFile.open(QIODevice::ReadWrite | QIODevice::Text);
+	jsonFile.write(jsonDocument.toJson());
+	jsonFile.close();
 }
 
 void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId) {
 	QJsonObject jsonObject;
-	QJsonDocument& jsonDocument = getJsonDocument();
+
+	QJsonDocument jsonDocument = getJsonDocument();
 
 	jsonObject.insert("apiHash", apiHash);
 	jsonObject.insert("phoneNumber", phoneNumber);
 	jsonObject.insert("apiId", apiId);
 
 	jsonDocument.setObject(jsonObject);
+	jsonFile.open(QIODevice::ReadWrite | QIODevice::Text);
+	jsonFile.write(jsonDocument.toJson());
+	jsonFile.close();
 }
 
 void MainWindow::saveTargetChannels(QStringList channels) {
 	QJsonObject jsonObject;
 	QJsonArray jsonArray;
+
 	QJsonDocument jsonDocument = getJsonDocument();
 
 	QJsonArray currentDocumentArray = jsonDocument.array();
@@ -114,8 +119,11 @@ void MainWindow::saveTargetChannels(QStringList channels) {
 		jsonArray.append(channel);
 
 	jsonObject.insert("channels", jsonArray);
-	qDebug() << jsonObject.value("channels");
 	jsonDocument.setObject(jsonObject);
+	jsonFile.open(QIODevice::ReadWrite | QIODevice::Text);
+	jsonFile.write(jsonDocument.toJson());
+	jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+	jsonFile.close();
 }
 
 
@@ -133,16 +141,13 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 	QRegularExpression channelsSplitRegularExpression("(\\ ,|\\,)");
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
-	qDebug() << TelegramChannelsList;
 	saveTargetChannels(TelegramChannelsList);
 	
 	TelegramParserTargetLineEdit->clear();
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click() {
-	QJsonDocument& jsonDocument = getJsonDocument();
-	QJsonObject jsonObject = jsonDocument.object();
-	QJsonValue jsonValue = jsonObject.value("channels");
+
 	
 	//QTextEdit* ReadedChannelsTextEdit = new QTextEdit(jsonArray);
 	//QDialog* DialogWindow = new QDialog();
