@@ -65,7 +65,7 @@ QJsonDocument& MainWindow::getJsonDocument() {
 	jsonFile.close();
 	
 	jsonDocument = QJsonDocument::fromJson(jsonData);
-	return jsonDocument;
+	return jsonDocument;;
 }
 
 void MainWindow::clearChannelsJsonArray() {
