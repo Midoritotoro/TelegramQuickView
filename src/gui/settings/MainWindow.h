@@ -18,14 +18,13 @@ class MainWindow : public QWidget
 {
 private:
 	Q_OBJECT
-	Q_PROPERTY(QByteArray& READ getUserData)
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
 	MouseDetector* mouseDetector = nullptr;
 public:
 	MainWindow(QWidget* parent = nullptr);
 
-	QByteArray& const getUserData();
-	QJsonDocument& const getJsonDocument();
+	QByteArray& getUserData();
+	QJsonDocument& getJsonDocument();
 	
 	void clearChannelsJsonArray();
 	void saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId);

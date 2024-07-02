@@ -4,7 +4,8 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QJsonArray>
-
+#include <QDir>
+#include <QStandardPaths>
 
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent) 
@@ -28,7 +29,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	AddChannelsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	ReplaceChannelsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	channelOptionsMenuBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	GetChannelsFromFileButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	GetChannelsFromFileButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed); // dwad/ddas. , dwad/ddas., warthudnder efesf sefs Ffef 432Q Q-8 , rr3, tg, saef@$78
 
 	GridLayout->addWidget(channelOptionsMenuBar, 0, 1, 1, 1);
 	GridLayout->addWidget(TelegramParserTextLabel, 1, 0, 1, 1);
@@ -48,8 +49,16 @@ MainWindow::MainWindow(QWidget* parent) :
 }
 
 QByteArray& MainWindow::getUserData() {
-	QFile jsonFile;
-	jsonFile.setFileName("userData.json");
+	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	qDebug() << writeDir;
+
+	if (!writeDir.mkpath(".")) {
+		qDebug() << writeDir;
+		return;
+	}
+	const QString fileName = writeDir.absolutePath() + "userData.json";
+	QFile jsonFile(fileName);
+
 	jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
 	QByteArray data = jsonFile.readAll();
 	jsonFile.close();
