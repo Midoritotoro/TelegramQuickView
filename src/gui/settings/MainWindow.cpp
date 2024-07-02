@@ -49,31 +49,37 @@ MainWindow::MainWindow(QWidget* parent) :
 }
 
 QByteArray& MainWindow::getUserData() {
+	QByteArray data;
 	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-	qDebug() << writeDir;
 
-	if (!writeDir.mkpath(".")) {
-		qDebug() << writeDir;
-		return;
-	}
-	const QString fileName = writeDir.absolutePath() + "userData.json";
+	if (!writeDir.mkpath("."))
+		return data;
+
+	const QString fileName = writeDir.absolutePath() + "\\userData.json";
 	QFile jsonFile(fileName);
 
-	jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
-	QByteArray data = jsonFile.readAll();
+	jsonFile.open(QIODevice::ReadWrite | QIODevice::Text);
+	data = jsonFile.readAll();
 	jsonFile.close();
 	return data;
 }
 
 QJsonDocument& MainWindow::getJsonDocument() {
+	QJsonDocument jsonDocument;
 	QByteArray& jsonData = getUserData();
-	QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonData);
+	
+	jsonDocument = QJsonDocument::fromJson(jsonData);
 	return jsonDocument;
 }
 
 void MainWindow::clearChannelsJsonArray() {
-	QJsonDocument jsonDocument = getJsonDocument();
-	QJsonArray jsonArray = jsonDocument.array();
+	QJsonArray jsonArray;
+	QJsonDocument& jsonDocument = getJsonDocument();
+
+	jsonArray = jsonDocument.array();
+
+	if (jsonArray.isEmpty())
+		return;
 
 	for (int index = 0; index < jsonArray.count(); index++)
 		jsonArray.removeAt(index);
@@ -82,8 +88,8 @@ void MainWindow::clearChannelsJsonArray() {
 }
 
 void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId) {
-	QJsonDocument jsonDocument = getJsonDocument();
-	QJsonObject jsonObject = jsonDocument.object();
+	QJsonObject jsonObject;
+	QJsonDocument& jsonDocument = getJsonDocument();
 
 	jsonObject.insert("apiHash", apiHash);
 	jsonObject.insert("phoneNumber", phoneNumber);
@@ -93,14 +99,22 @@ void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& a
 }
 
 void MainWindow::saveTargetChannels(QStringList channels) {
+	QJsonObject jsonObject;
+	QJsonArray jsonArray;
 	QJsonDocument jsonDocument = getJsonDocument();
-	QJsonObject jsonObject = jsonDocument.object();
-	QJsonArray jsonArray = jsonDocument.array();
 
+	QJsonArray currentDocumentArray = jsonDocument.array();
+
+	if (!currentDocumentArray.isEmpty()) {
+		foreach(const QJsonValue & channel, currentDocumentArray)
+			jsonArray.append(channel);
+	}
+	
 	foreach (const QString& channel, channels)
 		jsonArray.append(channel);
 
 	jsonObject.insert("channels", jsonArray);
+	qDebug() << jsonObject.value("channels");
 	jsonDocument.setObject(jsonObject);
 }
 
@@ -119,14 +133,14 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 	QRegularExpression channelsSplitRegularExpression("(\\ ,|\\,)");
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
-
+	qDebug() << TelegramChannelsList;
 	saveTargetChannels(TelegramChannelsList);
 	
 	TelegramParserTargetLineEdit->clear();
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click() {
-	QJsonDocument jsonDocument = getJsonDocument();
+	QJsonDocument& jsonDocument = getJsonDocument();
 	QJsonObject jsonObject = jsonDocument.object();
 	QJsonValue jsonValue = jsonObject.value("channels");
 	
