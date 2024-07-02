@@ -8,6 +8,9 @@
 #include <QTextEdit>
 #include <QMenuBar>
 
+#include <QJsonObject>
+#include <QJsonDocument>
+
 #include "../../core/winapi/MouseDetector.h"
 
 
@@ -15,23 +18,22 @@ class MainWindow : public QWidget
 {
 private:
 	Q_OBJECT
-	QDialog* DialogWindow = nullptr;
-	QGridLayout* GridLayout = nullptr;
-	QLabel* TelegramParserTextLabel = nullptr;
+	Q_PROPERTY(QByteArray& READ getUserData)
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
-	QTextEdit* ReadedChannelsTextEdit = nullptr;
-	QPushButton* GetChannelsFromFileButton = nullptr, * AddChannelsButton = nullptr, * ReplaceChannelsButton = nullptr;
-	QMenuBar* channelOptionsMenuBar = nullptr;
-	QMenu* channelOptionsMenu = nullptr;
-	QAction* LeftPartOfScreenAction = nullptr, * RightPartOfScreenAction = nullptr;
 	MouseDetector* mouseDetector = nullptr;
 public:
 	MainWindow(QWidget* parent = nullptr);
-	~MainWindow();
-	void CreateMainWindow();
-private slots:
+
+	QByteArray& const getUserData();
+	QJsonDocument& const getJsonDocument();
+	
+	void clearChannelsJsonArray();
+	void saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId);
+	void saveTargetChannels(QStringList channels);
+private Q_SLOTS:
 	void on_AddChannelsButton_click();
 	void on_ReplaceChannelsButton_click();
+	
 	void on_GetChannelsFromFileButton_click();
 
 	void LeftPartOfScreenAction_triggered();

@@ -1,34 +1,28 @@
 ﻿#include "MainWindow.h"
 
 #include <QPushButton>
-#include "../../core/winapi/FileIO.h"
+#include <QFile>
+#include <QRegularExpression>
+#include <QJsonArray>
+
 
 MainWindow::MainWindow(QWidget* parent) :
-	QWidget(parent)
+	QWidget(parent) 
 {
-	CreateMainWindow();
-}
-
-MainWindow::~MainWindow()
-{
-}
-
-void MainWindow::CreateMainWindow()
-{
-
-	GridLayout = new QGridLayout(this);
+	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
-	channelOptionsMenuBar = new QMenuBar(this);
+	QMenuBar* channelOptionsMenuBar = new QMenuBar(this);
 	mouseDetector = new MouseDetector();
-	TelegramParserTextLabel = new QLabel("Телеграм каналы: ");
+	QLabel* TelegramParserTextLabel = new QLabel("Телеграм каналы: ");
 
-	channelOptionsMenu = channelOptionsMenuBar->addMenu("&Появление панели");
-	LeftPartOfScreenAction = channelOptionsMenu->addAction("Левая часть экрана");
-	RightPartOfScreenAction = channelOptionsMenu->addAction("Правая часть экрана");
+	QMenu* channelOptionsMenu = channelOptionsMenuBar->addMenu("&Появление панели");
+	QAction* LeftPartOfScreenAction = channelOptionsMenu->addAction("Левая часть экрана");
+	QAction* RightPartOfScreenAction = channelOptionsMenu->addAction("Правая часть экрана");
 
-	AddChannelsButton = new QPushButton("Добавить", this);
-	ReplaceChannelsButton = new QPushButton("Заменить", this);
-	GetChannelsFromFileButton = new QPushButton("Просмотреть каналы в списке", this);
+	QPushButton* AddChannelsButton = new QPushButton("Добавить", this);
+	QPushButton* ReplaceChannelsButton = new QPushButton("Заменить", this);
+	QPushButton* GetChannelsFromFileButton = new QPushButton("Просмотреть каналы в списке", this);
+	QPushButton* AuthenticationButtton = new QPushButton("");
 
 	TelegramParserTargetLineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	AddChannelsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -36,7 +30,7 @@ void MainWindow::CreateMainWindow()
 	channelOptionsMenuBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	GetChannelsFromFileButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	GridLayout->addWidget(channelOptionsMenuBar, 0,1, 1, 1);
+	GridLayout->addWidget(channelOptionsMenuBar, 0, 1, 1, 1);
 	GridLayout->addWidget(TelegramParserTextLabel, 1, 0, 1, 1);
 	GridLayout->addWidget(TelegramParserTargetLineEdit, 1, 1, 1, 1);
 	GridLayout->addWidget(AddChannelsButton, 1, 2, 1, 1);
@@ -53,31 +47,88 @@ void MainWindow::CreateMainWindow()
 	connect(GetChannelsFromFileButton, SIGNAL(clicked()), this, SLOT(on_GetChannelsFromFileButton_click()));
 }
 
-void MainWindow::on_AddChannelsButton_click()
-{
-	LPWSTR TelegramChannels = (LPWSTR)TelegramParserTargetLineEdit->text().utf16();
-	WriteChannelsToFile(TelegramChannels, false);
+QByteArray& MainWindow::getUserData() {
+	QFile jsonFile;
+	jsonFile.setFileName("userData.json");
+	jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
+	QByteArray data = jsonFile.readAll();
+	jsonFile.close();
+	return data;
 }
 
-void MainWindow::on_ReplaceChannelsButton_click()
-{
-	LPWSTR TelegramChannels = (LPWSTR)TelegramParserTargetLineEdit->text().utf16();
-	WriteChannelsToFile(TelegramChannels, true);
+QJsonDocument& MainWindow::getJsonDocument() {
+	QByteArray& jsonData = getUserData();
+	QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonData);
+	return jsonDocument;
 }
 
-void MainWindow::on_GetChannelsFromFileButton_click()
-{
-	char* channels = ReadChannelsFromFile();
-	ReadedChannelsTextEdit = new QTextEdit(channels);
-	DialogWindow = new QDialog();
-	DialogWindow->setLayout(new QVBoxLayout);
-	DialogWindow->layout()->addWidget(ReadedChannelsTextEdit);
-	DialogWindow->exec();
+void MainWindow::clearChannelsJsonArray() {
+	QJsonDocument jsonDocument = getJsonDocument();
+	QJsonArray jsonArray = jsonDocument.array();
 
+	for (int index = 0; index < jsonArray.count(); index++)
+		jsonArray.removeAt(index);
+
+	jsonDocument.setArray(jsonArray);
 }
 
-void MainWindow::LeftPartOfScreenAction_triggered()
-{
+void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId) {
+	QJsonDocument jsonDocument = getJsonDocument();
+	QJsonObject jsonObject = jsonDocument.object();
+
+	jsonObject.insert("apiHash", apiHash);
+	jsonObject.insert("phoneNumber", phoneNumber);
+	jsonObject.insert("apiId", apiId);
+
+	jsonDocument.setObject(jsonObject);
+}
+
+void MainWindow::saveTargetChannels(QStringList channels) {
+	QJsonDocument jsonDocument = getJsonDocument();
+	QJsonObject jsonObject = jsonDocument.object();
+	QJsonArray jsonArray = jsonDocument.array();
+
+	foreach (const QString& channel, channels)
+		jsonArray.append(channel);
+
+	jsonObject.insert("channels", jsonArray);
+	jsonDocument.setObject(jsonObject);
+}
+
+
+void MainWindow::on_AddChannelsButton_click() {
+	QRegularExpression channelsSplitRegularExpression("(\\ ,|\\,)");
+	QString TelegramChannels = TelegramParserTargetLineEdit->text();
+	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
+
+	saveTargetChannels(TelegramChannelsList);
+
+	TelegramParserTargetLineEdit->clear();
+}
+
+void MainWindow::on_ReplaceChannelsButton_click() {
+	QRegularExpression channelsSplitRegularExpression("(\\ ,|\\,)");
+	QString TelegramChannels = TelegramParserTargetLineEdit->text();
+	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
+
+	saveTargetChannels(TelegramChannelsList);
+	
+	TelegramParserTargetLineEdit->clear();
+}
+
+void MainWindow::on_GetChannelsFromFileButton_click() {
+	QJsonDocument jsonDocument = getJsonDocument();
+	QJsonObject jsonObject = jsonDocument.object();
+	QJsonValue jsonValue = jsonObject.value("channels");
+	
+	//QTextEdit* ReadedChannelsTextEdit = new QTextEdit(jsonArray);
+	//QDialog* DialogWindow = new QDialog();
+	//DialogWindow->setLayout(new QVBoxLayout);
+	//DialogWindow->layout()->addWidget(ReadedChannelsTextEdit);
+	//DialogWindow->exec();
+}
+
+void MainWindow::LeftPartOfScreenAction_triggered() {
 	BOOL mouseDetectorDirection = mouseDetector->isRunning();
 	if (mouseDetectorDirection) {
 		mouseDetector->KillThread();
@@ -87,8 +138,7 @@ void MainWindow::LeftPartOfScreenAction_triggered()
 	mouseDetector->TrackMouse(MouseDetector::Direction::Left);
 }
 
-void MainWindow::RightPartOfScreenAction_triggered()
-{
+void MainWindow::RightPartOfScreenAction_triggered() {
 	BOOL mouseDetectorDirection = mouseDetector->isRunning();
 	if (mouseDetectorDirection) {
 		mouseDetector->KillThread();

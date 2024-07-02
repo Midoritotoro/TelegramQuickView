@@ -30,6 +30,8 @@ SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/parser/main.cpp)
 
 
 SET(MAIN_SOURCES  main.cpp
+	src/core/sql/SqlConnect.cpp
+	src/core/sql/SqlConnect.h
 	src/core/sql/SqlConversationModel.cpp
 	src/core/sql/SqlConversationModel.h
 

@@ -27,6 +27,7 @@ public:
 		Direction direction;
 		BOOL Running;
 	} ThreadParameters, *LPThreadParameters;
+
 private:
 	HANDLE _Thread = nullptr;
 	LPThreadParameters _LPThreadParameters = new ThreadParameters();

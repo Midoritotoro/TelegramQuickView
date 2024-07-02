@@ -1,48 +1,39 @@
-﻿#include <QGuiApplication>
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QtCore>
+﻿#include "src/core/sql/SqlConversationModel.h"
+#include "src/core/sql/SqlConnect.h"
+#include "src/core/winapi/AutoRunRegistryUtils.h"
+#include "src/gui/settings/MainWindow.h"
+
+
 #include <QtQml>
-
-#include "src/core/sql/SqlConversationModel.h"
-
+#include <QGuiApplication>
+#include <QApplication>
 #include <Windows.h>
 
-static void connectToDatabase()
-{
-    QSqlDatabase database = QSqlDatabase::database();
-
-    if (!database.isValid()) {
-        database = QSqlDatabase::addDatabase("QSQLITE");
-        if (!database.isValid())
-            return;
-    }
-
-    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-    if (!writeDir.mkpath("."))
-        return;
-
-    const QString fileName = writeDir.absolutePath() + "/chat-database.sqlite3";
-    database.setDatabaseName(fileName);
-
-    if (!database.open())
-        QFile::remove(fileName);
-}
 
 int main(int argc, char* argv[])
 {
     AllocConsole();
-    QGuiApplication app(argc, argv);
 
-    qmlRegisterType<SqlConversationModel>("sql.SqlConversationModel", 1, 0, "SqlConversationModel");
-
-    connectToDatabase();
-
-    QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("../../src/gui/qml/main.qml")));
-    if (engine.rootObjects().isEmpty())
+    if (!IS_MINIMUM_WINDOWS_VERSION) {
+        MessageBox(NULL, L"Приложение работает на версиях Windows от 10 и выше", L"Ошибка", MB_OK);
+        return -1;
+    }
+    if (!addParserToRegistryAutoRun())
         return -1;
 
+    //QGuiApplication app(argc, argv);
+
+    //qmlRegisterType<SqlConversationModel>("sql.SqlConversationModel", 1, 0, "SqlConversationModel");
+    //connectToDatabase();
+
+    //QQmlApplicationEngine engine;
+    //engine.load(QUrl(QStringLiteral("../../src/gui/qml/main.qml")));
+    //if (engine.rootObjects().isEmpty())
+    //    return -1;
+
+    QApplication app(argc, argv);
+    MainWindow window;
+
+    window.show();
     return app.exec();
 }
