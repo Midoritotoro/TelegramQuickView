@@ -9,7 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
 
-project("TelegramQuickView" LANGUAGES C CXX Python)
+project("TelegramQuickView" LANGUAGES C CXX)
 
 find_package(Python3 COMPONENTS Development REQUIRED)
 
@@ -65,10 +65,6 @@ SET(MAIN_SOURCES  main.cpp
 add_executable(Parser ${PARSER_SOURCES})
 target_include_directories(Parser PUBLIC ${Python3_INCLUDE_DIRS})
 target_link_libraries(Parser PRIVATE ${Python3_LIBRARIES})
-SET(CMAKE_CXX_FLAGS "-O0")
-SET(CMAKE_C_FLAGS "-O0")
-target_link_directories(${PROJECT_NAME} PRIVATE
-        ${Python3_LIBRARY_DIRS})
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 

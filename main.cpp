@@ -5,6 +5,7 @@
 #include <QtQml>
 
 #include "src/core/sql/SqlConversationModel.h"
+
 #include <Windows.h>
 
 static void connectToDatabase()
