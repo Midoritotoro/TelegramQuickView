@@ -7,7 +7,7 @@
 #include <QStandardPaths>
 
 MainWindow::MainWindow(QWidget* parent) :
-	QWidget(parent) 
+	QWidget(parent)
 {
 	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
@@ -46,25 +46,25 @@ MainWindow::MainWindow(QWidget* parent) :
 	connect(ReplaceChannelsButton, SIGNAL(clicked()), this, SLOT(on_ReplaceChannelsButton_click()));
 	connect(GetChannelsFromFileButton, SIGNAL(clicked()), this, SLOT(on_GetChannelsFromFileButton_click()));
 
-	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
 	if (!writeDir.mkpath("."))
 		return;
 
-	const QString fileName = writeDir.absolutePath() + "\\userData.json";
+	fileName = writeDir.absolutePath() + "\\userData.json";
 
 	jsonFile.setFileName(fileName);
 	jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 }
 
-QJsonDocument& MainWindow::getJsonDocument() {
+QJsonDocument MainWindow::getJsonDocument() {
 	QJsonDocument jsonDocument;
 	QByteArray jsonData;
 
 	jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
 	jsonData = jsonFile.readAll();
 	jsonFile.close();
-	
+
 	jsonDocument = QJsonDocument::fromJson(jsonData);
 	return jsonDocument;
 }
@@ -80,6 +80,8 @@ void MainWindow::clearChannelsJsonArray() {
 		return;
 
 	jsonObject.remove("channels");
+
+	jsonDocument.setObject(jsonObject);
 
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	jsonFile.write(jsonDocument.toJson());
@@ -97,7 +99,7 @@ void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& a
 
 	jsonDocument.setObject(jsonObject);
 
-	jsonFile.open(QIODevice::WriteOnly| QIODevice::Text);
+	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	jsonFile.write(jsonDocument.toJson());
 	jsonFile.close();
 }
@@ -108,14 +110,22 @@ void MainWindow::saveTargetChannels(QStringList channels) {
 
 	QJsonDocument jsonDocument = getJsonDocument();
 
-	QJsonArray currentDocumentArray = jsonDocument.array();
+	QJsonObject currentDocumentObject = jsonDocument.object();
 
-	foreach(const QJsonValue & channel, currentDocumentArray)
-		jsonArray.append(channel);
+	if (!currentDocumentObject.value("channels").toArray().isEmpty()) {
+		qDebug() << "not empty";
+		QJsonArray currentDocumentArray = currentDocumentObject.value("channels").toArray();
+
+		foreach(const QJsonValue & channel, currentDocumentArray) {
+
+			qDebug() << "Existing channel: " << channel;
+			jsonArray.append(channel);
+		}
+	}
 
 	clearChannelsJsonArray();
-	
-	foreach (const QString& channel, channels)
+
+	foreach(const QString & channel, channels)
 		jsonArray.append(channel);
 
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -143,13 +153,13 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 
 	clearChannelsJsonArray();
 	saveTargetChannels(TelegramChannelsList);
-	
+
 	TelegramParserTargetLineEdit->clear();
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click() {
 
-	
+
 	//QTextEdit* ReadedChannelsTextEdit = new QTextEdit(jsonArray);
 	//QDialog* DialogWindow = new QDialog();
 	//DialogWindow->setLayout(new QVBoxLayout);

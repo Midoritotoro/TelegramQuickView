@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
+#include <QDir>
 
 #include "../../core/winapi/MouseDetector.h"
 
@@ -22,10 +23,12 @@ private:
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
 	MouseDetector* mouseDetector = nullptr;
 	QFile jsonFile;
+	QString fileName;
+	QDir writeDir;
 public:
 	MainWindow(QWidget* parent = nullptr);
 
-	QJsonDocument& getJsonDocument();
+	QJsonDocument getJsonDocument();
 	
 	void clearChannelsJsonArray();
 	void saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId);
