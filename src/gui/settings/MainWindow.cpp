@@ -9,6 +9,17 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
+	writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+	if (!writeDir.mkpath("."))
+		return;
+
+	fileName = writeDir.absolutePath() + "\\userData.json";
+	jsonFile.setFileName(fileName);
+	jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+
+	saveLastPostsCountForChannels(3);
+
 	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
 	QMenuBar* channelOptionsMenuBar = new QMenuBar(this);
@@ -28,7 +39,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	AddChannelsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	ReplaceChannelsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	channelOptionsMenuBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	GetChannelsFromFileButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed); // dwad/ddas. , dwad/ddas., warthudnder efesf sefs Ffef 432Q Q-8 , rr3, tg, saef@$78
+	GetChannelsFromFileButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 	GridLayout->addWidget(channelOptionsMenuBar, 0, 1, 1, 1);
 	GridLayout->addWidget(TelegramParserTextLabel, 1, 0, 1, 1);
@@ -45,16 +56,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	connect(AddChannelsButton, SIGNAL(clicked()), this, SLOT(on_AddChannelsButton_click()));
 	connect(ReplaceChannelsButton, SIGNAL(clicked()), this, SLOT(on_ReplaceChannelsButton_click()));
 	connect(GetChannelsFromFileButton, SIGNAL(clicked()), this, SLOT(on_GetChannelsFromFileButton_click()));
-
-	writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-	if (!writeDir.mkpath("."))
-		return;
-
-	fileName = writeDir.absolutePath() + "\\userData.json";
-
-	jsonFile.setFileName(fileName);
-	jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 }
 
 QJsonDocument MainWindow::getJsonDocument() {
@@ -102,30 +103,39 @@ void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& a
 }
 
 void MainWindow::saveTargetChannels(QStringList channels) {
-	QJsonObject jsonObject;
 	QJsonArray jsonArray;
 	QJsonDocument jsonDocument = getJsonDocument();
 	QJsonObject currentDocumentObject = jsonDocument.object();
 
-	if (!currentDocumentObject.value("channels").toArray().isEmpty()) {
-		QJsonArray currentDocumentArray = currentDocumentObject.value("channels").toArray();
-		foreach(const QJsonValue & channel, currentDocumentArray)
-			jsonArray.append(channel);
-	}
+	if (!currentDocumentObject.value("channels").toArray().isEmpty())
+		jsonArray = currentDocumentObject.value("channels").toArray();
 
 	clearChannelsJsonArray();
 
-	foreach(const QString & channel, channels)
+	foreach(const QString& channel, channels)
 		jsonArray.append(channel);
 
-	jsonObject.insert("channels", jsonArray);
-	jsonDocument.setObject(jsonObject);
+	currentDocumentObject.insert("channels", jsonArray);
+	jsonDocument.setObject(currentDocumentObject);
 
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	jsonFile.write(jsonDocument.toJson());
 	jsonFile.close();
 }
 
+void MainWindow::saveLastPostsCountForChannels(int lastPostsCount) {
+	QJsonObject jsonObject;
+	QJsonDocument jsonDocument = getJsonDocument();
+
+	jsonObject = jsonDocument.object();
+
+	jsonObject.insert("lastPostsCount", lastPostsCount);
+	jsonDocument.setObject(jsonObject);
+
+	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
+	jsonFile.write(jsonDocument.toJson());
+	jsonFile.close();
+}
 
 void MainWindow::on_AddChannelsButton_click() {
 	QRegularExpression channelsSplitRegularExpression("(\\ ,|\\,)");

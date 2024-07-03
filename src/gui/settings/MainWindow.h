@@ -33,6 +33,7 @@ public:
 	void clearChannelsJsonArray();
 	void saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId);
 	void saveTargetChannels(QStringList channels);
+	void saveLastPostsCountForChannels(int count);
 private Q_SLOTS:
 	void on_AddChannelsButton_click();
 	void on_ReplaceChannelsButton_click();

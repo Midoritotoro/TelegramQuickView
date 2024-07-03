@@ -16,8 +16,8 @@ class Sleuth:
             api_hash: str,
             phone_number: int,
             username: str,
-            start_date=None,
-            end_date=None,
+            start_date: str=None,
+            end_date: str=None,
             download_path:str=None,
     ):
         self.api_id = api_id
@@ -29,16 +29,16 @@ class Sleuth:
         
         self.__download_path = download_path
 
-        self.__base_path = fr"{self.__download_path}/{username}"
+        self.__base_path = f"{self.__download_path}/{username}"
         self.__download_paths = [
-            fr"{self.__base_path}/Изображения",
-            fr"{self.__base_path}/Видео",
-            fr"{self.__base_path}/Аудио",
-            fr"{self.__base_path}/Документы",
-            fr"{self.__base_path}/Остальное",
-            fr"{self.__base_path}/Текст"
+            f"{self.__base_path}/Изображения",
+            f"{self.__base_path}/Видео",
+            f"{self.__base_path}/Аудио",
+            f"{self.__base_path}/Документы",
+            f"{self.__base_path}/Остальное",
+            f"{self.__base_path}/Текст"
         ]
-        self.__client = TelegramClient('history_extractor', self.api_id, self.api_hash, timeout=10)
+        self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
 
 
     async def get_messages(self):
@@ -85,15 +85,8 @@ class Sleuth:
 
             await self.get_messages()
             await self.__client.disconnect()
-
-        except ValueError as e:
-            raise f"Error -> {e}"
-        except Exception as error:
-            raise error
-        except ApiIdInvalidError as invalid_api:
-            raise invalid_api
-        except UsernameInvalidError as invalid_username:
-            raise invalid_username
+        except:
+            pass
 
     async def export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", newline="", encoding="utf-8") as file:
@@ -101,13 +94,11 @@ class Sleuth:
 
     async def __validate_date(self) -> None:
         date_pattern = r'^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'
-
         if not re.match(date_pattern, self.start_date) and not re.match(date_pattern, self.end_date):
             return
-        self.start_date = (datetime.strptime(self.start_date, '%Y-%m-%d')
-                           .replace(hour=0, minute=0, second=0, microsecond=0)).astimezone(timezone.utc)
-        self.end_date = (datetime.strptime(self.end_date, '%Y-%m-%d')
-                         .replace(hour=23, minute=59, second=59, microsecond=999999)).astimezone(timezone.utc)
+        
+        self.start_date = (datetime.strptime(self.start_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)).astimezone(timezone.utc)
+        self.end_date = (datetime.strptime(self.end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)).astimezone(timezone.utc)
 
     async def __get_download_path(self, file_type) -> str:
         return {
