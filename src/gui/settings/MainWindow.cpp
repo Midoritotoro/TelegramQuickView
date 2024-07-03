@@ -73,14 +73,12 @@ void MainWindow::clearChannelsJsonArray() {
 	QJsonObject jsonObject;
 	QJsonArray jsonArray;
 	QJsonDocument jsonDocument = getJsonDocument();
-
 	jsonObject = jsonDocument.object();
 
 	if (jsonObject.value("channels").isNull())
 		return;
 
 	jsonObject.remove("channels");
-
 	jsonDocument.setObject(jsonObject);
 
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -90,7 +88,6 @@ void MainWindow::clearChannelsJsonArray() {
 
 void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId) {
 	QJsonObject jsonObject;
-
 	QJsonDocument jsonDocument = getJsonDocument();
 
 	jsonObject.insert("apiHash", apiHash);
@@ -107,20 +104,13 @@ void MainWindow::saveUserData(QString& apiHash, QString& phoneNumber, QString& a
 void MainWindow::saveTargetChannels(QStringList channels) {
 	QJsonObject jsonObject;
 	QJsonArray jsonArray;
-
 	QJsonDocument jsonDocument = getJsonDocument();
-
 	QJsonObject currentDocumentObject = jsonDocument.object();
 
 	if (!currentDocumentObject.value("channels").toArray().isEmpty()) {
-		qDebug() << "not empty";
 		QJsonArray currentDocumentArray = currentDocumentObject.value("channels").toArray();
-
-		foreach(const QJsonValue & channel, currentDocumentArray) {
-
-			qDebug() << "Existing channel: " << channel;
+		foreach(const QJsonValue & channel, currentDocumentArray)
 			jsonArray.append(channel);
-		}
 	}
 
 	clearChannelsJsonArray();
@@ -128,9 +118,10 @@ void MainWindow::saveTargetChannels(QStringList channels) {
 	foreach(const QString & channel, channels)
 		jsonArray.append(channel);
 
-	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	jsonObject.insert("channels", jsonArray);
 	jsonDocument.setObject(jsonObject);
+
+	jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	jsonFile.write(jsonDocument.toJson());
 	jsonFile.close();
 }
@@ -158,13 +149,19 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click() {
+	QJsonDocument jsonDocument = getJsonDocument();
+	QJsonObject jsonObject = jsonDocument.object();
 
-
-	//QTextEdit* ReadedChannelsTextEdit = new QTextEdit(jsonArray);
-	//QDialog* DialogWindow = new QDialog();
-	//DialogWindow->setLayout(new QVBoxLayout);
-	//DialogWindow->layout()->addWidget(ReadedChannelsTextEdit);
-	//DialogWindow->exec();
+	if (!jsonObject.value("channels").toArray().isEmpty()) {
+		QTextEdit* ReadedChannelsTextEdit = new QTextEdit();
+		ReadedChannelsTextEdit->setReadOnly(true);
+		QString channels = QString::fromUtf8(QJsonDocument(jsonObject.value("channels").toArray()).toJson());
+		ReadedChannelsTextEdit->setPlainText(channels);
+		QDialog* DialogWindow = new QDialog();
+		DialogWindow->setLayout(new QVBoxLayout);
+		DialogWindow->layout()->addWidget(ReadedChannelsTextEdit);
+		DialogWindow->exec();
+	}
 }
 
 void MainWindow::LeftPartOfScreenAction_triggered() {
