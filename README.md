@@ -1,9 +1,9 @@
 # TelegramQuickView
 
-## Меню
+## Запуск
 
 <details>
-  <summary>Информация</summary>
+  <summary>cmd</summary>
 
-  Информация о проекте, описание, ссылки...
+  ``` cmake ```
 </details>
