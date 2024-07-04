@@ -6,13 +6,17 @@
 #include <QDir>
 #include <QStandardPaths>
 
-#include "UserDataManager.h"
+#include "UserAuthenticationDialog.h"
 
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
 	userDataManager = new UserDataManager();
 
+	if (!userDataManager->isUserAuthorized()) {
+		qDebug() << "False";
+		UserAuthenticationDialog* userAuthenticationDialog = new UserAuthenticationDialog(this);
+	}
 	userDataManager->saveLastPostsCountForChannels(3);
 
 	QGridLayout* GridLayout = new QGridLayout(this);

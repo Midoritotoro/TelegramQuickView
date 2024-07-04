@@ -33,6 +33,22 @@ QJsonDocument UserDataManager::getJsonDocument() {
 	return jsonDocument;
 }
 
+bool UserDataManager::isUserAuthorized() {
+	QJsonObject jsonObject;
+	QJsonDocument jsonDocument = getJsonDocument();
+
+	jsonObject = jsonDocument.object();
+
+	QJsonValue apiHash = jsonObject.value("apiHash");
+	QJsonValue apiId = jsonObject.value("apiId");
+	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
+
+	if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()))
+		return true;
+
+	return false;
+}
+
 void UserDataManager::clearChannelsJsonArray() {
 	QJsonObject jsonObject;
 	QJsonArray jsonArray;
@@ -99,4 +115,5 @@ void UserDataManager::saveLastPostsCountForChannels(int lastPostsCount) {
 	_jsonFile.write(jsonDocument.toJson());
 	_jsonFile.close();
 }
+
 

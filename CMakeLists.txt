@@ -57,8 +57,8 @@ SET(MAIN_SOURCES  main.cpp
 
 	src/gui/settings/MainWindow.cpp
 	src/gui/settings/MainWindow.h
-	src/gui/settings/UserAuthentication.cpp
-	src/gui/settings/UserAuthentication.h
+	src/gui/settings/UserAuthenticationDialog.cpp
+	src/gui/settings/UserAuthenticationDialog.h
 	src/gui/settings/UserDataManager.cpp
 	src/gui/settings/UserDataManager.h
 )

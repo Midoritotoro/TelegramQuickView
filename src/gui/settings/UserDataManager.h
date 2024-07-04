@@ -12,6 +12,7 @@ public:
 
 	[[nodiscard]] QJsonDocument getJsonDocument();
 	[[nodiscard]] static const QString getUserSettingsPath();
+	[[nodiscard]] bool isUserAuthorized();
 
 	void clearChannelsJsonArray();
 	void saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId);

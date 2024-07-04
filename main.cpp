@@ -21,16 +21,6 @@ int main(int argc, char* argv[])
     if (!addParserToRegistryAutoRun())
         return -1;
 
-    //QGuiApplication app(argc, argv);
-
-    //qmlRegisterType<SqlConversationModel>("sql.SqlConversationModel", 1, 0, "SqlConversationModel");
-    //connectToDatabase();
-
-    //QQmlApplicationEngine engine;
-    //engine.load(QUrl(QStringLiteral("../../src/gui/qml/main.qml")));
-    //if (engine.rootObjects().isEmpty())
-    //    return -1;
-
     QApplication app(argc, argv);
     MainWindow window;
 
