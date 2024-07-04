@@ -42,6 +42,8 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
     firstAuthenticationStageGridLayout->setContentsMargins(0, 0, 0, 0);
     firstAuthenticationStageGridLayout->setAlignment(Qt::AlignCenter);
 
+    secondAuthenticationStageGridLayout->setAlignment(Qt::AlignCenter);
+
     firstAuthenticationStageGridLayout->addWidget(apiHashLabel, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
     firstAuthenticationStageGridLayout->addWidget(apiIdLabel, 1, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
     firstAuthenticationStageGridLayout->addWidget(phoneNumberLabel, 2, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
@@ -51,6 +53,7 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
     firstAuthenticationStageGridLayout->addWidget(phoneNumberLineEdit, 2, 1, 1, 1, Qt::AlignCenter);
 
     firstAuthenticationStageGridLayout->addWidget(logInButton, 3, 1, 1, 1, Qt::AlignCenter);
+
 
     secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 0, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
     secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 1, 0, 1, 1, Qt::AlignVCenter | Qt::AlignRight);
@@ -84,18 +87,18 @@ void UserAuthenticationDialog::logInButton_clicked() {
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
-    _userDataManager->authorize(apiHash, phoneNumber, apiId);
+    _userDataManager->setTelegramCredentials(apiHash, phoneNumber, apiId);
     _mobilePhoneNumberLabel->setText(phoneNumberLineEdit->text());
     _stackedLayout->setCurrentIndex(1);
 }
 
 void UserAuthenticationDialog::confirmMobilePhoneCode_clicked() {
     QString mobilePhoneCode = _mobilePhoneCodeLineEdit->text();
-
+    _userDataManager->setPhoneNumberCode(mobilePhoneCode);
 }
 
 void UserAuthenticationDialog::closeEvent(QCloseEvent* event) {
-    if (!_userDataManager->isUserAuthorized()) {
+    if (_userDataManager->isTelegramCredentialsValid() == false || _userDataManager->isTelegramPhoneNumberCodeValid() == false) {
         event->ignore();
         shake();
     }

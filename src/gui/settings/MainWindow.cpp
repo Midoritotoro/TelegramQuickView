@@ -13,12 +13,12 @@ MainWindow::MainWindow(QWidget* parent) :
 {
 	userDataManager = new UserDataManager();
 
-	if (!userDataManager->isUserAuthorized()) {
+	if (!userDataManager->isTelegramCredentialsValid()) {
 		UserAuthenticationDialog* userAuthenticationDialog = new UserAuthenticationDialog();
 		userAuthenticationDialog->layout()->setMenuBar(this->window());
 		userAuthenticationDialog->exec();
 	}
-	userDataManager->saveLastPostsCountForChannels(3);
+	userDataManager->setLastPostsCountForChannels(3);
 
 	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
@@ -62,7 +62,7 @@ void MainWindow::on_AddChannelsButton_click() {
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
-	userDataManager->saveTargetChannels(TelegramChannelsList);
+	userDataManager->setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }
@@ -73,7 +73,7 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
 	userDataManager->clearChannelsJsonArray();
-	userDataManager->saveTargetChannels(TelegramChannelsList);
+	userDataManager->setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }

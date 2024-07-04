@@ -17,8 +17,8 @@ TelegramAuthorizationChecker::~TelegramAuthorizationChecker() {
     Py_Finalize();
 }
 
-bool TelegramAuthorizationChecker::callTelegramAuthorizeCheck(const char* apiHash, const char* phoneNumber, long long apiId) {
-    const char* PyFunctionName = "isUserAuthorized";
+bool TelegramAuthorizationChecker::callTelegramCredentialsValidCheck(const char* apiHash, const char* phoneNumber, long long apiId) {
+    const char* PyFunctionName = "isTelegramCredentialsValid";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
     bool BoolResult = false;

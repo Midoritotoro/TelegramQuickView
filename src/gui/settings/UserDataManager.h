@@ -19,10 +19,12 @@ public:
 
 	[[nodiscard]] QJsonDocument getJsonDocument();
 	[[nodiscard]] static const QString getUserSettingsPath();
-	[[nodiscard]] bool isUserAuthorized();
+	[[nodiscard]] bool isTelegramCredentialsValid();
+	[[nodiscard]] bool isTelegramPhoneNumberCodeValid();
 
 	void clearChannelsJsonArray();
-	void authorize(QString& apiHash, QString& phoneNumber, QString& apiId);
-	void saveTargetChannels(QStringList channels);
-	void saveLastPostsCountForChannels(int count);
+	void setTelegramCredentials(QString& apiHash, QString& phoneNumber, QString& apiId);
+	void setTargetChannels(QStringList channels);
+	void setLastPostsCountForChannels(int count);
+	void setPhoneNumberCode(QString& code);
 };
