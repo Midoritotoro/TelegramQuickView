@@ -14,5 +14,6 @@
   cd build
   cmake ../../
   cmake --build .
+  start TelegramQuickView.exe
   ```
 </details>
