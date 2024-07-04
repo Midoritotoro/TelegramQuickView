@@ -1,4 +1,4 @@
-#include "TelegramAuthorization.h"
+#include "telegramAuthorizationChecker.h"
 
 TelegramAuthorizationChecker::TelegramAuthorizationChecker() {
     Py_Initialize();
@@ -21,7 +21,7 @@ bool TelegramAuthorizationChecker::callTelegramAuthorizeCheck(const char* apiHas
     const char* PyFunctionName = "isUserAuthorized";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    bool BoolResult;
+    bool BoolResult = false;
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
@@ -56,4 +56,5 @@ bool TelegramAuthorizationChecker::callTelegramAuthorizeCheck(const char* apiHas
                 Py_DECREF(PyResult);
         }
     }
+    return BoolResult;
 }

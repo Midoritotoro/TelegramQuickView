@@ -20,7 +20,10 @@ QJsonDocument UserDataManager::getJsonDocument() {
 	QJsonDocument jsonDocument;
 	QByteArray jsonData;
 
-	_jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
+	
+	if (!_jsonFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		return jsonDocument;
+
 	jsonData = _jsonFile.readAll();
 	_jsonFile.close();
 
@@ -39,7 +42,7 @@ bool UserDataManager::isUserAuthorized() {
 	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
 
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-	bool isAuthorizedInTelegram = telegramAuthorizationChecker->callTelegramAuthorizeCheck(apiHash.toString().toStdString().c_str(), apiId.toString().toStdString().c_str(), phoneNumber.toString().toInt());
+	bool isAuthorizedInTelegram = telegramAuthorizationChecker->callTelegramAuthorizeCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt());
 
 	if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()) == true && isAuthorizedInTelegram == true) // && ...
 		return true;
