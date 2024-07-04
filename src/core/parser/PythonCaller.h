@@ -14,7 +14,7 @@ private:
 public:
     PythonCaller(const char* apiHash, const char* phoneNumber, long long apiId, const char* pythonFilePath);
     ~PythonCaller();
-    int CallTelegramParseFunction(const char* mName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
+    void CallTelegramParseFunction(const char* mName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
 };
 
 

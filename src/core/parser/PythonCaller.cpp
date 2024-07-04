@@ -1,12 +1,11 @@
 ﻿#include "PythonCaller.h"
-#include <iostream>
 
 
 PythonCaller::PythonCaller(const char* apiHash, const char* phoneNumber, long long apiId, const char* pythonFilePath): m_PyApiHash(apiHash), m_PyPhoneNumber(phoneNumber), m_PyApiId(apiId) {
     Py_Initialize();
+
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
-    std::cout << pythonFilePath;
     PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
 };
 
@@ -20,39 +19,40 @@ PythonCaller::~PythonCaller() {
 
     Py_DECREF(PyPath);
     Py_DECREF(PySys);
+
     PyErr_Print();
     Py_Finalize();
 };
 
-int PythonCaller::CallTelegramParseFunction(const char* mName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory)
-{
-    const char* fName = "dig";
-    const char* clsName = "Sleuth";
+void PythonCaller::CallTelegramParseFunction(const char* mName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory) {
+    const char* PyFunctionName = "dig";
+    const char* PyClassName = "Sleuth";
+    Py_ssize_t PyClassArgumentsTupleSize = 5;
 
     PyName = PyUnicode_FromString(mName);
     if (!PyName)
-        return NULL;
+        return;
 
     PyModule = PyImport_Import(PyName);
     if (!PyModule)
-        return NULL;
+        return;
 
     PyDict = PyModule_GetDict(PyModule);
     if (PyDict == NULL)
-        return NULL;
+        return;
 
-    PyClass = PyDict_GetItemString(PyDict, clsName);
+    PyClass = PyDict_GetItemString(PyDict, PyClassName);
 
     if (PyCallable_Check(PyClass)) {
-        Py_ssize_t tupleSize = 5;
-        PyArgs = PyTuple_New(tupleSize);
+        PyArgs = PyTuple_New(PyClassArgumentsTupleSize);
+
         PyTuple_SetItem(PyArgs, 0, PyLong_FromLong(long(m_PyApiId)));
         PyTuple_SetItem(PyArgs, 1, PyUnicode_FromString(m_PyApiHash));
         PyTuple_SetItem(PyArgs, 2, PyUnicode_FromString(m_PyPhoneNumber));
         PyTuple_SetItem(PyArgs, 3, PyUnicode_FromString(pathToSettingsJsonFile));
         PyTuple_SetItem(PyArgs, 4, PyUnicode_FromString(pathToAppRootDirectory));
+
         PyClsInstance = PyObject_CallObject(PyClass, PyArgs);
-        PyObject_CallMethod(PyClsInstance, fName, NULL);
+        PyObject_CallMethod(PyClsInstance, PyFunctionName, NULL);
     }
-    return 0;
 }
