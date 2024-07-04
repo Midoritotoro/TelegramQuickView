@@ -5,6 +5,7 @@ UserDataManager::UserDataManager() {
 	const QString fileName = getUserSettingsPath();
 	_jsonFile.setFileName(fileName);
 	_jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+	
 }
 
 const QString UserDataManager::getUserSettingsPath()

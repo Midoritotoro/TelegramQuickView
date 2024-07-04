@@ -14,7 +14,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	userDataManager = new UserDataManager();
 
 	if (!userDataManager->isUserAuthorized()) {
-		UserAuthenticationDialog* userAuthenticationDialog = new UserAuthenticationDialog(this);
+		UserAuthenticationDialog* userAuthenticationDialog = new UserAuthenticationDialog();
+		userAuthenticationDialog->layout()->setMenuBar(this->window());
 		userAuthenticationDialog->exec();
 	}
 	userDataManager->saveLastPostsCountForChannels(3);
