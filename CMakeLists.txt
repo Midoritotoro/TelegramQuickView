@@ -41,9 +41,6 @@ SET(MAIN_SOURCES  main.cpp
 	src/core/winapi/MouseDetector.h
 	src/core/winapi/MessageHandler.cpp
 	src/core/winapi/MessageHandler.h
-
-	src/gui/core/ScrollBar.cpp
-	src/gui/core/ScrollBar.h
 	src/gui/core/WidgetsHider.h
 
 	src/gui/media/ClickableLabel.cpp
@@ -60,6 +57,10 @@ SET(MAIN_SOURCES  main.cpp
 
 	src/gui/settings/MainWindow.cpp
 	src/gui/settings/MainWindow.h
+	src/gui/settings/UserAuthentication.cpp
+	src/gui/settings/UserAuthentication.h
+	src/gui/settings/UserDataManager.cpp
+	src/gui/settings/UserDataManager.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})

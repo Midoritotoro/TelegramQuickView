@@ -34,8 +34,8 @@ private:
 public:
 	VOID TrackMouse(Direction direction);
 	BOOL KillThread();
-	Direction getDirection() { return _LPThreadParameters->direction; }
-	BOOL isRunning() { return _LPThreadParameters->Running; }
+	[[nodiscard]] Direction getDirection() { return _LPThreadParameters->direction; }
+	[[nodiscard]] BOOL isRunning() { return _LPThreadParameters->Running; }
 	static DWORD WINAPI CheckMousePosition(LPVOID lpParam);
 };
 

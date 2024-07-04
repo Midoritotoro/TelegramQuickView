@@ -22,17 +22,9 @@ private:
 	Q_OBJECT
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
 	MouseDetector* mouseDetector = nullptr;
-	QFile jsonFile;
+	UserDataManager* userDataManager = nullptr;
 public:
 	MainWindow(QWidget* parent = nullptr);
-
-	QJsonDocument getJsonDocument();
-	
-	static const QString getUserSettingsPath();
-	void clearChannelsJsonArray();
-	void saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId);
-	void saveTargetChannels(QStringList channels);
-	void saveLastPostsCountForChannels(int count);
 private Q_SLOTS:
 	void on_AddChannelsButton_click();
 	void on_ReplaceChannelsButton_click();

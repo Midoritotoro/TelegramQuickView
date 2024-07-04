@@ -4,6 +4,8 @@
 
 #include <QApplication>
 #include <QTimer>
+#include <QWidget>
+#include <QWidgetList>
 
 
 class WidgetsHider : public QObject

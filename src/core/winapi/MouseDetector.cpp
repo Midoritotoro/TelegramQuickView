@@ -1,22 +1,18 @@
 ﻿#include "MouseDetector.h"
 
-VOID MouseDetector::TrackMouse(Direction direction)
-{
+VOID MouseDetector::TrackMouse(Direction direction) {
 	_LPThreadParameters->direction = direction;
 	_LPThreadParameters->Running = TRUE;
 	_Thread = CreateThread(NULL, 0, CheckMousePosition, _LPThreadParameters, 0, 0);
 }
 
-BOOL MouseDetector::KillThread()
-{
+BOOL MouseDetector::KillThread() {
 	FreeConsole();
 	_LPThreadParameters->Running = FALSE;
 	return CloseHandle(_Thread);
 }
 
-DWORD WINAPI MouseDetector::CheckMousePosition(LPVOID lpParam)
-{
-	AllocConsole();
+DWORD WINAPI MouseDetector::CheckMousePosition(LPVOID lpParam) {
 	LPThreadParameters lpThreadParameters = static_cast<LPThreadParameters>(lpParam);
 	POINT lpCursorPointParameters = { 0 };
 	while (lpThreadParameters->Running)

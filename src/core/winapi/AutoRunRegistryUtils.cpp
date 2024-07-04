@@ -34,14 +34,6 @@ BOOL addParserToRegistryAutoRun()
 
 }
 
-LPWSTR GetPathToCurrentFile(char* path)
-{
-    int pathToCurrentFileSize = MultiByteToWideChar(CP_ACP, 0, path, -1, NULL, 0);
-    LPWSTR pathToCurrentFile = new WCHAR[pathToCurrentFileSize];
-    MultiByteToWideChar(CP_ACP, 0, path, -1, pathToCurrentFile, pathToCurrentFileSize);
-    return pathToCurrentFile;
-}
-
 BOOL SetRegistryAutoRunKey(LPWSTR path)
 {
     LPCWSTR lpSubKey = TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");

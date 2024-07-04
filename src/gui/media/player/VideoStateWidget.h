@@ -11,5 +11,5 @@ private:
     QStackedWidget* _stackedWidget = nullptr;
 public:
     VideoStateWidget(ClickableLabel* playClickableLabel, ClickableLabel* stopClickableLabel, ClickableLabel* repeatClickableLabel, QWidget* parent = nullptr);
-    QStackedWidget* stackedWidget() { return _stackedWidget; }
+    [[nodiscard]]  QStackedWidget* stackedWidget() { return _stackedWidget; }
 };

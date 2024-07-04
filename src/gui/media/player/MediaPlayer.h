@@ -48,7 +48,7 @@ public:
 	void videoSliderSetValue(int value);
 	void setMediaPlayerVideoPosition(int value);
 	void adjustVideoSize();
-	QString detectMediaType(const QString& filePath);
+	[[nodiscard]] QString detectMediaType(const QString& filePath);
 protected:
 	void videoClicked();
 	void mouseDoubleClickEvent(QMouseEvent* event) override;

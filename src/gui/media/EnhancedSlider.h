@@ -19,5 +19,5 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
 private:
-    int32_t MousePostionToSliderVal(const QPoint& pos);
+    [[nodiscard]] int32_t MousePostionToSliderVal(const QPoint& pos);
 };
