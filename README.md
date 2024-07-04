@@ -5,5 +5,8 @@
 <details>
   <summary>cmd</summary>
 
-  ``` cmake ```
+  ```
+  git clone https://github.com/Midoritotoro/TelegramQuickView
+  
+  ```
 </details>
