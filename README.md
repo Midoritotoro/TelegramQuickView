@@ -7,6 +7,7 @@
 
   ```
   git clone https://github.com/Midoritotoro/TelegramQuickView
-  
+  cd TelegramQuickView
+
   ```
 </details>
