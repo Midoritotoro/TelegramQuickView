@@ -23,13 +23,12 @@ private:
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
 	MouseDetector* mouseDetector = nullptr;
 	QFile jsonFile;
-	QString fileName;
-	QDir writeDir;
 public:
 	MainWindow(QWidget* parent = nullptr);
 
 	QJsonDocument getJsonDocument();
 	
+	static const QString getUserSettingsPath();
 	void clearChannelsJsonArray();
 	void saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId);
 	void saveTargetChannels(QStringList channels);

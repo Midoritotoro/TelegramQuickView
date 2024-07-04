@@ -9,12 +9,7 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
-	writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-	if (!writeDir.mkpath("."))
-		return;
-
-	fileName = writeDir.absolutePath() + "\\userData.json";
+	const QString fileName = getUserSettingsPath();
 	jsonFile.setFileName(fileName);
 	jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 
@@ -56,6 +51,15 @@ MainWindow::MainWindow(QWidget* parent) :
 	connect(AddChannelsButton, SIGNAL(clicked()), this, SLOT(on_AddChannelsButton_click()));
 	connect(ReplaceChannelsButton, SIGNAL(clicked()), this, SLOT(on_ReplaceChannelsButton_click()));
 	connect(GetChannelsFromFileButton, SIGNAL(clicked()), this, SLOT(on_GetChannelsFromFileButton_click()));
+}
+
+const QString MainWindow::getUserSettingsPath()
+{
+	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	if (!writeDir.mkpath("."))
+		return "";
+	const QString fileName = writeDir.absolutePath() + "\\userData.json";
+	return fileName;
 }
 
 QJsonDocument MainWindow::getJsonDocument() {

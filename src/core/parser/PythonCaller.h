@@ -8,13 +8,13 @@ class PythonCaller
 {
 private:
     PyObject* PyName = nullptr, * PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr,
-        * PyArgs = nullptr, *PySys = nullptr, *PyPath = nullptr, *PyClass = nullptr, *PyClsInstance = nullptr;
-    const char* m_PyApiHash = nullptr, * m_PyDownloadPath = nullptr, * m_PyPhoneNumber = nullptr;
+        * PyArgs = nullptr, * PySys = nullptr, * PyPath = nullptr, * PyClass = nullptr, * PyClsInstance = nullptr;
+    const char* m_PyApiHash = nullptr, * m_PyPhoneNumber = nullptr;
     long long m_PyApiId = 0;
 public:
-    PythonCaller(const char* apiHash, const char* phoneNumber, const char* downloadPath, long long apiId, const char* pythonFilePath);
+    PythonCaller(const char* apiHash, const char* phoneNumber, long long apiId, const char* pythonFilePath);
     ~PythonCaller();
-    int CallTelegramParseFunction(const char* mName, const char* username, const char* startDate, const char* endDate);
+    int CallTelegramParseFunction(const char* mName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
 };
 
 
