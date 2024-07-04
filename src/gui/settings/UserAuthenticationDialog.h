@@ -3,6 +3,8 @@
 #include <QDialog>
 #include <QCloseEvent>
 #include <QTimer>
+#include <QLineEdit>
+
 
 class UserAuthenticationDialog : public QDialog
 {
