@@ -9,6 +9,7 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
 	QDialog(parent)
 {
 	setFixedSize(800, 600);
+    _userDataManager = new UserDataManager();
     QGridLayout* gridLayout = new QGridLayout(this);
 
     apiHashLineEdit = new QLineEdit();
@@ -62,13 +63,17 @@ void UserAuthenticationDialog::logInButton_clicked() {
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
-
+    _userDataManager->authorize(apiHash, phoneNumber, apiId);
 }
 
 void UserAuthenticationDialog::closeEvent(QCloseEvent* event) {
-	event->ignore();
-	shake();
-	//QDialog::closeEvent(event);
+    if (!_userDataManager->isUserAuthorized()) {
+        event->ignore();
+        shake();
+    }
+    else {
+        event->accept();
+    }
 }
 
 void UserAuthenticationDialog::vacillate()

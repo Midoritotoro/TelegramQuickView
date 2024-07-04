@@ -2,19 +2,21 @@
 
 #define PY_SSIZE_T_CLEAN
 
-#include <Python.h>
+#include "../PythonQtWrapper.h"
 
 class PythonCaller
 {
 private:
     PyObject* PyName = nullptr, * PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr,
         * PyArgs = nullptr, * PySys = nullptr, * PyPath = nullptr, * PyClass = nullptr, * PyClsInstance = nullptr;
-    const char* m_PyApiHash = nullptr, * m_PyPhoneNumber = nullptr;
+    const char* m_PyApiHash = nullptr, * m_PyPhoneNumber = nullptr, * _pythonFilePath = nullptr;
     long long m_PyApiId = 0;
 public:
     PythonCaller(const char* apiHash, const char* phoneNumber, long long apiId, const char* pythonFilePath);
     ~PythonCaller();
-    void CallTelegramParseFunction(const char* mName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
+
+    void CallTelegramParseFunction(const char* moduleName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
+    [[nodiscard]] bool callTelegramAuthorizeCheck();
 };
 
 

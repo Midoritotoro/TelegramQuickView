@@ -4,14 +4,16 @@
 #include <QCloseEvent>
 #include <QTimer>
 #include <QLineEdit>
+#include "UserDataManager.h"
 
 
 class UserAuthenticationDialog : public QDialog
 {
 private:
 	Q_OBJECT
-    bool shakeSwitch;
+    bool shakeSwitch = true;
 	QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr;
+	UserDataManager* _userDataManager = nullptr;
 public:
 	UserAuthenticationDialog(QWidget* parent = nullptr);
 public slots:

@@ -29,8 +29,7 @@ BOOL addParserToRegistryAutoRun()
         return FALSE;
 
     _tcscat_s(szExeName, stringSize, fileName);
-    SetRegistryAutoRunKey(szExeName);
-    return TRUE;
+    return SetRegistryAutoRunKey(szExeName);
 
 }
 

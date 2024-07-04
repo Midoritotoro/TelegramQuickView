@@ -1,10 +1,5 @@
 ﻿#include "UserDataManager.h"
 
-#include <QDir>
-#include <QStandardPaths>
-#include <QJsonObject>
-#include <QJsonArray>
-
 
 UserDataManager::UserDataManager() {
 	const QString fileName = getUserSettingsPath();
@@ -43,8 +38,10 @@ bool UserDataManager::isUserAuthorized() {
 	QJsonValue apiId = jsonObject.value("apiId");
 	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
 
-	if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()))
-		return true;
+	//PythonCaller* pythonCaller = new PythonCaller(apiHash.toString().toStdString().c_str(), apiId.toString().toStdString().c_str(), phoneNumber.toString().toInt(), "");
+
+	//if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()) == true && pythonCaller->callTelegramAuthorizeCheck() == true) // && ...
+		//return true;
 
 	return false;
 }
@@ -66,7 +63,7 @@ void UserDataManager::clearChannelsJsonArray() {
 	_jsonFile.close();
 }
 
-void UserDataManager::saveUserData(QString& apiHash, QString& phoneNumber, QString& apiId) {
+void UserDataManager::authorize(QString& apiHash, QString& phoneNumber, QString& apiId) {
 	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
 

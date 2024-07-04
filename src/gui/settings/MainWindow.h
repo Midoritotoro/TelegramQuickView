@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "UserDataManager.h"
+
 #include <QWidget>
 #include <QDialog>
 #include <QGridLayout>
@@ -14,7 +16,6 @@
 #include <QDir>
 
 #include "../../core/winapi/MouseDetector.h"
-#include "UserDataManager.h"
 
 class MainWindow : public QWidget
 {
