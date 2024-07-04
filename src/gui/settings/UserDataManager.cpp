@@ -1,4 +1,4 @@
-#include "UserDataManager.h"
+﻿#include "UserDataManager.h"
 
 #include <QDir>
 #include <QStandardPaths>
