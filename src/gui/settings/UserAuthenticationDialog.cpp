@@ -1,7 +1,6 @@
 ﻿#include "UserAuthenticationDialog.h"
 
 #include <QGridLayout>
-#include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
 
