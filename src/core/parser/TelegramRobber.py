@@ -34,6 +34,7 @@ class Sleuth:
             f"{self.__pathToAppRootDirectory}/Текст"
         ]
         
+        asyncio.set_event_loop(asyncio.new_event_loop())
         self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
 
 

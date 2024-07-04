@@ -1,7 +1,9 @@
 ﻿from telethon import TelegramClient
+import asyncio
 
 def isUserAuthorized(apiId: int, phoneNumber: str, apiHash: str) -> bool:
     try:
+        asyncio.set_event_loop(asyncio.new_event_loop())
         telegramClient = TelegramClient("AuthorizationCheck", apiId, apiHash, timeout=10)
     except:
         return False
