@@ -1,7 +1,6 @@
 ﻿#include "UserAuthenticationDialog.h"
 
 #include <QGridLayout>
-#include <QLabel>
 #include <QPushButton>
 
 
@@ -9,39 +8,61 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
 	QDialog(parent)
 {
 	setFixedSize(800, 600);
+
+    _stackedLayout = new QStackedLayout(this);
+
+    QWidget* firstAuthenticationStageWidget = new QWidget();
+    QWidget* secondAuthenticationStageWidget = new QWidget();
+
     _userDataManager = new UserDataManager();
-    QGridLayout* gridLayout = new QGridLayout(this);
+    QGridLayout* firstAuthenticationStageGridLayout = new QGridLayout(firstAuthenticationStageWidget);
+    QGridLayout* secondAuthenticationStageGridLayout = new QGridLayout(secondAuthenticationStageWidget);
 
     apiHashLineEdit = new QLineEdit();
     apiIdLineEdit = new QLineEdit();
     phoneNumberLineEdit = new QLineEdit();
+    _mobilePhoneCodeLineEdit = new QLineEdit();
 
     QLabel* apiHashLabel = new QLabel("Api hash: ");
-    QLabel* apiIdLineLabel = new QLabel("Api id: ");
-    QLabel* phoneNumberLineLabel = new QLabel("Номер телефона: ");
+    QLabel* apiIdLabel = new QLabel("Api id: ");
+    QLabel* phoneNumberLabel = new QLabel("Номер телефона: ");
+    QLabel* mobilePhoneCodeLabel = new QLabel("Код подтверждения: ");
+
+    _mobilePhoneNumberLabel = new QLabel();
 
     apiHashLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    apiIdLineLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    phoneNumberLineLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    apiIdLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    phoneNumberLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
     QPushButton* logInButton = new QPushButton("Войти");
+    QPushButton* confirmMobilePhoneCodeButton = new QPushButton("Подтвердить");
 
-    gridLayout->setSpacing(10);
-    gridLayout->setHorizontalSpacing(1);
-    gridLayout->setContentsMargins(0, 0, 0, 0);
-    gridLayout->setAlignment(Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->setSpacing(10);
+    firstAuthenticationStageGridLayout->setHorizontalSpacing(1);
+    firstAuthenticationStageGridLayout->setContentsMargins(0, 0, 0, 0);
+    firstAuthenticationStageGridLayout->setAlignment(Qt::AlignCenter);
 
-    gridLayout->addWidget(apiHashLabel, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(apiIdLineLabel, 1, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(phoneNumberLineLabel, 2, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiHashLabel, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiIdLabel, 1, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    firstAuthenticationStageGridLayout->addWidget(phoneNumberLabel, 2, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
 
-    gridLayout->addWidget(apiHashLineEdit, 0, 1, 1, 1, Qt::AlignCenter);
-    gridLayout->addWidget(apiIdLineEdit, 1, 1, 1, 1, Qt::AlignCenter);
-    gridLayout->addWidget(phoneNumberLineEdit, 2, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiHashLineEdit, 0, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiIdLineEdit, 1, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(phoneNumberLineEdit, 2, 1, 1, 1, Qt::AlignCenter);
 
-    gridLayout->addWidget(logInButton, 3, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(logInButton, 3, 1, 1, 1, Qt::AlignCenter);
+
+    secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 0, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
+    secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 1, 0, 1, 1, Qt::AlignVCenter | Qt::AlignRight);
+    secondAuthenticationStageGridLayout->addWidget(_mobilePhoneCodeLineEdit, 1, 1, 1, 1, Qt::AlignCenter);
+    secondAuthenticationStageGridLayout->addWidget(confirmMobilePhoneCodeButton, 2, 1, 1, 1, Qt::AlignCenter);
+
+    _stackedLayout->addWidget(firstAuthenticationStageWidget);
+    _stackedLayout->addWidget(secondAuthenticationStageWidget);
+
 
     connect(logInButton, &QPushButton::clicked, this, &UserAuthenticationDialog::logInButton_clicked);
+    connect(confirmMobilePhoneCodeButton, &QPushButton::clicked, this, &UserAuthenticationDialog::confirmMobilePhoneCode_clicked);
 }
 
 void UserAuthenticationDialog::shake()
@@ -64,6 +85,13 @@ void UserAuthenticationDialog::logInButton_clicked() {
     QString phoneNumber = phoneNumberLineEdit->text();
 
     _userDataManager->authorize(apiHash, phoneNumber, apiId);
+    _mobilePhoneNumberLabel->setText(phoneNumberLineEdit->text());
+    _stackedLayout->setCurrentIndex(1);
+}
+
+void UserAuthenticationDialog::confirmMobilePhoneCode_clicked() {
+    QString mobilePhoneCode = _mobilePhoneCodeLineEdit->text();
+
 }
 
 void UserAuthenticationDialog::closeEvent(QCloseEvent* event) {

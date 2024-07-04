@@ -5,7 +5,6 @@ UserDataManager::UserDataManager() {
 	const QString fileName = getUserSettingsPath();
 	_jsonFile.setFileName(fileName);
 	_jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
-	
 }
 
 const QString UserDataManager::getUserSettingsPath()
@@ -45,7 +44,7 @@ bool UserDataManager::isUserAuthorized() {
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
 	bool isAuthorizedInTelegram = telegramAuthorizationChecker->callTelegramAuthorizeCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt());
 
-	if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()) == true && isAuthorizedInTelegram == true) // && ...
+	if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()) && isAuthorizedInTelegram)
 		return true;
 
 	return false;
