@@ -14,8 +14,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	userDataManager = new UserDataManager();
 
 	if (!userDataManager->isUserAuthorized()) {
-		qDebug() << "False";
 		UserAuthenticationDialog* userAuthenticationDialog = new UserAuthenticationDialog(this);
+		userAuthenticationDialog->exec();
 	}
 	userDataManager->saveLastPostsCountForChannels(3);
 
