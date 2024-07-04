@@ -9,7 +9,6 @@
 #include "src/gui/settings/MainWindow.h"
 #include "src/core/sql/SqlConversationModel.h"
 #include "src/core/sql/SqlConnect.h"
-#include "src/core/parser/PythonCaller.h"
 
 int main(int argc, char* argv[])
 {
@@ -24,9 +23,6 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
     MainWindow window;
-
-    PythonCaller* p = new PythonCaller("", "", 1, "");
-    bool r = p->callTelegramAuthorizeCheck();
 
     window.show();
     return app.exec();

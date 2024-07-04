@@ -2,7 +2,7 @@
 
 #define PY_SSIZE_T_CLEAN
 
-#include "../PythonQtWrapper.h"
+#include <Python.h>
 
 class PythonCaller
 {
@@ -16,7 +16,6 @@ public:
     ~PythonCaller();
 
     void CallTelegramParseFunction(const char* moduleName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
-    [[nodiscard]] bool callTelegramAuthorizeCheck();
 };
 
 

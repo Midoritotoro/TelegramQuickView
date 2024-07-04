@@ -8,7 +8,7 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QJsonDocument>
-
+#include "TelegramAuthorizationChecker.h"
 
 class UserDataManager
 {

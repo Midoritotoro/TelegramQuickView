@@ -26,10 +26,11 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/PythonQtWrapper.h src/core/parser/main.cpp)
+SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/parser/main.cpp)
 
 
 SET(MAIN_SOURCES  main.cpp
+	src/core/PythonQtWrapper.h
 	src/core/sql/SqlConnect.cpp
 	src/core/sql/SqlConnect.h
 	src/core/sql/SqlConversationModel.cpp
@@ -61,6 +62,8 @@ SET(MAIN_SOURCES  main.cpp
 	src/gui/settings/UserAuthenticationDialog.h
 	src/gui/settings/UserDataManager.cpp
 	src/gui/settings/UserDataManager.h
+	src/gui/settings/TelegramAuthorizationChecker.cpp
+	src/gui/settings/TelegramAuthorizationChecker.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})

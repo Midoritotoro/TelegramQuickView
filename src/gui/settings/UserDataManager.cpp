@@ -38,10 +38,11 @@ bool UserDataManager::isUserAuthorized() {
 	QJsonValue apiId = jsonObject.value("apiId");
 	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
 
-	//PythonCaller* pythonCaller = new PythonCaller(apiHash.toString().toStdString().c_str(), apiId.toString().toStdString().c_str(), phoneNumber.toString().toInt(), "");
+	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+	bool isAuthorizedInTelegram = telegramAuthorizationChecker->callTelegramAuthorizeCheck(apiHash.toString().toStdString().c_str(), apiId.toString().toStdString().c_str(), phoneNumber.toString().toInt());
 
-	//if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()) == true && pythonCaller->callTelegramAuthorizeCheck() == true) // && ...
-		//return true;
+	if (!(apiHash.isUndefined() && apiId.isUndefined() && phoneNumber.isUndefined()) == true && isAuthorizedInTelegram == true) // && ...
+		return true;
 
 	return false;
 }
