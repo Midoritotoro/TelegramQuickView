@@ -2,6 +2,9 @@
 
 #include <QGridLayout>
 #include <QPushButton>
+#include <QTextEdit>
+#include <QStyleOption>
+#include <QPainter>
 
 
 UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
@@ -29,10 +32,14 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
     QLabel* mobilePhoneCodeLabel = new QLabel("Код подтверждения: ");
 
     _mobilePhoneNumberLabel = new QLabel();
+    _incorrentTelegramCredentialsLabel = new QLabel("Введены неверные данные Telegram. Проверьте их корректность. ");
 
     apiHashLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     apiIdLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     phoneNumberLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+    _incorrentTelegramCredentialsLabel->setStyleSheet("QLabel { color : red; font-size: 13px; }");
+    _incorrentTelegramCredentialsLabel->setWordWrap(true);
 
     QPushButton* logInButton = new QPushButton("Войти");
     QPushButton* confirmMobilePhoneCodeButton = new QPushButton("Подтвердить");
@@ -44,15 +51,17 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
 
     secondAuthenticationStageGridLayout->setAlignment(Qt::AlignCenter);
 
-    firstAuthenticationStageGridLayout->addWidget(apiHashLabel, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
-    firstAuthenticationStageGridLayout->addWidget(apiIdLabel, 1, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
-    firstAuthenticationStageGridLayout->addWidget(phoneNumberLabel, 2, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    firstAuthenticationStageGridLayout->addWidget(_incorrentTelegramCredentialsLabel, 0, 1, 1, 1, Qt::AlignVCenter | Qt::AlignRight);
 
-    firstAuthenticationStageGridLayout->addWidget(apiHashLineEdit, 0, 1, 1, 1, Qt::AlignCenter);
-    firstAuthenticationStageGridLayout->addWidget(apiIdLineEdit, 1, 1, 1, 1, Qt::AlignCenter);
-    firstAuthenticationStageGridLayout->addWidget(phoneNumberLineEdit, 2, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiHashLabel, 1, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiIdLabel, 2, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    firstAuthenticationStageGridLayout->addWidget(phoneNumberLabel, 3, 0, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
 
-    firstAuthenticationStageGridLayout->addWidget(logInButton, 3, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiHashLineEdit, 1, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(apiIdLineEdit, 2, 1, 1, 1, Qt::AlignCenter);
+    firstAuthenticationStageGridLayout->addWidget(phoneNumberLineEdit, 3, 1, 1, 1, Qt::AlignCenter);
+
+    firstAuthenticationStageGridLayout->addWidget(logInButton, 4, 1, 1, 1, Qt::AlignCenter);
 
 
     secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 0, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
@@ -63,6 +72,7 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
     _stackedLayout->addWidget(firstAuthenticationStageWidget);
     _stackedLayout->addWidget(secondAuthenticationStageWidget);
 
+    _incorrentTelegramCredentialsLabel->setVisible(false);
 
     connect(logInButton, &QPushButton::clicked, this, &UserAuthenticationDialog::logInButton_clicked);
     connect(confirmMobilePhoneCodeButton, &QPushButton::clicked, this, &UserAuthenticationDialog::confirmMobilePhoneCode_clicked);
@@ -83,12 +93,17 @@ void UserAuthenticationDialog::shake()
 }
 
 void UserAuthenticationDialog::logInButton_clicked() {
+    _incorrentTelegramCredentialsLabel->hide();
     QString apiHash = apiHashLineEdit->text();
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
     _userDataManager->setTelegramCredentials(apiHash, phoneNumber, apiId);
     _mobilePhoneNumberLabel->setText(phoneNumberLineEdit->text());
+    if (!_userDataManager->isTelegramCredentialsValid()) {
+        _incorrentTelegramCredentialsLabel->show();
+        return;
+    }
     _stackedLayout->setCurrentIndex(1);
 }
 

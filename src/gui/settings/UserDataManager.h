@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-// #include "../../src/core/parser/PythonCaller.h"
 
 #include <QDir>
 #include <QStandardPaths>

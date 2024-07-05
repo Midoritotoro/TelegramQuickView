@@ -18,6 +18,7 @@ private:
 	UserDataManager* _userDataManager = nullptr;
 	QStackedLayout* _stackedLayout = nullptr;
 	QLabel* _mobilePhoneNumberLabel = nullptr;
+	QLabel*_incorrentTelegramCredentialsLabel = nullptr;
 public:
 	UserAuthenticationDialog(QWidget* parent = nullptr);
 public slots:

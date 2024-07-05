@@ -18,13 +18,11 @@ const QString UserDataManager::getUserSettingsPath()
 
 QJsonDocument UserDataManager::getJsonDocument() {
 	QJsonDocument jsonDocument;
-	QByteArray jsonData;
 
-	
 	if (!_jsonFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		return jsonDocument;
 
-	jsonData = _jsonFile.readAll();
+	QByteArray jsonData = _jsonFile.readAll();
 	_jsonFile.close();
 
 	jsonDocument = QJsonDocument::fromJson(jsonData);
@@ -32,10 +30,8 @@ QJsonDocument UserDataManager::getJsonDocument() {
 }
 
 bool UserDataManager::isTelegramCredentialsValid() {
-	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
-
-	jsonObject = jsonDocument.object();
+	QJsonObject jsonObject = jsonDocument.object();
 
 	QJsonValue apiHash = jsonObject.value("apiHash");
 	QJsonValue apiId = jsonObject.value("apiId");
@@ -44,31 +40,23 @@ bool UserDataManager::isTelegramCredentialsValid() {
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
 	bool isTelegramCredentialsValid = telegramAuthorizationChecker->callTelegramCredentialsValidCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt());
 
-	if (!apiHash.isUndefined() == true && !apiId.isUndefined() == true && !phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true)
-		return true;
-
-	return false;
+	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true && !phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true;
 }
 bool UserDataManager::isTelegramPhoneNumberCodeValid() {
-	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
-
-	jsonObject = jsonDocument.object();
+	QJsonObject jsonObject = jsonDocument.object();
 
 	QJsonValue code = jsonObject.value("code");
 
 	if (!code.isUndefined() == true)
 		return true;
-
 	return false;
 }
 
 
 void UserDataManager::clearChannelsJsonArray() {
-	QJsonObject jsonObject;
-	QJsonArray jsonArray;
 	QJsonDocument jsonDocument = getJsonDocument();
-	jsonObject = jsonDocument.object();
+	QJsonObject jsonObject = jsonDocument.object();
 
 	if (jsonObject.value("channels").isNull())
 		return;
@@ -118,10 +106,9 @@ void UserDataManager::setTargetChannels(QStringList channels) {
 }
 
 void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
-	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
 
-	jsonObject = jsonDocument.object();
+	QJsonObject jsonObject = jsonDocument.object();
 
 	jsonObject.insert("lastPostsCount", lastPostsCount);
 	jsonDocument.setObject(jsonObject);
@@ -132,10 +119,9 @@ void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
 }
 
 void UserDataManager::setPhoneNumberCode(QString & code) {
-	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
 
-	jsonObject = jsonDocument.object();
+	QJsonObject jsonObject = jsonDocument.object();
 
 	jsonObject.insert("code", code);
 	jsonDocument.setObject(jsonObject);
