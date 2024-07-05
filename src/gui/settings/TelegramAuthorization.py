@@ -42,7 +42,7 @@ def isTelegramPhoneNumberCodeValid(apiId: int, phoneNumber: str, apiHash: str, c
         asyncio.set_event_loop(asyncio.new_event_loop())
         telegramClient = TelegramClient("AuthorizationCheck", apiId, apiHash, timeout=10)   
         telegramClient.connect()
-        # telegramClient.sign_in(phoneNumber, code=code, phone_code_hash=phone_code_hash)
+        telegramClient.sign_in(phoneNumber, code)
         telegramClient.disconnect()
     except:
         return False

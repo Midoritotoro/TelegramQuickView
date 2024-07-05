@@ -33,6 +33,7 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
 
     _mobilePhoneNumberLabel = new QLabel();
     _incorrentTelegramCredentialsLabel = new QLabel("Введены неверные данные Telegram. Проверьте их корректность. ");
+    _incorrentMobilePhoneLabel = new QLabel("Ошибка при отправке кода Telegram. Проверьте корректность номера телефона. ");
 
     apiHashLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     apiIdLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -40,6 +41,9 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
 
     _incorrentTelegramCredentialsLabel->setStyleSheet("QLabel { color : red; font-size: 13px; }");
     _incorrentTelegramCredentialsLabel->setWordWrap(true);
+
+    _incorrentMobilePhoneLabel->setStyleSheet("QLabel { color : red; font-size: 13px; }");
+    _incorrentMobilePhoneLabel->setWordWrap(true);
 
     QPushButton* logInButton = new QPushButton("Войти");
     QPushButton* confirmMobilePhoneCodeButton = new QPushButton("Подтвердить");
@@ -63,16 +67,16 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
 
     firstAuthenticationStageGridLayout->addWidget(logInButton, 4, 1, 1, 1, Qt::AlignCenter);
 
-
-    secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 0, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
-    secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 1, 0, 1, 1, Qt::AlignVCenter | Qt::AlignRight);
-    secondAuthenticationStageGridLayout->addWidget(_mobilePhoneCodeLineEdit, 1, 1, 1, 1, Qt::AlignCenter);
+    secondAuthenticationStageGridLayout->addWidget(_incorrentMobilePhoneLabel, 0, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
+    secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 1, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
+    secondAuthenticationStageGridLayout->addWidget(_mobilePhoneCodeLineEdit, 1,1, 1, 1, Qt::AlignCenter);
     secondAuthenticationStageGridLayout->addWidget(confirmMobilePhoneCodeButton, 2, 1, 1, 1, Qt::AlignCenter);
 
     _stackedLayout->addWidget(firstAuthenticationStageWidget);
     _stackedLayout->addWidget(secondAuthenticationStageWidget);
 
     _incorrentTelegramCredentialsLabel->setVisible(false);
+    _incorrentMobilePhoneLabel->setVisible(false);
 
     connect(logInButton, &QPushButton::clicked, this, &UserAuthenticationDialog::logInButton_clicked);
     connect(confirmMobilePhoneCodeButton, &QPushButton::clicked, this, &UserAuthenticationDialog::confirmMobilePhoneCode_clicked);
@@ -94,6 +98,7 @@ void UserAuthenticationDialog::shake()
 
 void UserAuthenticationDialog::logInButton_clicked() {
     _incorrentTelegramCredentialsLabel->hide();
+    _incorrentMobilePhoneLabel->hide();
 
     QString apiHash = apiHashLineEdit->text();
     QString apiId = apiIdLineEdit->text();
@@ -106,6 +111,11 @@ void UserAuthenticationDialog::logInButton_clicked() {
         return;
     }
     _stackedLayout->setCurrentIndex(1);
+    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt());
+    if (!isCodeSended) {
+        _incorrentMobilePhoneLabel->show();
+    }
 }
 
 void UserAuthenticationDialog::confirmMobilePhoneCode_clicked() {
