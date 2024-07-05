@@ -94,6 +94,7 @@ void UserAuthenticationDialog::shake()
 
 void UserAuthenticationDialog::logInButton_clicked() {
     _incorrentTelegramCredentialsLabel->hide();
+
     QString apiHash = apiHashLineEdit->text();
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
