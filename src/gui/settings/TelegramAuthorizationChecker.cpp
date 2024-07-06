@@ -1,5 +1,5 @@
 #include "telegramAuthorizationChecker.h"
-#include <pybind11/pybind11.h>
+
 
 TelegramAuthorizationChecker::TelegramAuthorizationChecker() {
     
@@ -14,7 +14,6 @@ bool TelegramAuthorizationChecker::TelegramCredentialsValidCheck(const char* api
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
     bool BoolResult = false;
-
     pybind11::object py_module = pybind11::module::import(pythonFilePath + *moduleName);
     pybind11::object result = py_module.attr(PyFunctionName)(25);
     std::cout << pybind11::cast<bool>(result);

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <iostream>
 #include <pybind11/pybind11.h>
 
-class TelegramAuthorizationChecker {
+class PYBIND11_EXPORT TelegramAuthorizationChecker {
 public:
 	TelegramAuthorizationChecker();
 	~TelegramAuthorizationChecker();

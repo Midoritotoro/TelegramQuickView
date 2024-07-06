@@ -65,12 +65,19 @@ SET(MAIN_SOURCES  main.cpp
 add_executable(Parser ${PARSER_SOURCES})
 target_include_directories(Parser PUBLIC ${Python3_INCLUDE_DIRS})
 target_link_libraries(Parser PRIVATE ${Python3_LIBRARIES})
+target_link_directories(Parser PUBLIC ${Python3_LIBRARY_DIRS})
 
-set(PYBIND11_FINDPYTHON ON)
-find_package(pybind11 CONFIG REQUIRED)
-
-pybind11_add_module(PythonCall src/gui/settings/TelegramAuthorizationChecker.cpp src/gui/settings/TelegramAuthorizationChecker.h)
 add_executable(TelegramQuickView ${MAIN_SOURCES})
+
+set(PYBIND11_PYTHON_VERSION 3)
+set(PYBIND11_FINDPYTHON ON)
+set(PYBIND11 thirdParty/pybind11)
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+include_directories(PYBIND11/include/)
+
+add_subdirectory(${PYBIND11})
+pybind11_add_module(PythonCall src/gui/settings/TelegramAuthorizationChecker.h src/gui/settings/TelegramAuthorizationChecker.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 					Qt6::Core
@@ -118,6 +125,7 @@ SET_SOURCE_FILES_PROPERTIES(
 )
 
 set(CMAKE_INSTALL_PREFIX "D:/TelegramQuickView/")
+
 install(TARGETS Parser DESTINATION out/build)
 install(TARGETS TelegramQuickView DESTINATION out/build)
 
