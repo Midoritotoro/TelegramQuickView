@@ -24,7 +24,8 @@ public:
 public slots:
     void shake();
 	void logInButton_clicked();
-	void confirmMobilePhoneCode_clicked();
+	void confirmMobilePhoneCodeButton_clicked();
+	void backToLogInScreenButton_clicked();
 private:
 	void vacillate();
 protected:

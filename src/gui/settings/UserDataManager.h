@@ -18,6 +18,7 @@ public:
 
 	[[nodiscard]] QJsonDocument getJsonDocument();
 	[[nodiscard]] static const QString getUserSettingsPath();
+	[[nodiscard]] QStringList getTelegramCredentials();
 	[[nodiscard]] bool isTelegramCredentialsValid();
 	[[nodiscard]] bool isTelegramPhoneNumberCodeValid();
 

@@ -1,3 +1,5 @@
+#include "PythonCaller.h"
+
 #ifndef UNICODE
 	#define UNICODE
 #endif
@@ -19,7 +21,7 @@ int main() {
 	//_wgetcwd(pathToCurrentFile, MAX_PATH);
 	//DWORD count;
 	//WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), pathToCurrentFile, _tcslen(pathToCurrentFile), &count, NULL);
-	/*PythonCaller* pythonCaller = new PythonCaller(apiHash, phoneNumber, apiId, "D:\\TelegramQuickView\\src\\core\\parser\\");
-	pythonCaller->CallTelegramParseFunction(PyModuleName, "2024-05-04", "2024-05-05");*/
+	PythonCaller* pythonCaller = new PythonCaller(apiHash, phoneNumber, apiId, "D:\\TelegramQuickView\\src\\core\\parser\\");
+	pythonCaller->CallTelegramParseFunction(PyModuleName, "2024-05-04", "2024-05-05");
 	return 0;
 }

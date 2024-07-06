@@ -1,11 +1,12 @@
 #pragma once
 
-#pragma push_macro("slots")
-#undef slots
-#include <pybind11/pybind11.h>
-#pragma pop_macro("slots")
+#define PY_SSIZE_T_CLEAN
+#include "../../src/core/PythonQtWrapper.h"
 
-class PYBIND11_EXPORT TelegramAuthorizationChecker {
+class TelegramAuthorizationChecker {
+private:
+	PyObject* PyArgs = nullptr, * PySys = nullptr, * PyPath = nullptr, * PyName = nullptr,
+		* PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr, * PyResult = nullptr;
 public:
 	TelegramAuthorizationChecker();
 	~TelegramAuthorizationChecker();
