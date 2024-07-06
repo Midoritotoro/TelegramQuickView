@@ -5,6 +5,10 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
+if(POLICY CMP0148)
+	cmake_policy(SET CMP0148 OLD)
+endif()
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
@@ -71,15 +75,16 @@ add_executable(TelegramQuickView ${MAIN_SOURCES})
 
 set(PYBIND11_PYTHON_VERSION 3)
 set(PYBIND11_FINDPYTHON ON)
-set(PYBIND11 thirdParty/pybind11)
+set(PYBIND11 ThirdParty/pybind11-2.13.1)
 find_package(PythonLibs REQUIRED)
+find_package(PythonInterp REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(PYBIND11/include)
 
 add_subdirectory(${PYBIND11})
 pybind11_add_module(PythonCall src/gui/settings/TelegramAuthorizationChecker.h src/gui/settings/TelegramAuthorizationChecker.cpp)
 
-# target_link_libraries(PythonCall PRIVATE Python3::Python)
+target_link_libraries(PythonCall PRIVATE Python3::Python)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 					Qt6::Core
