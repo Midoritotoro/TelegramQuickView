@@ -9,6 +9,7 @@
 #include "src/gui/settings/MainWindow.h"
 #include "src/core/sql/SqlConversationModel.h"
 #include "src/core/sql/SqlConnect.h"
+#include "src/gui/settings/TelegramAuthorizationChecker.h"
 
 int main(int argc, char* argv[])
 {
@@ -21,9 +22,16 @@ int main(int argc, char* argv[])
     if (!addParserToRegistryAutoRun())
         return -1;
 
-    QApplication app(argc, argv);
-    MainWindow window;
+   // QApplication app(argc, argv);
+   // MainWindow window;
 
-    window.show();
-    return app.exec();
+   // window.show();
+    //return app.exec();
+    TelegramAuthorizationChecker* checker = new TelegramAuthorizationChecker();
+    bool isTelegramCodeValid = checker->sendTelegramCode("019edf3f20c8460b741fb94114e6fec0", "+375292384917", 13711370);
+    return 0;
 }
+
+// apiHash = "019edf3f20c8460b741fb94114e6fec0";
+// phoneNumber = "+375292384917";
+// apiId = 13711370;

@@ -40,7 +40,8 @@ bool UserDataManager::isTelegramCredentialsValid() {
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
 	bool isTelegramCredentialsValid = telegramAuthorizationChecker->TelegramCredentialsValidCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt());
 
-	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true && !phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true;
+	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
+		!phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true;
 }
 
 QStringList UserDataManager::getTelegramCredentials() {
@@ -63,11 +64,20 @@ bool UserDataManager::isTelegramPhoneNumberCodeValid() {
 	QJsonDocument jsonDocument = getJsonDocument();
 	QJsonObject jsonObject = jsonDocument.object();
 
+	QJsonValue apiHash = jsonObject.value("apiHash");
+	QJsonValue apiId = jsonObject.value("apiId");
+	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
 	QJsonValue code = jsonObject.value("code");
 
-	if (!code.isUndefined() == true)
-		return true;
-	return false;
+	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+	bool isTelegramCodeValid = telegramAuthorizationChecker->TelegramCodeValidCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt(), code.toString().toInt());
+
+	bool r = !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
+		!phoneNumber.isUndefined() == true && !code.isUndefined() == true && isTelegramCodeValid == true;
+	qDebug() << r;
+
+	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
+		!phoneNumber.isUndefined() == true && !code.isUndefined() == true && isTelegramCodeValid == true;
 }
 
 
