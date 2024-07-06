@@ -26,6 +26,7 @@ public slots:
 	void logInButton_clicked();
 	void confirmMobilePhoneCodeButton_clicked();
 	void backToLogInScreenButton_clicked();
+	void sendCodeAgainButton_clicked();
 private:
 	void vacillate();
 protected:

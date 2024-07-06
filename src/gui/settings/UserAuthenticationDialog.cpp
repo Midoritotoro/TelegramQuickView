@@ -52,6 +52,7 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
     QPushButton* logInButton = new QPushButton("Войти");
     QPushButton* confirmMobilePhoneCodeButton = new QPushButton("Подтвердить");
     QPushButton* backToLogInScreenButton = new QPushButton("Назад");
+    QPushButton* sendCodeAgainButton = new QPushButton("Отправить еще раз");
 
     firstAuthenticationStageGridLayout->setSpacing(10);
     firstAuthenticationStageGridLayout->setHorizontalSpacing(1);
@@ -74,9 +75,10 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
     firstAuthenticationStageGridLayout->addWidget(logInButton, 4, 1, 1, 1, Qt::AlignCenter);
 
     secondAuthenticationStageGridLayout->addWidget(_incorrectTelegramCodeLabel, 0, 1, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
-    secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 2, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
+    secondAuthenticationStageGridLayout->addWidget(mobilePhoneCodeLabel, 1, 0, 1, 1, Qt::AlignVCenter | Qt::AlignTop);
 
-    secondAuthenticationStageGridLayout->addWidget(_mobilePhoneCodeLineEdit, 2,1, 1, 1, Qt::AlignCenter);
+    secondAuthenticationStageGridLayout->addWidget(_mobilePhoneCodeLineEdit, 1,1, 1, 1, Qt::AlignCenter);
+    secondAuthenticationStageGridLayout->addWidget(sendCodeAgainButton, 2, 1, 1, 1, Qt::AlignCenter);
     secondAuthenticationStageGridLayout->addWidget(confirmMobilePhoneCodeButton, 3, 1, 1, 1, Qt::AlignCenter);
     secondAuthenticationStageGridLayout->addWidget(backToLogInScreenButton, 4, 1, 1, 1, Qt::AlignCenter);
 
@@ -90,6 +92,7 @@ UserAuthenticationDialog::UserAuthenticationDialog(QWidget* parent):
     connect(logInButton, &QPushButton::clicked, this, &UserAuthenticationDialog::logInButton_clicked);
     connect(confirmMobilePhoneCodeButton, &QPushButton::clicked, this, &UserAuthenticationDialog::confirmMobilePhoneCodeButton_clicked);
     connect(backToLogInScreenButton, &QPushButton::clicked, this, &UserAuthenticationDialog::backToLogInScreenButton_clicked);
+    connect(sendCodeAgainButton, &QPushButton::clicked, this, &UserAuthenticationDialog::sendCodeAgainButton_clicked);
 }
 
 void UserAuthenticationDialog::shake()
@@ -123,7 +126,7 @@ void UserAuthenticationDialog::logInButton_clicked() {
         return;
     }
     TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt());
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
     if (!isCodeSended) {
         _incorrentMobilePhoneLabel->show();
         shake();
@@ -142,7 +145,6 @@ void UserAuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         shake();
         return;
     }
-
     close();
 }
 
@@ -152,6 +154,20 @@ void UserAuthenticationDialog::backToLogInScreenButton_clicked() {
     apiHashLineEdit->setText(telegramCredentialsList.at(0));
     apiIdLineEdit->setText(telegramCredentialsList.at(1));
     phoneNumberLineEdit->setText(telegramCredentialsList.at(2));
+}
+
+void UserAuthenticationDialog::sendCodeAgainButton_clicked() {
+    QFile file("TelegramQuickView.session");
+    file.remove();
+    QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
+
+
+    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(telegramCredentialsList.at(0).toStdString().c_str(), telegramCredentialsList.at(1).toStdString().c_str(), telegramCredentialsList.at(2).toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
+    if (!isCodeSended) {
+        shake();
+        return;
+    }
 }
 
 void UserAuthenticationDialog::closeEvent(QCloseEvent* event) {

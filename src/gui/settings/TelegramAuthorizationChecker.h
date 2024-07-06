@@ -11,6 +11,6 @@ public:
 	TelegramAuthorizationChecker();
 	~TelegramAuthorizationChecker();
 	[[nodiscard]] bool TelegramCredentialsValidCheck(const char* apiHash, const char* phoneNumber, long long apiId);
-	[[nodiscard]] bool sendTelegramCode(const char* apiHash, const char* phoneNumber, long long apiId);
-	[[nodiscard]] bool TelegramCodeValidCheck(const char* apiHash, const char* phoneNumber, long long apiId, long code);
+	[[nodiscard]] bool sendTelegramCode(const char* apiHash, const char* phoneNumber, long long apiId, const char* pathToUserSettingsJson);
+	[[nodiscard]] bool TelegramCodeValidCheck(const char* apiHash, const char* phoneNumber, long long apiId, long code, const char* codeHash);
 };
