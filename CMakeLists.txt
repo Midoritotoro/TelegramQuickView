@@ -64,6 +64,7 @@ SET(MAIN_SOURCES  main.cpp
 	src/gui/settings/UserDataManager.h
 	src/gui/settings/TelegramAuthorizationChecker.cpp
 	src/gui/settings/TelegramAuthorizationChecker.h
+	src/gui/settings/AuthorizationForm.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})
