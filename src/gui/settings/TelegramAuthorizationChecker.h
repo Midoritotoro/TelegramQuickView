@@ -1,12 +1,9 @@
 #pragma once
 
-#define PY_SSIZE_T_CLEAN
-#include "../../src/core/PythonQtWrapper.h"
+#include <iostream>
+#include <pybind11/pybind11.h>
 
 class TelegramAuthorizationChecker {
-private:
-	PyObject* PyArgs = nullptr, * PySys = nullptr, * PyPath = nullptr, * PyName = nullptr,
-		* PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr, * PyResult = nullptr;
 public:
 	TelegramAuthorizationChecker();
 	~TelegramAuthorizationChecker();

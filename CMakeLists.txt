@@ -11,7 +11,7 @@ set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
 
 project("TelegramQuickView" LANGUAGES C CXX)
 
-find_package(Python3 COMPONENTS Development REQUIRED)
+find_package(Python3 COMPONENTS Development Interpreter REQUIRED)
 
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
@@ -26,11 +26,9 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/parser/main.cpp)
-
+SET(PARSER_SOURCES src/core/parser/main.cpp)
 
 SET(MAIN_SOURCES  main.cpp
-	src/core/PythonQtWrapper.h
 	src/core/sql/SqlConnect.cpp
 	src/core/sql/SqlConnect.h
 	src/core/sql/SqlConversationModel.cpp
@@ -62,19 +60,22 @@ SET(MAIN_SOURCES  main.cpp
 	src/gui/settings/UserAuthenticationDialog.h
 	src/gui/settings/UserDataManager.cpp
 	src/gui/settings/UserDataManager.h
-	src/gui/settings/TelegramAuthorizationChecker.cpp
-	src/gui/settings/TelegramAuthorizationChecker.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})
 target_include_directories(Parser PUBLIC ${Python3_INCLUDE_DIRS})
 target_link_libraries(Parser PRIVATE ${Python3_LIBRARIES})
 
-add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
+set(PYBIND11_FINDPYTHON ON)
+find_package(pybind11 CONFIG REQUIRED)
+
+pybind11_add_module(PythonCall src/gui/settings/TelegramAuthorizationChecker.cpp src/gui/settings/TelegramAuthorizationChecker.h)
+add_executable(TelegramQuickView ${MAIN_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 					Qt6::Core
 					Qt6::Widgets
+					Qt6::Qml
 					Qt6::Qml
 					Qt6::Multimedia
 					Qt6::MultimediaWidgets
@@ -82,7 +83,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 					Qt6::Quick
 					Qt6::Xml
 )
-target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
+
+# add_library(PythonCall)
 
 execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED
                RESULT_VARIABLE result
