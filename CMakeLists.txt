@@ -64,7 +64,7 @@ SET(MAIN_SOURCES  main.cpp
 
 add_executable(Parser ${PARSER_SOURCES})
 target_include_directories(Parser PUBLIC ${Python3_INCLUDE_DIRS})
-target_link_libraries(Parser PRIVATE ${Python3_LIBRARIES})
+target_link_libraries(Parser PUBLIC ${Python3_LIBRARIES})
 target_link_directories(Parser PUBLIC ${Python3_LIBRARY_DIRS})
 
 add_executable(TelegramQuickView ${MAIN_SOURCES})
@@ -74,10 +74,12 @@ set(PYBIND11_FINDPYTHON ON)
 set(PYBIND11 thirdParty/pybind11)
 find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
-include_directories(PYBIND11/include/)
+include_directories(PYBIND11/include)
 
 add_subdirectory(${PYBIND11})
 pybind11_add_module(PythonCall src/gui/settings/TelegramAuthorizationChecker.h src/gui/settings/TelegramAuthorizationChecker.cpp)
+
+# target_link_libraries(PythonCall PRIVATE Python3::Python)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 					Qt6::Core

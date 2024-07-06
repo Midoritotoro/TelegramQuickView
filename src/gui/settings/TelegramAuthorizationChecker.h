@@ -1,6 +1,9 @@
 #pragma once
 
+#pragma push_macro("slots")
+#undef slots
 #include <pybind11/pybind11.h>
+#pragma pop_macro("slots")
 
 class PYBIND11_EXPORT TelegramAuthorizationChecker {
 public:
