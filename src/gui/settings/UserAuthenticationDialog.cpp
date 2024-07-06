@@ -122,11 +122,13 @@ void UserAuthenticationDialog::logInButton_clicked() {
     _mobilePhoneNumberLabel->setText(phoneNumberLineEdit->text());
     if (!_userDataManager->isTelegramCredentialsValid()) {
         _incorrentTelegramCredentialsLabel->show();
+        _userDataManager->clearTelegramCredentials();
         shake();
         return;
     }
     TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
     bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
+
     if (!isCodeSended) {
         _incorrentMobilePhoneLabel->show();
         shake();
@@ -158,7 +160,7 @@ void UserAuthenticationDialog::backToLogInScreenButton_clicked() {
 
 void UserAuthenticationDialog::sendCodeAgainButton_clicked() {
     QFile file("TelegramQuickView.session");
-    file.remove();
+    qDebug() << file.remove();
     QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
 
 
