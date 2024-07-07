@@ -1,22 +1,26 @@
-#include "AuthorizationForm.h"
+﻿#include "AuthorizationForm.h"
 
-void Ui_Dialog::setupUi(QDialog* Dialog) {
-    if (Dialog->objectName().isEmpty())
-        Dialog->setObjectName("Dialog");
-    Dialog->resize(720, 720);
-    Dialog->setStyleSheet(QString::fromUtf8("*{\n"
+AuthenticationDialog::AuthenticationDialog(QWidget* parent):
+    QDialog(parent)
+{
+    setFixedSize(720, 720);
+
+    setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
         "font-size: 24px;\n"
         "}"));
-    frame = new QFrame(Dialog);
+
+    frame = new QFrame(this);
     frame->setObjectName("frame");
     frame->setGeometry(QRect(90, 120, 550, 550));
     frame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
         "}"));
+
     frame->setFrameShape(QFrame::Shape::StyledPanel);
     frame->setFrameShadow(QFrame::Shadow::Raised);
+
     loginButton = new QPushButton(frame);
     loginButton->setObjectName("loginButton");
     loginButton->setGeometry(QRect(50, 450, 450, 80));
@@ -30,62 +34,156 @@ void Ui_Dialog::setupUi(QDialog* Dialog) {
         "border-radius: 15px;\n"
         "background: #49ebff\n"
         "}"));
-    lineEdit = new QLineEdit(frame);
-    lineEdit->setObjectName("lineEdit");
-    lineEdit->setGeometry(QRect(50, 130, 450, 24));
-    lineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
+
+    apiHashLineEdit = new QLineEdit(frame);
+    apiHashLineEdit->setObjectName("lineEdit");
+    apiHashLineEdit->setGeometry(QRect(50, 130, 450, 24));
+
+    apiHashLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
         "border: none;\n"
         "color: #717072;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
         ""));
-    lineEdit_2 = new QLineEdit(frame);
-    lineEdit_2->setObjectName("lineEdit_2");
-    lineEdit_2->setGeometry(QRect(50, 240, 450, 24));
-    lineEdit_2->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
+
+    apiIdLineEdit = new QLineEdit(frame);
+    apiIdLineEdit->setObjectName("lineEdit_2");
+    apiIdLineEdit->setGeometry(QRect(50, 240, 450, 24));
+    apiIdLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
         "border: none;\n"
         "color: #717072;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
         ""));
-    lineEdit_3 = new QLineEdit(frame);
-    lineEdit_3->setObjectName("lineEdit_3");
-    lineEdit_3->setGeometry(QRect(50, 360, 450, 24));
-    lineEdit_3->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
+
+    phoneNumberLineEdit = new QLineEdit(frame);
+    phoneNumberLineEdit->setObjectName("lineEdit_3");
+    phoneNumberLineEdit->setGeometry(QRect(50, 360, 450, 24));
+    phoneNumberLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
         "border: none;\n"
         "color: #717072;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
         ""));
-    toolButton = new QToolButton(Dialog);
-    toolButton->setObjectName("toolButton");
-    toolButton->setGeometry(QRect(310, 60, 120, 120));
-    toolButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
+
+    logInButton = new QToolButton(this);
+    logInButton->setObjectName("toolButton");
+    logInButton->setGeometry(QRect(310, 60, 120, 120));
+    logInButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
         "background: red;\n"
         "border-radius: 60px;\n"
         "}"));
+
     QIcon icon;
     icon.addFile(QString::fromUtf8("../../assets/images/auth.png"), QSize(), QIcon::Normal, QIcon::Off);
-    toolButton->setIcon(icon);
-    toolButton->setIconSize(QSize(48, 48));
+    logInButton->setIcon(icon);
+    logInButton->setIconSize(QSize(48, 48));
 
-    retranslateUi(Dialog);
+    setWindowTitle("Аутентификация");
+    loginButton->setText("Войти");
 
-    QMetaObject::connectSlotsByName(Dialog);
+    apiHashLineEdit->setPlaceholderText("Api Hash");
+    apiIdLineEdit->setPlaceholderText("Api Id");
+    phoneNumberLineEdit->setPlaceholderText("Телефонный номер");
+
+    //QMetaObject::connectSlotsByName(this);
+    connect(logInButton, &QToolButton::clicked, this, &AuthenticationDialog::logInButton_clicked);
 }
 
-void Ui_Dialog::retranslateUi(QDialog* Dialog)
+
+void AuthenticationDialog::shake()
 {
-    Dialog->setWindowTitle(QCoreApplication::translate("Dialog", "Dialog", nullptr));
-    loginButton->setText(QCoreApplication::translate("Dialog", "\320\222\320\276\320\271\321\202\320\270", nullptr));
-    lineEdit->setText(QString());
-    lineEdit->setPlaceholderText(QCoreApplication::translate("Dialog", "Api Hash", nullptr));
-    lineEdit_2->setText(QString());
-    lineEdit_2->setPlaceholderText(QCoreApplication::translate("Dialog", "Api Id", nullptr));
-    lineEdit_3->setText(QString());
-    lineEdit_3->setPlaceholderText(QCoreApplication::translate("Dialog", "\320\242\320\265\320\273\320\265\321\204\320\276\320\275\320\275\321\213\320\271 \320\275\320\276\320\274\320\265\321\200", nullptr));
-    toolButton->setText(QString());
+    static int numTimesCalled = 0;
+    numTimesCalled++;
+
+    if (numTimesCalled == 9) {
+        numTimesCalled = 0;
+        return;
+    }
+
+    vacillate();
+    // QTimer::singleShot(20, this, SLOT(shake()));
+}
+
+void AuthenticationDialog::logInButton_clicked() {
+   /* _incorrentTelegramCredentialsLabel->hide();
+    _incorrentMobilePhoneLabel->hide();
+    _incorrectTelegramCodeLabel->hide();
+
+    QString apiHash = apiHashLineEdit->text();
+    QString apiId = apiIdLineEdit->text();
+    QString phoneNumber = phoneNumberLineEdit->text();
+
+    _userDataManager->setTelegramCredentials(apiHash, phoneNumber, apiId);
+    _mobilePhoneNumberLabel->setText(phoneNumberLineEdit->text());
+    if (!_userDataManager->isTelegramCredentialsValid()) {
+        _incorrentTelegramCredentialsLabel->show();
+        _userDataManager->clearTelegramCredentials();
+        shake();
+        return;
+    }
+    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
+
+    if (!isCodeSended) {
+        _incorrentMobilePhoneLabel->show();
+        shake();
+        return;
+    }
+    _stackedLayout->setCurrentIndex(1);*/
+}
+
+void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
+   /* QString mobilePhoneCode = _mobilePhoneCodeLineEdit->text();
+    _userDataManager->setPhoneNumberCode(mobilePhoneCode);
+
+    if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
+        _incorrectTelegramCodeLabel->show();
+        _mobilePhoneCodeLineEdit->clear();
+        shake();
+        return;
+    }
+    close();*/
+}
+
+void AuthenticationDialog::backToLogInScreenButton_clicked() {
+    //QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
+    //_stackedLayout->setCurrentIndex(0);
+    //apiHashLineEdit->setText(telegramCredentialsList.at(0));
+    //apiIdLineEdit->setText(telegramCredentialsList.at(1));
+    //phoneNumberLineEdit->setText(telegramCredentialsList.at(2));
+}
+
+void AuthenticationDialog::sendCodeAgainButton_clicked() {
+   /* QFile file("TelegramQuickView.session");
+    qDebug() << file.remove();
+    QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
+
+
+    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(telegramCredentialsList.at(0).toStdString().c_str(), telegramCredentialsList.at(1).toStdString().c_str(), telegramCredentialsList.at(2).toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
+    if (!isCodeSended) {
+        shake();
+        return;
+    }*/
+}
+
+void AuthenticationDialog::closeEvent(QCloseEvent* event) {
+   /* if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
+        event->ignore();
+        shake();
+    }
+    else {
+        event->accept();
+    }*/
+}
+
+void AuthenticationDialog::vacillate()
+{/*
+    QPoint offset(5, 10);
+    move(((shakeSwitch) ? pos() + offset : pos() - offset));
+    shakeSwitch = !shakeSwitch;*/
 }

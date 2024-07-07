@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
+    <width>698</width>
     <height>720</height>
    </rect>
   </property>
@@ -169,6 +169,17 @@ border-radius: 60px;
      <height>48</height>
     </size>
    </property>
+  </widget>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>60</y>
+     <width>2</width>
+     <height>2</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_3"/>
   </widget>
  </widget>
  <resources>

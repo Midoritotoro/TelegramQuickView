@@ -23,11 +23,8 @@ int main(int argc, char* argv[])
         return -1;
 
     QApplication app(argc, argv);
-    //MainWindow window;
-    Ui_Dialog form;
-    QDialog* dialog = new QDialog();
+    AuthenticationDialog form;
 
-    form.setupUi(dialog);
-    dialog->show();
+    form.exec();
     return app.exec();
 }

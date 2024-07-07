@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QVariant>
 #include <QIcon>
@@ -9,24 +9,26 @@
 #include <QPushButton>
 #include <QToolButton>
 
-QT_BEGIN_NAMESPACE
 
-class Ui_Dialog
+class AuthenticationDialog: public QDialog
 {
 private:
-    QFrame* frame;
-    QPushButton* loginButton;
-    QLineEdit* lineEdit;
-    QLineEdit* lineEdit_2;
-    QLineEdit* lineEdit_3;
-    QToolButton* toolButton;
+    bool shakeSwitch = false;
+    QFrame* frame = nullptr;
+    QPushButton* loginButton = nullptr;
+    QLineEdit* apiHashLineEdit = nullptr, *apiIdLineEdit = nullptr, *phoneNumberLineEdit = nullptr;
+    QToolButton* logInButton = nullptr;
 public:
-    void setupUi(QDialog* Dialog);
-    void retranslateUi(QDialog* Dialog);
+    AuthenticationDialog(QWidget* parent = nullptr);
+public slots:
+    void shake();
+    void logInButton_clicked();
+    void confirmMobilePhoneCodeButton_clicked();
+    void backToLogInScreenButton_clicked();
+    void sendCodeAgainButton_clicked();
+private:
+    void vacillate();
+protected:
+    void closeEvent(QCloseEvent* event) override;
 };
 
-namespace Ui {
-    class Dialog : public Ui_Dialog {};
-}
-
-QT_END_NAMESPACE
