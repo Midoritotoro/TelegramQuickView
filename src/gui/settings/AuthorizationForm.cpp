@@ -1,11 +1,15 @@
 ﻿#include "AuthorizationForm.h"
 
+#include <QTimer>
+
+
 AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     QDialog(parent)
 {
     setFixedSize(720, 720);
 
     _stackedWidget = new QStackedWidget(this);
+    _userDataManager = new UserDataManager();
 
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
@@ -29,7 +33,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     loginButton = new QPushButton(firstAuthenticationStageFrame);
     loginButton->setGeometry(QRect(50, 450, 450, 80));
     loginButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
-        "background: red;\n"
+        "background: Wheat;\n"
         "border-radius: 15px;\n"
         "color: white;\n"
         "}\n"
@@ -73,7 +77,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     logInButton = new QToolButton(this);
     logInButton->setGeometry(QRect(310, 60, 120, 120));
     logInButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
-        "background: red;\n"
+        "background: Wheat;\n"
         "border-radius: 60px;\n"
         "}"));
 
@@ -99,11 +103,65 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     secondAuthenticationStageFrame->setFrameShape(QFrame::Shape::StyledPanel);
     secondAuthenticationStageFrame->setFrameShadow(QFrame::Shadow::Raised);
 
+    QPushButton* sendCodeButton = new QPushButton(secondAuthenticationStageFrame);
+    sendCodeButton->setObjectName("sendCodeButton");
+    sendCodeButton->setGeometry(QRect(50, 250, 450, 70));
+    sendCodeButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
+        "        background: Wheat;\n"
+        "        border-radius: 15px;\n"
+        "        color: black;\n"
+        "}\n"
+        "QPushButton::hover { \n"
+        "        color: SandyBrown;\n"
+        "        border-radius: 15px;\n"
+        "        background: Wheat;\n"
+        "}"));
+    QPushButton* confirmCodeButton = new QPushButton(secondAuthenticationStageFrame);
+    confirmCodeButton->setObjectName("confirmCodeButton");
+    confirmCodeButton->setGeometry(QRect(50, 350, 450, 70));
+    confirmCodeButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
+        "        background: Wheat;\n"
+        "        border-radius: 15px;\n"
+        "        color: black;\n"
+        "}\n"
+        "QPushButton::hover { \n"
+        "        color: SandyBrown;\n"
+        "        border-radius: 15px;\n"
+        "        background: Wheat;\n"
+        "}"));
+    telegramCodeLineEdit = new QLineEdit(secondAuthenticationStageFrame);
+    telegramCodeLineEdit->setObjectName("telegramCodeLineEdit");
+    telegramCodeLineEdit->setGeometry(QRect(50, 150, 450, 51));
+    telegramCodeLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
+        "        background: transparent;\n"
+        "        border: none;\n"
+        "        color: white;\n"
+        "        border-bottom: 1px solid #717072;\n"
+        "}"));
+    QPushButton* backButton = new QPushButton(secondAuthenticationStageFrame);
+    backButton->setObjectName("backButton");
+    backButton->setGeometry(QRect(210, 450, 121, 41));
+    backButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
+        "        background: SandyBrown;\n"
+        "        border-radius: 15px;\n"
+        "        color: black;\n"
+        "}\n"
+        "QPushButton::hover { \n"
+        "        color: Wheat;\n"
+        "        border-radius: 15px;\n"
+        "        background: SandyBrown;\n"
+        "}"));
 
+    sendCodeButton->setText("Отправить");
+    confirmCodeButton->setText("Подтвердить");
+    backButton->setText("Назад");
+    telegramCodeLineEdit->setPlaceholderText("Код");
 
     _stackedWidget->addWidget(secondAuthenticationStageFrame);
 
-    connect(logInButton, &QToolButton::clicked, this, &AuthenticationDialog::logInButton_clicked);
+    connect(loginButton, &QPushButton::clicked, this, &AuthenticationDialog::logInButton_clicked);
+    connect(backButton, &QPushButton::clicked, this, &AuthenticationDialog::backButton_clicked);
+
 }
 
 
@@ -118,8 +176,7 @@ void AuthenticationDialog::shake()
     }
 
     vacillate();
-
-    // QTimer::singleShot(20, this, SLOT(shake()));
+    QTimer::singleShot(20, this, SLOT(shake()));
 }
 
 void AuthenticationDialog::logInButton_clicked() {
@@ -163,7 +220,7 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
     close();*/
 }
 
-void AuthenticationDialog::backToLogInScreenButton_clicked() {
+void AuthenticationDialog::backButton_clicked() {
     //QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
     //_stackedLayout->setCurrentIndex(0);
     //apiHashLineEdit->setText(telegramCredentialsList.at(0));
@@ -196,8 +253,8 @@ void AuthenticationDialog::closeEvent(QCloseEvent* event) {
 }
 
 void AuthenticationDialog::vacillate()
-{/*
+{
     QPoint offset(5, 10);
     move(((shakeSwitch) ? pos() + offset : pos() - offset));
-    shakeSwitch = !shakeSwitch;*/
+    shakeSwitch = !shakeSwitch;
 }
