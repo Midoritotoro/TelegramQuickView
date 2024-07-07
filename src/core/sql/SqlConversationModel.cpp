@@ -35,6 +35,7 @@ SqlConversationModel::SqlConversationModel(QObject* parent) :
     setEditStrategy(QSqlTableModel::OnManualSubmit);
 }
 
+// Допилить вставку изображений в качестве сообщения
 
 void SqlConversationModel::sendMessage(const QString& author, const QString& message, const QString& timestamp)
 {

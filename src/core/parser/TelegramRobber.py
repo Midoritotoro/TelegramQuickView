@@ -10,6 +10,8 @@ from pathlib import Path
 from shutil import rmtree
 import json
 
+# Не передавать в класс api Hash, id и номер телефона, а сделать его самостоятельной единицей, т.е брать данные только из json основного приложения
+
 
 class Sleuth:
     def __init__(
@@ -42,9 +44,7 @@ class Sleuth:
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
-                self.group_username,
-                offset_date="2024-05-05",
-                reverse=True):
+                self.group_username):
             
             if not message:
                 break
@@ -74,7 +74,9 @@ class Sleuth:
             await self.__check_download_path()
             await self.__client.connect()
             code, codeHash = await self.getTelegramCredentials()
-            await self.__client.sign_in(self.phone_number, code, phone_code_hash=codeHash)
+            
+            if not await self.__client.is_user_authorized():
+                await self.__client.sign_in(self.phone_number, code, phone_code_hash=codeHash)
 
             await self.get_messages()
             await self.__client.disconnect()

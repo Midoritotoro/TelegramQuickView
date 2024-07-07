@@ -47,9 +47,3 @@ def asyncCall(functionName: str, *args) -> bool:
     return asyncio.run((functions[functionName])(*args))
 
 
-if __name__ == "__main__":
-    asyncCall("sendTelegramCode", 13711370, "+375292384917", "019edf3f20c8460b741fb94114e6fec0", "C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json")
-#  apiHash = "019edf3f20c8460b741fb94114e6fec0"
-#  phoneNumber = "+375292384917"
-#  apiId = 13711370
-
