@@ -5,24 +5,28 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
 {
     setFixedSize(720, 720);
 
+    _stackedWidget = new QStackedWidget(this);
+
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
         "font-size: 24px;\n"
-        "}"));
+    "}"));
 
-    frame = new QFrame(this);
-    frame->setObjectName("frame");
-    frame->setGeometry(QRect(90, 120, 550, 550));
-    frame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
+    firstAuthenticationStageFrame = new QFrame();
+    secondAuthenticationStageFrame = new QFrame();
+
+    firstAuthenticationStageFrame->setGeometry(QRect(90, 120, 550, 550));
+    firstAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
-        "}"));
+    "}"));
 
-    frame->setFrameShape(QFrame::Shape::StyledPanel);
-    frame->setFrameShadow(QFrame::Shadow::Raised);
+    firstAuthenticationStageFrame->setFrameShape(QFrame::Shape::StyledPanel);
+    firstAuthenticationStageFrame->setFrameShadow(QFrame::Shadow::Raised);
 
-    loginButton = new QPushButton(frame);
-    loginButton->setObjectName("loginButton");
+    _stackedWidget->setGeometry(firstAuthenticationStageFrame->pos().x(), firstAuthenticationStageFrame->pos().y(), firstAuthenticationStageFrame->width(), firstAuthenticationStageFrame->height());
+
+    loginButton = new QPushButton(firstAuthenticationStageFrame);
     loginButton->setGeometry(QRect(50, 450, 450, 80));
     loginButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
         "background: red;\n"
@@ -35,8 +39,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "background: #49ebff\n"
         "}"));
 
-    apiHashLineEdit = new QLineEdit(frame);
-    apiHashLineEdit->setObjectName("lineEdit");
+    apiHashLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     apiHashLineEdit->setGeometry(QRect(50, 130, 450, 24));
 
     apiHashLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
@@ -47,8 +50,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "}\n"
         ""));
 
-    apiIdLineEdit = new QLineEdit(frame);
-    apiIdLineEdit->setObjectName("lineEdit_2");
+    apiIdLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     apiIdLineEdit->setGeometry(QRect(50, 240, 450, 24));
     apiIdLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
@@ -58,8 +60,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "}\n"
         ""));
 
-    phoneNumberLineEdit = new QLineEdit(frame);
-    phoneNumberLineEdit->setObjectName("lineEdit_3");
+    phoneNumberLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     phoneNumberLineEdit->setGeometry(QRect(50, 360, 450, 24));
     phoneNumberLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
@@ -70,7 +71,6 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         ""));
 
     logInButton = new QToolButton(this);
-    logInButton->setObjectName("toolButton");
     logInButton->setGeometry(QRect(310, 60, 120, 120));
     logInButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
         "background: red;\n"
@@ -89,7 +89,20 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     apiIdLineEdit->setPlaceholderText("Api Id");
     phoneNumberLineEdit->setPlaceholderText("Телефонный номер");
 
-    //QMetaObject::connectSlotsByName(this);
+    _stackedWidget->addWidget(firstAuthenticationStageFrame);
+
+    secondAuthenticationStageFrame->setGeometry(QRect(90, 120, 550, 550));
+    secondAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
+        "background: #333;\n"
+        "border-radius: 15px\n"
+    "}"));
+    secondAuthenticationStageFrame->setFrameShape(QFrame::Shape::StyledPanel);
+    secondAuthenticationStageFrame->setFrameShadow(QFrame::Shadow::Raised);
+
+
+
+    _stackedWidget->addWidget(secondAuthenticationStageFrame);
+
     connect(logInButton, &QToolButton::clicked, this, &AuthenticationDialog::logInButton_clicked);
 }
 
@@ -105,6 +118,7 @@ void AuthenticationDialog::shake()
     }
 
     vacillate();
+
     // QTimer::singleShot(20, this, SLOT(shake()));
 }
 

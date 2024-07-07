@@ -8,16 +8,18 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QToolButton>
+#include <QStackedWidget>
 
 
 class AuthenticationDialog: public QDialog
 {
 private:
     bool shakeSwitch = false;
-    QFrame* frame = nullptr;
+    QFrame* firstAuthenticationStageFrame = nullptr, * secondAuthenticationStageFrame = nullptr;
     QPushButton* loginButton = nullptr;
     QLineEdit* apiHashLineEdit = nullptr, *apiIdLineEdit = nullptr, *phoneNumberLineEdit = nullptr;
     QToolButton* logInButton = nullptr;
+    QStackedWidget* _stackedWidget = nullptr;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
 public slots:
