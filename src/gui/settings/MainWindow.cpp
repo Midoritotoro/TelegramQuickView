@@ -12,12 +12,11 @@ MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
 	userDataManager = new UserDataManager();
+	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
 
-	if (userDataManager->isTelegramCredentialsValid() == false || userDataManager->isTelegramPhoneNumberCodeValid() == false) {
-		AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
-		userAuthenticationDialog->layout()->setMenuBar(window());
+	if (userDataManager->isTelegramCredentialsValid() == false || userDataManager->isTelegramPhoneNumberCodeValid() == false)
 		userAuthenticationDialog->exec();
-	}
+
 	userDataManager->setLastPostsCountForChannels(3);
 
 	QGridLayout* GridLayout = new QGridLayout(this);

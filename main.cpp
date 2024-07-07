@@ -7,6 +7,7 @@
 
 
 #include "src/gui/settings/MainWindow.h"
+#include "src/gui/settings/AuthenticationDialog.h"
 
 int main(int argc, char* argv[])
 {
