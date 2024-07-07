@@ -9,6 +9,12 @@
 #include <QJsonDocument>
 #include "TelegramAuthorizationChecker.h"
 
+typedef struct _TelegramCredentials {
+	QString apiId;
+	QString apiHash;
+	QString phoneNumber;
+} TelegramCredentials, * LPTelegramCredentials;
+
 class UserDataManager
 {
 private:
@@ -18,14 +24,14 @@ public:
 
 	[[nodiscard]] QJsonDocument getJsonDocument();
 	[[nodiscard]] static const QString getUserSettingsPath();
-	[[nodiscard]] QStringList getTelegramCredentials();
+	[[nodiscard]] LPTelegramCredentials getTelegramCredentials();
 	[[nodiscard]] bool isTelegramCredentialsValid();
 	[[nodiscard]] bool isTelegramPhoneNumberCodeValid();
 
 	void clearChannelsJsonArray();
 	void clearTelegramCredentials();
 
-	[[nodiscard]] bool setTelegramCredentials(QString& apiHash, QString& phoneNumber, QString& apiId);
+	[[nodiscard]] bool setTelegramCredentials(LPTelegramCredentials telegramCredentials);
 	void setTargetChannels(QStringList channels);
 	void setLastPostsCountForChannels(int count);
 	void setPhoneNumberCode(QString& code);

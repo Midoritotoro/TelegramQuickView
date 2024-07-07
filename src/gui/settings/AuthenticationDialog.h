@@ -27,6 +27,7 @@ private:
     QStackedWidget* _stackedWidget = nullptr;
     UserDataManager* _userDataManager = nullptr;
     QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr,*_incorrectTelegramCodeLabel = nullptr;
+    LPTelegramCredentials _telegramCredentials = nullptr;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
 public slots:

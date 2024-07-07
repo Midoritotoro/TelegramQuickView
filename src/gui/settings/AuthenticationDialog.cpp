@@ -10,6 +10,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
 
     _stackedWidget = new QStackedWidget(this);
     _userDataManager = new UserDataManager();
+    _telegramCredentials = new TelegramCredentials();
 
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
@@ -39,7 +40,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     _incorrectMobilePhoneLabel->setGeometry(QRect(50, 110, 450, 50));
     _incorrectTelegramCodeLabel->setGeometry(QRect(50, 110, 450, 50));
 
-    firstAuthenticationStageFrame->setGeometry(QRect(80, 120, 550, 550));
+    firstAuthenticationStageFrame->setGeometry(QRect(85, 120, 550, 550));
     firstAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
@@ -94,11 +95,16 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     ""));
 
     logInButton = new QToolButton(this);
-    logInButton->setGeometry(QRect(310, 60, 120, 120));
+
+    logInButton->setGeometry(QRect(295, 60, 120, 120));
     logInButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
-        "background: Wheat;\n"
-        "border-radius: 60px;\n"
-    "}"));
+        "        background: Wheat;\n"
+        "        border-radius: 60px;\n"
+        "        color: black;\n"
+        "}\n"
+        "QToolButton::hover { \n"
+        "        background: NavajoWhite;\n"
+        "}"));
 
     QIcon icon;
     icon.addFile(QString::fromUtf8("../../assets/images/auth.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -114,7 +120,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
 
     _stackedWidget->addWidget(firstAuthenticationStageFrame);
 
-    secondAuthenticationStageFrame->setGeometry(QRect(80, 120, 550, 550));
+    secondAuthenticationStageFrame->setGeometry(QRect(85, 120, 550, 550));
     secondAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
@@ -131,9 +137,8 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        color: black;\n"
         "}\n"
         "QPushButton::hover { \n"
-        "        color: SandyBrown;\n"
         "        border-radius: 15px;\n"
-        "        background: Wheat;\n"
+        "        background: NavajoWhite;\n"
     "}"));
     QPushButton* confirmCodeButton = new QPushButton(secondAuthenticationStageFrame);
     confirmCodeButton->setObjectName("confirmCodeButton");
@@ -144,9 +149,8 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        color: black;\n"
         "}\n"
         "QPushButton::hover { \n"
-        "        color: SandyBrown;\n"
         "        border-radius: 15px;\n"
-        "        background: Wheat;\n"
+        "        background: NavajoWhite;\n"
     "}"));
     telegramCodeLineEdit = new QLineEdit(secondAuthenticationStageFrame);
     telegramCodeLineEdit->setObjectName("telegramCodeLineEdit");
@@ -166,9 +170,8 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        color: black;\n"
         "}\n"
         "QPushButton::hover { \n"
-        "        color: Wheat;\n"
         "        border-radius: 15px;\n"
-        "        background: SandyBrown;\n"
+        "        background: NavajoWhite;\n"
     "}"));
 
     sendCodeButton->setText("Отправить");
@@ -212,7 +215,11 @@ void AuthenticationDialog::logInButton_clicked() {
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
-    if (!_userDataManager->setTelegramCredentials(apiHash, phoneNumber, apiId))
+    _telegramCredentials->apiHash = apiHash;
+    _telegramCredentials->apiId = apiId;
+    _telegramCredentials->phoneNumber = phoneNumber;
+
+    if (!_userDataManager->setTelegramCredentials(_telegramCredentials))
         return;
     if (!_userDataManager->isTelegramCredentialsValid()) {
         _incorrectTelegramCredentialsLabel->show();
@@ -249,20 +256,19 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
 
 void AuthenticationDialog::backButton_clicked() {
 
-    QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
-    apiHashLineEdit->setText(telegramCredentialsList.at(0));
-    apiIdLineEdit->setText(telegramCredentialsList.at(1));
-    phoneNumberLineEdit->setText(telegramCredentialsList.at(2));
+    _telegramCredentials = _userDataManager->getTelegramCredentials();
+    apiHashLineEdit->setText(_telegramCredentials->apiHash);
+    apiIdLineEdit->setText(_telegramCredentials->apiId);
+    phoneNumberLineEdit->setText(_telegramCredentials->phoneNumber);
 }
 
 void AuthenticationDialog::sendCodeAgainButton_clicked() {
     QFile file("TelegramQuickView.session");
     file.remove();
-    QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
-
+    _telegramCredentials = _userDataManager->getTelegramCredentials();
 
     TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(telegramCredentialsList.at(0).toStdString().c_str(), telegramCredentialsList.at(1).toStdString().c_str(), telegramCredentialsList.at(2).toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(_telegramCredentials->apiHash.toStdString().c_str(), _telegramCredentials->phoneNumber.toStdString().c_str(), _telegramCredentials->apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
     if (!isCodeSended) {
         shake();
         return;

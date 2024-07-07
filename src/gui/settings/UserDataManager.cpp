@@ -49,21 +49,21 @@ bool UserDataManager::isTelegramCredentialsValid() {
 	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
 		!phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true;
 }
-
-QStringList UserDataManager::getTelegramCredentials() {
+LPTelegramCredentials UserDataManager::getTelegramCredentials() {
 	QJsonDocument jsonDocument = getJsonDocument();
 	QJsonObject jsonObject = jsonDocument.object();
-	QStringList telegramCredentialsList;
+	LPTelegramCredentials telegramCredentials = new TelegramCredentials();
+	
 
 	QJsonValue apiHash = jsonObject.value("apiHash");
 	QJsonValue apiId = jsonObject.value("apiId");
 	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
 
-	telegramCredentialsList.append(apiHash.toString());
-	telegramCredentialsList.append(apiId.toString());
-	telegramCredentialsList.append(phoneNumber.toString());
+	telegramCredentials->apiHash = apiHash.toString();
+	telegramCredentials->apiId = apiId.toString();
+	telegramCredentials->phoneNumber = phoneNumber.toString();
 
-	return telegramCredentialsList;
+	return telegramCredentials;
 }
 
 bool UserDataManager::isTelegramPhoneNumberCodeValid() {
@@ -84,6 +84,9 @@ bool UserDataManager::isTelegramPhoneNumberCodeValid() {
 
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
 	bool isTelegramCodeValid = telegramAuthorizationChecker->TelegramCodeValidCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt(), code.toString().toInt(), codeHash.toString().toStdString().c_str());
+
+	if (strlen(code.toString().toStdString().c_str()) < 5)
+		return false;
 
 	return !code.isUndefined() == true && !codeHash.isUndefined() == true && isTelegramCodeValid == true;
 }
@@ -124,16 +127,16 @@ void UserDataManager::clearTelegramCredentials() {
 	_jsonFile.close();
 }
 
-bool UserDataManager::setTelegramCredentials(QString& apiHash, QString& phoneNumber, QString& apiId) {
+bool UserDataManager::setTelegramCredentials(_TelegramCredentials* telegramCredentials) {
 	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
 
-	if (strlen(apiHash.toStdString().c_str()) < 32 || strlen(apiId.toStdString().c_str()) < 5)
+	if (strlen(telegramCredentials->apiHash.toStdString().c_str()) < 32 || strlen(telegramCredentials->apiId.toStdString().c_str()) < 5)
 		return false;
 
-	jsonObject.insert("apiHash", apiHash);
-	jsonObject.insert("phoneNumber", phoneNumber);
-	jsonObject.insert("apiId", apiId);
+	jsonObject.insert("apiHash", telegramCredentials->apiHash);
+	jsonObject.insert("phoneNumber", telegramCredentials->phoneNumber);
+	jsonObject.insert("apiId", telegramCredentials->apiId);
 
 	jsonDocument.setObject(jsonObject);
 

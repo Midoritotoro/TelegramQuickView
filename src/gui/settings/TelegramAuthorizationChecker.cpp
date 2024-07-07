@@ -1,5 +1,5 @@
 #include "telegramAuthorizationChecker.h"
-#include <iostream>
+
 
 TelegramAuthorizationChecker::TelegramAuthorizationChecker() {
     Py_Initialize();
@@ -67,8 +67,6 @@ bool TelegramAuthorizationChecker::sendTelegramCode(const char* apiHash, const c
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
     bool BoolResult = false;
-
-    std::cout << apiHash << phoneNumber << apiId << pathToUserSettingsJson;
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
