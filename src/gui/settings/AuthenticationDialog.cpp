@@ -172,7 +172,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "}\n"
         "QPushButton::hover { \n"
         "        border-radius: 15px;\n"
-        "        background: NavajoWhite;\n"
+        "        background: #E49450;\n"
     "}"));
 
     sendCodeButton->setText("Отправить");
