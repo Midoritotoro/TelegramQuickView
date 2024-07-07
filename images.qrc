@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>assets/images/auth.png</file>
-    </qresource>
-</RCC>

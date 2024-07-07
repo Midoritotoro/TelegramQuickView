@@ -84,6 +84,9 @@ border-bottom: 1px solid #717072;
 </string>
     </property>
     <property name="text">
+     <string/>
+    </property>
+    <property name="placeholderText">
      <string>Api Hash</string>
     </property>
    </widget>
@@ -106,6 +109,9 @@ border-bottom: 1px solid #717072;
 </string>
     </property>
     <property name="text">
+     <string/>
+    </property>
+    <property name="placeholderText">
      <string>Api Id</string>
     </property>
    </widget>
@@ -128,6 +134,9 @@ border-bottom: 1px solid #717072;
 </string>
     </property>
     <property name="text">
+     <string/>
+    </property>
+    <property name="placeholderText">
      <string>Телефонный номер</string>
     </property>
    </widget>
@@ -151,8 +160,8 @@ border-radius: 60px;
     <string/>
    </property>
    <property name="icon">
-    <iconset resource="../../../images.qrc">
-     <normaloff>:/assets/images/auth.png</normaloff>:/assets/images/auth.png</iconset>
+    <iconset>
+     <normaloff>../../../assets/images/auth.png</normaloff>../../../assets/images/auth.png</iconset>
    </property>
    <property name="iconSize">
     <size>
