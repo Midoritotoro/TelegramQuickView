@@ -1,4 +1,4 @@
-﻿#include "AuthorizationForm.h"
+﻿#include "AuthenticationDialog.h"
 
 #include <QTimer>
 
@@ -39,7 +39,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     _incorrectMobilePhoneLabel->setGeometry(QRect(50, 110, 450, 50));
     _incorrectTelegramCodeLabel->setGeometry(QRect(50, 110, 450, 50));
 
-    firstAuthenticationStageFrame->setGeometry(QRect(90, 120, 550, 550));
+    firstAuthenticationStageFrame->setGeometry(QRect(80, 120, 550, 550));
     firstAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
@@ -94,7 +94,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     ""));
 
     logInButton = new QToolButton(this);
-    logInButton->setGeometry(QRect(320, 60, 120, 120));
+    logInButton->setGeometry(QRect(310, 60, 120, 120));
     logInButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
         "background: Wheat;\n"
         "border-radius: 60px;\n"
@@ -114,7 +114,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
 
     _stackedWidget->addWidget(firstAuthenticationStageFrame);
 
-    secondAuthenticationStageFrame->setGeometry(QRect(90, 120, 550, 550));
+    secondAuthenticationStageFrame->setGeometry(QRect(80, 120, 550, 550));
     secondAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
@@ -184,6 +184,8 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
 
     connect(loginButton, &QPushButton::clicked, this, &AuthenticationDialog::logInButton_clicked);
     connect(backButton, &QPushButton::clicked, this, &AuthenticationDialog::backButton_clicked);
+    connect(confirmCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::confirmMobilePhoneCodeButton_clicked);
+    connect(sendCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::sendCodeAgainButton_clicked);
 }
 
 
@@ -198,7 +200,7 @@ void AuthenticationDialog::shake()
     }
 
     vacillate();
-    QTimer::singleShot(20, this, SLOT(shake()));
+    QTimer::singleShot(20, this, &AuthenticationDialog::shake);
 }
 
 void AuthenticationDialog::logInButton_clicked() {
@@ -210,10 +212,14 @@ void AuthenticationDialog::logInButton_clicked() {
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
-    _userDataManager->setTelegramCredentials(apiHash, phoneNumber, apiId);
+    if (!_userDataManager->setTelegramCredentials(apiHash, phoneNumber, apiId))
+        return;
     if (!_userDataManager->isTelegramCredentialsValid()) {
         _incorrectTelegramCredentialsLabel->show();
         _userDataManager->clearTelegramCredentials();
+        apiHashLineEdit->clear();
+        apiIdLineEdit->clear();
+        phoneNumberLineEdit->clear();
         shake();
         return;
     }
@@ -251,7 +257,7 @@ void AuthenticationDialog::backButton_clicked() {
 
 void AuthenticationDialog::sendCodeAgainButton_clicked() {
     QFile file("TelegramQuickView.session");
-    qDebug() << file.remove();
+    file.remove();
     QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
 
 
@@ -264,7 +270,7 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
-    if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
+    if (_userDataManager->isTelegramPhoneNumberCodeValid() == false || _userDataManager->isTelegramCredentialsValid() == false) {
         event->ignore();
         shake();
     }

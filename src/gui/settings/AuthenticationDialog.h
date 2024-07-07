@@ -18,6 +18,7 @@
 class AuthenticationDialog: public QDialog
 {
 private:
+    Q_OBJECT
     bool shakeSwitch = true;
     QFrame* firstAuthenticationStageFrame = nullptr, * secondAuthenticationStageFrame = nullptr;
     QPushButton* loginButton = nullptr;

@@ -37,6 +37,12 @@ bool UserDataManager::isTelegramCredentialsValid() {
 	QJsonValue apiId = jsonObject.value("apiId");
 	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
 
+	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
+		return false;
+
+	if (strlen(apiHash.toString().toStdString().c_str()) < 32 || strlen(apiId.toString().toStdString().c_str()) < 5)
+		return false;
+
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
 	bool isTelegramCredentialsValid = telegramAuthorizationChecker->TelegramCredentialsValidCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt());
 
@@ -70,12 +76,16 @@ bool UserDataManager::isTelegramPhoneNumberCodeValid() {
 	QJsonValue code = jsonObject.value("code");
 	QJsonValue codeHash = jsonObject.value("codeHash");
 
+	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
+		return false;
+
+	if (strlen(apiHash.toString().toStdString().c_str()) < 32 || strlen(apiId.toString().toStdString().c_str()) < 5)
+		return false;
+
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-	qDebug() << codeHash;
 	bool isTelegramCodeValid = telegramAuthorizationChecker->TelegramCodeValidCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt(), code.toString().toInt(), codeHash.toString().toStdString().c_str());
-	qDebug() << isTelegramCodeValid;
-	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true && !phoneNumber.isUndefined() == true &&
-		!code.isUndefined() == true && !codeHash.isUndefined() == true && isTelegramCodeValid == true;
+
+	return !code.isUndefined() == true && !codeHash.isUndefined() == true && isTelegramCodeValid == true;
 }
 
 
@@ -114,9 +124,12 @@ void UserDataManager::clearTelegramCredentials() {
 	_jsonFile.close();
 }
 
-void UserDataManager::setTelegramCredentials(QString& apiHash, QString& phoneNumber, QString& apiId) {
+bool UserDataManager::setTelegramCredentials(QString& apiHash, QString& phoneNumber, QString& apiId) {
 	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
+
+	if (strlen(apiHash.toStdString().c_str()) < 32 || strlen(apiId.toStdString().c_str()) < 5)
+		return false;
 
 	jsonObject.insert("apiHash", apiHash);
 	jsonObject.insert("phoneNumber", phoneNumber);
@@ -127,6 +140,7 @@ void UserDataManager::setTelegramCredentials(QString& apiHash, QString& phoneNum
 	_jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	_jsonFile.write(jsonDocument.toJson());
 	_jsonFile.close();
+	return true;
 }
 
 void UserDataManager::setTargetChannels(QStringList channels) {
@@ -163,7 +177,7 @@ void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
 	_jsonFile.close();
 }
 
-void UserDataManager::setPhoneNumberCode(QString & code) {
+void UserDataManager::setPhoneNumberCode(QString& code) {
 	QJsonDocument jsonDocument = getJsonDocument();
 
 	QJsonObject jsonObject = jsonDocument.object();

@@ -6,16 +6,16 @@
 #include <QDir>
 #include <QStandardPaths>
 
-#include "UserAuthenticationDialog.h"
+#include "AuthenticationDialog.h"
 
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
 	userDataManager = new UserDataManager();
 
-	if (!userDataManager->isTelegramCredentialsValid()) {
-		UserAuthenticationDialog* userAuthenticationDialog = new UserAuthenticationDialog();
-		userAuthenticationDialog->layout()->setMenuBar(this->window());
+	if (userDataManager->isTelegramCredentialsValid() == false || userDataManager->isTelegramPhoneNumberCodeValid() == false) {
+		AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
+		userAuthenticationDialog->layout()->setMenuBar(window());
 		userAuthenticationDialog->exec();
 	}
 	userDataManager->setLastPostsCountForChannels(3);

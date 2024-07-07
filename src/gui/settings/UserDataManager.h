@@ -24,7 +24,8 @@ public:
 
 	void clearChannelsJsonArray();
 	void clearTelegramCredentials();
-	void setTelegramCredentials(QString& apiHash, QString& phoneNumber, QString& apiId);
+
+	[[nodiscard]] bool setTelegramCredentials(QString& apiHash, QString& phoneNumber, QString& apiId);
 	void setTargetChannels(QStringList channels);
 	void setLastPostsCountForChannels(int count);
 	void setPhoneNumberCode(QString& code);

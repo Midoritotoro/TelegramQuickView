@@ -5,10 +5,12 @@ import json
 
 async def sendTelegramCode(apiId: int, phoneNumber: str, apiHash: str, pathToUserSettingsJson: str) -> bool:   
     try:
-        telegramClient = TelegramClient("TelegrafmQuickView", apiId, apiHash, timeout=10)
+        telegramClient = TelegramClient("TelegramQuickView", apiId, apiHash, timeout=10)
         await telegramClient.connect()
         code = await telegramClient.send_code_request(phoneNumber)
-        data = {"codeHash": code.phone_code_hash}
+        with open(pathToUserSettingsJson, "r", encoding="utf-8") as jsonFile:
+           data = json.load(jsonFile)
+        data["codeHash"] = code.phone_code_hash
         with open(pathToUserSettingsJson, "w", encoding="utf-8") as jsonFile:
            json.dump(data, jsonFile)
         await telegramClient.disconnect()
@@ -23,7 +25,8 @@ async def isTelegramCredentialsValid(apiId: int, phoneNumber: str, apiHash: str)
         telegramClient = TelegramClient("TelegramQuickView", apiId, apiHash, timeout=10)
         await telegramClient.connect()
         await telegramClient.disconnect()
-    except:
+    except Exception as e:
+        print(e)
         return False
     return True
 

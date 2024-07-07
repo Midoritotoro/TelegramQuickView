@@ -58,14 +58,12 @@ SET(MAIN_SOURCES  main.cpp
 
 	src/gui/settings/MainWindow.cpp
 	src/gui/settings/MainWindow.h
-	src/gui/settings/UserAuthenticationDialog.cpp
-	src/gui/settings/UserAuthenticationDialog.h
 	src/gui/settings/UserDataManager.cpp
 	src/gui/settings/UserDataManager.h
 	src/gui/settings/TelegramAuthorizationChecker.cpp
 	src/gui/settings/TelegramAuthorizationChecker.h
-	src/gui/settings/AuthorizationForm.cpp
-	src/gui/settings/AuthorizationForm.h
+	src/gui/settings/AuthenticationDialog.cpp
+	src/gui/settings/AuthenticationDialog.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})

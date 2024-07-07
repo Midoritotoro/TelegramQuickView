@@ -7,9 +7,6 @@
 
 
 #include "src/gui/settings/MainWindow.h"
-#include "src/gui/settings/AuthorizationForm.h"
-#include "src/core/sql/SqlConversationModel.h"
-#include "src/core/sql/SqlConnect.h"
 
 int main(int argc, char* argv[])
 {
@@ -23,8 +20,8 @@ int main(int argc, char* argv[])
         return -1;
 
     QApplication app(argc, argv);
-    AuthenticationDialog form;
+    MainWindow window;
 
-    form.exec();
+    window.show();
     return app.exec();
 }
