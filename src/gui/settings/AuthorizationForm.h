@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QStackedWidget>
+#include <QLabel>
 
 #include "UserDataManager.h"
 
@@ -23,6 +24,7 @@ private:
     QToolButton* logInButton = nullptr;
     QStackedWidget* _stackedWidget = nullptr;
     UserDataManager* _userDataManager = nullptr;
+    QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr,*_incorrectTelegramCodeLabel = nullptr;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
 public slots:

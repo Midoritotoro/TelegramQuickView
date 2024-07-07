@@ -19,6 +19,22 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     firstAuthenticationStageFrame = new QFrame();
     secondAuthenticationStageFrame = new QFrame();
 
+    _incorrectTelegramCredentialsLabel = new QLabel(firstAuthenticationStageFrame);
+    _incorrectMobilePhoneLabel = new QLabel(firstAuthenticationStageFrame);
+    _incorrectTelegramCodeLabel = new QLabel(secondAuthenticationStageFrame);
+
+    _incorrectTelegramCredentialsLabel->setWordWrap(true);
+    _incorrectMobilePhoneLabel->setWordWrap(true);
+    _incorrectTelegramCodeLabel->setWordWrap(true);
+
+    _incorrectTelegramCredentialsLabel->setText("Введены неверные данные Telegram. Проверьте их корректность. ");
+    _incorrectMobilePhoneLabel->setText("Ошибка при отправке кода Telegram. Проверьте корректность номера телефона. ");
+    _incorrectTelegramCodeLabel->setText("Ошибка при входе в аккаунт Telegram. Проверьте корректность введённого кода. ");
+
+    _incorrectTelegramCredentialsLabel->setStyleSheet("QLabel { color: red; }");
+    _incorrectMobilePhoneLabel->setStyleSheet("QLabel { color: red; }");
+    _incorrectTelegramCodeLabel->setStyleSheet("QLabel { color: red; }");
+
     firstAuthenticationStageFrame->setGeometry(QRect(90, 120, 550, 550));
     firstAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
@@ -31,51 +47,50 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     _stackedWidget->setGeometry(firstAuthenticationStageFrame->pos().x(), firstAuthenticationStageFrame->pos().y(), firstAuthenticationStageFrame->width(), firstAuthenticationStageFrame->height());
 
     loginButton = new QPushButton(firstAuthenticationStageFrame);
-    loginButton->setGeometry(QRect(50, 450, 450, 80));
+    loginButton->setGeometry(QRect(50, 410, 450, 80));
     loginButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
         "background: Wheat;\n"
         "border-radius: 15px;\n"
-        "color: white;\n"
+        "color: black;\n"
         "}\n"
         "QPushButton::hover { \n"
-        "color: red;\n"
         "border-radius: 15px;\n"
-        "background: #49ebff\n"
+        "background: NavajoWhite\n"
         "}"));
 
     apiHashLineEdit = new QLineEdit(firstAuthenticationStageFrame);
-    apiHashLineEdit->setGeometry(QRect(50, 130, 450, 24));
+    apiHashLineEdit->setGeometry(QRect(50, 170, 450, 50));
 
     apiHashLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
         "border: none;\n"
-        "color: #717072;\n"
+        "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
         ""));
 
     apiIdLineEdit = new QLineEdit(firstAuthenticationStageFrame);
-    apiIdLineEdit->setGeometry(QRect(50, 240, 450, 24));
+    apiIdLineEdit->setGeometry(QRect(50, 240, 450, 50));
     apiIdLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
         "border: none;\n"
-        "color: #717072;\n"
+        "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
         ""));
 
     phoneNumberLineEdit = new QLineEdit(firstAuthenticationStageFrame);
-    phoneNumberLineEdit->setGeometry(QRect(50, 360, 450, 24));
+    phoneNumberLineEdit->setGeometry(QRect(50, 310, 450, 50));
     phoneNumberLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "background: transparent;\n"
         "border: none;\n"
-        "color: #717072;\n"
+        "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
         ""));
 
     logInButton = new QToolButton(this);
-    logInButton->setGeometry(QRect(310, 60, 120, 120));
+    logInButton->setGeometry(QRect(320, 60, 120, 120));
     logInButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
         "background: Wheat;\n"
         "border-radius: 60px;\n"
@@ -131,7 +146,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "}"));
     telegramCodeLineEdit = new QLineEdit(secondAuthenticationStageFrame);
     telegramCodeLineEdit->setObjectName("telegramCodeLineEdit");
-    telegramCodeLineEdit->setGeometry(QRect(50, 150, 450, 51));
+    telegramCodeLineEdit->setGeometry(QRect(50, 150, 450, 50));
     telegramCodeLineEdit->setStyleSheet(QString::fromUtf8("QLineEdit{\n"
         "        background: transparent;\n"
         "        border: none;\n"
@@ -159,9 +174,12 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
 
     _stackedWidget->addWidget(secondAuthenticationStageFrame);
 
+    _incorrectTelegramCredentialsLabel->hide();
+    _incorrectMobilePhoneLabel->hide();
+    _incorrectTelegramCodeLabel->hide();
+
     connect(loginButton, &QPushButton::clicked, this, &AuthenticationDialog::logInButton_clicked);
     connect(backButton, &QPushButton::clicked, this, &AuthenticationDialog::backButton_clicked);
-
 }
 
 
@@ -180,11 +198,12 @@ void AuthenticationDialog::shake()
 }
 
 void AuthenticationDialog::logInButton_clicked() {
-   /* _incorrentTelegramCredentialsLabel->hide();
-    _incorrentMobilePhoneLabel->hide();
+    _stackedWidget->setCurrentIndex(1);
+    _incorrectTelegramCredentialsLabel->hide();
+    _incorrectMobilePhoneLabel->hide();
     _incorrectTelegramCodeLabel->hide();
 
-    QString apiHash = apiHashLineEdit->text();
+   /* QString apiHash = apiHashLineEdit->text();
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
@@ -221,8 +240,9 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
 }
 
 void AuthenticationDialog::backButton_clicked() {
+
     //QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
-    //_stackedLayout->setCurrentIndex(0);
+    _stackedWidget->setCurrentIndex(0);
     //apiHashLineEdit->setText(telegramCredentialsList.at(0));
     //apiIdLineEdit->setText(telegramCredentialsList.at(1));
     //phoneNumberLineEdit->setText(telegramCredentialsList.at(2));
