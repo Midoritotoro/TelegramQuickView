@@ -10,6 +10,7 @@
 #include <QToolButton>
 #include <QStackedWidget>
 #include <QLabel>
+#include <QCloseEvent>
 
 #include "UserDataManager.h"
 
@@ -17,7 +18,7 @@
 class AuthenticationDialog: public QDialog
 {
 private:
-    bool shakeSwitch = false;
+    bool shakeSwitch = true;
     QFrame* firstAuthenticationStageFrame = nullptr, * secondAuthenticationStageFrame = nullptr;
     QPushButton* loginButton = nullptr;
     QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr, * telegramCodeLineEdit = nullptr;

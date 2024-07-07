@@ -31,9 +31,13 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     _incorrectMobilePhoneLabel->setText("Ошибка при отправке кода Telegram. Проверьте корректность номера телефона. ");
     _incorrectTelegramCodeLabel->setText("Ошибка при входе в аккаунт Telegram. Проверьте корректность введённого кода. ");
 
-    _incorrectTelegramCredentialsLabel->setStyleSheet("QLabel { color: red; }");
-    _incorrectMobilePhoneLabel->setStyleSheet("QLabel { color: red; }");
-    _incorrectTelegramCodeLabel->setStyleSheet("QLabel { color: red; }");
+    _incorrectTelegramCredentialsLabel->setStyleSheet("QLabel { color: red; font-size: 15px; }");
+    _incorrectMobilePhoneLabel->setStyleSheet("QLabel { color: red; font-size: 15px; }");
+    _incorrectTelegramCodeLabel->setStyleSheet("QLabel { color: red; font-size: 15px; }");
+
+    _incorrectTelegramCredentialsLabel->setGeometry(QRect(50, 110, 450, 50));
+    _incorrectMobilePhoneLabel->setGeometry(QRect(50, 110, 450, 50));
+    _incorrectTelegramCodeLabel->setGeometry(QRect(50, 110, 450, 50));
 
     firstAuthenticationStageFrame->setGeometry(QRect(90, 120, 550, 550));
     firstAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
@@ -56,7 +60,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "QPushButton::hover { \n"
         "border-radius: 15px;\n"
         "background: NavajoWhite\n"
-        "}"));
+    "}"));
 
     apiHashLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     apiHashLineEdit->setGeometry(QRect(50, 170, 450, 50));
@@ -67,7 +71,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
-        ""));
+    ""));
 
     apiIdLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     apiIdLineEdit->setGeometry(QRect(50, 240, 450, 50));
@@ -77,7 +81,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
-        ""));
+    ""));
 
     phoneNumberLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     phoneNumberLineEdit->setGeometry(QRect(50, 310, 450, 50));
@@ -87,14 +91,14 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
-        ""));
+    ""));
 
     logInButton = new QToolButton(this);
     logInButton->setGeometry(QRect(320, 60, 120, 120));
     logInButton->setStyleSheet(QString::fromUtf8("QToolButton{ \n"
         "background: Wheat;\n"
         "border-radius: 60px;\n"
-        "}"));
+    "}"));
 
     QIcon icon;
     icon.addFile(QString::fromUtf8("../../assets/images/auth.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -130,7 +134,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        color: SandyBrown;\n"
         "        border-radius: 15px;\n"
         "        background: Wheat;\n"
-        "}"));
+    "}"));
     QPushButton* confirmCodeButton = new QPushButton(secondAuthenticationStageFrame);
     confirmCodeButton->setObjectName("confirmCodeButton");
     confirmCodeButton->setGeometry(QRect(50, 350, 450, 70));
@@ -143,7 +147,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        color: SandyBrown;\n"
         "        border-radius: 15px;\n"
         "        background: Wheat;\n"
-        "}"));
+    "}"));
     telegramCodeLineEdit = new QLineEdit(secondAuthenticationStageFrame);
     telegramCodeLineEdit->setObjectName("telegramCodeLineEdit");
     telegramCodeLineEdit->setGeometry(QRect(50, 150, 450, 50));
@@ -152,7 +156,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        border: none;\n"
         "        color: white;\n"
         "        border-bottom: 1px solid #717072;\n"
-        "}"));
+    "}"));
     QPushButton* backButton = new QPushButton(secondAuthenticationStageFrame);
     backButton->setObjectName("backButton");
     backButton->setGeometry(QRect(210, 450, 121, 41));
@@ -165,7 +169,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        color: Wheat;\n"
         "        border-radius: 15px;\n"
         "        background: SandyBrown;\n"
-        "}"));
+    "}"));
 
     sendCodeButton->setText("Отправить");
     confirmCodeButton->setText("Подтвердить");
@@ -198,19 +202,17 @@ void AuthenticationDialog::shake()
 }
 
 void AuthenticationDialog::logInButton_clicked() {
-    _stackedWidget->setCurrentIndex(1);
     _incorrectTelegramCredentialsLabel->hide();
     _incorrectMobilePhoneLabel->hide();
     _incorrectTelegramCodeLabel->hide();
 
-   /* QString apiHash = apiHashLineEdit->text();
+    QString apiHash = apiHashLineEdit->text();
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
     _userDataManager->setTelegramCredentials(apiHash, phoneNumber, apiId);
-    _mobilePhoneNumberLabel->setText(phoneNumberLineEdit->text());
     if (!_userDataManager->isTelegramCredentialsValid()) {
-        _incorrentTelegramCredentialsLabel->show();
+        _incorrectTelegramCredentialsLabel->show();
         _userDataManager->clearTelegramCredentials();
         shake();
         return;
@@ -219,37 +221,36 @@ void AuthenticationDialog::logInButton_clicked() {
     bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
 
     if (!isCodeSended) {
-        _incorrentMobilePhoneLabel->show();
+        _incorrectMobilePhoneLabel->show();
         shake();
         return;
     }
-    _stackedLayout->setCurrentIndex(1);*/
+    _stackedWidget->setCurrentIndex(1);
 }
 
 void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
-   /* QString mobilePhoneCode = _mobilePhoneCodeLineEdit->text();
-    _userDataManager->setPhoneNumberCode(mobilePhoneCode);
+   QString mobilePhoneCode = telegramCodeLineEdit->text();
+   _userDataManager->setPhoneNumberCode(mobilePhoneCode);
 
     if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
         _incorrectTelegramCodeLabel->show();
-        _mobilePhoneCodeLineEdit->clear();
+        telegramCodeLineEdit->clear();
         shake();
         return;
     }
-    close();*/
+    close();
 }
 
 void AuthenticationDialog::backButton_clicked() {
 
-    //QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
-    _stackedWidget->setCurrentIndex(0);
-    //apiHashLineEdit->setText(telegramCredentialsList.at(0));
-    //apiIdLineEdit->setText(telegramCredentialsList.at(1));
-    //phoneNumberLineEdit->setText(telegramCredentialsList.at(2));
+    QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
+    apiHashLineEdit->setText(telegramCredentialsList.at(0));
+    apiIdLineEdit->setText(telegramCredentialsList.at(1));
+    phoneNumberLineEdit->setText(telegramCredentialsList.at(2));
 }
 
 void AuthenticationDialog::sendCodeAgainButton_clicked() {
-   /* QFile file("TelegramQuickView.session");
+    QFile file("TelegramQuickView.session");
     qDebug() << file.remove();
     QStringList telegramCredentialsList = _userDataManager->getTelegramCredentials();
 
@@ -259,17 +260,17 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
     if (!isCodeSended) {
         shake();
         return;
-    }*/
+    }
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
-   /* if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
+    if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
         event->ignore();
         shake();
     }
     else {
         event->accept();
-    }*/
+    }
 }
 
 void AuthenticationDialog::vacillate()
