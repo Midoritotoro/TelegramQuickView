@@ -10,6 +10,7 @@
 #include <QToolButton>
 #include <QStackedWidget>
 #include <QLabel>
+#include <QTimer>
 #include <QCloseEvent>
 
 #include "UserDataManager.h"
@@ -21,13 +22,15 @@ private:
     Q_OBJECT
     bool shakeSwitch = true;
     QFrame* firstAuthenticationStageFrame = nullptr, * secondAuthenticationStageFrame = nullptr;
-    QPushButton* loginButton = nullptr;
+    QPushButton* loginButton = nullptr, *confirmCodeButton = nullptr, * sendCodeButton = nullptr;
     QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr, * telegramCodeLineEdit = nullptr;
     QToolButton* logInButton = nullptr;
     QStackedWidget* _stackedWidget = nullptr;
     UserDataManager* _userDataManager = nullptr;
     QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr,*_incorrectTelegramCodeLabel = nullptr;
     LPTelegramCredentials _telegramCredentials = nullptr;
+    QTimer* timer = nullptr;
+    int timeRemaining = 0;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
 public slots:
@@ -36,6 +39,7 @@ public slots:
     void confirmMobilePhoneCodeButton_clicked();
     void backButton_clicked();
     void sendCodeAgainButton_clicked();
+    void updateSendCodeButtonText();
 private:
     void vacillate();
 protected:

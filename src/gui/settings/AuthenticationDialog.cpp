@@ -11,6 +11,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     _stackedWidget = new QStackedWidget(this);
     _userDataManager = new UserDataManager();
     _telegramCredentials = new TelegramCredentials();
+    timer = new QTimer();
 
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
@@ -128,7 +129,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     secondAuthenticationStageFrame->setFrameShape(QFrame::Shape::StyledPanel);
     secondAuthenticationStageFrame->setFrameShadow(QFrame::Shadow::Raised);
 
-    QPushButton* sendCodeButton = new QPushButton(secondAuthenticationStageFrame);
+    sendCodeButton = new QPushButton(secondAuthenticationStageFrame);
     sendCodeButton->setObjectName("sendCodeButton");
     sendCodeButton->setGeometry(QRect(50, 250, 450, 70));
     sendCodeButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
@@ -140,7 +141,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        border-radius: 15px;\n"
         "        background: NavajoWhite;\n"
     "}"));
-    QPushButton* confirmCodeButton = new QPushButton(secondAuthenticationStageFrame);
+    confirmCodeButton = new QPushButton(secondAuthenticationStageFrame);
     confirmCodeButton->setObjectName("confirmCodeButton");
     confirmCodeButton->setGeometry(QRect(50, 350, 450, 70));
     confirmCodeButton->setStyleSheet(QString::fromUtf8("QPushButton{\n"
@@ -189,8 +190,23 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     connect(backButton, &QPushButton::clicked, this, &AuthenticationDialog::backButton_clicked);
     connect(confirmCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::confirmMobilePhoneCodeButton_clicked);
     connect(sendCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::sendCodeAgainButton_clicked);
+    connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
 }
 
+void AuthenticationDialog::updateSendCodeButtonText() {
+    timeRemaining--;
+
+    if (timeRemaining >= 0) {
+        QString text = QString("Осталось: %1 с").arg(timeRemaining);
+        sendCodeButton->setText(text);
+    }
+    else {
+        timer->stop();
+        sendCodeButton->setEnabled(true);
+        sendCodeButton->setText("Отправить");
+        sendCodeButton->setToolTip("");
+    }
+}
 
 void AuthenticationDialog::shake()
 {
@@ -218,8 +234,9 @@ void AuthenticationDialog::logInButton_clicked() {
     _telegramCredentials->apiHash = apiHash;
     _telegramCredentials->apiId = apiId;
     _telegramCredentials->phoneNumber = phoneNumber;
+    timeRemaining = 180;
 
-    if (!_userDataManager->setTelegramCredentials(_telegramCredentials))
+  /*  if (!_userDataManager->setTelegramCredentials(_telegramCredentials))
         return;
     if (!_userDataManager->isTelegramCredentialsValid()) {
         _incorrectTelegramCredentialsLabel->show();
@@ -230,6 +247,7 @@ void AuthenticationDialog::logInButton_clicked() {
         shake();
         return;
     }
+
     TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
     bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
 
@@ -237,7 +255,12 @@ void AuthenticationDialog::logInButton_clicked() {
         _incorrectMobilePhoneLabel->show();
         shake();
         return;
-    }
+    }*/
+
+    timer->start(1000);
+    sendCodeButton->setEnabled(false);
+    sendCodeButton->setToolTip("Кнопка неактивна в течение 180 секунд по причине ограничений Telegram. ");
+    sendCodeButton->setText(QString("Осталось: %1 с").arg(timeRemaining));
     _stackedWidget->setCurrentIndex(1);
 }
 
@@ -260,10 +283,11 @@ void AuthenticationDialog::backButton_clicked() {
     apiHashLineEdit->setText(_telegramCredentials->apiHash);
     apiIdLineEdit->setText(_telegramCredentials->apiId);
     phoneNumberLineEdit->setText(_telegramCredentials->phoneNumber);
+    _stackedWidget->setCurrentIndex(0);
 }
 
 void AuthenticationDialog::sendCodeAgainButton_clicked() {
-    QFile file("TelegramQuickView.session");
+   /* QFile file("TelegramQuickView.session");
     file.remove();
     _telegramCredentials = _userDataManager->getTelegramCredentials();
 
@@ -272,7 +296,12 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
     if (!isCodeSended) {
         shake();
         return;
-    }
+    }*/
+    timeRemaining = 180;
+    timer->start(1000);
+    sendCodeButton->setEnabled(false);
+    sendCodeButton->setToolTip("Кнопка неактивна в течение 180 секунд по причине ограничений Telegram. ");
+    sendCodeButton->setText(QString("Осталось: %1 с").arg(timeRemaining));
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
