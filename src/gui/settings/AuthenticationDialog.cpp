@@ -234,9 +234,8 @@ void AuthenticationDialog::logInButton_clicked() {
     _telegramCredentials->apiHash = apiHash;
     _telegramCredentials->apiId = apiId;
     _telegramCredentials->phoneNumber = phoneNumber;
-    timeRemaining = 180;
 
-  /*  if (!_userDataManager->setTelegramCredentials(_telegramCredentials))
+    if (!_userDataManager->setTelegramCredentials(_telegramCredentials))
         return;
     if (!_userDataManager->isTelegramCredentialsValid()) {
         _incorrectTelegramCredentialsLabel->show();
@@ -255,8 +254,9 @@ void AuthenticationDialog::logInButton_clicked() {
         _incorrectMobilePhoneLabel->show();
         shake();
         return;
-    }*/
+    }
 
+    timeRemaining = 180;
     timer->start(1000);
     sendCodeButton->setEnabled(false);
     sendCodeButton->setToolTip("Кнопка неактивна в течение 180 секунд по причине ограничений Telegram. ");
@@ -266,6 +266,14 @@ void AuthenticationDialog::logInButton_clicked() {
 
 void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
    QString mobilePhoneCode = telegramCodeLineEdit->text();
+
+   if (mobilePhoneCode.length() < 5) {
+       _incorrectTelegramCodeLabel->show();
+       telegramCodeLineEdit->clear();
+       shake();
+       return;
+   }
+
    _userDataManager->setPhoneNumberCode(mobilePhoneCode);
 
     if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
@@ -274,6 +282,7 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         shake();
         return;
     }
+
     close();
 }
 
@@ -287,7 +296,7 @@ void AuthenticationDialog::backButton_clicked() {
 }
 
 void AuthenticationDialog::sendCodeAgainButton_clicked() {
-   /* QFile file("TelegramQuickView.session");
+    QFile file("TelegramQuickView.session");
     file.remove();
     _telegramCredentials = _userDataManager->getTelegramCredentials();
 
@@ -296,7 +305,7 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
     if (!isCodeSended) {
         shake();
         return;
-    }*/
+    }
     timeRemaining = 180;
     timer->start(1000);
     sendCodeButton->setEnabled(false);

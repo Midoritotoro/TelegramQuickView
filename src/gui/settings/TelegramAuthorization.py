@@ -34,7 +34,8 @@ async def isTelegramPhoneNumberCodeValid(apiId: int, phoneNumber: str, apiHash: 
     try:
         telegramClient = TelegramClient("TelegramQuickView", apiId, apiHash, timeout=10)   
         await telegramClient.connect()
-        await telegramClient.sign_in(phoneNumber, code, phone_code_hash=codeHash)
+        if not await telegramClient.is_user_authorized():
+            await telegramClient.sign_in(phoneNumber, code, phone_code_hash=codeHash)
         await telegramClient.disconnect()
     except Exception as e:
         print(e)
