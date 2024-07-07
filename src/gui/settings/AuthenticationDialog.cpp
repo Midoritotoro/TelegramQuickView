@@ -3,7 +3,7 @@
 #include <QTimer>
 
 
-AuthenticationDialog::AuthenticationDialog(QWidget* parent):
+AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     QDialog(parent)
 {
     setFixedSize(720, 720);
@@ -16,7 +16,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
         "font-size: 24px;\n"
-    "}"));
+        "}"));
 
     firstAuthenticationStageFrame = new QFrame();
     secondAuthenticationStageFrame = new QFrame();
@@ -45,7 +45,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     firstAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
-    "}"));
+        "}"));
 
     firstAuthenticationStageFrame->setFrameShape(QFrame::Shape::StyledPanel);
     firstAuthenticationStageFrame->setFrameShadow(QFrame::Shadow::Raised);
@@ -62,7 +62,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "QPushButton::hover { \n"
         "border-radius: 15px;\n"
         "background: NavajoWhite\n"
-    "}"));
+        "}"));
 
     apiHashLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     apiHashLineEdit->setGeometry(QRect(50, 170, 450, 50));
@@ -73,7 +73,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
-    ""));
+        ""));
 
     apiIdLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     apiIdLineEdit->setGeometry(QRect(50, 240, 450, 50));
@@ -83,7 +83,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
-    ""));
+        ""));
 
     phoneNumberLineEdit = new QLineEdit(firstAuthenticationStageFrame);
     phoneNumberLineEdit->setGeometry(QRect(50, 310, 450, 50));
@@ -93,7 +93,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "color: white;\n"
         "border-bottom: 1px solid #717072;\n"
         "}\n"
-    ""));
+        ""));
 
     logInButton = new QToolButton(this);
 
@@ -125,7 +125,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
     secondAuthenticationStageFrame->setStyleSheet(QString::fromUtf8("QFrame{ \n"
         "background: #333;\n"
         "border-radius: 15px\n"
-    "}"));
+        "}"));
     secondAuthenticationStageFrame->setFrameShape(QFrame::Shape::StyledPanel);
     secondAuthenticationStageFrame->setFrameShadow(QFrame::Shadow::Raised);
 
@@ -140,7 +140,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "QPushButton::hover { \n"
         "        border-radius: 15px;\n"
         "        background: NavajoWhite;\n"
-    "}"));
+        "}"));
     confirmCodeButton = new QPushButton(secondAuthenticationStageFrame);
     confirmCodeButton->setObjectName("confirmCodeButton");
     confirmCodeButton->setGeometry(QRect(50, 350, 450, 70));
@@ -152,7 +152,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "QPushButton::hover { \n"
         "        border-radius: 15px;\n"
         "        background: NavajoWhite;\n"
-    "}"));
+        "}"));
     telegramCodeLineEdit = new QLineEdit(secondAuthenticationStageFrame);
     telegramCodeLineEdit->setObjectName("telegramCodeLineEdit");
     telegramCodeLineEdit->setGeometry(QRect(50, 150, 450, 50));
@@ -161,7 +161,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "        border: none;\n"
         "        color: white;\n"
         "        border-bottom: 1px solid #717072;\n"
-    "}"));
+        "}"));
     QPushButton* backButton = new QPushButton(secondAuthenticationStageFrame);
     backButton->setObjectName("backButton");
     backButton->setGeometry(QRect(210, 450, 121, 41));
@@ -173,7 +173,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent):
         "QPushButton::hover { \n"
         "        border-radius: 15px;\n"
         "        background: #E49450;\n"
-    "}"));
+        "}"));
 
     sendCodeButton->setText("Отправить");
     confirmCodeButton->setText("Подтвердить");
@@ -235,8 +235,15 @@ void AuthenticationDialog::logInButton_clicked() {
     _telegramCredentials->apiId = apiId;
     _telegramCredentials->phoneNumber = phoneNumber;
 
-    if (!_userDataManager->setTelegramCredentials(_telegramCredentials))
+    if (!_userDataManager->setTelegramCredentials(_telegramCredentials)) {
+        _incorrectTelegramCredentialsLabel->show();
+        _userDataManager->clearTelegramCredentials();
+        apiHashLineEdit->clear();
+        apiIdLineEdit->clear();
+        phoneNumberLineEdit->clear();
+        shake();
         return;
+    }
     if (!_userDataManager->isTelegramCredentialsValid()) {
         _incorrectTelegramCredentialsLabel->show();
         _userDataManager->clearTelegramCredentials();
@@ -265,16 +272,16 @@ void AuthenticationDialog::logInButton_clicked() {
 }
 
 void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
-   QString mobilePhoneCode = telegramCodeLineEdit->text();
+    QString mobilePhoneCode = telegramCodeLineEdit->text();
 
-   if (mobilePhoneCode.length() < 5) {
-       _incorrectTelegramCodeLabel->show();
-       telegramCodeLineEdit->clear();
-       shake();
-       return;
-   }
+    if (mobilePhoneCode.length() < 5) {
+        _incorrectTelegramCodeLabel->show();
+        telegramCodeLineEdit->clear();
+        shake();
+        return;
+    }
 
-   _userDataManager->setPhoneNumberCode(mobilePhoneCode);
+    _userDataManager->setPhoneNumberCode(mobilePhoneCode);
 
     if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
         _incorrectTelegramCodeLabel->show();

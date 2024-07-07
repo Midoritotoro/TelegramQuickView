@@ -1,12 +1,18 @@
 ﻿#include "MainWindow.h"
 
+#include <QDialog>
+#include <QFile>
+#include <QGridLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLabel>
+#include <QMenuBar>
 #include <QPushButton>
 #include <QRegularExpression>
-#include <QJsonArray>
-#include <QDir>
-#include <QStandardPaths>
+#include <QTextEdit>
 
 #include "AuthenticationDialog.h"
+
 
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)

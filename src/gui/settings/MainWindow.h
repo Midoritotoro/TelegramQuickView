@@ -1,17 +1,7 @@
 ﻿#pragma once
 
 #include <QWidget>
-#include <QDialog>
-#include <QGridLayout>
-#include <QLabel>
 #include <QLineEdit>
-#include <QTextEdit>
-#include <QMenuBar>
-
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QFile>
-#include <QDir>
 
 #include "../../core/winapi/MouseDetector.h"
 #include "UserDataManager.h"
