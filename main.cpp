@@ -8,6 +8,11 @@
 
 #include "src/gui/settings/MainWindow.h"
 #include "src/gui/settings/AuthenticationDialog.h"
+#include "src/core/sql/SqlConversationModel.h"
+#include "src/core/sql/SqlConnect.h"
+
+
+
 
 int main(int argc, char* argv[])
 {
@@ -20,9 +25,17 @@ int main(int argc, char* argv[])
     if (!addParserToRegistryAutoRun())
         return -1;
 
-    QApplication app(argc, argv);
-    MainWindow window;
+    QGuiApplication app(argc, argv);
 
-    window.show();
+    qmlRegisterType<SqlConversationModel>("sql.SqlConversationModel", 1, 0, "SqlConversationModel");
+    connectToDatabase();
+
+    QQmlApplicationEngine engine;
+    engine.load(QUrl(QStringLiteral("../../src/gui/qml/main.qml")));
+    if (engine.rootObjects().isEmpty())
+        return -1;
+
+
+
     return app.exec();
 }
