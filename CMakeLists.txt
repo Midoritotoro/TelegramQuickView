@@ -62,6 +62,9 @@ SET(MAIN_SOURCES  main.cpp
 	src/gui/settings/TelegramAuthorizationChecker.h
 	src/gui/settings/AuthenticationDialog.cpp
 	src/gui/settings/AuthenticationDialog.h
+
+	src/gui/panel/MessageWidget.cpp
+	src/gui/panel/MessageWidget.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})

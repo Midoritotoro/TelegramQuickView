@@ -6,7 +6,7 @@
 
 #include "src/gui/settings/MainWindow.h"
 #include "src/gui/settings/AuthenticationDialog.h"
-
+#include "src/gui/panel/MessageWidget.h"
 
 int main(int argc, char* argv[])
 {
@@ -19,5 +19,9 @@ int main(int argc, char* argv[])
     if (!addParserToRegistryAutoRun())
         return -1;
 
-    // return app.exec();
+    QApplication app(argc, argv);
+    MessageWidget messageWidget;
+
+    messageWidget.show();
+    return app.exec();
 }
