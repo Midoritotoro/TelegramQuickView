@@ -37,7 +37,10 @@ class Sleuth:
         if set:
             self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{index}"
         else:
-            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{index}"
+            if hasattr(self, "self.__pathToAppRootDirectoryContent"):
+                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{index}"
+            else:
+                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{index}"
 
         self.__download_paths = [
             f"{self.__pathToAppRootDirectoryContent}/Изображения",
@@ -55,30 +58,18 @@ class Sleuth:
 
     async def __get_messages(self, username: str, limit: int):
         postIndex = 1
+        # if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
+        #     postIndex = await self.getPostIndex(username)
+        #     await self.__updatePaths(postIndex, True, username)
+        # else:
+        #     await self.__updatePaths(postIndex, False)
+        #     await self.__check_download_path()
         if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
             postIndex = await self.getPostIndex(username)
-            if hasattr(self, "self.__pathToAppRootDirectoryContent"):
-                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{postIndex}"
-            else:
-                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{postIndex}"
-            self.__download_paths = [
-                f"{self.__pathToAppRootDirectoryContent}/Изображения",
-                f"{self.__pathToAppRootDirectoryContent}/Видео",
-                f"{self.__pathToAppRootDirectoryContent}/Аудио",
-                f"{self.__pathToAppRootDirectoryContent}/Документы",
-                f"{self.__pathToAppRootDirectoryContent}/Остальное",
-                f"{self.__pathToAppRootDirectoryContent}/Текст"
-            ]
+            await self.__updatePaths(postIndex, False)
+            await self.__check_download_path()
         else:
-            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{postIndex}"
-            self.__download_paths = [
-                f"{self.__pathToAppRootDirectoryContent}/Изображения",
-                f"{self.__pathToAppRootDirectoryContent}/Видео",
-                f"{self.__pathToAppRootDirectoryContent}/Аудио",
-                f"{self.__pathToAppRootDirectoryContent}/Документы",
-                f"{self.__pathToAppRootDirectoryContent}/Остальное",
-                f"{self.__pathToAppRootDirectoryContent}/Текст"
-            ]
+            await self.__updatePaths(postIndex, True, username)
             await self.__check_download_path()
         tasks = []
         export = []
@@ -91,9 +82,10 @@ class Sleuth:
                 break
                          
             postIndex = await self.getPostIndex(username)
+            # await self.__updatePaths(postIndex, False)
+            await self.__check_download_path()
             
             if message.sender is not None and message.text is not None:
-                await self.__check_download_path()
                 clean_message = message.text
                 export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/{postIndex}.txt")))
                 
@@ -126,18 +118,16 @@ class Sleuth:
             Path(self.__pathToAppRootDirectoryContent).mkdir(parents=True)
         for download_path in self.__download_paths:
             Path(download_path).mkdir(parents=True, exist_ok=True)
-        while True:
-            dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
-            
-            if not (int(dirObjects[-1]) > self.lastPostsCount):
-                break
-            
+        dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])    
+
+        if (int(dirObjects[-1]) > self.lastPostsCount):  
             rmtree(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
                 
         dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
         for index, obj in enumerate(dirObjects, start=1):
             if obj != str(index):
-                rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj)
+                rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
+                print(listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}"))
                 
     async def getPostIndex(self, username: str) -> int:
         dirObjects = listdir(self.__pathToAppRootDirectory + f"/{username}/")
