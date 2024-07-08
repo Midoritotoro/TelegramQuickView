@@ -122,7 +122,7 @@ class Sleuth:
         return data.get("code"), data.get("codeHash")
             
   
-if __name__ == "__main__":
-    telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
-    asyncio.run(telegramParser.dig())
+# if __name__ == "__main__":
+#     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
+#     asyncio.run(telegramParser.dig())
             
