@@ -2,7 +2,9 @@
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
 * text=auto
-*.css linguist-language=Python
+
+*.css linguist-language=C++
+src/core/css/*.css linguist-language=C++
 *.h linguist-language=C++
 
 ###############################################################################
