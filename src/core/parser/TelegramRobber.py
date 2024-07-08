@@ -1,14 +1,14 @@
 ﻿from datetime import datetime, timezone
 from dateutil.tz import tzlocal
-from telethon.sync import TelegramClient
+from telethon import TelegramClient, events
+from telethon.tl.types import InputPeerChannel, PeerChannel
+from telethon.errors import PeerFloodError
 import asyncio
 from pathlib import Path
 from shutil import rmtree
 import json
-import asyncio
 
-# Проверка, не добавились ли в список .json новые каналы.
-# Проверка, не появились ли новые посты в существующих каналах. 
+channels = ["test329483", "testssss352"]
 
 
 class Sleuth:
@@ -19,7 +19,7 @@ class Sleuth:
     ):
         self.postIndex = 1
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
-        telegramCredentials = self.getTelegramCredentials()
+        telegramCredentials = self.__getUserSettings()
         
         self.api_id = telegramCredentials.get("apiId")
         self.api_hash = telegramCredentials.get("apiHash")
@@ -32,7 +32,7 @@ class Sleuth:
         
         self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
         
-    async def updatePaths(self, set: bool, username: str = None) -> None:
+    async def __updatePaths(self, set: bool, username: str = None) -> None:
         self.postIndex += 1
         
         if set:
@@ -49,12 +49,12 @@ class Sleuth:
             f"{self.__pathToAppRootDirectory}/Текст"
         ]
         
-    def getUserSettings(self) -> dict[str, str]:
+    def __getUserSettings(self) -> dict[str, str]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
             data = json.load(jsonFile)
         return data
 
-    async def get_messages(self, username: str):
+    async def __get_messages(self, username: str):
         self.postIndex = 0
         tasks = []
         export = []
@@ -67,9 +67,9 @@ class Sleuth:
                 break
             
             if self.postIndex == 0:
-                await self.updatePaths(True, username)
+                await self.__updatePaths(True, username)
             else:
-                await self.updatePaths(False)
+                await self.__updatePaths(False)
 
             if message.sender is not None and message.text is not None:
                 clean_message = message.text
@@ -79,14 +79,14 @@ class Sleuth:
                     await self.__check_download_path()
                     download_path = await self.__get_download_path(file_type)
                     tasks.append(asyncio.create_task(message.download_media(file=download_path)))
-                    export.append(asyncio.create_task(self.export_to_txt(clean_message, f"{self.__download_paths[5]}/{self.postIndex}.txt")))
+                    export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/{self.postIndex}.txt")))
 
                 if len(tasks) == self.lastPostsCount:
                     await asyncio.gather(*tasks, *export)
                     tasks.clear()
                     export.clear()
 
-    async def export_to_txt(self, message: str, output_path: str) -> None:
+    async def __export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
             file.write(message)
 
@@ -109,19 +109,34 @@ class Sleuth:
     async def checkAndParseTelegramChannels(self) -> None:
         await self.__client.connect()
         if not await self.__client.is_user_authorized():
-                await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
+            await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
                 
-        while True:
+        # while True:
             
-            await self.get_messages(self.group_username)
-            await asyncio.sleep(60)
-            
-        await self.__client.disconnect()
+            # await self.get_messages(self.group_username)
+            # await asyncio.sleep(60)
+        for channel in channels:
+            await self.createChannelHandler(channel)
+        # await self.__client.disconnect()
+        await self.__client.run_until_disconnected()
+     
+        
+    async def createChannelHandler(self, username: str):
+        channel_entity = await self.__client.get_input_entity(username)
+        if isinstance(channel_entity, InputPeerChannel):
+            @self.__client.on(events.NewMessage(chats=channel_entity))
+            async def handler(event):
+                await self.__get_messages(username)
+                print(f"Новый пост в канале: {username}")
+                print(f"Текст: {event.message.text}")
+            print(f"Создан обработчик для канала: {username}")
+        else:
+            print(f"Ошибка: {username} - это не канал")
         
     def start(self) -> None:
-        asyncio.run(self.checkAndParseTelegramChannels())
+        self.__client.loop.run_until_complete(self.checkAndParseTelegramChannels())
   
-# if __name__ == "__main__":
-#     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
-#     asyncio.run(telegramParser.dig())
+if __name__ == "__main__":
+   telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
+   telegramParser.start()
             
