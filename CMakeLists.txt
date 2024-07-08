@@ -33,8 +33,6 @@ SET(MAIN_SOURCES  main.cpp
 	src/core/PythonQtWrapper.h
 	src/core/sql/SqlConnect.cpp
 	src/core/sql/SqlConnect.h
-	src/core/sql/SqlConversationModel.cpp
-	src/core/sql/SqlConversationModel.h
 
 	src/core/winapi/AutoRunRegistryUtils.cpp
 	src/core/winapi/AutoRunRegistryUtils.h
@@ -88,25 +86,6 @@ execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirement
                RESULT_VARIABLE result
                OUTPUT_VARIABLE output
                ERROR_VARIABLE error)
-
-set(qml_resource_files
-    "src/gui/qml/ChatToolBar.qml"
-    "src/gui/qml/ConversationPage.qml"
-    "src/gui/qml/main.qml"
-    "src/gui/qml/themes.conf"
-)
-
-qt6_add_resources(TelegramQuickView "qml"
-    PREFIX
-        "/"
-    FILES
-        ${qml_resource_files}
-)
-			
-
-set_source_files_properties("assets/images/avatar.jpg"
-    PROPERTIES QT_RESOURCE_ALIAS "avatar.jpg"
-)
 
 SET_SOURCE_FILES_PROPERTIES(
   ${OBJS}
