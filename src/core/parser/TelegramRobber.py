@@ -89,8 +89,8 @@ class Sleuth:
             
             if not message:
                 break
-            
-            # await self.__updatePaths(postIndex, False)
+                         
+            postIndex = await self.getPostIndex(username)
             
             if message.sender is not None and message.text is not None:
                 await self.__check_download_path()
@@ -101,7 +101,7 @@ class Sleuth:
                     file_type = message.file.mime_type.split('/')[0]
                     download_path = await self.__get_download_path(file_type)
                     tasks.append(asyncio.create_task(message.download_media(file=download_path)))
-
+            
             if len(tasks) == limit:
                 await asyncio.gather(*tasks, *export)
                 tasks.clear()
@@ -141,21 +141,19 @@ class Sleuth:
                 
     async def getPostIndex(self, username: str) -> int:
         dirObjects = listdir(self.__pathToAppRootDirectory + f"/{username}/")
-        return int(dirObjects[-1])
+        if len(dirObjects) > 0:
+            return int(dirObjects[-1]) + 1
+        return 1
         
 
     async def checkAndParseTelegramChannels(self) -> None:
         await self.__client.connect()
         if not await self.__client.is_user_authorized():
             await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
-                
-        # while True:
-            
-            # await self.get_messages(self.group_username)
-            # await asyncio.sleep(60)
+
         for channel in channels:
             await self.createChannelHandler(channel)
-        # await self.__client.disconnect()
+
         await self.__client.run_until_disconnected()
      
         
