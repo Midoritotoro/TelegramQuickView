@@ -14,13 +14,15 @@ class Sleuth:
             pathToSettingsJsonFile: str,
             pathToAppRootDirectory: str
     ):
+        self.postIndex = 1
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
         telegramCredentials = self.getTelegramCredentials()
         self.api_id = telegramCredentials.get("apiId")
         self.api_hash = telegramCredentials.get("apiHash")
         self.phone_number = telegramCredentials.get("phoneNumber") 
+        self.lastPostsCount = telegramCredentials.get("lastPostsCount")
         self.group_username = "antifishechki"
-        self.__pathToAppRootDirectory = pathToAppRootDirectory
+        self.__pathToAppRootDirectory = pathToAppRootDirectory + "/" + self.group_username + f"/{self.postIndex}"
 
         self.__download_paths = [
             f"{self.__pathToAppRootDirectory}/Изображения",
@@ -33,55 +35,69 @@ class Sleuth:
         
         self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
         
+    async def updatePaths(self) -> None:
+        self.postIndex += 1
+        self.__pathToAppRootDirectory = self.__pathToAppRootDirectory[:-1] + f"{self.postIndex}"
+        self.__download_paths = [
+            f"{self.__pathToAppRootDirectory}/Изображения",
+            f"{self.__pathToAppRootDirectory}/Видео",
+            f"{self.__pathToAppRootDirectory}/Аудио",
+            f"{self.__pathToAppRootDirectory}/Документы",
+            f"{self.__pathToAppRootDirectory}/Остальное",
+            f"{self.__pathToAppRootDirectory}/Текст"
+        ]
+        
     def getTelegramCredentials(self) -> dict[str, str]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
             data = json.load(jsonFile)
         return data
 
-    async def get_messages(self):
+    async def get_messages(self, username: str):
+        self.postIndex = 0
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
-                self.group_username
-                ):
-            
+                username,
+                limit = self.lastPostsCount
+        ):
+         
             if not message:
-                break 
+                break
+
+            await self.updatePaths()
 
             if message.sender is not None and message.text is not None:
                 clean_message = message.text
 
                 if message.file is not None:
                     file_type = message.file.mime_type.split('/')[0]
+                    await self.__check_download_path()
                     download_path = await self.__get_download_path(file_type)
-                    tasks.append(asyncio.create_task(self.__client.download_media(message, file=download_path)))
-                    export.append(asyncio.create_task(self.export_to_txt(clean_message, f"{self.__download_paths[5]}/{f"{message.date.astimezone(tzlocal())}".replace(" ", "_").rsplit("+", 1)[0].replace(":", "_")}.txt")))
+                    tasks.append(asyncio.create_task(message.download_media(file=download_path)))
+                    export.append(asyncio.create_task(self.export_to_txt(clean_message, f"{self.__download_paths[5]}/{self.postIndex}.txt")))
 
-                if len(tasks) == 50:
+                if len(tasks) == self.lastPostsCount:
                     await asyncio.gather(*tasks, *export)
                     tasks.clear()
                     export.clear()
 
-        await asyncio.gather(*tasks)
-        await self.export_to_txt(f"{self.__download_paths[5]}/{f"{message.date.astimezone(tzlocal())}".replace(" ", "_").rsplit("+", 1)[0].replace(":", "_")}.txt")
 
     async def dig(self) -> str:
         try:
-            await self.__check_download_path()
             await self.__client.connect()
             code, codeHash = await self.getTelegramCode()
         
             if not await self.__client.is_user_authorized():
                 await self.__client.sign_in(self.phone_number, code, phone_code_hash=codeHash)
 
-            await self.get_messages()
+            await self.get_messages(self.group_username)
             await self.__client.disconnect()
 
         except Exception as e:
             print(e)
 
     async def export_to_txt(self, message: str, output_path: str) -> None:
-        with open(output_path, "w", newline="", encoding="utf-8") as file:
+        with open(output_path, "w", encoding="utf-8") as file:
             file.write(message)
 
     async def __get_download_path(self, file_type) -> str:
