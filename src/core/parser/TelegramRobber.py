@@ -7,6 +7,9 @@ from shutil import rmtree
 import json
 import asyncio
 
+# Проверка, не добавились ли в список .json новые каналы.
+# Проверка, не появились ли новые посты в существующих каналах. 
+
 
 class Sleuth:
     def __init__(
@@ -17,27 +20,26 @@ class Sleuth:
         self.postIndex = 1
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
         telegramCredentials = self.getTelegramCredentials()
+        
         self.api_id = telegramCredentials.get("apiId")
         self.api_hash = telegramCredentials.get("apiHash")
         self.phone_number = telegramCredentials.get("phoneNumber") 
         self.lastPostsCount = telegramCredentials.get("lastPostsCount")
-        self.group_username = "antifishechki"
-        self.__pathToAppRootDirectory = pathToAppRootDirectory + "/" + self.group_username + f"/{self.postIndex}"
-
-        self.__download_paths = [
-            f"{self.__pathToAppRootDirectory}/Изображения",
-            f"{self.__pathToAppRootDirectory}/Видео",
-            f"{self.__pathToAppRootDirectory}/Аудио",
-            f"{self.__pathToAppRootDirectory}/Документы",
-            f"{self.__pathToAppRootDirectory}/Остальное",
-            f"{self.__pathToAppRootDirectory}/Текст"
-        ]
+        self.code = telegramCredentials.get("code")
+        self.codeHash = telegramCredentials.get("codeHash")
+        
+        self.__pathToAppRootDirectory = pathToAppRootDirectory
         
         self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
         
-    async def updatePaths(self) -> None:
+    async def updatePaths(self, set: bool, username: str = None) -> None:
         self.postIndex += 1
-        self.__pathToAppRootDirectory = self.__pathToAppRootDirectory[:-1] + f"{self.postIndex}"
+        
+        if set:
+            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{self.postIndex}"
+        else:
+            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{self.postIndex}"
+            
         self.__download_paths = [
             f"{self.__pathToAppRootDirectory}/Изображения",
             f"{self.__pathToAppRootDirectory}/Видео",
@@ -47,7 +49,7 @@ class Sleuth:
             f"{self.__pathToAppRootDirectory}/Текст"
         ]
         
-    def getTelegramCredentials(self) -> dict[str, str]:
+    def getUserSettings(self) -> dict[str, str]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
             data = json.load(jsonFile)
         return data
@@ -63,8 +65,11 @@ class Sleuth:
          
             if not message:
                 break
-
-            await self.updatePaths()
+            
+            if self.postIndex == 0:
+                await self.updatePaths(True, username)
+            else:
+                await self.updatePaths(False)
 
             if message.sender is not None and message.text is not None:
                 clean_message = message.text
@@ -81,21 +86,6 @@ class Sleuth:
                     tasks.clear()
                     export.clear()
 
-
-    async def dig(self) -> str:
-        try:
-            await self.__client.connect()
-            code, codeHash = await self.getTelegramCode()
-        
-            if not await self.__client.is_user_authorized():
-                await self.__client.sign_in(self.phone_number, code, phone_code_hash=codeHash)
-
-            await self.get_messages(self.group_username)
-            await self.__client.disconnect()
-
-        except Exception as e:
-            print(e)
-
     async def export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
             file.write(message)
@@ -109,18 +99,27 @@ class Sleuth:
         }.get(file_type, self.__download_paths[4])
 
     async def __check_download_path(self) -> None:
-        if Path(self.__pathToAppRootDirectory).exists():
-            rmtree(self.__pathToAppRootDirectory)
-        if not Path(self.__pathToAppRootDirectory).exists():
-            Path(self.__pathToAppRootDirectory).mkdir(parents=True)
+        if Path(self.__pathToAppRootDirectoryContent).exists():
+            rmtree(self.__pathToAppRootDirectoryContent)
+        if not Path(self.__pathToAppRootDirectoryContent).exists():
+            Path(self.__pathToAppRootDirectoryContent).mkdir(parents=True)
         for download_path in self.__download_paths:
             Path(download_path).mkdir(parents=True, exist_ok=True)
-     
-    async def getTelegramCode(self) -> tuple[str | None, str | None]:
-        with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
-            data = json.load(jsonFile)
-        return data.get("code"), data.get("codeHash")
+
+    async def checkAndParseTelegramChannels(self) -> None:
+        await self.__client.connect()
+        if not await self.__client.is_user_authorized():
+                await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
+                
+        while True:
             
+            await self.get_messages(self.group_username)
+            await asyncio.sleep(60)
+            
+        await self.__client.disconnect()
+        
+    def start(self) -> None:
+        asyncio.run(self.checkAndParseTelegramChannels())
   
 # if __name__ == "__main__":
 #     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")

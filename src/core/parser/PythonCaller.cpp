@@ -21,9 +21,9 @@ PythonCaller::~PythonCaller() {
 };
 
 void PythonCaller::CallTelegramParseFunction(const char* moduleName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory) {
-    const char* PyFunctionName = "dig";
+    const char* PyFunctionName = "start";
     const char* PyClassName = "Sleuth";
-    Py_ssize_t PyClassArgumentsTupleSize = 5;
+    Py_ssize_t PyClassArgumentsTupleSize = 2;
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
@@ -46,11 +46,8 @@ void PythonCaller::CallTelegramParseFunction(const char* moduleName, const char*
     if (PyCallable_Check(PyClass)) {
         PyArgs = PyTuple_New(PyClassArgumentsTupleSize);
 
-        PyTuple_SetItem(PyArgs, 0, PyLong_FromLong(long(m_PyApiId)));
-        PyTuple_SetItem(PyArgs, 1, PyUnicode_FromString(m_PyApiHash));
-        PyTuple_SetItem(PyArgs, 2, PyUnicode_FromString(m_PyPhoneNumber));
-        PyTuple_SetItem(PyArgs, 3, PyUnicode_FromString(pathToSettingsJsonFile));
-        PyTuple_SetItem(PyArgs, 4, PyUnicode_FromString(pathToAppRootDirectory));
+        PyTuple_SetItem(PyArgs, 0, PyUnicode_FromString(pathToSettingsJsonFile));
+        PyTuple_SetItem(PyArgs, 1, PyUnicode_FromString(pathToAppRootDirectory));
 
         PyClsInstance = PyObject_CallObject(PyClass, PyArgs);
         PyObject_CallMethod(PyClsInstance, PyFunctionName, NULL);
