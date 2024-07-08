@@ -17,7 +17,7 @@ class Sleuth:
             pathToSettingsJsonFile: str,
             pathToAppRootDirectory: str
     ):
-        self.postIndex = 1
+        self.postIndex = 0
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
         telegramCredentials = self.__getUserSettings()
         
