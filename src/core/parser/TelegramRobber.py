@@ -54,11 +54,32 @@ class Sleuth:
         return data
 
     async def __get_messages(self, username: str, limit: int):
-        postIndex = await self.getPostIndex(username)
+        postIndex = 1
         if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
-            await self.__updatePaths(postIndex, False)
+            postIndex = await self.getPostIndex(username)
+            if hasattr(self, "self.__pathToAppRootDirectoryContent"):
+                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{postIndex}"
+            else:
+                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{postIndex}"
+            self.__download_paths = [
+                f"{self.__pathToAppRootDirectoryContent}/Изображения",
+                f"{self.__pathToAppRootDirectoryContent}/Видео",
+                f"{self.__pathToAppRootDirectoryContent}/Аудио",
+                f"{self.__pathToAppRootDirectoryContent}/Документы",
+                f"{self.__pathToAppRootDirectoryContent}/Остальное",
+                f"{self.__pathToAppRootDirectoryContent}/Текст"
+            ]
         else:
-            await self.__updatePaths(postIndex, True, username)
+            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{postIndex}"
+            self.__download_paths = [
+                f"{self.__pathToAppRootDirectoryContent}/Изображения",
+                f"{self.__pathToAppRootDirectoryContent}/Видео",
+                f"{self.__pathToAppRootDirectoryContent}/Аудио",
+                f"{self.__pathToAppRootDirectoryContent}/Документы",
+                f"{self.__pathToAppRootDirectoryContent}/Остальное",
+                f"{self.__pathToAppRootDirectoryContent}/Текст"
+            ]
+            await self.__check_download_path()
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
@@ -69,7 +90,7 @@ class Sleuth:
             if not message:
                 break
             
-            await self.__updatePaths(postIndex, False)
+            # await self.__updatePaths(postIndex, False)
             
             if message.sender is not None and message.text is not None:
                 await self.__check_download_path()
@@ -143,7 +164,6 @@ class Sleuth:
         if isinstance(channel_entity, InputPeerChannel):
             @self.__client.on(events.NewMessage(chats=channel_entity))
             async def handler(event):
-                await self.__check_download_path()
                 await self.__get_messages(username, 1)
                 print(f"Новый пост в канале: {username}")
                 print(f"Текст: {event.message.text}")

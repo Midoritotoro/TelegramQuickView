@@ -9,7 +9,7 @@ MessageWidget::MessageWidget(QWidget* parent) :
 	QGridLayout* gridLayout = new QGridLayout(this);
 	QLabel* messageTextLabel = new QLabel("fkeoisfkeiofr je fjeoifj seoifjseif jsiefjseiofesif jhsoeif sief isfiesjf ijsfoisejf iosfi sje fjsieofjioe foehopuwhwqf");
 	MediaPlayer* mediaPlayer = new MediaPlayer();
-	mediaPlayer->setSource(QUrl::fromLocalFile("C:/U"))
+	mediaPlayer->setSource(QUrl::fromLocalFile(""));
 
 	gridLayout->setContentsMargins(0, 0, 0, 0);
 	gridLayout->setSpacing(0);

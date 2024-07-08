@@ -26,7 +26,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/parser/main.cpp)
+SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/parser/main.cpp src/core/parser/TelegramRobber.py)
 
 
 SET(MAIN_SOURCES  main.cpp
