@@ -18,7 +18,6 @@ class Sleuth:
             pathToSettingsJsonFile: str,
             pathToAppRootDirectory: str
     ):
-        self.postIndex = 0
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
         telegramCredentials = self.__getUserSettings()
         
@@ -34,13 +33,11 @@ class Sleuth:
         
         self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
         
-    async def __updatePaths(self, set: bool, username: str = None) -> None:
-        self.postIndex += 1
-        
+    async def __updatePaths(self, index: int, set: bool, username: str = None) -> None:  
         if set:
-            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{self.postIndex}"
+            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{index}"
         else:
-            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{self.postIndex}"
+            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{index}"
 
         self.__download_paths = [
             f"{self.__pathToAppRootDirectoryContent}/Изображения",
@@ -57,30 +54,27 @@ class Sleuth:
         return data
 
     async def __get_messages(self, username: str, limit: int):
-        self.postIndex = 0
+        postIndex = await self.getPostIndex(username)
+        if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
+            await self.__updatePaths(postIndex, False)
+        else:
+            await self.__updatePaths(postIndex, True, username)
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
                 username,
                 limit = limit
         ):
-         
+            
             if not message:
                 break
             
-            print(self.__pathToAppRootDirectoryContent)
-            
-            if self.postIndex == 0:
-                await self.__updatePaths(True, username)
-            else:
-                await self.__updatePaths(False)
-
-            print(self.__pathToAppRootDirectoryContent)
+            await self.__updatePaths(postIndex, False)
             
             if message.sender is not None and message.text is not None:
                 await self.__check_download_path()
                 clean_message = message.text
-                export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/{self.postIndex}.txt")))
+                export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/{postIndex}.txt")))
                 
                 if message.file is not None:
                     file_type = message.file.mime_type.split('/')[0]
@@ -123,6 +117,10 @@ class Sleuth:
         for index, obj in enumerate(dirObjects, start=1):
             if obj != str(index):
                 rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj)
+                
+    async def getPostIndex(self, username: str) -> int:
+        dirObjects = listdir(self.__pathToAppRootDirectory + f"/{username}/")
+        return int(dirObjects[-1])
         
 
     async def checkAndParseTelegramChannels(self) -> None:
@@ -145,6 +143,7 @@ class Sleuth:
         if isinstance(channel_entity, InputPeerChannel):
             @self.__client.on(events.NewMessage(chats=channel_entity))
             async def handler(event):
+                await self.__check_download_path()
                 await self.__get_messages(username, 1)
                 print(f"Новый пост в канале: {username}")
                 print(f"Текст: {event.message.text}")
