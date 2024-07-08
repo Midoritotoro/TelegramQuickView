@@ -14,8 +14,7 @@ async def sendTelegramCode(apiId: int, phoneNumber: str, apiHash: str, pathToUse
         with open(pathToUserSettingsJson, "w", encoding="utf-8") as jsonFile:
            json.dump(data, jsonFile)
         await telegramClient.disconnect()
-    except Exception as e:
-        print(e)
+    except:
         return False
     return True
        
@@ -25,8 +24,7 @@ async def isTelegramCredentialsValid(apiId: int, phoneNumber: str, apiHash: str)
         telegramClient = TelegramClient("TelegramQuickView", apiId, apiHash, timeout=10)
         await telegramClient.connect()
         await telegramClient.disconnect()
-    except Exception as e:
-        print(e)
+    except:
         return False
     return True
 
@@ -37,8 +35,7 @@ async def isTelegramPhoneNumberCodeValid(apiId: int, phoneNumber: str, apiHash: 
         if not await telegramClient.is_user_authorized():
             await telegramClient.sign_in(phoneNumber, code, phone_code_hash=codeHash)
         await telegramClient.disconnect()
-    except Exception as e:
-        print(e)
+    except:
         return False
     return True
 

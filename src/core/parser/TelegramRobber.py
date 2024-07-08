@@ -1,31 +1,24 @@
-﻿from os import replace
-import re
-from datetime import datetime, timezone
+﻿from datetime import datetime, timezone
 from dateutil.tz import tzlocal
-from telethon.errors import ApiIdInvalidError, UsernameInvalidError
 from telethon.sync import TelegramClient
-import re
 import asyncio
 from pathlib import Path
 from shutil import rmtree
 import json
-
-# Не передавать в класс api Hash, id и номер телефона, а сделать его самостоятельной единицей, т.е брать данные только из json основного приложения
+import asyncio
 
 
 class Sleuth:
     def __init__(
             self,
-            api_id: int,
-            api_hash: str,
-            phone_number: int,
             pathToSettingsJsonFile: str,
             pathToAppRootDirectory: str
     ):
-        self.api_id = api_id
-        self.api_hash = api_hash
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
-        self.phone_number = phone_number 
+        telegramCredentials = self.getTelegramCredentials()
+        self.api_id = telegramCredentials.get("apiId")
+        self.api_hash = telegramCredentials.get("apiHash")
+        self.phone_number = telegramCredentials.get("phoneNumber") 
         self.group_username = "antifishechki"
         self.__pathToAppRootDirectory = pathToAppRootDirectory
 
@@ -39,18 +32,21 @@ class Sleuth:
         ]
         
         self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
+        
+    def getTelegramCredentials(self) -> dict[str, str]:
+        with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
+            data = json.load(jsonFile)
+        return data
 
     async def get_messages(self):
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
-                self.group_username):
+                self.group_username
+                ):
             
             if not message:
-                break
-            
-            print(message.text)
-           
+                break 
 
             if message.sender is not None and message.text is not None:
                 clean_message = message.text
@@ -58,7 +54,7 @@ class Sleuth:
                 if message.file is not None:
                     file_type = message.file.mime_type.split('/')[0]
                     download_path = await self.__get_download_path(file_type)
-                    tasks.append(asyncio.create_task(message.download_media(file=download_path)))
+                    tasks.append(asyncio.create_task(self.__client.download_media(message, file=download_path)))
                     export.append(asyncio.create_task(self.export_to_txt(clean_message, f"{self.__download_paths[5]}/{f"{message.date.astimezone(tzlocal())}".replace(" ", "_").rsplit("+", 1)[0].replace(":", "_")}.txt")))
 
                 if len(tasks) == 50:
@@ -73,8 +69,8 @@ class Sleuth:
         try:
             await self.__check_download_path()
             await self.__client.connect()
-            code, codeHash = await self.getTelegramCredentials()
-            
+            code, codeHash = await self.getTelegramCode()
+        
             if not await self.__client.is_user_authorized():
                 await self.__client.sign_in(self.phone_number, code, phone_code_hash=codeHash)
 
@@ -104,17 +100,13 @@ class Sleuth:
         for download_path in self.__download_paths:
             Path(download_path).mkdir(parents=True, exist_ok=True)
      
-    async def getTelegramCredentials(self) -> tuple[str | None, str | None]:
+    async def getTelegramCode(self) -> tuple[str | None, str | None]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
             data = json.load(jsonFile)
         return data.get("code"), data.get("codeHash")
             
-      
-apiHash = "019edf3f20c8460b741fb94114e6fec0";
-phoneNumber = "+375292384917";
-apiId = 13711370;
-
+  
 if __name__ == "__main__":
-    telegramParser = Sleuth(apiId, apiHash, phoneNumber, "C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
+    telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
     asyncio.run(telegramParser.dig())
             
