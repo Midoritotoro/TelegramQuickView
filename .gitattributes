@@ -4,7 +4,7 @@
 * text=auto
 
 *.css linguist-language=C++
-src/core/css/*.css linguist-language=C++
+src/css/*.css linguist-language=C++
 *.h linguist-language=C++
 
 ###############################################################################
