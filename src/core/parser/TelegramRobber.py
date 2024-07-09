@@ -1,7 +1,7 @@
 ﻿from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
 from typing import Callable
-from telethon.tl.types import InputPeerChannel
+from telethon.tl.types import InputPeerChannel, Message
 import asyncio
 from pathlib import Path
 from shutil import rmtree
@@ -28,10 +28,10 @@ class HandlersManager:
                     if event.message.grouped_id != self.__groupedMessageId:
                         self.__groupedMessageId = event.message.grouped_id
                         self.__groupedMessageDate = event.message.date
-                        await self.__downloadFunction(self.__username, 1, False, event.message)
+                        await self.__downloadFunction(self.__username, event.message)
                     elif event.message.grouped_id == self.__groupedMessageId:
                         if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20):
-                            await self.__downloadFunction(self.__username, 1, False, event.message)
+                            await self.__downloadFunction(self.__username, event.message)
                 elif event.message.grouped_id == None:
                     await self.__downloadFunction(self.__username, 1, True)
 
@@ -50,6 +50,7 @@ class Sleuth:
         self.lastPostsCount = telegramCredentials.get("lastPostsCount")
         self.code = telegramCredentials.get("code")
         self.codeHash = telegramCredentials.get("codeHash")
+        self.lastMessageGroupId = 0
         
         self.__pathToAppRootDirectory = pathToAppRootDirectory
         self.__pathToAppRootDirectoryContent = ""
@@ -61,20 +62,18 @@ class Sleuth:
             data = json.load(jsonFile)
         return data
 
-    async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True, message: Message = None):
-        if message != None:
+    async def __get_singleMessageFromGroupMessages(self, username: str, message: Message):
+        if self.lastMessageGroupId != message.grouped_id:
+            self.lastMessageGroupId = message.grouped_id
             postIndex = await self.getPostIndex(username)
-            if postIndex > 1:
-                await self.__check_download_path(username, postIndex - 1)
-            else:
-                await self.__check_download_path(username, postIndex)
-            if len(message.text) > 1:
-                await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
-            file_type = message.file.mime_type.split('/')[0]
-            download_path = await self.__get_download_path(file_type)
-            await message.download_media(file=download_path)
-            return
+        await self.__check_download_path(username, postIndex)
+        if len(message.text) > 1:
+            await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
+        file_type = message.file.mime_type.split('/')[0]
+        download_path = await self.__get_download_path(file_type)
+        await message.download_media(file=download_path)
             
+    async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True):
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
@@ -101,7 +100,6 @@ class Sleuth:
     async def __export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
             file.write(message)
-            print(message, output_path)
 
     async def __get_download_path(self, file_type) -> str:
         return {
@@ -162,7 +160,7 @@ class Sleuth:
             await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
 
         for channel in channels:
-            handlersManager = HandlersManager(self.__client, self.__get_messages, channel)
+            handlersManager = HandlersManager(self.__client, self.__get_singleMessageFromGroupMessages, channel)
             await handlersManager.createChannelHandler()
 
         await self.__client.run_until_disconnected()
