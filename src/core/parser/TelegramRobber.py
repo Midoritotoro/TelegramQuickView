@@ -30,12 +30,13 @@ class HandlersManager:
                 event.message: Message = event.message
                 if event.message.grouped_id != None:
                     if event.message.grouped_id != self.__groupedMessageId:
-                        self.__groupedMessageId = event.message.grouped_id
-                        self.__groupedMessageDate = event.message.date
-                        await self.__downloadFunction(self.__username, 1)
-                    else:
+                        # self.__groupedMessageId = event.message.grouped_id
+                        # self.__groupedMessageDate = event.message.date
+                        await self.__downloadFunction(self.__username, event.message)
+                    elif event.message.grouped_id == self.__groupedMessageId:
                         if event.message.date.second == self.__groupedMessageDate.second:
-                            await self.__downloadFunction(self.__username, 1, False)
+                            print("second==")
+                            await self.__downloadFunction(self.__username, 1, False, event.message)
                 else:
                     await self.__downloadFunction(self.__username, 1, True)
 
@@ -65,7 +66,14 @@ class Sleuth:
             data = json.load(jsonFile)
         return data
 
-    async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True):
+    async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True, message: Message = None):
+        if message != None:
+            await self.__check_download_path(username)
+            # await self.organizeDirectory(username)
+            file_type = message.file.mime_type.split('/')[0]
+            download_path = await self.__get_download_path(file_type)
+            await message.download_media(file=download_path)
+            await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
