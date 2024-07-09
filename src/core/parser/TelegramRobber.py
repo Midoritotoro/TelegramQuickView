@@ -1,7 +1,7 @@
 ﻿from datetime import datetime, timezone
 from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
-from telethon.tl.types import InputPeerChannel, PeerChannel
+from telethon.tl.types import InputPeerChannel, PeerChannel, Message 
 from telethon.errors import PeerFloodError
 import asyncio
 from pathlib import Path
@@ -89,21 +89,22 @@ class Sleuth:
             f"{self.__pathToAppRootDirectoryContent}/Остальное",
             f"{self.__pathToAppRootDirectoryContent}/Текст"
         ]
+        
         if not Path(self.__pathToAppRootDirectoryContent).exists():
             Path(self.__pathToAppRootDirectoryContent).mkdir(parents=True)
         for download_path in self.__download_paths:
             Path(download_path).mkdir(parents=True, exist_ok=True)
+            
         dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])    
 
         if (int(dirObjects[-1]) > self.lastPostsCount):  
             rmtree(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
-            print("deleted: ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
    
             dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
             for index, obj in enumerate(dirObjects, start=1):
                 if obj != str(index):
-                    print("Renamed ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, "to ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
                     rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
+                    
         postIndex = await self.getPostIndex(username)
         self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex - 1)
         self.__download_paths = [
@@ -131,19 +132,23 @@ class Sleuth:
             await self.createChannelHandler(channel)
 
         await self.__client.run_until_disconnected()
-     
-        
+
     async def createChannelHandler(self, username: str):
         channel_entity = await self.__client.get_input_entity(username)
         if isinstance(channel_entity, InputPeerChannel):
             @self.__client.on(events.NewMessage(chats=channel_entity))
             async def handler(event):
-                await self.__get_messages(username, 1)
-                print(f"Новый пост в канале: {username}")
-                print(f"Текст: {event.message.text}")
-            print(f"Создан обработчик для канала: {username}")
-        else:
-            print(f"Ошибка: {username} - это не канал")
+                if event.message.media:
+                    # message: Message = 0
+                     #message.media
+                    print("Сообщение получено")
+                    # print(f"Файл: {event.message.media}")
+                else:
+                    print(f"Сообщение: {event.message.text}")
+                # await self.__get_messages(username, 1)
+           #  @self.__client.on(events.Album(chats=channel_entity))
+            # async def albumHandler(event): 
+               #  await self.__get_messages(username, 1)
         
     def start(self) -> None:
         self.__client.loop.run_until_complete(self.checkAndParseTelegramChannels())
@@ -151,4 +156,4 @@ class Sleuth:
 if __name__ == "__main__":
     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
     telegramParser.start()
-            
+     
