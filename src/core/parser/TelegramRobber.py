@@ -1,4 +1,5 @@
-﻿from dateutil.tz import tzlocal
+﻿from tkinter.messagebox import askyesno
+from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
 from typing import Callable
 from telethon.tl.types import InputPeerChannel, Message
@@ -136,7 +137,8 @@ class Sleuth:
         return 1
 
     async def __checkAndParseTelegramChannels(self) -> None:
-        await self.__client.connect()
+        if self.__client.disconnected:
+            await self.__client.connect()
         if not await self.__client.is_user_authorized():
             await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
 
@@ -147,7 +149,11 @@ class Sleuth:
         await self.__client.run_until_disconnected()
      
     async def __fetchRecentChannelsUpdates(self):
-        async for channel in self.channels:
+        if self.__client.disconnected:
+            await self.__client.connect()
+        if not await self.__client.is_user_authorized():
+            await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
+        for channel in self.channels:
             async for message in self.__client.iter_messages(
                 channel,
                 limit=self.lastPostsCount
@@ -162,12 +168,14 @@ class Sleuth:
                     await self.__organizeDirectory(channel)
                     download_path = await self.__get_download_path(file_type)
                     await message.download_media(file=download_path)
-                    await self.export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
-                    
-    def start(self) -> None:
-        self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
-        self.__client.loop.run_until_complete(self.__checkAndParseTelegramChannels())
-  
+                    await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
+        await self.__client.run_until_disconnected()
+         
+def start(telegramParser: Sleuth) -> None:
+    telegramParser.__client.loop.run_until_complete(telegramParser.__fetchRecentChannelsUpdates())
+        
+    # self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
+
 if __name__ == "__main__":
     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
     telegramParser.start()

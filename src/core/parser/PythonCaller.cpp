@@ -1,7 +1,8 @@
 ﻿#include "PythonCaller.h"
+#include <thread>
 
 
-PythonCaller::PythonCaller(const char* apiHash, const char* phoneNumber, long long apiId, const char* pythonFilePath): m_PyApiHash(apiHash), m_PyPhoneNumber(phoneNumber), m_PyApiId(apiId), _pythonFilePath(pythonFilePath) {
+PythonCaller::PythonCaller(const char* pythonFilePath): _pythonFilePath(pythonFilePath) {
     Py_Initialize();
 };
 
@@ -50,6 +51,7 @@ void PythonCaller::CallTelegramParseFunction(const char* moduleName, const char*
         PyTuple_SetItem(PyArgs, 1, PyUnicode_FromString(pathToAppRootDirectory));
 
         PyClsInstance = PyObject_CallObject(PyClass, PyArgs);
-        PyObject_CallMethod(PyClsInstance, PyFunctionName, NULL);
+        PyObject* function = PyObject_GetAttrString(PyModule, PyFunctionName);
+        PyObject_CallObject(function, PyClsInstance);
     }
 }

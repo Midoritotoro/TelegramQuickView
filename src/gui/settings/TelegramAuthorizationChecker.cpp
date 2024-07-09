@@ -1,4 +1,5 @@
 #include "telegramAuthorizationChecker.h"
+#include <iostream>
 
 
 TelegramAuthorizationChecker::TelegramAuthorizationChecker() {
@@ -22,7 +23,7 @@ bool TelegramAuthorizationChecker::TelegramCredentialsValidCheck(const char* api
     const char* PyFunctionName = "isTelegramCredentialsValid";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    bool BoolResult = false;
+    bool BoolResult;
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
@@ -54,7 +55,10 @@ bool TelegramAuthorizationChecker::TelegramCredentialsValidCheck(const char* api
         PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                BoolResult = PyObject_IsTrue(PyResult);
+                if (PyObject_IsTrue(PyResult) == 0)
+                    BoolResult = false;
+                else
+                    BoolResult = true;
                 Py_DECREF(PyResult);
         }
     }
@@ -66,7 +70,7 @@ bool TelegramAuthorizationChecker::sendTelegramCode(const char* apiHash, const c
     const char* PyFunctionName = "sendTelegramCode";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    bool BoolResult = false;
+    bool BoolResult;
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
@@ -99,7 +103,10 @@ bool TelegramAuthorizationChecker::sendTelegramCode(const char* apiHash, const c
         PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                BoolResult = PyObject_IsTrue(PyResult);
+                if (PyObject_IsTrue(PyResult) == 0)
+                    BoolResult = false;
+                else
+                    BoolResult = true;
             Py_DECREF(PyResult);
         }
     }
@@ -111,7 +118,7 @@ bool TelegramAuthorizationChecker::TelegramCodeValidCheck(const char* apiHash, c
     const char* PyFunctionName = "isTelegramPhoneNumberCodeValid";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    bool BoolResult = false;
+    bool BoolResult;
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
@@ -145,10 +152,14 @@ bool TelegramAuthorizationChecker::TelegramCodeValidCheck(const char* apiHash, c
         PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                BoolResult = PyObject_IsTrue(PyResult);
+                if (PyObject_IsTrue(PyResult) == 0)
+                    BoolResult = false;
+                else
+                    BoolResult = true;
             Py_DECREF(PyResult);
         }
     }
     PyErr_Print();
+    std::cout << "C++: " << BoolResult;
     return BoolResult;
 }

@@ -193,6 +193,11 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
 }
 
+void AuthenticationDialog::skipFirstAuthorizationStage() {
+    backButton_clicked();
+    logInButton_clicked();
+}
+
 void AuthenticationDialog::updateSendCodeButtonText() {
     timeRemaining--;
 

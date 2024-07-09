@@ -9,21 +9,10 @@ class PythonCaller
 private:
     PyObject* PyName = nullptr, * PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr,
         * PyArgs = nullptr, * PySys = nullptr, * PyPath = nullptr, * PyClass = nullptr, * PyClsInstance = nullptr;
-    const char* m_PyApiHash = nullptr, * m_PyPhoneNumber = nullptr, * _pythonFilePath = nullptr;
-    long long m_PyApiId = 0;
+    const char* _pythonFilePath = nullptr;
 public:
-    PythonCaller(const char* apiHash, const char* phoneNumber, long long apiId, const char* pythonFilePath);
+    PythonCaller(const char* pythonFilePath);
     ~PythonCaller();
 
     void CallTelegramParseFunction(const char* moduleName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
 };
-
-
-//  const char* PyModuleName = "TelegramRobber";
-//  const char* TelegramUsername = "antifishechki";
-//  const char* apiHash = "019edf3f20c8460b741fb94114e6fec0";
-//  const char* phoneNumber = "+375292384917";
-//  const char* downloadPath = "D:\\Media";
-//  long long apiId = 13711370;
-//  PythonCaller pythonCaller(apiHash, phoneNumber, downloadPath, apiId);
-//  pythonCaller.CallTelegramParseFunction(PyModuleName, TelegramUsername, "2024-05-04", "2024-05-05");

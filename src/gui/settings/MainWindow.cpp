@@ -24,8 +24,13 @@ MainWindow::MainWindow(QWidget* parent) :
 	userDataManager = new UserDataManager();
 	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
 
-	if (userDataManager->isTelegramCredentialsValid() == false || userDataManager->isTelegramPhoneNumberCodeValid() == false)
+	if (userDataManager->isTelegramCredentialsValid() == true && userDataManager->isTelegramPhoneNumberCodeValid() == false) {
+		userAuthenticationDialog->skipFirstAuthorizationStage();
 		userAuthenticationDialog->exec();
+	}
+	else if (userDataManager->isTelegramCredentialsValid() == false) {
+		userAuthenticationDialog->exec();
+	}
 
 	userDataManager->setLastPostsCountForChannels(3);
 

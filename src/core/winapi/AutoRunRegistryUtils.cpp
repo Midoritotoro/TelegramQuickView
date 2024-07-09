@@ -21,7 +21,7 @@ bool IsWindowsGreaterThen(int version)
 BOOL addParserToRegistryAutoRun()
 {
     TCHAR szExeName[MAX_PATH];
-    TCHAR fileName[12] = L"\\parser.exe";
+    TCHAR fileName[12] = L"\\Parser.exe";
     rsize_t stringSize = MAX_PATH;
     GetModuleFileName(NULL, szExeName, stringSize);
 
@@ -51,7 +51,7 @@ BOOL SetRegistryAutoRunKey(LPWSTR path)
         RegCloseKey(hKey);
         return FALSE;
     }
-    result = RegSetValueEx(hKey, TEXT("TelegramViewer"), 0, REG_SZ, (PBYTE)(path), ((LPBYTE)(path), (lstrlen(path) * sizeof(TCHAR) + 1)));
+    result = RegSetValueEx(hKey, TEXT("TelegramQuickView"), 0, REG_SZ, (PBYTE)(path), ((LPBYTE)(path), (lstrlen(path) * sizeof(TCHAR) + 1)));
     if (result == ERROR_SUCCESS && pResult != REG_OPENED_EXISTING_KEY) {
         PrintMsg(hOut, TEXT("Приложение успешно добавлено в автозагрузку.\n"));
     }

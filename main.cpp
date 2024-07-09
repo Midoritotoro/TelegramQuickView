@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
         return -1;
 
     QApplication app(argc, argv);
-    MessageWidget messageWidget;
+    MainWindow messageWidget;
 
     messageWidget.show();
     return app.exec();

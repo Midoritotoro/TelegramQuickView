@@ -33,6 +33,8 @@ private:
     int timeRemaining = 0;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
+
+    void skipFirstAuthorizationStage();
 public slots:
     void shake();
     void logInButton_clicked();

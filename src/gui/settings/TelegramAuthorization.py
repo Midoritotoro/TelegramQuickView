@@ -35,8 +35,10 @@ async def isTelegramPhoneNumberCodeValid(apiId: int, phoneNumber: str, apiHash: 
         if not await telegramClient.is_user_authorized():
             await telegramClient.sign_in(phoneNumber, code, phone_code_hash=codeHash)
         await telegramClient.disconnect()
-    except:
+    except Exception as e:
+        print(e)
         return False
+    print("Python: True")
     return True
 
 def asyncCall(functionName: str, *args) -> bool:

@@ -79,6 +79,7 @@ bool UserDataManager::isTelegramPhoneNumberCodeValid() {
 	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
 		return false;
 
+
 	if (apiHash.toString().length() < 32 || apiId.toString().length() < 5)
 		return false;
 
