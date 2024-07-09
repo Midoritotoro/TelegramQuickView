@@ -9,6 +9,7 @@ import json
 from os import listdir, rename
 from datetime import datetime
 
+
 channels = ["test329483", "testssss352"]
 
 class HandlersManager:
@@ -33,7 +34,7 @@ class HandlersManager:
                         if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20):
                             await self.__downloadFunction(self.__username, event.message)
                 elif event.message.grouped_id == None:
-                    await self.__downloadFunction(self.__username, 1, True)
+                    await self.__downloadFunction(self.__username, event.message)
 
 class Sleuth:
     def __init__(
@@ -62,40 +63,22 @@ class Sleuth:
             data = json.load(jsonFile)
         return data
 
-    async def __get_singleMessageFromGroupMessages(self, username: str, message: Message):
-        if self.lastMessageGroupId != message.grouped_id:
-            self.lastMessageGroupId = message.grouped_id
-            postIndex = await self.getPostIndex(username)
-        await self.__check_download_path(username, postIndex)
+    async def __get_singleMessage(self, username: str, message: Message):
+        postIndex = await self.getPostIndex(username)
+        if message.grouped_id != None: 
+            if self.lastMessageGroupId != message.grouped_id:
+                await self.__check_download_path(username, postIndex)
+                await self.organizeDirectory(username)
+                self.lastMessageGroupId = message.grouped_id
+        elif message.grouped_id == None:
+            await self.__check_download_path(username, postIndex)
+            await self.organizeDirectory(username)
         if len(message.text) > 1:
             await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
-        file_type = message.file.mime_type.split('/')[0]
-        download_path = await self.__get_download_path(file_type)
-        await message.download_media(file=download_path)
-            
-    async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True):
-        tasks = []
-        export = []
-        async for message in self.__client.iter_messages(
-                username,
-                limit = limit
-        ):
-            if not message:
-                break
-            
-            if message.sender is not None and message.text is not None:
-                
-                if checkDownloadPath:
-                    postIndex = await self.getPostIndex(username)
-                    await self.__check_download_path(username, postIndex)
-                await self.organizeDirectory(username)
-                clean_message = message.text
-                await self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")
-                
-                if message.file is not None:
-                    file_type = message.file.mime_type.split('/')[0]
-                    download_path = await self.__get_download_path(file_type)
-                    await message.download_media(file=download_path)
+        if message.media != None:
+            file_type = message.file.mime_type.split('/')[0]
+            download_path = await self.__get_download_path(file_type)
+            await message.download_media(file=download_path)
 
     async def __export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
@@ -160,7 +143,7 @@ class Sleuth:
             await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
 
         for channel in channels:
-            handlersManager = HandlersManager(self.__client, self.__get_singleMessageFromGroupMessages, channel)
+            handlersManager = HandlersManager(self.__client, self.__get_singleMessage, channel)
             await handlersManager.createChannelHandler()
 
         await self.__client.run_until_disconnected()
