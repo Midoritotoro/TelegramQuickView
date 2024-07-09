@@ -43,6 +43,10 @@ void PythonCaller::CallTelegramParseFunction(const char* moduleName, const char*
         return;
 
     PyClass = PyDict_GetItemString(PyDict, PyClassName);
+    PyObject* asyncio_module = PyImport_ImportModule("asyncio");
+    PyObject* loop = PyObject_CallMethod(asyncio_module, "new_event_loop", NULL);
+
+    PyObject_CallMethod(asyncio_module, "set_event_loop", "(O)", loop);
 
     if (PyCallable_Check(PyClass)) {
         PyArgs = PyTuple_New(PyClassArgumentsTupleSize);
@@ -51,7 +55,6 @@ void PythonCaller::CallTelegramParseFunction(const char* moduleName, const char*
         PyTuple_SetItem(PyArgs, 1, PyUnicode_FromString(pathToAppRootDirectory));
 
         PyClsInstance = PyObject_CallObject(PyClass, PyArgs);
-        PyObject* function = PyObject_GetAttrString(PyModule, PyFunctionName);
-        PyObject_CallObject(function, PyClsInstance);
+        PyObject_CallMethod(PyClsInstance, PyFunctionName, NULL);
     }
 }

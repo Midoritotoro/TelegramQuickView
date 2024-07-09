@@ -52,6 +52,8 @@ class Sleuth:
         self.codeHash = userSettings.get("codeHash")
         self.channels = userSettings.get("channels")
         self.lastMessageGroupId = 0
+        self.__groupedMessageId = 0
+        self.__groupedMessageDate: datetime 
         self.__pathToAppRootDirectory = pathToAppRootDirectory
         self.__pathToAppRootDirectoryContent = ""
         
@@ -63,7 +65,7 @@ class Sleuth:
         return data
 
     async def __get_singleMessage(self, username: str, message: Message):
-        postIndex = await self.getPostIndex(username)
+        postIndex = await self.__getPostIndex(username)
         if message.grouped_id != None: 
             if self.lastMessageGroupId != message.grouped_id:
                 await self.__check_download_path(username, postIndex)
@@ -147,35 +149,70 @@ class Sleuth:
             await handlersManager.createChannelHandler()
 
         await self.__client.run_until_disconnected()
-     
+        
+        # if event.message.grouped_id != None:
+        #             if event.message.grouped_id != self.__groupedMessageId:
+        #                 self.__groupedMessageId = event.message.grouped_id
+        #                 self.__groupedMessageDate = event.message.date
+        #                 await self.__downloadFunction(self.__username, event.message)
+        #             elif event.message.grouped_id == self.__groupedMessageId:
+        #                 if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20):
+        #                     await self.__downloadFunction(self.__username, event.message)
+        #         elif event.message.grouped_id == None:
+        #             await self.__downloadFunction(self.__username, event.message)
+    async def parse(self, channel: str):
+        index = 0    
+        async for message in self.__client.iter_messages(
+            channel
+        ):
+            if not message:
+                break
+                
+            index += 1
+            print(index, self.lastPostsCount)
+            if index > self.lastPostsCount:
+                break
+                
+            if message.grouped_id != None:
+                if message.grouped_id != self.__groupedMessageId:
+                    self.__groupedMessageId = message.grouped_id
+                    self.__groupedMessageDate = message.date
+                    self.lastPostsCount += 1
+                    await self.__get_singleMessage(channel, message)
+                elif message.grouped_id == self.__groupedMessageId:
+                    if message.date.minute == self.__groupedMessageDate.minute or (message.date.minute - self.__groupedMessageDate.minute == 1 and message.date.second <= 20):
+                        self.lastPostsCount += 1
+                        await self.__get_singleMessage(channel, message)
+            elif message.grouped_id == None:
+                await self.__get_singleMessage(channel, message)
+                    
     async def __fetchRecentChannelsUpdates(self):
+        savePostsCount = self.lastPostsCount
         if self.__client.disconnected:
             await self.__client.connect()
         if not await self.__client.is_user_authorized():
             await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
         for channel in self.channels:
-            async for message in self.__client.iter_messages(
-                channel,
-                limit=self.lastPostsCount
-            ):
-                if not message:
-                    break
-                    
-                if message.file is not None:
-                    file_type = message.file.mime_type.split('/')[0]
-                    postIndex = await self.__getPostIndex(channel)
-                    await self.__check_download_path(channel, postIndex)
-                    await self.__organizeDirectory(channel)
-                    download_path = await self.__get_download_path(file_type)
-                    await message.download_media(file=download_path)
-                    await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
+            
+                await self.parse(channel)
+                self.lastPostsCount = savePostsCount
+                # postIndex = await self.__getPostIndex(channel)
+                # await self.__check_download_path(channel, postIndex)
+                # await self.__organizeDirectory(channel)
+                
+                # if message.file is not None:
+                #     file_type = message.file.mime_type.split('/')[0]
+                #     download_path = await self.__get_download_path(file_type)
+                #     await message.download_media(file=download_path)
+                #     await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
         await self.__client.run_until_disconnected()
          
-def start(telegramParser: Sleuth) -> None:
-    telegramParser.__client.loop.run_until_complete(telegramParser.__fetchRecentChannelsUpdates())
+    def start(self) -> None:
+        self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
         
     # self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
 
 if __name__ == "__main__":
     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
     telegramParser.start()
+   
