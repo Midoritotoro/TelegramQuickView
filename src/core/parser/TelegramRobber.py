@@ -30,17 +30,17 @@ class HandlersManager:
                 event.message: Message = event.message
                 if event.message.grouped_id != None:
                     if event.message.grouped_id != self.__groupedMessageId:
-                        print("event.message.grouped_id != self.__groupedMessageId")
+                        #print("event.message.grouped_id != self.__groupedMessageId")
                         self.__groupedMessageId = event.message.grouped_id
                         self.__groupedMessageDate = event.message.date
                         await self.__downloadFunction(self.__username, 1, False, event.message)
                     elif event.message.grouped_id == self.__groupedMessageId:
-                        print("event.message.grouped_id == self.__groupedMessageId")
+                        #print("event.message.grouped_id == self.__groupedMessageId")
                         if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20):
-                            print("event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20)")
+                            #print("event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20)")
                             await self.__downloadFunction(self.__username, 1, False, event.message)
                 elif event.message.grouped_id == None:
-                    print("event.message.grouped_id == None")
+                    #print("event.message.grouped_id == None")
                     await self.__downloadFunction(self.__username, 1, True)
 
 class Sleuth:
@@ -79,11 +79,13 @@ class Sleuth:
             if len(message.text) > 1:
                 print(message.text)
                 await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
+                print(f"{self.__download_paths[5]}/text.txt")
                 return
             # await self.organizeDirectory(username)
             file_type = message.file.mime_type.split('/')[0]
             download_path = await self.__get_download_path(file_type)
             await message.download_media(file=download_path)
+            return
             
         tasks = []
         export = []
@@ -119,6 +121,7 @@ class Sleuth:
     async def __export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
             file.write(message)
+            print(message, output_path)
 
     async def __get_download_path(self, file_type) -> str:
         return {
