@@ -1,6 +1,4 @@
-﻿from abc import ABCMeta
-from datetime import datetime, timezone
-from re import A
+﻿from datetime import datetime, timezone
 from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
 from typing import Callable
@@ -11,6 +9,7 @@ from pathlib import Path
 from shutil import rmtree
 import json
 from os import listdir, rename
+from datetime import datetime
 
 channels = ["test329483", "testssss352"]
 
@@ -20,6 +19,7 @@ class HandlersManager:
         self.__downloadFunction = downloadFunction
         self.__username = username
         self.__groupedMessageId = 0
+        self.__groupedMessageDate: datetime 
         
     
     async def createChannelHandler(self):
@@ -28,10 +28,16 @@ class HandlersManager:
             @self.__client.on(events.NewMessage(chats=channel_entity))
             async def handler(event: events.NewMessage.Event):
                 event.message: Message = event.message
-                print(event.message.grouped_id, event._message_id)
-                if event.message.grouped_id != self.__groupedMessageId:
-                    self.__groupedMessageId = event.message.grouped_id
-                    await self.__downloadFunction(self.__username, 1)
+                if event.message.grouped_id != None:
+                    if event.message.grouped_id != self.__groupedMessageId:
+                        self.__groupedMessageId = event.message.grouped_id
+                        self.__groupedMessageDate = event.message.date
+                        await self.__downloadFunction(self.__username, 1)
+                    else:
+                        if event.message.date.second == self.__groupedMessageDate.second:
+                            await self.__downloadFunction(self.__username, 1, False)
+                else:
+                    await self.__downloadFunction(self.__username, 1, True)
 
 class Sleuth:
     def __init__(
@@ -59,7 +65,7 @@ class Sleuth:
             data = json.load(jsonFile)
         return data
 
-    async def __get_messages(self, username: str, limit: int):
+    async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True):
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
@@ -71,7 +77,9 @@ class Sleuth:
                 break
             
             if message.sender is not None and message.text is not None:
-                await self.__check_download_path(username)
+                if checkDownloadPath:
+                    await self.__check_download_path(username)
+                await self.organizeDirectory(username)
                 clean_message = message.text
                 await self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")
                 # export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")))
@@ -115,7 +123,8 @@ class Sleuth:
             Path(self.__pathToAppRootDirectoryContent).mkdir(parents=True)
         for download_path in self.__download_paths:
             Path(download_path).mkdir(parents=True, exist_ok=True)
-            
+    
+    async def organizeDirectory(self, username: str) -> None:
         dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])    
 
         if (int(dirObjects[-1]) > self.lastPostsCount):  
