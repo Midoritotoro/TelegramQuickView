@@ -154,4 +154,3 @@ class Sleuth:
 if __name__ == "__main__":
     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
     telegramParser.start()
-     
