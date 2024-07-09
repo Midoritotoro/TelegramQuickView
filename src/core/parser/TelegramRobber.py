@@ -33,44 +33,12 @@ class Sleuth:
         
         self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
         
-    async def __updatePaths(self, index: int, set: bool, username: str = None) -> None:  
-        if set:
-            self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{index}"
-        else:
-            if hasattr(self, "self.__pathToAppRootDirectoryContent"):
-                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectoryContent[:-1] + f"{index}"
-            else:
-                self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + f"{index}"
-
-        self.__download_paths = [
-            f"{self.__pathToAppRootDirectoryContent}/Изображения",
-            f"{self.__pathToAppRootDirectoryContent}/Видео",
-            f"{self.__pathToAppRootDirectoryContent}/Аудио",
-            f"{self.__pathToAppRootDirectoryContent}/Документы",
-            f"{self.__pathToAppRootDirectoryContent}/Остальное",
-            f"{self.__pathToAppRootDirectoryContent}/Текст"
-        ]
-        
     def __getUserSettings(self) -> dict[str, str]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
             data = json.load(jsonFile)
         return data
 
     async def __get_messages(self, username: str, limit: int):
-        postIndex = 1
-        # if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
-        #     postIndex = await self.getPostIndex(username)
-        #     await self.__updatePaths(postIndex, True, username)
-        # else:
-        #     await self.__updatePaths(postIndex, False)
-        #     await self.__check_download_path()
-        if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
-            postIndex = await self.getPostIndex(username)
-            await self.__updatePaths(postIndex, False)
-            await self.__check_download_path()
-        else:
-            await self.__updatePaths(postIndex, True, username)
-            await self.__check_download_path()
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
@@ -80,24 +48,23 @@ class Sleuth:
             
             if not message:
                 break
-                         
-            postIndex = await self.getPostIndex(username)
-            # await self.__updatePaths(postIndex, False)
-            await self.__check_download_path()
             
             if message.sender is not None and message.text is not None:
+                await self.__check_download_path(username)
                 clean_message = message.text
-                export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/{postIndex}.txt")))
+                await self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")
+                # export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/{postIndex}.txt")))
                 
                 if message.file is not None:
                     file_type = message.file.mime_type.split('/')[0]
                     download_path = await self.__get_download_path(file_type)
-                    tasks.append(asyncio.create_task(message.download_media(file=download_path)))
+                    await message.download_media(file=download_path)
+                    # tasks.append(asyncio.create_task(message.download_media(file=download_path)))
             
-            if len(tasks) == limit:
-                await asyncio.gather(*tasks, *export)
-                tasks.clear()
-                export.clear()
+            # if len(tasks) == limit:
+                 #await asyncio.gather(*tasks, *export)
+                # tasks.clear()
+                # export.clear()
 
     async def __export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
@@ -111,9 +78,17 @@ class Sleuth:
             'documents': self.__download_paths[3],
         }.get(file_type, self.__download_paths[4])
 
-    async def __check_download_path(self) -> None:
-        if Path(self.__pathToAppRootDirectoryContent).exists():
-            rmtree(self.__pathToAppRootDirectoryContent)
+    async def __check_download_path(self, username: str) -> None:
+        postIndex = await self.getPostIndex(username)
+        self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex)
+        self.__download_paths = [
+            f"{self.__pathToAppRootDirectoryContent}/Изображения",
+            f"{self.__pathToAppRootDirectoryContent}/Видео",
+            f"{self.__pathToAppRootDirectoryContent}/Аудио",
+            f"{self.__pathToAppRootDirectoryContent}/Документы",
+            f"{self.__pathToAppRootDirectoryContent}/Остальное",
+            f"{self.__pathToAppRootDirectoryContent}/Текст"
+        ]
         if not Path(self.__pathToAppRootDirectoryContent).exists():
             Path(self.__pathToAppRootDirectoryContent).mkdir(parents=True)
         for download_path in self.__download_paths:
@@ -122,19 +97,30 @@ class Sleuth:
 
         if (int(dirObjects[-1]) > self.lastPostsCount):  
             rmtree(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
-                
-        dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
-        for index, obj in enumerate(dirObjects, start=1):
-            if obj != str(index):
-                rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
-                print(listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}"))
+            print("deleted: ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
+   
+            dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
+            for index, obj in enumerate(dirObjects, start=1):
+                if obj != str(index):
+                    print("Renamed ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, "to ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
+                    rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
+        postIndex = await self.getPostIndex(username)
+        self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex - 1)
+        self.__download_paths = [
+            f"{self.__pathToAppRootDirectoryContent}/Изображения",
+            f"{self.__pathToAppRootDirectoryContent}/Видео",
+            f"{self.__pathToAppRootDirectoryContent}/Аудио",
+            f"{self.__pathToAppRootDirectoryContent}/Документы",
+            f"{self.__pathToAppRootDirectoryContent}/Остальное",
+            f"{self.__pathToAppRootDirectoryContent}/Текст"
+        ]
                 
     async def getPostIndex(self, username: str) -> int:
-        dirObjects = listdir(self.__pathToAppRootDirectory + f"/{username}/")
-        if len(dirObjects) > 0:
-            return int(dirObjects[-1]) + 1
+        if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
+            dirObjects = listdir(self.__pathToAppRootDirectory + f"/{username}/")
+            if len(dirObjects) > 0:
+                return int(dirObjects[-1]) + 1
         return 1
-        
 
     async def checkAndParseTelegramChannels(self) -> None:
         await self.__client.connect()
