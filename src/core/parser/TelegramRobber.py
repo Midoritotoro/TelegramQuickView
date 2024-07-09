@@ -30,14 +30,17 @@ class HandlersManager:
                 event.message: Message = event.message
                 if event.message.grouped_id != None:
                     if event.message.grouped_id != self.__groupedMessageId:
-                        # self.__groupedMessageId = event.message.grouped_id
-                        # self.__groupedMessageDate = event.message.date
-                        await self.__downloadFunction(self.__username, event.message)
+                        print("event.message.grouped_id != self.__groupedMessageId")
+                        self.__groupedMessageId = event.message.grouped_id
+                        self.__groupedMessageDate = event.message.date
+                        await self.__downloadFunction(self.__username, 1, False, event.message)
                     elif event.message.grouped_id == self.__groupedMessageId:
-                        if event.message.date.second == self.__groupedMessageDate.second:
-                            print("second==")
+                        print("event.message.grouped_id == self.__groupedMessageId")
+                        if event.message.date.minute == self.__groupedMessageDate.minute:
+                            print("event.message.date.minute == self.__groupedMessageDate.minute")
                             await self.__downloadFunction(self.__username, 1, False, event.message)
-                else:
+                elif event.message.grouped_id == None:
+                    print("event.message.grouped_id == None")
                     await self.__downloadFunction(self.__username, 1, True)
 
 class Sleuth:
@@ -68,7 +71,8 @@ class Sleuth:
 
     async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True, message: Message = None):
         if message != None:
-            await self.__check_download_path(username)
+            postIndex = await self.getPostIndex(username)
+            await self.__check_download_path(username, postIndex - 1)
             # await self.organizeDirectory(username)
             file_type = message.file.mime_type.split('/')[0]
             download_path = await self.__get_download_path(file_type)
@@ -85,8 +89,10 @@ class Sleuth:
                 break
             
             if message.sender is not None and message.text is not None:
+                
                 if checkDownloadPath:
-                    await self.__check_download_path(username)
+                    postIndex = await self.getPostIndex(username)
+                    await self.__check_download_path(username, postIndex)
                 await self.organizeDirectory(username)
                 clean_message = message.text
                 await self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")
@@ -115,8 +121,7 @@ class Sleuth:
             'documents': self.__download_paths[3],
         }.get(file_type, self.__download_paths[4])
 
-    async def __check_download_path(self, username: str) -> None:
-        postIndex = await self.getPostIndex(username)
+    async def __check_download_path(self, username: str, postIndex: int) -> None:
         self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex)
         self.__download_paths = [
             f"{self.__pathToAppRootDirectoryContent}/Изображения",
