@@ -45,7 +45,7 @@ class Sleuth:
                 username,
                 limit = limit
         ):
-            
+            print(message.text)
             if not message:
                 break
             
@@ -53,7 +53,7 @@ class Sleuth:
                 await self.__check_download_path(username)
                 clean_message = message.text
                 await self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")
-                # export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/{postIndex}.txt")))
+                # export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")))
                 
                 if message.file is not None:
                     file_type = message.file.mime_type.split('/')[0]
@@ -62,8 +62,8 @@ class Sleuth:
                     # tasks.append(asyncio.create_task(message.download_media(file=download_path)))
             
             # if len(tasks) == limit:
-                 #await asyncio.gather(*tasks, *export)
-                # tasks.clear()
+               #  await asyncio.gather(*tasks, *export)
+                #tasks.clear()
                 # export.clear()
 
     async def __export_to_txt(self, message: str, output_path: str) -> None:
