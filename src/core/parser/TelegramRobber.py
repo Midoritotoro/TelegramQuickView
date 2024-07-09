@@ -36,8 +36,8 @@ class HandlersManager:
                         await self.__downloadFunction(self.__username, 1, False, event.message)
                     elif event.message.grouped_id == self.__groupedMessageId:
                         print("event.message.grouped_id == self.__groupedMessageId")
-                        if event.message.date.minute == self.__groupedMessageDate.minute:
-                            print("event.message.date.minute == self.__groupedMessageDate.minute")
+                        if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20):
+                            print("event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20)")
                             await self.__downloadFunction(self.__username, 1, False, event.message)
                 elif event.message.grouped_id == None:
                     print("event.message.grouped_id == None")
@@ -72,12 +72,19 @@ class Sleuth:
     async def __get_messages(self, username: str, limit: int, checkDownloadPath: bool = True, message: Message = None):
         if message != None:
             postIndex = await self.getPostIndex(username)
-            await self.__check_download_path(username, postIndex - 1)
+            if postIndex > 1:
+                await self.__check_download_path(username, postIndex - 1)
+            else:
+                await self.__check_download_path(username, postIndex)
+            if len(message.text) > 1:
+                print(message.text)
+                await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
+                return
             # await self.organizeDirectory(username)
             file_type = message.file.mime_type.split('/')[0]
             download_path = await self.__get_download_path(file_type)
             await message.download_media(file=download_path)
-            await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
+            
         tasks = []
         export = []
         async for message in self.__client.iter_messages(
