@@ -1,9 +1,7 @@
-﻿from datetime import datetime, timezone
-from dateutil.tz import tzlocal
+﻿from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
 from typing import Callable
-from telethon.tl.types import InputPeerChannel, PeerChannel, Message, TypeMessageReplyHeader
-from telethon.errors import PeerFloodError
+from telethon.tl.types import InputPeerChannel
 import asyncio
 from pathlib import Path
 from shutil import rmtree
@@ -20,14 +18,12 @@ class HandlersManager:
         self.__username = username
         self.__groupedMessageId = 0
         self.__groupedMessageDate: datetime 
-        
     
     async def createChannelHandler(self):
         channel_entity = await self.__client.get_input_entity(self.__username)
         if isinstance(channel_entity, InputPeerChannel):
             @self.__client.on(events.NewMessage(chats=channel_entity))
             async def handler(event: events.NewMessage.Event):
-                event.message: Message = event.message
                 if event.message.grouped_id != None:
                     if event.message.grouped_id != self.__groupedMessageId:
                         self.__groupedMessageId = event.message.grouped_id
@@ -73,11 +69,8 @@ class Sleuth:
             else:
                 await self.__check_download_path(username, postIndex)
             if len(message.text) > 1:
-                print(message.text)
                 await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
-                print(f"{self.__download_paths[5]}/text.txt")
             file_type = message.file.mime_type.split('/')[0]
-            print(file_type)
             download_path = await self.__get_download_path(file_type)
             await message.download_media(file=download_path)
             return
@@ -88,7 +81,6 @@ class Sleuth:
                 username,
                 limit = limit
         ):
-            print(message.text)
             if not message:
                 break
             
@@ -100,18 +92,11 @@ class Sleuth:
                 await self.organizeDirectory(username)
                 clean_message = message.text
                 await self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")
-                # export.append(asyncio.create_task(self.__export_to_txt(clean_message, f"{self.__download_paths[5]}/text.txt")))
                 
                 if message.file is not None:
                     file_type = message.file.mime_type.split('/')[0]
                     download_path = await self.__get_download_path(file_type)
                     await message.download_media(file=download_path)
-                    # tasks.append(asyncio.create_task(message.download_media(file=download_path)))
-            
-            # if len(tasks) == limit:
-               #  await asyncio.gather(*tasks, *export)
-                #tasks.clear()
-                # export.clear()
 
     async def __export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
