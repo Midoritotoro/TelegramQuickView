@@ -1,7 +1,10 @@
-﻿from datetime import datetime, timezone
+﻿from abc import ABCMeta
+from datetime import datetime, timezone
+from re import A
 from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
-from telethon.tl.types import InputPeerChannel, PeerChannel, Message 
+from typing import Callable
+from telethon.tl.types import InputPeerChannel, PeerChannel, Message, TypeMessageReplyHeader
 from telethon.errors import PeerFloodError
 import asyncio
 from pathlib import Path
@@ -11,6 +14,24 @@ from os import listdir, rename
 
 channels = ["test329483", "testssss352"]
 
+class HandlersManager:
+    def __init__(self, client: TelegramClient, downloadFunction: Callable, username: str) -> None:
+        self.__client = client
+        self.__downloadFunction = downloadFunction
+        self.__username = username
+        self.__groupedMessageId = 0
+        
+    
+    async def createChannelHandler(self):
+        channel_entity = await self.__client.get_input_entity(self.__username)
+        if isinstance(channel_entity, InputPeerChannel):
+            @self.__client.on(events.NewMessage(chats=channel_entity))
+            async def handler(event: events.NewMessage.Event):
+                event.message: Message = event.message
+                print(event.message.grouped_id, event._message_id)
+                if event.message.grouped_id != self.__groupedMessageId:
+                    self.__groupedMessageId = event.message.grouped_id
+                    await self.__downloadFunction(self.__username, 1)
 
 class Sleuth:
     def __init__(
@@ -129,26 +150,10 @@ class Sleuth:
             await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
 
         for channel in channels:
-            await self.createChannelHandler(channel)
+            handlersManager = HandlersManager(self.__client, self.__get_messages, channel)
+            await handlersManager.createChannelHandler()
 
         await self.__client.run_until_disconnected()
-
-    async def createChannelHandler(self, username: str):
-        channel_entity = await self.__client.get_input_entity(username)
-        if isinstance(channel_entity, InputPeerChannel):
-            @self.__client.on(events.NewMessage(chats=channel_entity))
-            async def handler(event):
-                if event.message.media:
-                    # message: Message = 0
-                     #message.media
-                    print("Сообщение получено")
-                    # print(f"Файл: {event.message.media}")
-                else:
-                    print(f"Сообщение: {event.message.text}")
-                # await self.__get_messages(username, 1)
-           #  @self.__client.on(events.Album(chats=channel_entity))
-            # async def albumHandler(event): 
-               #  await self.__get_messages(username, 1)
         
     def start(self) -> None:
         self.__client.loop.run_until_complete(self.checkAndParseTelegramChannels())
