@@ -57,4 +57,5 @@ void PythonCaller::CallTelegramParseFunction(const char* moduleName, const char*
         PyClsInstance = PyObject_CallObject(PyClass, PyArgs);
         PyObject_CallMethod(PyClsInstance, PyFunctionName, NULL);
     }
+    PyErr_Print();
 }

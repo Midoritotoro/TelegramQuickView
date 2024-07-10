@@ -151,34 +151,29 @@ class Sleuth:
             await handlersManager.createChannelHandler()
 
         await self.__client.run_until_disconnected()
-        
-    async def parse(self, channel: str):
-        index = 0    
-        async for message in self.__client.iter_messages(
-            channel
-        ):
-            if not message:
-                break
-                
-            index += 1
-            if index > self.currentLastPostCount:
-                break           
-            await self.__get_singleMessage(channel, message)
                     
     async def __fetchRecentChannelsUpdates(self):
-        savePostsCount = self.lastPostsCount
         if self.__client.disconnected:
             await self.__client.connect()
         if not await self.__client.is_user_authorized():
             await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
         for channel in self.channels:
-            
-                await self.parse(channel)
-                self.lastPostsCount = savePostsCount
+            index = 0    
+            async for message in self.__client.iter_messages(
+                channel
+            ):
+                if not message:
+                    break
+                index += 1
+                if index > self.currentLastPostCount:
+                    break           
+                await self.__get_singleMessage(channel, message)
+                self.currentLastPostCount = self.lastPostsCount
         await self.__client.run_until_disconnected()
          
     def start(self) -> None:
         self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
+        # self.__client.loop.run_until_complete(self.__checkAndParseTelegramChannels())
 
 if __name__ == "__main__":
     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
