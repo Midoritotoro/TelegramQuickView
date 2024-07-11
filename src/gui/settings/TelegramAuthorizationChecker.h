@@ -3,14 +3,20 @@
 #define PY_SSIZE_T_CLEAN
 #include "../../src/core/PythonQtWrapper.h"
 
+#include <Windows.h>
+
+typedef struct _TelegramCredentials {
+	const char* apiHash;
+	const char* phoneNumber;
+	long long apiId;
+	const char* pathToUserSettingsJson;
+	long code;
+	const char* codeHash;
+} TelegramCredentials, *LPTelegramCredentials;
+
 class TelegramAuthorizationChecker {
-private:
-	PyObject* PyArgs = nullptr, * PySys = nullptr, * PyPath = nullptr, * PyName = nullptr,
-		* PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr, * PyResult = nullptr;
 public:
-	TelegramAuthorizationChecker();
-	~TelegramAuthorizationChecker();
-	[[nodiscard]] bool TelegramCredentialsValidCheck(const char* apiHash, const char* phoneNumber, long long apiId);
-	[[nodiscard]] bool sendTelegramCode(const char* apiHash, const char* phoneNumber, long long apiId, const char* pathToUserSettingsJson);
-	[[nodiscard]] bool TelegramCodeValidCheck(const char* apiHash, const char* phoneNumber, long long apiId, long code, const char* codeHash);
+	[[nodiscard]] static DWORD WINAPI TelegramCredentialsValidCheck(LPVOID lpParam);
+	[[nodiscard]] static DWORD WINAPI sendTelegramCode(LPVOID lpParam);
+	[[nodiscard]] static DWORD WINAPI TelegramCodeValidCheck(LPVOID lpParam);
 };

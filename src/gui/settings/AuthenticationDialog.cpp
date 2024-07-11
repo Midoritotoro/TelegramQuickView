@@ -228,6 +228,9 @@ void AuthenticationDialog::shake()
 }
 
 void AuthenticationDialog::logInButton_clicked() {
+    DWORD functionResult = 0;
+    HANDLE thread = nullptr;
+
     _incorrectTelegramCredentialsLabel->hide();
     _incorrectMobilePhoneLabel->hide();
     _incorrectTelegramCodeLabel->hide();
@@ -236,9 +239,9 @@ void AuthenticationDialog::logInButton_clicked() {
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
-    _telegramCredentials->apiHash = apiHash;
-    _telegramCredentials->apiId = apiId;
-    _telegramCredentials->phoneNumber = phoneNumber;
+    _telegramCredentials->apiHash = apiHash.toStdString().c_str();
+    _telegramCredentials->apiId = apiId.toInt();
+    _telegramCredentials->phoneNumber = phoneNumber.toStdString().c_str();
 
     if (!_userDataManager->setTelegramCredentials(_telegramCredentials)) {
         _incorrectTelegramCredentialsLabel->show();
@@ -249,7 +252,15 @@ void AuthenticationDialog::logInButton_clicked() {
         shake();
         return;
     }
-    if (!_userDataManager->isTelegramCredentialsValid()) {
+
+    thread = CreateThread(NULL, 0, &UserDataManager::isTelegramCredentialsValid, NULL, 0, NULL);
+    WaitForSingleObject(thread, INFINITE);
+
+    if (!GetExitCodeThread(thread, &functionResult))
+        return;
+    CloseHandle(thread);
+
+    if (!functionResult) {
         _incorrectTelegramCredentialsLabel->show();
         _userDataManager->clearTelegramCredentials();
         apiHashLineEdit->clear();
@@ -259,10 +270,14 @@ void AuthenticationDialog::logInButton_clicked() {
         return;
     }
 
-    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
+    thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
+    WaitForSingleObject(thread, INFINITE);
 
-    if (!isCodeSended) {
+    if (!GetExitCodeThread(thread, &functionResult))
+        return;
+    CloseHandle(thread);
+
+    if (!functionResult) {
         _incorrectMobilePhoneLabel->show();
         shake();
         return;
@@ -302,7 +317,7 @@ void AuthenticationDialog::backButton_clicked() {
 
     _telegramCredentials = _userDataManager->getTelegramCredentials();
     apiHashLineEdit->setText(_telegramCredentials->apiHash);
-    apiIdLineEdit->setText(_telegramCredentials->apiId);
+    apiIdLineEdit->setText(QString::number(_telegramCredentials->apiId));
     phoneNumberLineEdit->setText(_telegramCredentials->phoneNumber);
     _stackedWidget->setCurrentIndex(0);
 }
@@ -310,14 +325,22 @@ void AuthenticationDialog::backButton_clicked() {
 void AuthenticationDialog::sendCodeAgainButton_clicked() {
     QFile file("TelegramQuickView.session");
     file.remove();
+    DWORD functionResult = 0;
+
     _telegramCredentials = _userDataManager->getTelegramCredentials();
 
-    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(_telegramCredentials->apiHash.toStdString().c_str(), _telegramCredentials->phoneNumber.toStdString().c_str(), _telegramCredentials->apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
-    if (!isCodeSended) {
+    HANDLE thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
+    WaitForSingleObject(thread, INFINITE);
+
+    if (!GetExitCodeThread(thread, &functionResult))
+        return;
+    CloseHandle(thread);
+
+    if (!functionResult) {
         shake();
         return;
     }
+
     timeRemaining = 180;
     timer->start(1000);
     sendCodeButton->setEnabled(false);
