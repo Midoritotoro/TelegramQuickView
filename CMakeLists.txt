@@ -25,10 +25,10 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES src/core/parser/PythonCaller.cpp src/core/parser/main.cpp src/core/parser/TelegramRobber.py)
+SET(PARSER_SOURCES WIN32 src/core/parser/PythonCaller.cpp src/core/parser/main.cpp src/core/parser/TelegramRobber.py)
 
 
-SET(MAIN_SOURCES  main.cpp
+SET(MAIN_SOURCES main.cpp
 	src/core/PythonQtWrapper.h
 	src/core/sql/SqlConnect.cpp
 	src/core/sql/SqlConnect.h
