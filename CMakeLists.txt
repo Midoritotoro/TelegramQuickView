@@ -6,7 +6,6 @@ if (POLICY CMP0141)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
 
 project("TelegramQuickView" LANGUAGES C CXX)

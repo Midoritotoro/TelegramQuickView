@@ -172,12 +172,7 @@ class Sleuth:
                     break           
                 await self.__get_singleMessage(channel, message)
                 self.currentLastPostCount = self.lastPostsCount
-        await self.__client.run_until_disconnected()
          
     def start(self) -> None:
         self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
         self.__client.loop.run_until_complete(self.__checkAndParseTelegramChannels())
-
-if __name__ == "__main__":
-    telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
-    telegramParser.start()
