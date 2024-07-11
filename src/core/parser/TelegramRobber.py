@@ -8,6 +8,7 @@ from pathlib import Path
 from shutil import rmtree
 import json
 from os import listdir, rename
+import os.path
 from datetime import datetime
 
 
@@ -58,7 +59,9 @@ class Sleuth:
         self.__pathToAppRootDirectory = pathToAppRootDirectory
         self.__pathToAppRootDirectoryContent = ""
         
-        self.__client = TelegramClient('TelegramQuickView', self.api_id, self.api_hash, timeout=10)
+        exePath = os.path.dirname(os.path.abspath(__file__)).rsplit("\\", 3)[0]
+        self.sessionFile = os.path.join(exePath, "TelegramQuickView.session")
+        self.__client = TelegramClient(self.sessionFile, self.api_id, self.api_hash, timeout=10)
         
     def __getUserSettings(self) -> dict[str, str]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
@@ -78,10 +81,10 @@ class Sleuth:
             await self.__organizeDirectory(username)
         if len(message.text) > 1:
             await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
-        if message.media != None:
+        if message.file != None:
             file_type = message.file.mime_type.split('/')[0]
             download_path = await self.__get_download_path(file_type)
-            await message.download_media(file=download_path)
+            await self.__client.download_media(message=message, file=download_path)
 
     async def __export_to_txt(self, message: str, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
@@ -173,9 +176,8 @@ class Sleuth:
          
     def start(self) -> None:
         self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
-        # self.__client.loop.run_until_complete(self.__checkAndParseTelegramChannels())
+        self.__client.loop.run_until_complete(self.__checkAndParseTelegramChannels())
 
 if __name__ == "__main__":
     telegramParser = Sleuth("C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media")
     telegramParser.start()
-   
