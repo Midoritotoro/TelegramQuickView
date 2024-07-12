@@ -264,8 +264,9 @@ void AuthenticationDialog::logInButton_clicked() {
 
     functionResult = UserDataManager::isTelegramCredentialsValid();
 
-    if (!functionResult) {
+    if (functionResult == 0) {
         _incorrectTelegramCredentialsLabel->show();
+        qDebug() << "isTelegramCredentialsValid = 0";
         UserDataManager::clearTelegramCredentials();
         apiHashLineEdit->clear();
         apiIdLineEdit->clear();
@@ -281,13 +282,13 @@ void AuthenticationDialog::logInButton_clicked() {
     //if (!GetExitCodeThread(thread, &functionResult))
     //    return;
     //CloseHandle(thread);
-    functionResult = TelegramAuthorizationChecker::sendTelegramCode(_telegramCredentials);
+    //functionResult = TelegramAuthorizationChecker::sendTelegramCode(_telegramCredentials);
 
-    if (!functionResult) {
-        _incorrectMobilePhoneLabel->show();
-        shake();
-        return;
-    }
+    //if (!functionResult) {
+    //    _incorrectMobilePhoneLabel->show();
+    //    shake();
+    //    return;
+    //}
 
     timeRemaining = 180;
     timer->start(1000);

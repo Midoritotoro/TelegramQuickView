@@ -16,6 +16,7 @@ QJsonDocument UserDataManager::getJsonDocument() {
 	
 	const QString fileName = getUserSettingsPath();
 	jsonFile.setFileName(fileName);
+	jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 
 	if (!jsonFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		return jsonDocument;
@@ -30,15 +31,10 @@ QJsonDocument UserDataManager::getJsonDocument() {
 DWORD UserDataManager::isTelegramCredentialsValid(LPVOID lpParam) {
 	QJsonDocument jsonDocument = getJsonDocument();
 	QJsonObject jsonObject = jsonDocument.object();
-	LPTelegramCredentials telegramCredentials = new TelegramCredentials();
 
 	QJsonValue apiHash = jsonObject.value("apiHash");
 	QJsonValue apiId = jsonObject.value("apiId");
 	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
-
-	telegramCredentials->apiHash = apiHash.toString().toStdString();
-	telegramCredentials->phoneNumber = phoneNumber.toString().toStdString();
-	telegramCredentials->apiId = apiId.toString().toInt();
 
 	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
 		return false;
@@ -46,10 +42,16 @@ DWORD UserDataManager::isTelegramCredentialsValid(LPVOID lpParam) {
 	if (apiHash.toString().length() < 32 || apiId.toString().length() < 5)
 		return false;
 
-	bool isTelegramCredentialsValid = TelegramAuthorizationChecker::TelegramCredentialsValidCheck(telegramCredentials);
+	LPTelegramCredentials telegramCredentials = new TelegramCredentials();
+	telegramCredentials->apiHash = apiHash.toString().toStdString();
+	telegramCredentials->phoneNumber = phoneNumber.toString().toStdString();
+	telegramCredentials->apiId = apiId.toString().toInt();
+
+	DWORD isTelegramCredentialsValid = TelegramAuthorizationChecker::TelegramCredentialsValidCheck(telegramCredentials);
+	qDebug() << isTelegramCredentialsValid;
 
 	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
-		!phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true;
+		!phoneNumber.isUndefined() == true && isTelegramCredentialsValid == 1;
 }
 
 LPTelegramCredentials UserDataManager::getTelegramCredentials() {
@@ -88,11 +90,12 @@ DWORD UserDataManager::isTelegramPhoneNumberCodeValid(LPVOID lpParam) {
 	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
 		return false;
 
-
 	if (apiHash.toString().length() < 32 || apiId.toString().length() < 5)
 		return false;
 
 	bool isTelegramCodeValid = TelegramAuthorizationChecker::TelegramCodeValidCheck(telegramCredentials);
+
+	qDebug() << isTelegramCodeValid;
 
 	if (code.toString().length() < 5)
 		return false;
@@ -147,7 +150,6 @@ void UserDataManager::clearTelegramCredentials() {
 }
 
 bool UserDataManager::setTelegramCredentials(LPTelegramCredentials telegramCredentials) {
-	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
 	QFile jsonFile;
 
@@ -155,13 +157,10 @@ bool UserDataManager::setTelegramCredentials(LPTelegramCredentials telegramCrede
 	jsonFile.setFileName(fileName);
 	jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 
-	qDebug() << telegramCredentials->apiHash;
-
-	if (QString(telegramCredentials->apiHash.c_str()).length() < 32 || QString::number(telegramCredentials->apiId).length() < 5) {
-		qDebug() << QString(telegramCredentials->apiHash.c_str()).length();
-		qDebug() << QString::number(telegramCredentials->apiId).length();
+	if (QString(telegramCredentials->apiHash.c_str()).length() < 32 || QString::number(telegramCredentials->apiId).length() < 5)
 		return false;
-	}
+
+	QJsonObject jsonObject = jsonDocument.object();
 
 	jsonObject.insert("apiHash", QString(telegramCredentials->apiHash.c_str()));
 	jsonObject.insert("phoneNumber", QString(telegramCredentials->phoneNumber.c_str()));

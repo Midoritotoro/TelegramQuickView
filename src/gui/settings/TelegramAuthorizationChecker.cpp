@@ -6,7 +6,7 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
     const char* PyFunctionName = "isTelegramCredentialsValid";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    bool BoolResult;
+    DWORD result = 0;
 
     LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
 
@@ -23,18 +23,18 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
     PyName = PyUnicode_FromString(moduleName);
     PyErr_Print();
     if (!PyName)
-        return false;
+        return result;
 
     PyModule = PyImport_Import(PyName);
     PyErr_Print();
     if (!PyModule)
-        return false;
+        return result;
 
     PyFunc = PyObject_GetAttrString(PyModule, "asyncCall");
 
     PyErr_Print();
     if (!PyFunc)
-        return false;
+        return result;
 
     if (PyCallable_Check(PyFunc)) {
         PyArgs = PyTuple_Pack(PyArgumentsTupleSize, PyUnicode_FromString(PyFunctionName),
@@ -44,10 +44,8 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
             PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                if (PyObject_IsTrue(PyResult) == 0)
-                    BoolResult = false;
-                else
-                    BoolResult = true;
+                if (PyObject_IsTrue(PyResult))
+                    result = 1;
         }
     }
 
@@ -63,14 +61,14 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
     PyErr_Print();
     Py_Finalize();
 
-    return BoolResult;
+    return result;
 }
 
 DWORD WINAPI TelegramAuthorizationChecker::sendTelegramCode(LPVOID lpParam){
     const char* PyFunctionName = "sendTelegramCode";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    bool BoolResult;
+    DWORD result = 0;
 
     LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
 
@@ -87,17 +85,17 @@ DWORD WINAPI TelegramAuthorizationChecker::sendTelegramCode(LPVOID lpParam){
     PyName = PyUnicode_FromString(moduleName);
     PyErr_Print();
     if (!PyName)
-        return false;
+        return result;
 
     PyModule = PyImport_Import(PyName);
     PyErr_Print();
     if (!PyModule)
-        return false;
+        return result;
 
     PyDict = PyModule_GetDict(PyModule);
     PyErr_Print();
     if (!PyDict)
-        return false;
+        return result;
 
     PyFunc = PyDict_GetItemString(PyDict, "asyncCall");
     PyErr_Print();
@@ -110,10 +108,8 @@ DWORD WINAPI TelegramAuthorizationChecker::sendTelegramCode(LPVOID lpParam){
         PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                if (PyObject_IsTrue(PyResult) == 0)
-                    BoolResult = false;
-                else
-                    BoolResult = true;
+                if (PyObject_IsTrue(PyResult))
+                    result = 1;
         }
     }
 
@@ -130,14 +126,14 @@ DWORD WINAPI TelegramAuthorizationChecker::sendTelegramCode(LPVOID lpParam){
 
     Py_Finalize();
 
-    return BoolResult;
+    return result;
 }
 
 DWORD WINAPI TelegramAuthorizationChecker::TelegramCodeValidCheck(LPVOID lpParam) {
     const char* PyFunctionName = "isTelegramPhoneNumberCodeValid";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    bool BoolResult;
+    DWORD result = 0;
 
     LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
 
@@ -154,17 +150,17 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCodeValidCheck(LPVOID lpParam
     PyName = PyUnicode_FromString(moduleName);
     PyErr_Print();
     if (!PyName)
-        return false;
+        return result;
 
     PyModule = PyImport_Import(PyName);
     PyErr_Print();
     if (!PyModule)
-        return false;
+        return result;
 
     PyDict = PyModule_GetDict(PyModule);
     PyErr_Print();
     if (!PyDict)
-        return false;
+        return result;
 
     PyFunc = PyDict_GetItemString(PyDict, "asyncCall");
     PyErr_Print();
@@ -179,10 +175,8 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCodeValidCheck(LPVOID lpParam
 
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                if (PyObject_IsTrue(PyResult) == 0)
-                    BoolResult = false;
-                else
-                    BoolResult = true;
+                if (PyObject_IsTrue(PyResult))
+                    result = 1;
         }
     }
 
@@ -199,5 +193,5 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCodeValidCheck(LPVOID lpParam
 
     Py_Finalize();
 
-    return BoolResult;
+    return result;
 }
