@@ -42,6 +42,7 @@ async def isTelegramPhoneNumberCodeValid(apiId: int, phoneNumber: str, apiHash: 
 
 def asyncCall(functionName: str, *args) -> bool:
     functions = {"sendTelegramCode": sendTelegramCode, "isTelegramCredentialsValid": isTelegramCredentialsValid, "isTelegramPhoneNumberCodeValid": isTelegramPhoneNumberCodeValid}
+    print("called: ", functions[functionName].__name__)
     return asyncio.run((functions[functionName])(*args))
 
 

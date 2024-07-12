@@ -26,7 +26,6 @@ private:
     QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr, * telegramCodeLineEdit = nullptr;
     QToolButton* logInButton = nullptr;
     QStackedWidget* _stackedWidget = nullptr;
-    UserDataManager* _userDataManager = nullptr;
     QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr,*_incorrectTelegramCodeLabel = nullptr;
     LPTelegramCredentials _telegramCredentials = nullptr;
     QTimer* timer = nullptr;

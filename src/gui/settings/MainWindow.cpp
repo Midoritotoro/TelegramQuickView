@@ -21,18 +21,21 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
-	userDataManager = new UserDataManager();
 	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
 
-	if (userDataManager->isTelegramCredentialsValid() == true && userDataManager->isTelegramPhoneNumberCodeValid() == false) {
+	qDebug() << "UserDataManager::isTelegramCredentialsValid() - " << UserDataManager::isTelegramCredentialsValid();
+	qDebug() << "UserDataManager::isTelegramPhoneNumberCodeValid() - " << UserDataManager::isTelegramPhoneNumberCodeValid();
+
+
+	if (UserDataManager::isTelegramCredentialsValid() == true && UserDataManager::isTelegramPhoneNumberCodeValid() == false) {
 		userAuthenticationDialog->skipFirstAuthorizationStage();
 		userAuthenticationDialog->exec();
 	}
-	else if (userDataManager->isTelegramCredentialsValid() == false) {
+	else if (UserDataManager::isTelegramCredentialsValid() == false) {
 		userAuthenticationDialog->exec();
 	}
 
-	userDataManager->setLastPostsCountForChannels(3);
+	UserDataManager::setLastPostsCountForChannels(3);
 
 	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
@@ -76,7 +79,7 @@ void MainWindow::on_AddChannelsButton_click() {
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
-	userDataManager->setTargetChannels(TelegramChannelsList);
+	UserDataManager::setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }
@@ -86,14 +89,14 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
-	userDataManager->clearChannelsJsonArray();
-	userDataManager->setTargetChannels(TelegramChannelsList);
+	UserDataManager::clearChannelsJsonArray();
+	UserDataManager::setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click() {
-	QJsonDocument jsonDocument = userDataManager->getJsonDocument();
+	QJsonDocument jsonDocument = UserDataManager::getJsonDocument();
 	QJsonObject jsonObject = jsonDocument.object();
 
 	if (!jsonObject.value("channels").toArray().isEmpty()) {

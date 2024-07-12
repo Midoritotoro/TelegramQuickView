@@ -12,7 +12,6 @@ private:
 	Q_OBJECT
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
 	MouseDetector* mouseDetector = nullptr;
-	UserDataManager* userDataManager = nullptr;
 public:
 	MainWindow(QWidget* parent = nullptr);
 private Q_SLOTS:

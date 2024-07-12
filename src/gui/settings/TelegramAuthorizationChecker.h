@@ -4,15 +4,18 @@
 #include "../../src/core/PythonQtWrapper.h"
 
 #include <Windows.h>
+#include <string>
+
 
 typedef struct _TelegramCredentials {
-	const char* apiHash;
-	const char* phoneNumber;
+	std::string apiHash;
+	std::string phoneNumber;
+	std::string codeHash;
+	std::string pathToUserSettingsJson;
 	long long apiId;
-	const char* pathToUserSettingsJson;
 	long code;
-	const char* codeHash;
 } TelegramCredentials, *LPTelegramCredentials;
+
 
 class TelegramAuthorizationChecker {
 public:
