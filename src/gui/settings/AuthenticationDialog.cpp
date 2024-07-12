@@ -267,7 +267,7 @@ void AuthenticationDialog::logInButton_clicked() {
     if (functionResult == 0) {
         _incorrectTelegramCredentialsLabel->show();
         qDebug() << "isTelegramCredentialsValid = 0";
-        UserDataManager::clearTelegramCredentials();
+        //UserDataManager::clearTelegramCredentials();
         apiHashLineEdit->clear();
         apiIdLineEdit->clear();
         phoneNumberLineEdit->clear();

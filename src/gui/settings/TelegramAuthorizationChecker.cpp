@@ -26,15 +26,17 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
         return result;
 
     PyModule = PyImport_Import(PyName);
+    std::cout << "func";
     PyErr_Print();
     if (!PyModule)
         return result;
 
     PyFunc = PyObject_GetAttrString(PyModule, "asyncCall");
-
+    std::cout << "func";
     PyErr_Print();
     if (!PyFunc)
         return result;
+    std::cout << "ffffunc";
 
     if (PyCallable_Check(PyFunc)) {
         PyArgs = PyTuple_Pack(PyArgumentsTupleSize, PyUnicode_FromString(PyFunctionName),
