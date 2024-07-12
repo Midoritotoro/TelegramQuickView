@@ -4,7 +4,7 @@
 DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID lpParam) {
     const char* PyFunctionName = "isTelegramCredentialsValid";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
-    const char* moduleName = "TelegramAuthorization.py";
+    const char* moduleName = "TelegramAuthorization";
     bool BoolResult;
 
     LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
@@ -15,7 +15,7 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
-    PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
+    PyList_Append(PyPath, PyUnicode_FromString("."));
 
     Py_ssize_t PyArgumentsTupleSize = 4;
 
@@ -27,7 +27,7 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
     if (!PyModule)
         return false;
 
-    PyFunc = PyDict_GetItemString(PyModule, "asyncCall");
+    PyFunc = PyObject_GetAttrString(PyModule, "asyncCall");
     if (!PyFunc)
         return false;
 
