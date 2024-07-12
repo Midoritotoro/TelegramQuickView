@@ -1,5 +1,4 @@
 ﻿#include "PythonCaller.h"
-#include <thread>
 
 
 PythonCaller::PythonCaller(const char* pythonFilePath): _pythonFilePath(pythonFilePath) {
