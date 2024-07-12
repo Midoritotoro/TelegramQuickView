@@ -51,7 +51,7 @@ DWORD UserDataManager::isTelegramCredentialsValid(LPVOID lpParam) {
 	LPTelegramCredentials telegramCredentials = new TelegramCredentials();
 	telegramCredentials->apiHash = apiHash.toString().toStdString();
 	telegramCredentials->phoneNumber = phoneNumber.toString().toStdString();
-	telegramCredentials->apiId = apiId.toString().toInt();
+	telegramCredentials->apiId = apiId.toInt();
 
 	DWORD isTelegramCredentialsValid = TelegramAuthorizationChecker::TelegramCredentialsValidCheck(telegramCredentials);
 	qDebug() << isTelegramCredentialsValid;
@@ -71,7 +71,7 @@ LPTelegramCredentials UserDataManager::getTelegramCredentials() {
 	QJsonValue phoneNumber = jsonObject.value("phoneNumber");
 
 	telegramCredentials->apiHash = apiHash.toString().toStdString();
-	telegramCredentials->apiId = apiId.toString().toInt();
+	telegramCredentials->apiId = apiId.toInt();
 	telegramCredentials->phoneNumber = phoneNumber.toString().toStdString();
 
 	return telegramCredentials;
@@ -90,7 +90,7 @@ DWORD UserDataManager::isTelegramPhoneNumberCodeValid(LPVOID lpParam) {
 
 	telegramCredentials->apiHash = apiHash.toString().toStdString();
 	telegramCredentials->phoneNumber = phoneNumber.toString().toStdString();
-	telegramCredentials->apiId = apiId.toString().toInt();
+	telegramCredentials->apiId = apiId.toInt();
 	telegramCredentials->code = code.toString().toInt();
 	telegramCredentials->codeHash = codeHash.toString().toStdString();
 

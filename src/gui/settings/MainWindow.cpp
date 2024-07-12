@@ -23,17 +23,21 @@ MainWindow::MainWindow(QWidget* parent) :
 {
 	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
 
+	Py_InitializeEx(0);
+
 	qDebug() << "UserDataManager::isTelegramCredentialsValid() - " << UserDataManager::isTelegramCredentialsValid();
 	qDebug() << "UserDataManager::isTelegramPhoneNumberCodeValid() - " << UserDataManager::isTelegramPhoneNumberCodeValid();
 
+	Py_FinalizeEx();
 
-	if (UserDataManager::isTelegramCredentialsValid() == true && UserDataManager::isTelegramPhoneNumberCodeValid() == false) {
+
+	/*if (UserDataManager::isTelegramCredentialsValid() == true && UserDataManager::isTelegramPhoneNumberCodeValid() == false) {
 		userAuthenticationDialog->skipFirstAuthorizationStage();
 		userAuthenticationDialog->exec();
 	}
 	else if (UserDataManager::isTelegramCredentialsValid() == false) {
 		userAuthenticationDialog->exec();
-	}
+	}*/
 
 	UserDataManager::setLastPostsCountForChannels(3);
 
