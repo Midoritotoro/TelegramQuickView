@@ -17,7 +17,6 @@ async def sendTelegramCode(apiId: int, phoneNumber: str, apiHash: str, pathToUse
     except:
         return False
     return True
-       
 
 async def isTelegramCredentialsValid(apiId: int, phoneNumber: str, apiHash: str) -> bool:
     try:

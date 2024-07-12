@@ -4,14 +4,14 @@
 DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID lpParam) {
     const char* PyFunctionName = "isTelegramCredentialsValid";
     const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
-    const char* moduleName = "TelegramAuthorization";
+    const char* moduleName = "TelegramAuthorization.py";
     bool BoolResult;
 
     LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
 
     Py_Initialize();
 
-    PyObject* PySys = nullptr, * PyPath = nullptr, * PyArgs = nullptr, * PyName = nullptr, * PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr, * PyResult = nullptr;
+    PyObject* PySys = nullptr, * PyPath = nullptr, * PyArgs = nullptr, * PyName = nullptr, * PyModule = nullptr, * PyFunc = nullptr, * PyResult = nullptr;
 
     PySys = PyImport_ImportModule("sys");
     PyPath = PyObject_GetAttrString(PySys, "path");
@@ -27,22 +27,16 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
     if (!PyModule)
         return false;
 
-    PyDict = PyModule_GetDict(PyModule);
-    if (!PyDict)
+    PyFunc = PyDict_GetItemString(PyModule, "asyncCall");
+    if (!PyFunc)
         return false;
 
-    PyFunc = PyDict_GetItemString(PyDict, "asyncCall");
-
     if (PyCallable_Check(PyFunc)) {
-        PyArgs = PyTuple_New(PyArgumentsTupleSize);
+        PyArgs = PyTuple_Pack(PyArgumentsTupleSize, PyUnicode_FromString(PyFunctionName),
+            PyLong_FromLong(long(lpTelegramCredentials->apiId)), PyUnicode_FromString(lpTelegramCredentials->phoneNumber), PyUnicode_FromString(lpTelegramCredentials->apiHash));
 
-        PyTuple_SetItem(PyArgs, 0, PyUnicode_FromString(PyFunctionName));
-        PyTuple_SetItem(PyArgs, 1, PyLong_FromLong(long(lpTelegramCredentials->apiId)));
-        PyTuple_SetItem(PyArgs, 2, PyUnicode_FromString(lpTelegramCredentials->phoneNumber));
-        PyTuple_SetItem(PyArgs, 3, PyUnicode_FromString(lpTelegramCredentials->apiHash));
-
-        PyResult = PyObject_CallObject(PyFunc, PyArgs);
-        Py_XDECREF(PyArgs);
+        if (PyArgs != NULL)
+            PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
                 if (PyObject_IsTrue(PyResult) == 0)
@@ -50,16 +44,18 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
                 else
                     BoolResult = true;
         }
-        Py_XDECREF(PyResult);
-        Py_XDECREF(PyFunc);
     }
-    PyErr_Print();
 
+    Py_DECREF(PyResult);
+    Py_DECREF(PyArgs);
+    Py_DECREF(PyFunc);
     Py_DECREF(PyModule);
-    Py_DECREF(PyName);
+    //Py_DECREF(PyName);
+
     Py_DECREF(PyPath);
     Py_DECREF(PySys);
 
+    PyErr_Print();
     Py_Finalize();
 
     return BoolResult;
@@ -73,7 +69,7 @@ DWORD WINAPI TelegramAuthorizationChecker::sendTelegramCode(LPVOID lpParam){
 
     LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
 
-    Py_Initialize();
+    Py_InitializeEx(0);
 
     PyObject* PySys = nullptr, * PyPath = nullptr, *PyArgs = nullptr, * PyName = nullptr, * PyModule = nullptr, *PyDict = nullptr, * PyFunc = nullptr, *PyResult = nullptr;
 
@@ -132,7 +128,7 @@ DWORD WINAPI TelegramAuthorizationChecker::sendTelegramCode(LPVOID lpParam){
     Py_DECREF(PyPath);
     Py_DECREF(PySys);
 
-    Py_Finalize();
+    Py_FinalizeEx();
 
     return BoolResult;
 }
@@ -208,7 +204,7 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCodeValidCheck(LPVOID lpParam
     Py_DECREF(PyPath);
     Py_DECREF(PySys);
 
-    Py_Finalize();
+    Py_FinalizeEx();
 
     return BoolResult;
 }
