@@ -25,20 +25,22 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	Py_InitializeEx(0);
 
-	qDebug() << "UserDataManager::isTelegramCredentialsValid() - " << UserDataManager::isTelegramCredentialsValid();
-	qDebug() << "UserDataManager::isTelegramPhoneNumberCodeValid() - " << UserDataManager::isTelegramPhoneNumberCodeValid();
+	PyObject* PySys = PyImport_ImportModule("sys");
+	PyObject* PyPath = PyObject_GetAttrString(PySys, "path");
+	PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
+	//qDebug() << "UserDataManager::isTelegramCredentialsValid() - " << UserDataManager::isTelegramCredentialsValid();
+	//qDebug() << "UserDataManager::isTelegramPhoneNumberCodeValid() - " << UserDataManager::isTelegramPhoneNumberCodeValid();
 
-	Py_FinalizeEx();
 
 
-	/*if (UserDataManager::isTelegramCredentialsValid() == true && UserDataManager::isTelegramPhoneNumberCodeValid() == false) {
+	if (UserDataManager::isTelegramCredentialsValid() == true && UserDataManager::isTelegramPhoneNumberCodeValid() == false) {
 		userAuthenticationDialog->skipFirstAuthorizationStage();
 		userAuthenticationDialog->exec();
 	}
 	else if (UserDataManager::isTelegramCredentialsValid() == false) {
 		userAuthenticationDialog->exec();
-	}*/
-
+	}
+	Py_FinalizeEx();
 	UserDataManager::setLastPostsCountForChannels(3);
 
 	QGridLayout* GridLayout = new QGridLayout(this);

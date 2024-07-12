@@ -253,17 +253,15 @@ void AuthenticationDialog::logInButton_clicked() {
         return;
     }
 
-    //thread = CreateThread(NULL, 0, &UserDataManager::isTelegramCredentialsValid, NULL, 0, NULL);
-    //_Analysis_assume_(thread != NULL);
+    thread = CreateThread(NULL, 0, &UserDataManager::isTelegramCredentialsValid, NULL, 0, NULL);
+    _Analysis_assume_(thread != NULL);
 
-    //WaitForSingleObject(thread, INFINITE);
+    WaitForSingleObject(thread, INFINITE);
 
-    //if (!GetExitCodeThread(thread, &functionResult))
-    //    return;
+    if (!GetExitCodeThread(thread, &functionResult))
+        return;
 
-    //CloseHandle(thread);
-
-    functionResult = UserDataManager::isTelegramCredentialsValid();
+    CloseHandle(thread);
 
     if (functionResult == 0) {
         _incorrectTelegramCredentialsLabel->show();
@@ -276,20 +274,20 @@ void AuthenticationDialog::logInButton_clicked() {
         return;
     }
 
-    //thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
+    thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
+    _Analysis_assume_(thread != NULL);
+    WaitForSingleObject(thread, INFINITE);
 
-    //WaitForSingleObject(thread, INFINITE);
+    if (!GetExitCodeThread(thread, &functionResult))
+        return;
+    CloseHandle(thread);
+    functionResult = TelegramAuthorizationChecker::sendTelegramCode(_telegramCredentials);
 
-    //if (!GetExitCodeThread(thread, &functionResult))
-    //    return;
-    //CloseHandle(thread);
-    //functionResult = TelegramAuthorizationChecker::sendTelegramCode(_telegramCredentials);
-
-    //if (!functionResult) {
-    //    _incorrectMobilePhoneLabel->show();
-    //    shake();
-    //    return;
-    //}
+    if (!functionResult) {
+        _incorrectMobilePhoneLabel->show();
+        shake();
+        return;
+    }
 
     timeRemaining = 180;
     timer->start(1000);
@@ -339,15 +337,13 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
 
     _telegramCredentials = UserDataManager::getTelegramCredentials();
 
-    /*HANDLE thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
+    HANDLE thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
     _Analysis_assume_(thread != NULL);
     WaitForSingleObject(thread, INFINITE);
 
     if (!GetExitCodeThread(thread, &functionResult))
         return;
-    CloseHandle(thread);*/
-
-    functionResult = TelegramAuthorizationChecker::sendTelegramCode(_telegramCredentials);
+    CloseHandle(thread);
 
     if (!functionResult) {
         shake();

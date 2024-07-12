@@ -12,10 +12,6 @@ DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID 
 
     PyObject* PySys = nullptr, * PyPath = nullptr, * PyArgs = nullptr, * PyName = nullptr, * PyModule = nullptr, * PyFunc = nullptr, * PyResult = nullptr;
 
-    PySys = PyImport_ImportModule("sys");
-    PyPath = PyObject_GetAttrString(PySys, "path");
-    PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
-
     Py_ssize_t PyArgumentsTupleSize = 4;
 
     PyName = PyUnicode_FromString(moduleName);
