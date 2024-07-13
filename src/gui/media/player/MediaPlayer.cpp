@@ -68,13 +68,14 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 	GraphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	GraphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	GraphicsVideoItem->setAspectRatioMode(Qt::KeepAspectRatioByExpanding);
+	GraphicsVideoItem->setAspectRatioMode(Qt::KeepAspectRatio);
+	//GraphicsVideoItem->setAspectRatioMode(Qt::KeepAspectRatioByExpanding);
 
 	VideoSlider = new EnhancedSlider(Qt::Horizontal);
 	AudioSlider = new EnhancedSlider(Qt::Horizontal);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir assetsDir(currentPath + "/../../TelegramQuickView/assets/images");
+	QDir assetsDir(currentPath + "/../../assets/images");
 
 	QString speakerImagePath = assetsDir.absolutePath() + "/speaker_white.png";
 	QString stopImagePath = assetsDir.absolutePath() + "/stop.png";
@@ -134,7 +135,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	videoStateWidget->setStyleSheet("background-color: transparent");
 	videoStateWidget->setFixedSize(screenWidth / 60, screenHeight / 40);
 
-	QDir qssDir(currentPath + "/../../TelegramQuickView/src/css/");
+	QDir qssDir(currentPath + "/../../src/css/");
 	QString VideoSliderStyle = qssDir.absolutePath() + "/VideoSliderStyle.css";
 	QString AudioSliderStyle = qssDir.absolutePath() + "/AudioSliderStyle.css";
 
@@ -423,13 +424,11 @@ void MediaPlayer::adjustBottomWidgets()
 	}
 }
 
-QString MediaPlayer::detectMediaType(const QString& filePath)
-{
+QString MediaPlayer::detectMediaType(const QString& filePath) {
 	return QMimeDatabase().mimeTypeForFile(filePath).name();
 }
 
-void MediaPlayer::setSource(const QUrl& source)
-{
+void MediaPlayer::setSource(const QUrl& source) {
 	QString sourcePath;
 	if (source.path().at(0) == "/"[0])
 		sourcePath = source.path().remove(0, 1);
@@ -447,6 +446,7 @@ void MediaPlayer::setSource(const QUrl& source)
 		}
 		containerWidget->show();
 		MediaPlayerWidget->setSource(source);
+		GraphicsVideoItem->setSize(QSize(464, 848));
 		play();
 	}
 	else if (mediaType.contains("image")) {
@@ -456,7 +456,6 @@ void MediaPlayer::setSource(const QUrl& source)
 	}
 }
 
-void MediaPlayer::play()
-{
+void MediaPlayer::play() {
 	MediaPlayerWidget->play();
 }

@@ -8,6 +8,7 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
 
+
 project("TelegramQuickView" LANGUAGES C CXX)
 
 find_package(Python3 COMPONENTS Development REQUIRED)
@@ -21,6 +22,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 			Sql
 			Quick
 			Xml
+			OpenGLWidgets
 )
 
 qt_standard_project_setup()
@@ -81,7 +83,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 					Qt6::Sql
 					Qt6::Quick
 					Qt6::Xml
+					Qt6::OpenGLWidgets
 )
+
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
 
 execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED

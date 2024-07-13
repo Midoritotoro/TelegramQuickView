@@ -300,7 +300,7 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
 }
 
 void AuthenticationDialog::backButton_clicked() {
-
+    
     _telegramCredentials = _userDataManager->getTelegramCredentials();
     apiHashLineEdit->setText(_telegramCredentials->apiHash);
     apiIdLineEdit->setText(_telegramCredentials->apiId);

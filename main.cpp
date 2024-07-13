@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include "src/gui/settings/MainWindow.h"
+#include "src/gui/panel/MessageWidget.h"
 
 
 int main(int argc, char* argv[])
@@ -16,7 +17,7 @@ int main(int argc, char* argv[])
        // return -1;
 
     QApplication app(argc, argv);
-    MainWindow messageWidget;
+    MessageWidget messageWidget;
 
     messageWidget.show();
     return app.exec();

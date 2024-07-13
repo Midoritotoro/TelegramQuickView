@@ -15,7 +15,7 @@ typedef struct _TelegramCredentials {
 	QString phoneNumber;
 } TelegramCredentials, * LPTelegramCredentials;
 
-class UserDataManager: public QObject
+class UserDataManager
 {
 private:
 	QFile _jsonFile;

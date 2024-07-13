@@ -5,7 +5,6 @@ import json
 
 async def sendTelegramCode(apiId: int, phoneNumber: str, apiHash: str, pathToUserSettingsJson: str) -> bool:   
     try:
-        print("sendTelegramCode: ISSS", apiId, phoneNumber, apiHash, pathToUserSettingsJson)
         telegramClient = TelegramClient("TelegramQuickView", apiId, apiHash, timeout=10)
         await telegramClient.connect()
         code = await telegramClient.send_code_request(phoneNumber)
@@ -21,7 +20,6 @@ async def sendTelegramCode(apiId: int, phoneNumber: str, apiHash: str, pathToUse
 
 async def isTelegramCredentialsValid(apiId: int, phoneNumber: str, apiHash: str) -> bool:
     try:
-        print("isTelegramCredentialsValid: ISS", apiId, phoneNumber, apiHash)
         telegramClient = TelegramClient("TelegramQuickView", apiId, apiHash, timeout=10)
         await telegramClient.connect()
         await telegramClient.disconnect()
@@ -31,7 +29,6 @@ async def isTelegramCredentialsValid(apiId: int, phoneNumber: str, apiHash: str)
 
 async def isTelegramPhoneNumberCodeValid(apiId: int, phoneNumber: str, apiHash: str, code: int, codeHash: str) -> bool:
     try:
-        print("isTelegramPhoneNumberCodeValid: ISSIS", apiId, phoneNumber, apiHash, code, codeHash)
         telegramClient = TelegramClient("TelegramQuickView", apiId, apiHash, timeout=10)   
         await telegramClient.connect()
         if not await telegramClient.is_user_authorized():
@@ -44,7 +41,6 @@ async def isTelegramPhoneNumberCodeValid(apiId: int, phoneNumber: str, apiHash: 
 
 def asyncCall(functionName: str, *args) -> bool:
     functions = {"sendTelegramCode": sendTelegramCode, "isTelegramCredentialsValid": isTelegramCredentialsValid, "isTelegramPhoneNumberCodeValid": isTelegramPhoneNumberCodeValid}
-    print("called: ", functions[functionName].__name__)
     return asyncio.run((functions[functionName])(*args))
 
 

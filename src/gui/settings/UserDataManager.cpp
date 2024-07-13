@@ -45,7 +45,6 @@ bool UserDataManager::isTelegramCredentialsValid() {
 
 	TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
 	bool isTelegramCredentialsValid = telegramAuthorizationChecker->TelegramCredentialsValidCheck(apiHash.toString().toStdString().c_str(), phoneNumber.toString().toStdString().c_str(), apiId.toString().toInt());
-	qDebug() << "isTelegramCredentialsValid: " << isTelegramCredentialsValid;
 
 	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
 		!phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true;

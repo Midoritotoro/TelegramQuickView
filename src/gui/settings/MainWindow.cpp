@@ -10,7 +10,6 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QTextEdit>
-#include <QThread>
 
 #include "AuthenticationDialog.h"
 
@@ -26,13 +25,10 @@ MainWindow::MainWindow(QWidget* parent) :
 	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
 
 	if (userDataManager->isTelegramCredentialsValid() == true && userDataManager->isTelegramPhoneNumberCodeValid() == false) {
-		qDebug() << userDataManager->isTelegramCredentialsValid();
-		qDebug() << userDataManager->isTelegramPhoneNumberCodeValid();
 		userAuthenticationDialog->skipFirstAuthorizationStage();
 		userAuthenticationDialog->exec();
 	}
 	else if (userDataManager->isTelegramCredentialsValid() == false) {
-		qDebug() << userDataManager->isTelegramCredentialsValid();
 		userAuthenticationDialog->exec();
 	}
 
