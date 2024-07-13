@@ -36,6 +36,11 @@ public:
 	BOOL KillThread();
 	[[nodiscard]] Direction getDirection() { return _LPThreadParameters->direction; }
 	[[nodiscard]] BOOL isRunning() { return _LPThreadParameters->Running; }
-	static DWORD WINAPI CheckMousePosition(LPVOID lpParam);
+	static DWORD WINAPI d(LPVOID lpParam){
+		MouseDetector* This = (MouseDetector*)lpParam;
+		return This->CheckMousePosition();
+	}
+protected:
+	DWORD WINAPI CheckMousePosition();
 };
 

@@ -48,7 +48,6 @@ DWORD UserDataManager::isTelegramCredentialsValid(LPVOID lpParam) {
 	telegramCredentials->apiId = apiId.toInt();
 
 	DWORD isTelegramCredentialsValid = TelegramAuthorizationChecker::TelegramCredentialsValidCheck(telegramCredentials);
-	qDebug() << isTelegramCredentialsValid;
 
 	if (!apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
 		!phoneNumber.isUndefined() == true && isTelegramCredentialsValid == 1)

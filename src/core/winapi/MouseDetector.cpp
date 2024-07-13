@@ -3,7 +3,7 @@
 VOID MouseDetector::TrackMouse(Direction direction) {
 	_LPThreadParameters->direction = direction;
 	_LPThreadParameters->Running = TRUE;
-	_Thread = CreateThread(NULL, 0, CheckMousePosition, _LPThreadParameters, 0, 0);
+	_Thread = CreateThread(NULL, 0, d, (LPVOID)this, 0, 0);
 }
 
 BOOL MouseDetector::KillThread() {
@@ -12,10 +12,9 @@ BOOL MouseDetector::KillThread() {
 	return CloseHandle(_Thread);
 }
 
-DWORD WINAPI MouseDetector::CheckMousePosition(LPVOID lpParam) {
-	LPThreadParameters lpThreadParameters = static_cast<LPThreadParameters>(lpParam);
+DWORD WINAPI MouseDetector::CheckMousePosition() {
 	POINT lpCursorPointParameters = { 0 };
-	while (lpThreadParameters->Running)
+	while (_LPThreadParameters->Running)
 	{
 		BOOL SuccessfullyGetCursorPos = GetCursorPos(&lpCursorPointParameters);
 		if (SuccessfullyGetCursorPos == FALSE) {
@@ -24,10 +23,10 @@ DWORD WINAPI MouseDetector::CheckMousePosition(LPVOID lpParam) {
 		int ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 		int ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 		int menuThresholdWidthRatio = ScreenWidth / 64;
-		if (lpThreadParameters->direction == Direction::Right && (ScreenWidth - lpCursorPointParameters.x) <= menuThresholdWidthRatio && (ScreenWidth - lpCursorPointParameters.x) > EDGE_OF_SCREEN_POSITION) {
+		if (_LPThreadParameters->direction == Direction::Right && (ScreenWidth - lpCursorPointParameters.x) <= menuThresholdWidthRatio && (ScreenWidth - lpCursorPointParameters.x) > EDGE_OF_SCREEN_POSITION) {
 			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), TEXT("Мышь находится в правой части экрана \n"));
 		}
-		else if (lpThreadParameters->direction == Direction::Left && lpCursorPointParameters.x <= menuThresholdWidthRatio && lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION) {
+		else if (_LPThreadParameters->direction == Direction::Left && lpCursorPointParameters.x <= menuThresholdWidthRatio && lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION) {
 			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), TEXT("Мышь находится в левой части экрана \n"));
 		}
 		Sleep(200);

@@ -229,7 +229,8 @@ void AuthenticationDialog::shake()
 void AuthenticationDialog::logInButton_clicked() {
     DWORD functionResult = 0;
     HANDLE thread = nullptr;
-    Py_InitializeEx(0);
+    bool local = false;
+
 
     _incorrectTelegramCredentialsLabel->hide();
     _incorrectMobilePhoneLabel->hide();
@@ -295,7 +296,7 @@ void AuthenticationDialog::logInButton_clicked() {
     sendCodeButton->setToolTip("Кнопка неактивна в течение 180 секунд по причине ограничений Telegram. ");
     sendCodeButton->setText(QString("Осталось: %1 с").arg(timeRemaining));
     _stackedWidget->setCurrentIndex(1);
-    Py_FinalizeEx();
+
 }
 
 void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
@@ -309,7 +310,8 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
     }
 
     UserDataManager::setPhoneNumberCode(mobilePhoneCode);
-    Py_InitializeEx(0);
+    if (Py_IsInitialized())
+        Py_InitializeEx(0);
     if (!UserDataManager::isTelegramPhoneNumberCodeValid()) {
         _incorrectTelegramCodeLabel->show();
         telegramCodeLineEdit->clear();
@@ -317,7 +319,8 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         Py_FinalizeEx();
         return;
     }
-    Py_FinalizeEx();
+    if (Py_IsInitialized())
+        Py_FinalizeEx();
     close();
 }
 
