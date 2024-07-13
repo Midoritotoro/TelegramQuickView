@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QGridLayout>
-
+#include <QPainter>
 
 class MessageWidget : public QWidget {
 private:

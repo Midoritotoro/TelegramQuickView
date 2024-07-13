@@ -1,5 +1,4 @@
-﻿from tkinter.messagebox import askyesno
-from dateutil.tz import tzlocal
+﻿from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
 from typing import Callable
 from telethon.tl.types import InputPeerChannel, Message
@@ -45,23 +44,23 @@ class Sleuth:
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
         userSettings = self.__getUserSettings()
         
-        self.api_id = userSettings.get("apiId")
-        self.api_hash = userSettings.get("apiHash")
-        self.phone_number = userSettings.get("phoneNumber") 
-        self.lastPostsCount = userSettings.get("lastPostsCount")
-        self.code = userSettings.get("code")
-        self.codeHash = userSettings.get("codeHash")
-        self.channels = userSettings.get("channels")
-        self.lastMessageGroupId = 0
+        self.__api_id = userSettings.get("apiId")
+        self.__api_hash = userSettings.get("apiHash")
+        self.__phone_number = userSettings.get("phoneNumber") 
+        self.__lastPostsCount = userSettings.get("lastPostsCount")
+        self.__code = userSettings.get("code")
+        self.__codeHash = userSettings.get("codeHash")
+        self.__channels = userSettings.get("channels")
+        self.__lastMessageGroupId = 0
         self.__groupedMessageId = 0
-        self.currentLastPostCount = self.lastPostsCount
+        self.__currentLastPostCount = self.__lastPostsCount
         self.__groupedMessageDate: datetime 
         self.__pathToAppRootDirectory = pathToAppRootDirectory
         self.__pathToAppRootDirectoryContent = ""
         
         exePath = os.path.dirname(os.path.abspath(__file__)).rsplit("\\", 3)[0]
-        self.sessionFile = os.path.join(exePath, "TelegramQuickView.session")
-        self.__client = TelegramClient(self.sessionFile, self.api_id, self.api_hash, timeout=10)
+        sessionFile = os.path.join(exePath, "TelegramQuickView.session")
+        self.__client = TelegramClient(sessionFile, self.__api_id, self.__api_hash, timeout=10)
         
     def __getUserSettings(self) -> dict[str, str]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
@@ -71,11 +70,11 @@ class Sleuth:
     async def __get_singleMessage(self, username: str, message: Message):
         postIndex = await self.__getPostIndex(username)
         if message.grouped_id != None: 
-            self.currentLastPostCount += 1
-            if self.lastMessageGroupId != message.grouped_id:
+            self.__currentLastPostCount += 1
+            if self.__lastMessageGroupId != message.grouped_id:
                 await self.__check_download_path(username, postIndex)
                 await self.__organizeDirectory(username)
-                self.lastMessageGroupId = message.grouped_id
+                self.__lastMessageGroupId = message.grouped_id
         elif message.grouped_id == None:
             await self.__check_download_path(username, postIndex)
             await self.__organizeDirectory(username)
@@ -117,7 +116,7 @@ class Sleuth:
     async def __organizeDirectory(self, username: str) -> None:
         dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])    
 
-        if (int(dirObjects[-1]) > self.lastPostsCount):  
+        if (int(dirObjects[-1]) > self.__lastPostsCount):  
             rmtree(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
    
             dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
@@ -147,9 +146,9 @@ class Sleuth:
         if self.__client.disconnected:
             await self.__client.connect()
         if not await self.__client.is_user_authorized():
-            await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
+            await self.__client.sign_in(self.__phone_number, self.__code, phone_code_hash=self.__codeHash)
 
-        for channel in self.channels:
+        for channel in self.__channels:
             handlersManager = HandlersManager(self.__client, self.__get_singleMessage, channel)
             await handlersManager.createChannelHandler()
 
@@ -159,8 +158,8 @@ class Sleuth:
         if self.__client.disconnected:
             await self.__client.connect()
         if not await self.__client.is_user_authorized():
-            await self.__client.sign_in(self.phone_number, self.code, phone_code_hash=self.codeHash)
-        for channel in self.channels:
+            await self.__client.sign_in(self.__phone_number, self.__code, phone_code_hash=self.__codeHash)
+        for channel in self.__channels:
             index = 0    
             async for message in self.__client.iter_messages(
                 channel
@@ -168,10 +167,10 @@ class Sleuth:
                 if not message:
                     break
                 index += 1
-                if index > self.currentLastPostCount:
+                if index > self.__currentLastPostCount:
                     break           
                 await self.__get_singleMessage(channel, message)
-                self.currentLastPostCount = self.lastPostsCount
+                self.__currentLastPostCount = self.__lastPostsCount
          
     def start(self) -> None:
         self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
