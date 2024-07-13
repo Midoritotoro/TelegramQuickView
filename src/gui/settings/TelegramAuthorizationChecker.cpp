@@ -1,139 +1,159 @@
 #include "telegramAuthorizationChecker.h"
+#include <iostream>
 
 
-DWORD WINAPI TelegramAuthorizationChecker::TelegramCredentialsValidCheck(LPVOID lpParam) {
+TelegramAuthorizationChecker::TelegramAuthorizationChecker() {
+    Py_Initialize();
+}
+
+TelegramAuthorizationChecker::~TelegramAuthorizationChecker() {
+    Py_DECREF(PyArgs);
+    Py_DECREF(PyFunc);
+    Py_DECREF(PyDict);
+    Py_DECREF(PyModule);
+    Py_DECREF(PyName);
+
+    Py_DECREF(PyPath);
+    Py_DECREF(PySys);
+    PyErr_Print();
+    Py_Finalize();
+}
+
+bool TelegramAuthorizationChecker::TelegramCredentialsValidCheck(const char* apiHash, const char* phoneNumber, long long apiId) {
     const char* PyFunctionName = "isTelegramCredentialsValid";
+    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    DWORD result = 0;
+    bool BoolResult = false;
 
-    LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
-    PyObject* PySys = NULL, * PyPath = NULL, * PyArgs = NULL, * PyName = NULL, * PyModule = NULL, * PyFunc = NULL, * PyResult = NULL;
+    PySys = PyImport_ImportModule("sys");
+    PyPath = PyObject_GetAttrString(PySys, "path");
+    PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
+
     Py_ssize_t PyArgumentsTupleSize = 4;
 
     PyName = PyUnicode_FromString(moduleName);
     if (!PyName)
-        return result;
+        return false;
 
     PyModule = PyImport_Import(PyName);
     if (!PyModule)
-        return result;
+        return false;
 
-    PyFunc = PyObject_GetAttrString(PyModule, "asyncCall");
-    if (!PyFunc)
-        return result;
+    PyDict = PyModule_GetDict(PyModule);
+    if (!PyDict)
+        return false;
+
+    PyFunc = PyDict_GetItemString(PyDict, "asyncCall");
 
     if (PyCallable_Check(PyFunc)) {
-        PyArgs = PyTuple_Pack(PyArgumentsTupleSize, PyUnicode_FromString(PyFunctionName),
-            PyLong_FromLong(long(lpTelegramCredentials->apiId)), PyUnicode_FromString(lpTelegramCredentials->phoneNumber.c_str()), PyUnicode_FromString(lpTelegramCredentials->apiHash.c_str()));
+        PyArgs = PyTuple_New(PyArgumentsTupleSize);
 
-        if (PyArgs != NULL)
-            PyResult = PyObject_CallObject(PyFunc, PyArgs);
+        PyTuple_SetItem(PyArgs, 0, PyUnicode_FromString(PyFunctionName));
+        PyTuple_SetItem(PyArgs, 1, PyLong_FromLong(long(apiId)));
+        PyTuple_SetItem(PyArgs, 2, PyUnicode_FromString(phoneNumber));
+        PyTuple_SetItem(PyArgs, 3, PyUnicode_FromString(apiHash));
+        PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                if (PyObject_IsTrue(PyResult))
-                    result = 1;
+                if (PyObject_IsTrue(PyResult) > 0)
+                    BoolResult = true;
+            Py_DECREF(PyResult);
         }
     }
-
-    Py_DECREF(PyResult);
-    //Py_DECREF(PyFunc);
-    Py_DECREF(PyArgs);
-    Py_DECREF(PyModule);
-    Py_DECREF(PyName);
-
     PyErr_Print();
-
-    return result;
+    std::cout << BoolResult;
+    return BoolResult;
 }
 
-DWORD WINAPI TelegramAuthorizationChecker::sendTelegramCode(LPVOID lpParam){
+bool TelegramAuthorizationChecker::sendTelegramCode(const char* apiHash, const char* phoneNumber, long long apiId, const char* pathToUserSettingsJson) {
     const char* PyFunctionName = "sendTelegramCode";
+    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    DWORD result = 0;
+    bool BoolResult = false;
 
-    LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
-    PyObject* PySys = NULL, * PyPath = NULL, *PyArgs = NULL, * PyName = NULL, * PyModule = NULL, * PyFunc = NULL, *PyResult = NULL;
+    PySys = PyImport_ImportModule("sys");
+    PyPath = PyObject_GetAttrString(PySys, "path");
+    PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
+
     Py_ssize_t PyArgumentsTupleSize = 5;
 
     PyName = PyUnicode_FromString(moduleName);
     if (!PyName)
-        return result;
+        return false;
 
     PyModule = PyImport_Import(PyName);
     if (!PyModule)
-        return result;
+        return false;
 
-    PyFunc = PyObject_GetAttrString(PyModule, "asyncCall");
-    if (!PyFunc)
-        return result;
+    PyDict = PyModule_GetDict(PyModule);
+    if (!PyDict)
+        return false;
+
+    PyFunc = PyDict_GetItemString(PyDict, "asyncCall");
 
     if (PyCallable_Check(PyFunc)) {
-        PyArgs = PyTuple_Pack(PyArgumentsTupleSize, PyUnicode_FromString(PyFunctionName),
-            PyLong_FromLong(long(lpTelegramCredentials->apiId)), PyUnicode_FromString(lpTelegramCredentials->phoneNumber.c_str()),
-            PyUnicode_FromString(lpTelegramCredentials->apiHash.c_str()), PyUnicode_FromString(lpTelegramCredentials->pathToUserSettingsJson.c_str()));
+        PyArgs = PyTuple_New(PyArgumentsTupleSize);
 
+        PyTuple_SetItem(PyArgs, 0, PyUnicode_FromString(PyFunctionName));
+        PyTuple_SetItem(PyArgs, 1, PyLong_FromLong(long(apiId)));
+        PyTuple_SetItem(PyArgs, 2, PyUnicode_FromString(phoneNumber));
+        PyTuple_SetItem(PyArgs, 3, PyUnicode_FromString(apiHash));
+        PyTuple_SetItem(PyArgs, 4, PyUnicode_FromString(pathToUserSettingsJson));
         PyResult = PyObject_CallObject(PyFunc, PyArgs);
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                if (PyObject_IsTrue(PyResult))
-                    result = 1;
+                if (PyObject_IsTrue(PyResult) > 0)
+                    BoolResult = true;
+            Py_DECREF(PyResult);
         }
     }
-
-    Py_DECREF(PyResult);
-  //  Py_DECREF(PyFunc);
-    Py_DECREF(PyArgs);
-    Py_DECREF(PyModule);
-    Py_DECREF(PyName);
-
     PyErr_Print();
-
-    return result;
+    return BoolResult;
 }
 
-DWORD WINAPI TelegramAuthorizationChecker::TelegramCodeValidCheck(LPVOID lpParam) {
+bool TelegramAuthorizationChecker::TelegramCodeValidCheck(const char* apiHash, const char* phoneNumber, long long apiId, long code, const char* codeHash) {
     const char* PyFunctionName = "isTelegramPhoneNumberCodeValid";
+    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
     const char* moduleName = "TelegramAuthorization";
-    DWORD result = 0;
+    bool BoolResult = false;
 
-    LPTelegramCredentials lpTelegramCredentials = static_cast<LPTelegramCredentials>(lpParam);
-    PyObject* PySys = NULL, * PyPath = NULL, *PyArgs = NULL, * PyName = NULL, * PyModule = NULL, * PyFunc = NULL, *PyResult = NULL;
+    PySys = PyImport_ImportModule("sys");
+    PyPath = PyObject_GetAttrString(PySys, "path");
+    PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
+
     Py_ssize_t PyArgumentsTupleSize = 6;
 
     PyName = PyUnicode_FromString(moduleName);
     if (!PyName)
-        return result;
+        return false;
 
     PyModule = PyImport_Import(PyName);
     if (!PyModule)
-        return result;
+        return false;
 
-    PyFunc = PyObject_GetAttrString(PyModule, "asyncCall");
-    if (!PyFunc)
-        return result;
+    PyDict = PyModule_GetDict(PyModule);
+    if (!PyDict)
+        return false;
+
+    PyFunc = PyDict_GetItemString(PyDict, "asyncCall");
 
     if (PyCallable_Check(PyFunc)) {
-        PyArgs = PyTuple_Pack(PyArgumentsTupleSize, PyUnicode_FromString(PyFunctionName),
-            PyLong_FromLong(lpTelegramCredentials->apiId), PyUnicode_FromString(lpTelegramCredentials->phoneNumber.c_str()),
-            PyUnicode_FromString(lpTelegramCredentials->apiHash.c_str()), PyLong_FromLong(lpTelegramCredentials->code),
-            PyUnicode_FromString(lpTelegramCredentials->codeHash.c_str()));
+        PyArgs = PyTuple_New(PyArgumentsTupleSize);
 
+        PyTuple_SetItem(PyArgs, 0, PyUnicode_FromString(PyFunctionName));
+        PyTuple_SetItem(PyArgs, 1, PyLong_FromLong(long(apiId)));
+        PyTuple_SetItem(PyArgs, 2, PyUnicode_FromString(phoneNumber));
+        PyTuple_SetItem(PyArgs, 3, PyUnicode_FromString(apiHash));
+        PyTuple_SetItem(PyArgs, 4, PyLong_FromLong(code));
+        PyTuple_SetItem(PyArgs, 5, PyUnicode_FromString(codeHash));
         PyResult = PyObject_CallObject(PyFunc, PyArgs);
-
         if (PyResult != NULL) {
             if (PyBool_Check(PyResult))
-                if (PyObject_IsTrue(PyResult))
-                    result = 1;
+                if (PyObject_IsTrue(PyResult) > 0)
+                    BoolResult = true;
+            Py_DECREF(PyResult);
         }
     }
-
-    Py_DECREF(PyResult);
- //   Py_DECREF(PyFunc);
-    Py_DECREF(PyArgs);
-    Py_DECREF(PyModule);
-    Py_DECREF(PyName);
-
     PyErr_Print();
-
-    return result;
+    return BoolResult;
 }

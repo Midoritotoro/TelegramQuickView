@@ -16,17 +16,18 @@
 #include "UserDataManager.h"
 
 
-class AuthenticationDialog: public QDialog
+class AuthenticationDialog : public QDialog
 {
 private:
     Q_OBJECT
-    bool shakeSwitch = true;
+        bool shakeSwitch = true;
     QFrame* firstAuthenticationStageFrame = nullptr, * secondAuthenticationStageFrame = nullptr;
-    QPushButton* loginButton = nullptr, *confirmCodeButton = nullptr, * sendCodeButton = nullptr;
+    QPushButton* loginButton = nullptr, * confirmCodeButton = nullptr, * sendCodeButton = nullptr;
     QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr, * telegramCodeLineEdit = nullptr;
     QToolButton* logInButton = nullptr;
     QStackedWidget* _stackedWidget = nullptr;
-    QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr,*_incorrectTelegramCodeLabel = nullptr;
+    UserDataManager* _userDataManager = nullptr;
+    QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr, * _incorrectTelegramCodeLabel = nullptr;
     LPTelegramCredentials _telegramCredentials = nullptr;
     QTimer* timer = nullptr;
     int timeRemaining = 0;

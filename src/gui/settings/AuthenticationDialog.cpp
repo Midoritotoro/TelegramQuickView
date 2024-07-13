@@ -9,6 +9,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     setFixedSize(720, 720);
 
     _stackedWidget = new QStackedWidget(this);
+    _userDataManager = new UserDataManager();
     _telegramCredentials = new TelegramCredentials();
     timer = new QTimer();
 
@@ -227,11 +228,6 @@ void AuthenticationDialog::shake()
 }
 
 void AuthenticationDialog::logInButton_clicked() {
-    DWORD functionResult = 0;
-    HANDLE thread = nullptr;
-    bool local = false;
-
-
     _incorrectTelegramCredentialsLabel->hide();
     _incorrectMobilePhoneLabel->hide();
     _incorrectTelegramCodeLabel->hide();
@@ -240,13 +236,13 @@ void AuthenticationDialog::logInButton_clicked() {
     QString apiId = apiIdLineEdit->text();
     QString phoneNumber = phoneNumberLineEdit->text();
 
-    _telegramCredentials->apiHash = apiHash.toStdString();
-    _telegramCredentials->apiId = apiId.toInt();
-    _telegramCredentials->phoneNumber = phoneNumber.toStdString();
+    _telegramCredentials->apiHash = apiHash;
+    _telegramCredentials->apiId = apiId;
+    _telegramCredentials->phoneNumber = phoneNumber;
 
-    if (!UserDataManager::setTelegramCredentials(_telegramCredentials)) {
+    if (!_userDataManager->setTelegramCredentials(_telegramCredentials)) {
         _incorrectTelegramCredentialsLabel->show();
-        UserDataManager::clearTelegramCredentials();
+        _userDataManager->clearTelegramCredentials();
         apiHashLineEdit->clear();
         apiIdLineEdit->clear();
         phoneNumberLineEdit->clear();
@@ -254,20 +250,9 @@ void AuthenticationDialog::logInButton_clicked() {
         return;
     }
 
-    thread = CreateThread(NULL, 0, &UserDataManager::isTelegramCredentialsValid, NULL, 0, NULL);
-    _Analysis_assume_(thread != NULL);
-
-    WaitForSingleObject(thread, INFINITE);
-
-    if (!GetExitCodeThread(thread, &functionResult))
-        return;
-
-    CloseHandle(thread);
-
-    if (functionResult == 0) {
+    if (!_userDataManager->isTelegramCredentialsValid()) {
         _incorrectTelegramCredentialsLabel->show();
-        qDebug() << "isTelegramCredentialsValid = 0";
-        //UserDataManager::clearTelegramCredentials();
+        _userDataManager->clearTelegramCredentials();
         apiHashLineEdit->clear();
         apiIdLineEdit->clear();
         phoneNumberLineEdit->clear();
@@ -275,16 +260,10 @@ void AuthenticationDialog::logInButton_clicked() {
         return;
     }
 
-    thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
-    _Analysis_assume_(thread != NULL);
-    WaitForSingleObject(thread, INFINITE);
+    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
 
-    if (!GetExitCodeThread(thread, &functionResult))
-        return;
-    CloseHandle(thread);
-    functionResult = TelegramAuthorizationChecker::sendTelegramCode(_telegramCredentials);
-
-    if (!functionResult) {
+    if (!isCodeSended) {
         _incorrectMobilePhoneLabel->show();
         shake();
         return;
@@ -296,7 +275,6 @@ void AuthenticationDialog::logInButton_clicked() {
     sendCodeButton->setToolTip("Кнопка неактивна в течение 180 секунд по причине ограничений Telegram. ");
     sendCodeButton->setText(QString("Осталось: %1 с").arg(timeRemaining));
     _stackedWidget->setCurrentIndex(1);
-
 }
 
 void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
@@ -309,50 +287,38 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         return;
     }
 
-    UserDataManager::setPhoneNumberCode(mobilePhoneCode);
-    if (Py_IsInitialized())
-        Py_InitializeEx(0);
-    if (!UserDataManager::isTelegramPhoneNumberCodeValid()) {
+    _userDataManager->setPhoneNumberCode(mobilePhoneCode);
+
+    if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
         _incorrectTelegramCodeLabel->show();
         telegramCodeLineEdit->clear();
         shake();
-        Py_FinalizeEx();
         return;
     }
-    if (Py_IsInitialized())
-        Py_FinalizeEx();
+
     close();
 }
 
 void AuthenticationDialog::backButton_clicked() {
 
-    _telegramCredentials = UserDataManager::getTelegramCredentials();
-    apiHashLineEdit->setText(_telegramCredentials->apiHash.c_str());
-    apiIdLineEdit->setText(QString::number(_telegramCredentials->apiId));
-    phoneNumberLineEdit->setText(_telegramCredentials->phoneNumber.c_str());
+    _telegramCredentials = _userDataManager->getTelegramCredentials();
+    apiHashLineEdit->setText(_telegramCredentials->apiHash);
+    apiIdLineEdit->setText(_telegramCredentials->apiId);
+    phoneNumberLineEdit->setText(_telegramCredentials->phoneNumber);
     _stackedWidget->setCurrentIndex(0);
 }
 
 void AuthenticationDialog::sendCodeAgainButton_clicked() {
     QFile file("TelegramQuickView.session");
     file.remove();
-    DWORD functionResult = 0;
+    _telegramCredentials = _userDataManager->getTelegramCredentials();
 
-    _telegramCredentials = UserDataManager::getTelegramCredentials();
-
-    HANDLE thread = CreateThread(NULL, 0, &TelegramAuthorizationChecker::sendTelegramCode, _telegramCredentials, 0, NULL);
-    _Analysis_assume_(thread != NULL);
-    WaitForSingleObject(thread, INFINITE);
-
-    if (!GetExitCodeThread(thread, &functionResult))
-        return;
-    CloseHandle(thread);
-
-    if (!functionResult) {
+    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
+    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(_telegramCredentials->apiHash.toStdString().c_str(), _telegramCredentials->phoneNumber.toStdString().c_str(), _telegramCredentials->apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
+    if (!isCodeSended) {
         shake();
         return;
     }
-
     timeRemaining = 180;
     timer->start(1000);
     sendCodeButton->setEnabled(false);
@@ -361,7 +327,7 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
-    if (UserDataManager::isTelegramPhoneNumberCodeValid() == false || UserDataManager::isTelegramCredentialsValid() == false) {
+    if (_userDataManager->isTelegramPhoneNumberCodeValid() == false || _userDataManager->isTelegramCredentialsValid() == false) {
         event->ignore();
         shake();
     }

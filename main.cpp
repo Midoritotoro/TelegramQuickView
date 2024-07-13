@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include "src/gui/settings/MainWindow.h"
-#include "src/core/winapi/MouseDetector.h"
 
 
 int main(int argc, char* argv[])
@@ -15,9 +14,6 @@ int main(int argc, char* argv[])
     }
     // if (!addParserToRegistryAutoRun())
        // return -1;
-
-    MouseDetector* det = new MouseDetector();
-    det->TrackMouse(det->Right);
 
     QApplication app(argc, argv);
     MainWindow messageWidget;

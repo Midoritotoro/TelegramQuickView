@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QTextEdit>
+#include <QThread>
 
 #include "AuthenticationDialog.h"
 
@@ -21,37 +22,21 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
+	userDataManager = new UserDataManager();
 	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
 
-	//Py_InitializeEx(0);
+	if (userDataManager->isTelegramCredentialsValid() == true && userDataManager->isTelegramPhoneNumberCodeValid() == false) {
+		qDebug() << userDataManager->isTelegramCredentialsValid();
+		qDebug() << userDataManager->isTelegramPhoneNumberCodeValid();
+		userAuthenticationDialog->skipFirstAuthorizationStage();
+		userAuthenticationDialog->exec();
+	}
+	else if (userDataManager->isTelegramCredentialsValid() == false) {
+		qDebug() << userDataManager->isTelegramCredentialsValid();
+		userAuthenticationDialog->exec();
+	}
 
-	const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
-	//PyGILState_STATE state = PyGILState_Ensure();
-
-	//PyObject* PySys = PyImport_ImportModule("sys");
-	//PyObject* PyPath = PyObject_GetAttrString(PySys, "path");
-	//PyList_Append(PyPath, PyUnicode_FromString(pythonFilePath));
-
-	//DWORD result1 = UserDataManager::isTelegramCredentialsValid();
-	//DWORD result2 = UserDataManager::isTelegramPhoneNumberCodeValid();
-	//qDebug() << "UserDataManager::isTelegramCredentialsValid() - " << result1;
-	//qDebug() << "UserDataManager::isTelegramPhoneNumberCodeValid() - " << result2;
-
-	//if (result1 == 1 && result2 == 0) {
-	//	userAuthenticationDialog->skipFirstAuthorizationStage();
-	//	userAuthenticationDialog->exec();
-	//}
-	//else if (result1 == 0) {
-	//	userAuthenticationDialog->exec();
-	//}
-
-	//Py_DECREF(PyPath);
-	//Py_DECREF(PySys);
-
-	//PyGILState_Release(state);
-
-	//Py_FinalizeEx();
-	UserDataManager::setLastPostsCountForChannels(3);
+	userDataManager->setLastPostsCountForChannels(3);
 
 	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
@@ -95,7 +80,7 @@ void MainWindow::on_AddChannelsButton_click() {
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
-	UserDataManager::setTargetChannels(TelegramChannelsList);
+	userDataManager->setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }
@@ -105,14 +90,14 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
-	UserDataManager::clearChannelsJsonArray();
-	UserDataManager::setTargetChannels(TelegramChannelsList);
+	userDataManager->clearChannelsJsonArray();
+	userDataManager->setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click() {
-	QJsonDocument jsonDocument = UserDataManager::getJsonDocument();
+	QJsonDocument jsonDocument = userDataManager->getJsonDocument();
 	QJsonObject jsonObject = jsonDocument.object();
 
 	if (!jsonObject.value("channels").toArray().isEmpty()) {
