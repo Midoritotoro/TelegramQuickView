@@ -20,24 +20,6 @@ BOOL PrintMsg(HANDLE hOut, LPCTSTR pMsg)
 	return PrintStrings(hOut, pMsg, NULL);
 }
 
-VOID ReportError(LPCTSTR UserMessage, DWORD exceptionCode)
-{
-	DWORD eMsgLen, LastErr = GetLastError();
-	LPTSTR lpvSysMsg;
-	HANDLE hStdErr = GetStdHandle(STD_ERROR_HANDLE);
-	PrintMsg(hStdErr, UserMessage);
-	eMsgLen = FormatMessage
-	(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM, NULL, LastErr,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpvSysMsg, 0, NULL);
-	PrintStrings(hStdErr, _T("\n"), lpvSysMsg,
-		_T("\n"), NULL);
-	HeapFree(GetProcessHeap(), 0, lpvSysMsg);
-	if (exceptionCode & VIEWER_ERROR)
-		ExitProcess(exceptionCode);
-}
-
 VOID printLastError()
 {
 	DWORD Count = NULL;

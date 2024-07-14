@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-
 #include <QDir>
 #include <QStandardPaths>
 #include <QJsonObject>

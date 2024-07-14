@@ -39,28 +39,20 @@ BOOL SetRegistryAutoRunKey(LPWSTR path)
     LONG result = NULL;
     DWORD pResult = NULL;
     HKEY hKey = NULL;
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
     if ((RegOpenKeyEx(HKEY_CURRENT_USER, lpSubKey, 0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
-        ReportError(VIEWER_REGISTRY_OPEN_ERROR_DESCRIPTION, VIEWER_REGISTRY_OPEN_ERROR);
         RegCloseKey(hKey);
         return FALSE;
     }
 
     if ((RegCreateKeyEx(HKEY_CURRENT_USER, lpSubKey, 0, REG_OPTION_NON_VOLATILE, NULL, KEY_ALL_ACCESS, NULL, &hKey, &pResult)) != ERROR_SUCCESS) {
-        ReportError(VIEWER_REGISTRY_CREATE_KEY_ERROR_DESCRIPTION, VIEWER_REGISTRY_CREATE_KEY_ERROR);
         RegCloseKey(hKey);
         return FALSE;
     }
     result = RegSetValueEx(hKey, TEXT("TelegramQuickView"), 0, REG_SZ, (PBYTE)(path), ((LPBYTE)(path), (lstrlen(path) * sizeof(TCHAR) + 1)));
-    if (result == ERROR_SUCCESS && pResult != REG_OPENED_EXISTING_KEY) {
-        PrintMsg(hOut, TEXT("Приложение успешно добавлено в автозагрузку.\n"));
-    }
-    else if (result == ERROR_SUCCESS && pResult == REG_OPENED_EXISTING_KEY) {
-        ReportError(REGISTRY_ALREADY_TAKEN_AUTO_LOAD_VALUES_WARNING_DESCRIPTION, REGISTRY_ALREADY_TAKEN_AUTO_LOAD_VALUES_WARNING);
-    }
-    else
-    {
-        ReportError(VIEWER_REGISTRY_SET_VALUE_ERROR_DESCRIPTION, VIEWER_REGISTRY_SET_VALUE_ERROR);
+    if (result != ERROR_SUCCESS){
+        RegCloseKey(hKey);
+        return FALSE;
     }
     RegCloseKey(hKey);
     return TRUE;

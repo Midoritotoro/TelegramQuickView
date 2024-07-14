@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
         MessageBox(NULL, L"Приложение работает на версиях Windows от 10 и выше", L"Ошибка", MB_OK);
         return -1;
     }
-    // if (!addParserToRegistryAutoRun())
-       // return -1;
+    if (!addParserToRegistryAutoRun())
+       return -1;
 
     QApplication app(argc, argv);
     MessageWidget messageWidget;
