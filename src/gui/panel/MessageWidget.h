@@ -10,4 +10,5 @@ private:
 	Q_OBJECT
 public:
 	MessageWidget(QWidget* parent = nullptr);
+	[[nodiscard]] static QSize getImageAspectRatio(QImage& image);
 };

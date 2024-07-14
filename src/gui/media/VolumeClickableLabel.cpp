@@ -14,8 +14,7 @@ VolumeClickableLabel::VolumeClickableLabel(const QString& imagePath, QSlider* Vo
 	setCursor(Qt::PointingHandCursor);
 }
 
-void VolumeClickableLabel::hideEvent(QHideEvent* event)
-{
+void VolumeClickableLabel::hideEvent(QHideEvent* event) {
     Q_UNUSED(event);
     m_VolumeSlider->hide();
 }

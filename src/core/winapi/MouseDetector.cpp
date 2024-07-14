@@ -2,19 +2,19 @@
 
 VOID MouseDetector::TrackMouse(Direction direction) {
 	_lpThreadParameters->direction = direction;
-	_lpThreadParameters->Running = TRUE;
+	_lpThreadParameters->running = TRUE;
 	_thread = CreateThread(NULL, 0, CheckMousePosition, (LPVOID)this, 0, 0);
 }
 
 BOOL MouseDetector::KillThread() {
-	_lpThreadParameters->Running = FALSE;
+	_lpThreadParameters->running = FALSE;
 	return CloseHandle(_thread);
 }
 
 DWORD WINAPI MouseDetector::CheckMousePositionMember() {
 	POINT lpCursorPointParameters = { 0 };
 
-	while (_lpThreadParameters->Running)
+	while (_lpThreadParameters->running)
 	{
 		BOOL isSuccessfullyGetCursorPos = GetCursorPos(&lpCursorPointParameters);
 		if (isSuccessfullyGetCursorPos == FALSE)

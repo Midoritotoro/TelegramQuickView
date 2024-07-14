@@ -36,7 +36,7 @@ private:
 				   * _graphicsAudioSlider = nullptr, * _graphicsVideoTimeLabel = nullptr;
 	QLabel* _videoTimeLabel = nullptr;
 	VideoStateWidget* _videoStateWidget = nullptr;
-	bool doubleClicked = false, _allowChangeVideoState = true;
+	bool _doubleClicked = false, _allowChangeVideoState = true;
 public:
 	MediaPlayer(QWidget* parent = nullptr);
 

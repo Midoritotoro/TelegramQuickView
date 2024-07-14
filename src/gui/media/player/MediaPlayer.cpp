@@ -335,7 +335,7 @@ void MediaPlayer::setMediaPlayerVideoPosition(int value) {
 }
 
 void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event) {
-	doubleClicked = true;
+	_doubleClicked = true;
 	mousePressEvent(event);
 
 	if (isMaximized() || isFullScreen())
@@ -344,7 +344,7 @@ void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event) {
 		showFullScreen();
 
 	adjustVideoSize();
-	doubleClicked = false;
+	_doubleClicked = false;
 	event->accept();
 }
 
@@ -373,7 +373,7 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 
 	_toolWidget->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
 	_toolLayout->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
-	if (doubleClicked)
+	if (_doubleClicked)
 		return;
 
 	adjustVideoSize();
