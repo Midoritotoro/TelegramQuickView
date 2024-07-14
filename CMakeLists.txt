@@ -32,8 +32,6 @@ SET(PARSER_SOURCES WIN32 src/core/parser/PythonCaller.cpp src/core/parser/main.c
 
 SET(MAIN_SOURCES main.cpp
 	src/core/PythonQtWrapper.h
-	src/core/sql/SqlConnect.cpp
-	src/core/sql/SqlConnect.h
 
 	src/core/winapi/AutoRunRegistryUtils.cpp
 	src/core/winapi/AutoRunRegistryUtils.h

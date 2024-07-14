@@ -8,12 +8,12 @@
 	#define _UNICODE
 #endif
 
+#define EDGE_OF_SCREEN_POSITION -1
+
 #include <windows.h>
 #include <tchar.h>
 
 #include "MessageHandler.h"
-
-#define EDGE_OF_SCREEN_POSITION -1
 
 class MouseDetector
 {	
@@ -25,22 +25,19 @@ public:
 
 	typedef struct _ThreadParameters {
 		Direction direction;
-		BOOL Running;
+		BOOL running;
 	} ThreadParameters, *LPThreadParameters;
 
 private:
-	HANDLE _Thread = nullptr;
-	LPThreadParameters _LPThreadParameters = new ThreadParameters();
+	HANDLE _thread = nullptr;
+	LPThreadParameters _lpThreadParameters = new ThreadParameters();
 public:
 	VOID TrackMouse(Direction direction);
 	BOOL KillThread();
-	[[nodiscard]] Direction getDirection() { return _LPThreadParameters->direction; }
-	[[nodiscard]] BOOL isRunning() { return _LPThreadParameters->Running; }
-	static DWORD WINAPI d(LPVOID lpParam){
-		MouseDetector* This = (MouseDetector*)lpParam;
-		return This->CheckMousePosition();
-	}
+	[[nodiscard]] Direction getDirection() { return _lpThreadParameters->direction; }
+	[[nodiscard]] BOOL isRunning() { return _lpThreadParameters->running; }
+	[[nodiscard]] static DWORD WINAPI CheckMousePosition(LPVOID lpSelf);
 protected:
-	DWORD WINAPI CheckMousePosition();
+	DWORD WINAPI CheckMousePositionMember();
 };
 

@@ -1,35 +1,40 @@
 ﻿#include "MouseDetector.h"
 
 VOID MouseDetector::TrackMouse(Direction direction) {
-	_LPThreadParameters->direction = direction;
-	_LPThreadParameters->Running = TRUE;
-	_Thread = CreateThread(NULL, 0, d, (LPVOID)this, 0, 0);
+	_lpThreadParameters->direction = direction;
+	_lpThreadParameters->Running = TRUE;
+	_thread = CreateThread(NULL, 0, CheckMousePosition, (LPVOID)this, 0, 0);
 }
 
 BOOL MouseDetector::KillThread() {
-	FreeConsole();
-	_LPThreadParameters->Running = FALSE;
-	return CloseHandle(_Thread);
+	_lpThreadParameters->Running = FALSE;
+	return CloseHandle(_thread);
 }
 
-DWORD WINAPI MouseDetector::CheckMousePosition() {
+DWORD WINAPI MouseDetector::CheckMousePositionMember() {
 	POINT lpCursorPointParameters = { 0 };
-	while (_LPThreadParameters->Running)
+
+	while (_lpThreadParameters->Running)
 	{
-		BOOL SuccessfullyGetCursorPos = GetCursorPos(&lpCursorPointParameters);
-		if (SuccessfullyGetCursorPos == FALSE) {
+		BOOL isSuccessfullyGetCursorPos = GetCursorPos(&lpCursorPointParameters);
+		if (isSuccessfullyGetCursorPos == FALSE)
 			continue;
-		}
-		int ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-		int ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
-		int menuThresholdWidthRatio = ScreenWidth / 64;
-		if (_LPThreadParameters->direction == Direction::Right && (ScreenWidth - lpCursorPointParameters.x) <= menuThresholdWidthRatio && (ScreenWidth - lpCursorPointParameters.x) > EDGE_OF_SCREEN_POSITION) {
+
+		int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+		int menuThresholdWidthRatio = screenWidth / 64;
+
+		if (_lpThreadParameters->direction == Direction::Right && (screenWidth - lpCursorPointParameters.x) <= menuThresholdWidthRatio && (screenWidth - lpCursorPointParameters.x) > EDGE_OF_SCREEN_POSITION) {
 			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), TEXT("Мышь находится в правой части экрана \n"));
 		}
-		else if (_LPThreadParameters->direction == Direction::Left && lpCursorPointParameters.x <= menuThresholdWidthRatio && lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION) {
+		else if (_lpThreadParameters->direction == Direction::Left && lpCursorPointParameters.x <= menuThresholdWidthRatio && lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION) {
 			PrintMsg(GetStdHandle(STD_OUTPUT_HANDLE), TEXT("Мышь находится в левой части экрана \n"));
 		}
 		Sleep(200);
 	}
 	return 0;
+}
+
+DWORD WINAPI MouseDetector::CheckMousePosition(LPVOID lpSelf) {
+	MouseDetector* self = (MouseDetector*)lpSelf;
+	return self->CheckMousePositionMember();
 }

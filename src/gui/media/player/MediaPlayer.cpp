@@ -1,8 +1,5 @@
 ﻿#include "MediaPlayer.h"
 
-#define VideoBegin 0
-
-
 
 MediaPlayer::MediaPlayer(QWidget* parent) :
 	QWidget(parent)
@@ -15,8 +12,8 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	setContentsMargins(0, 0, 0, 0);
 	QGridLayout* gridLayout = new QGridLayout();
 
-	MediaPlayerWidget = new QMediaPlayer();
-	audioOutput = new QAudioOutput();
+	_mediaPlayerWidget = new QMediaPlayer();
+	_audioOutput = new QAudioOutput();
 
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
@@ -46,33 +43,32 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	closeButton->setStyleSheet("background-color: transparent;");
 	maxButton->setStyleSheet("background-color: transparent;");
 
-	GraphicsScene = new	QGraphicsScene();
-	GraphicsView = new QGraphicsView(GraphicsScene);
-	GraphicsVideoItem = new QGraphicsVideoItem();
+	_videoScene = new	QGraphicsScene();
+	_videoView = new QGraphicsView(_videoScene);
+	_videoItem = new QGraphicsVideoItem();
 
-	form = new QGraphicsWidget();
-	grid = new QGraphicsGridLayout();
+	_videoForm = new QGraphicsWidget();
+	_videoFormLayout = new QGraphicsGridLayout();
 
-	toolWidget = new QGraphicsWidget();
-	toolLayout = new QGraphicsGridLayout();
+	_toolWidget = new QGraphicsWidget();
+	_toolLayout = new QGraphicsGridLayout();
 
-	containerWidget = new QGraphicsWidget();
-	containerLayout = new QGraphicsGridLayout();
+	_containerWidget = new QGraphicsWidget();
+	_containerLayout = new QGraphicsGridLayout();
 
-	GraphicsView->setScene(GraphicsScene);
+	_videoView->setScene(_videoScene);
 
-	GraphicsVideoItem->setSize(size());
-	GraphicsScene->setSceneRect(QRectF(QPointF(0, 0), size()));
+	_videoItem->setSize(size());
+	_videoScene->setSceneRect(QRectF(QPointF(0, 0), size()));
 
-	GraphicsScene->addItem(GraphicsVideoItem);
+	_videoScene->addItem(_videoItem);
 
-	GraphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	GraphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	GraphicsVideoItem->setAspectRatioMode(Qt::KeepAspectRatio);
-	//GraphicsVideoItem->setAspectRatioMode(Qt::KeepAspectRatioByExpanding);
+	_videoView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_videoView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_videoItem->setAspectRatioMode(Qt::KeepAspectRatio);
 
-	VideoSlider = new EnhancedSlider(Qt::Horizontal);
-	AudioSlider = new EnhancedSlider(Qt::Horizontal);
+	_videoSlider = new EnhancedSlider(Qt::Horizontal);
+	_audioSlider = new EnhancedSlider(Qt::Horizontal);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir assetsDir(currentPath + "/../../assets/images");
@@ -82,9 +78,9 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	QString playImagePath = assetsDir.absolutePath() + "/play.png";
 	QString repeatImagePath = assetsDir.absolutePath() + "/repeat.png";
 
-	_VolumeClickableLabel = new VolumeClickableLabel(speakerImagePath, AudioSlider);
+	_VolumeClickableLabel = new VolumeClickableLabel(speakerImagePath, _audioSlider);
 	_VolumeClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
-	AudioSlider->setRange(0, 100);
+	_audioSlider->setRange(0, 100);
 	gridLayout->setContentsMargins(0, 0, 0, 0);
 	gridLayout->setSpacing(0);
 
@@ -143,49 +139,49 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	QFile AudioSliderStyleFile(AudioSliderStyle);
 
 	if (VideoSliderStyleFile.open(QFile::ReadOnly) && AudioSliderStyleFile.open(QFile::ReadOnly)) {
-		VideoSlider->setStyleSheet(VideoSliderStyleFile.readAll());
-		AudioSlider->setStyleSheet(AudioSliderStyleFile.readAll());
+		_videoSlider->setStyleSheet(VideoSliderStyleFile.readAll());
+		_audioSlider->setStyleSheet(AudioSliderStyleFile.readAll());
 
 		VideoSliderStyleFile.close();
 		AudioSliderStyleFile.close();
 	}
 
-	MediaPlayerWidget->setAudioOutput(audioOutput);
-	MediaPlayerWidget->setVideoOutput(GraphicsVideoItem);
+	_mediaPlayerWidget->setAudioOutput(_audioOutput);
+	_mediaPlayerWidget->setVideoOutput(_videoItem);
 
 	setLayout(gridLayout);
 
-	gridLayout->addWidget(GraphicsView);
+	gridLayout->addWidget(_videoView);
 
-	form->setMaximumSize(screenWidth, screenHeight);
-	grid->setMaximumSize(screenWidth, screenHeight);
+	_videoForm->setMaximumSize(screenWidth, screenHeight);
+	_videoFormLayout->setMaximumSize(screenWidth, screenHeight);
 
-	toolWidget->setMaximumSize(screenWidth, screenHeight);
-	toolLayout->setMaximumSize(screenWidth, screenHeight);
+	_toolWidget->setMaximumSize(screenWidth, screenHeight);
+	_toolLayout->setMaximumSize(screenWidth, screenHeight);
 
-	toolWidget->setContentsMargins(0, 0, 0, 0);
-	toolLayout->setContentsMargins(0, 0, 0, 0);
+	_toolWidget->setContentsMargins(0, 0, 0, 0);
+	_toolLayout->setContentsMargins(0, 0, 0, 0);
 
-	form->setGeometry(QRectF(form->pos().x(), form->pos().y(), size().width(), size().height()));
-	grid->setGeometry(QRectF(form->pos().x(), form->pos().y(), size().width(), size().height()));
+	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
+	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 
-	toolWidget->setGeometry(QRectF(toolWidget->pos().x(), toolWidget->pos().y(), size().width(), size().height()));
-	toolLayout->setGeometry(QRectF(toolWidget->pos().x(), toolWidget->pos().y(), size().width(), size().height()));
+	_toolWidget->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
+	_toolLayout->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
 
-	form->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	toolWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	_videoForm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	_toolWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	GraphicsAudioSlider = GraphicsScene->addWidget(AudioSlider);
-	GraphicsVolumeClickableLabel = GraphicsScene->addWidget(_VolumeClickableLabel);
-	GraphicsVideoSlider = GraphicsScene->addWidget(VideoSlider);
-	GraphicsVideoTimeLabel = GraphicsScene->addWidget(videoTimeLabel);
-	QGraphicsWidget* GraphicsVideoStateWidget = GraphicsScene->addWidget(videoStateWidget);
+	_graphicsAudioSlider = _videoScene->addWidget(_audioSlider);
+	QGraphicsWidget* volumeClickableLabel = _videoScene->addWidget(_VolumeClickableLabel);
+	QGraphicsWidget* GraphicsVideoSlider = _videoScene->addWidget(_videoSlider);
+	GraphicsVideoTimeLabel = _videoScene->addWidget(videoTimeLabel);
+	QGraphicsWidget* GraphicsVideoStateWidget = _videoScene->addWidget(videoStateWidget);
 
-	QGraphicsWidget* GraphicsMinButton = GraphicsScene->addWidget(minButton);
-	QGraphicsWidget* GraphicsMaxButton = GraphicsScene->addWidget(maxButton);
-	QGraphicsWidget* GraphicsCloseButton = GraphicsScene->addWidget(closeButton);
+	QGraphicsWidget* GraphicsMinButton = _videoScene->addWidget(minButton);
+	QGraphicsWidget* GraphicsMaxButton = _videoScene->addWidget(maxButton);
+	QGraphicsWidget* GraphicsCloseButton = _videoScene->addWidget(closeButton);
 
-	GraphicsAudioSlider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	_graphicsAudioSlider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	GraphicsVideoSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	GraphicsVideoTimeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	GraphicsVideoStateWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -193,64 +189,64 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	GraphicsMaxButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	GraphicsCloseButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	containerWidget->setLayout(containerLayout);
-	toolWidget->setLayout(toolLayout);
+	_containerWidget->setLayout(_containerLayout);
+	_toolWidget->setLayout(_toolLayout);
 
-	containerLayout->setSpacing(screenWidth / 250);
-	containerWidget->setContentsMargins(0, 0, 0, 0);
-	grid->setContentsMargins(0, 0, 0, 0);
+	_containerLayout->setSpacing(screenWidth / 250);
+	_containerWidget->setContentsMargins(0, 0, 0, 0);
+	_videoFormLayout->setContentsMargins(0, 0, 0, 0);
 
-	containerLayout->addItem(GraphicsVideoSlider, 0, 0, 1, 5, Qt::AlignLeft | Qt::AlignBottom);
-	containerLayout->addItem(GraphicsVideoStateWidget, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
-	containerLayout->addItem(GraphicsVolumeClickableLabel, 1, 1, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
-	containerLayout->addItem(GraphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
-	containerLayout->addItem(GraphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(GraphicsVideoSlider, 0, 0, 1, 5, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(GraphicsVideoStateWidget, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(volumeClickableLabel, 1, 1, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(_graphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(GraphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 
 
-	toolLayout->addItem(GraphicsMinButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	toolLayout->addItem(GraphicsMaxButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	toolLayout->addItem(GraphicsCloseButton, 0, 2, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	_toolLayout->addItem(GraphicsMinButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	_toolLayout->addItem(GraphicsMaxButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	_toolLayout->addItem(GraphicsCloseButton, 0, 2, 1, 1, Qt::AlignRight | Qt::AlignTop);
 
-	containerLayout->setRowSpacing(1, GraphicsAudioSlider->size().height() * 2);
-	toolLayout->setHorizontalSpacing(0);
+	_containerLayout->setRowSpacing(1, _graphicsAudioSlider->size().height() * 2);
+	_toolLayout->setHorizontalSpacing(0);
 
-	containerLayout->setContentsMargins(10, 10, 10, 10);
+	_containerLayout->setContentsMargins(10, 10, 10, 10);
 
-	GraphicsView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	_videoView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	grid->addItem(toolWidget, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	grid->addItem(containerWidget, 1, 0, 1, 1, Qt::AlignBottom);
+	_videoFormLayout->addItem(_toolWidget, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	_videoFormLayout->addItem(_containerWidget, 1, 0, 1, 1, Qt::AlignBottom);
 
-	form->setLayout(grid);
-	GraphicsScene->addItem(form);
+	_videoForm->setLayout(_videoFormLayout);
+	_videoScene->addItem(_videoForm);
 
-	connect(VideoSlider, &QSlider::sliderPressed, [this]() {
-		disconnect(MediaPlayerWidget, &QMediaPlayer::positionChanged, VideoSlider, &QSlider::setValue);
-		MediaPlayerWidget->pause();
+	connect(_videoSlider, &QSlider::sliderPressed, [this]() {
+		disconnect(_mediaPlayerWidget, &QMediaPlayer::positionChanged, _videoSlider, &QSlider::setValue);
+		_mediaPlayerWidget->pause();
 		});
 
-	connect(VideoSlider, &QSlider::sliderReleased, [this]() {
-		connect(MediaPlayerWidget, &QMediaPlayer::positionChanged, VideoSlider, &QSlider::setValue);
+	connect(_videoSlider, &QSlider::sliderReleased, [this]() {
+		connect(_mediaPlayerWidget, &QMediaPlayer::positionChanged, _videoSlider, &QSlider::setValue);
 		Sleep(1);
-		MediaPlayerWidget->play();
+		_mediaPlayerWidget->play();
 		});
 
-	connect(MediaPlayerWidget, &QMediaPlayer::durationChanged, VideoSlider, &QSlider::setMaximum);
-	connect(MediaPlayerWidget, &QMediaPlayer::positionChanged, this, &MediaPlayer::videoSliderSetValue);
-	connect(MediaPlayerWidget, &QMediaPlayer::mediaStatusChanged, this, [this]() {
-		if (MediaPlayerWidget->mediaStatus() == MediaPlayerWidget->EndOfMedia) {
+	connect(_mediaPlayerWidget, &QMediaPlayer::durationChanged, _videoSlider, &QSlider::setMaximum);
+	connect(_mediaPlayerWidget, &QMediaPlayer::positionChanged, this, &MediaPlayer::videoSliderSetValue);
+	connect(_mediaPlayerWidget, &QMediaPlayer::mediaStatusChanged, this, [this]() {
+		if (_mediaPlayerWidget->mediaStatus() == _mediaPlayerWidget->EndOfMedia) {
 			videoStateWidget->stackedWidget()->setCurrentIndex(2);
 		}
 		});
 
-	connect(VideoSlider, &QSlider::sliderMoved, this, &MediaPlayer::setMediaPlayerVideoPosition);
-	connect(AudioSlider, &QSlider::valueChanged, this, &MediaPlayer::volumeChanged);
+	connect(_videoSlider, &QSlider::sliderMoved, this, &MediaPlayer::setMediaPlayerVideoPosition);
+	connect(_audioSlider, &QSlider::valueChanged, this, &MediaPlayer::volumeChanged);
 
 	connect(_VolumeClickableLabel, &ClickableLabel::clicked, this, [this]() {
-		if (AudioSlider->isHidden())
-			AudioSlider->show();
+		if (_audioSlider->isHidden())
+			_audioSlider->show();
 		else
-			AudioSlider->hide();
+			_audioSlider->hide();
 		adjustBottomWidgets();
 		});
 
@@ -269,22 +265,22 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		videoClicked();
 		});
 	connect(videoRepeatClickableLabel, &ClickableLabel::clicked, this, [this]() {
-		MediaPlayerWidget->setPosition(VideoBegin);
+		_mediaPlayerWidget->setPosition(0);
 		_allowChangeVideoState = true;
-		if (MediaPlayerWidget->playbackState() != MediaPlayerWidget->PlayingState) {
-			MediaPlayerWidget->play();
+		if (_mediaPlayerWidget->playbackState() != _mediaPlayerWidget->PlayingState) {
+			_mediaPlayerWidget->play();
 		}
 		videoStateWidget->stackedWidget()->setCurrentIndex(0);
 		});
 
-	QWidgetList widgetsList = QWidgetList({ VideoSlider, _VolumeClickableLabel, videoStateWidget, videoTimeLabel, minButton, maxButton, closeButton });
+	QWidgetList widgetsList = QWidgetList({ _videoSlider, _VolumeClickableLabel, videoStateWidget, videoTimeLabel, minButton, maxButton, closeButton });
 	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList);
 	widgetsHider.SetInactivityDuration(3000);
 
 	connect(&widgetsHider, &WidgetsHider::widgetsShowed, this, &MediaPlayer::adjustBottomWidgets);
 	connect(&widgetsHider, &WidgetsHider::widgetsHidden, this, &MediaPlayer::adjustBottomWidgets);
 
-	VideoSlider->hide();
+	_videoSlider->hide();
 	_VolumeClickableLabel->hide();
 	videoStateWidget->hide();
 	videoTimeLabel->hide();
@@ -292,19 +288,17 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	maxButton->hide(); 
 	closeButton->hide();
 
-	AudioSlider->setValue(50);
+	_audioSlider->setValue(50);
 }
 
-void MediaPlayer::volumeChanged(int value)
-{
+void MediaPlayer::volumeChanged(int value) {
 	qreal linearVolume = QAudio::convertVolume(value / qreal(100), QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
-	audioOutput->setVolume(linearVolume);
+	_audioOutput->setVolume(linearVolume);
 }
 
-void MediaPlayer::videoSliderSetValue(int value)
-{
-	int position = MediaPlayerWidget->position();
-	int duration = MediaPlayerWidget->duration();
+void MediaPlayer::videoSliderSetValue(int value) {
+	int position = _mediaPlayerWidget->position();
+	int duration = _mediaPlayerWidget->duration();
 
 	int positionSeconds = (position / 1000) % 60;
 	int positionMinutes = (position / 1000) / 60;
@@ -317,7 +311,7 @@ void MediaPlayer::videoSliderSetValue(int value)
 
 	int timeToEnd = duration - position;
 	if (timeToEnd <= 1000 && timeToEnd >= 0) {
-		MediaPlayerWidget->pause();
+		_mediaPlayerWidget->pause();
 		setMediaPlayerVideoPosition(duration-1);
 		_allowChangeVideoState = false;
 		videoStateWidget->stackedWidget()->setCurrentIndex(2);
@@ -326,21 +320,19 @@ void MediaPlayer::videoSliderSetValue(int value)
 
 	if (videoStateWidget->stackedWidget()->currentIndex() == 2 && _allowChangeVideoState == false) {
 		_allowChangeVideoState = true;
-		MediaPlayerWidget->play();
+		_mediaPlayerWidget->play();
 		videoStateWidget->stackedWidget()->setCurrentIndex(0);
 	}
 	
-	VideoSlider->setValue(value);
+	_videoSlider->setValue(value);
 }
 
-void MediaPlayer::setMediaPlayerVideoPosition(int value)
-{
+void MediaPlayer::setMediaPlayerVideoPosition(int value) {
 	if (_allowChangeVideoState)
-		MediaPlayerWidget->setPosition(value);
+		_mediaPlayerWidget->setPosition(value);
 }
 
-void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event)
-{
+void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event) {
 	doubleClicked = true;
 	mousePressEvent(event);
 
@@ -354,8 +346,7 @@ void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event)
 	event->accept();
 }
 
-void MediaPlayer::mousePressEvent(QMouseEvent* event)
-{
+void MediaPlayer::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		videoClicked();
 	}
@@ -363,28 +354,26 @@ void MediaPlayer::mousePressEvent(QMouseEvent* event)
 }
 
 
-void MediaPlayer::videoClicked()
-{
+void MediaPlayer::videoClicked() {
 	if (!_allowChangeVideoState)
 		return;
 
-	if (MediaPlayerWidget->playbackState() == MediaPlayerWidget->PlayingState) {
-		MediaPlayerWidget->pause();
+	if (_mediaPlayerWidget->playbackState() == _mediaPlayerWidget->PlayingState) {
+		_mediaPlayerWidget->pause();
 	}
-	else if (MediaPlayerWidget->playbackState() == MediaPlayerWidget->PausedState) {
-		MediaPlayerWidget->play();
+	else if (_mediaPlayerWidget->playbackState() == _mediaPlayerWidget->PausedState) {
+		_mediaPlayerWidget->play();
 	}
 }
 
-void MediaPlayer::resizeEvent(QResizeEvent* event)
-{
+void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	Q_UNUSED(event);
 
-	form->setGeometry(QRectF(form->pos().x(), form->pos().y(), size().width(), size().height()));
-	grid->setGeometry(QRectF(form->pos().x(), form->pos().y(), size().width(), size().height()));
+	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
+	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 
-	toolWidget->setGeometry(QRectF(toolWidget->pos().x(), toolWidget->pos().y(), size().width(), size().height()));
-	toolLayout->setGeometry(QRectF(toolWidget->pos().x(), toolWidget->pos().y(), size().width(), size().height()));
+	_toolWidget->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
+	_toolLayout->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
 	if (doubleClicked)
 		return;
 
@@ -396,31 +385,33 @@ void MediaPlayer::resizeEvent(QResizeEvent* event)
 	isFullScreen() ? showNormal() : showFullScreen();
 }
 
-void MediaPlayer::adjustVideoSize()
-{
-	GraphicsVideoItem->setSize(size());
-	GraphicsScene->setSceneRect(QRectF(QPointF(0, 0), size()));
+void MediaPlayer::adjustVideoSize() {
+	_videoItem->setSize(size());
+	_videoScene->setSceneRect(QRectF(QPointF(0, 0), size()));
 }
 
-void MediaPlayer::adjustBottomWidgets()
-{
-	if (AudioSlider->isHidden()) {
-		containerLayout->removeItem(GraphicsVideoTimeLabel);
-		QGraphicsLayoutItem* item = containerLayout->itemAt(1, 2);
-		if (item == GraphicsAudioSlider) {
-			containerLayout->removeItem(GraphicsAudioSlider);
-			containerLayout->addItem(GraphicsAudioSlider, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+void MediaPlayer::adjustBottomWidgets() {
+	if (_audioSlider->isHidden()) {
+		_containerLayout->removeItem(GraphicsVideoTimeLabel);
+		QGraphicsLayoutItem* item = _containerLayout->itemAt(1, 2);
+
+		if (item == _graphicsAudioSlider) {
+			_containerLayout->removeItem(_graphicsAudioSlider);
+			_containerLayout->addItem(_graphicsAudioSlider, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 		}
-		containerLayout->addItem(GraphicsVideoTimeLabel, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+
+		_containerLayout->addItem(GraphicsVideoTimeLabel, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	}
 	else {
-		containerLayout->removeItem(GraphicsVideoTimeLabel);
-		QGraphicsLayoutItem* item = containerLayout->itemAt(1, 3);
-		if (item == GraphicsAudioSlider) {
-			containerLayout->removeItem(GraphicsAudioSlider);
-			containerLayout->addItem(GraphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+		_containerLayout->removeItem(GraphicsVideoTimeLabel);
+		QGraphicsLayoutItem* item = _containerLayout->itemAt(1, 3);
+
+		if (item == _graphicsAudioSlider) {
+			_containerLayout->removeItem(_graphicsAudioSlider);
+			_containerLayout->addItem(_graphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 		}
-		containerLayout->addItem(GraphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+
+		_containerLayout->addItem(GraphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	}
 }
 
@@ -437,25 +428,25 @@ void MediaPlayer::setSource(const QUrl& source) {
 
 	QString mediaType = detectMediaType(sourcePath);
 	if (mediaType.contains("video")) {
-		QList<QGraphicsItem*> items = GraphicsScene->items();
+		QList<QGraphicsItem*> items = _videoScene->items();
 		for (QGraphicsItem* item : items) {
 			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
-				GraphicsScene->removeItem(item);
+				_videoScene->removeItem(item);
 				delete item;
 			}
 		}
-		containerWidget->show();
-		MediaPlayerWidget->setSource(source);
-		GraphicsVideoItem->setSize(QSize(464, 848));
+		_containerWidget->show();
+		_mediaPlayerWidget->setSource(source);
+		_videoItem->setSize(QSize(464, 848));
 		play();
 	}
 	else if (mediaType.contains("image")) {
-		containerWidget->hide();
+		_containerWidget->hide();
 		QGraphicsPixmapItem* m_currentImageItem = new QGraphicsPixmapItem(QPixmap(sourcePath));
-		GraphicsScene->addItem(m_currentImageItem);
+		_videoScene->addItem(m_currentImageItem);
 	}
 }
 
 void MediaPlayer::play() {
-	MediaPlayerWidget->play();
+	_mediaPlayerWidget->play();
 }

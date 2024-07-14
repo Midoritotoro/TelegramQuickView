@@ -11,62 +11,51 @@
 class WidgetsHider : public QObject
 {
     Q_OBJECT
-
 public:
     using DurationT = int;
 
-    static inline WidgetsHider& Instance(QWidgetList& qWidgetList)
-    {
+    static inline WidgetsHider& Instance(QWidgetList& qWidgetList) {
         static WidgetsHider i(qWidgetList);
         return i;
     }
 
-    explicit inline WidgetsHider(QWidgetList& qWidgetList) : _InactivityDuration{ DurationT{} }, _qWidgetList(qWidgetList)
-    {
+    explicit inline WidgetsHider(QWidgetList& qWidgetList) : _inactivityDuration{ DurationT{} }, _qWidgetList(qWidgetList) {
         QCoreApplication::instance()->installEventFilter(this);
 
-        _Timer.setSingleShot(true);
-        _Timer.callOnTimeout(
+        _timer.setSingleShot(true);
+        _timer.callOnTimeout(
             [this]() {
                 ControlVisibility(false);
             }
         );
     }
 
-    inline void SetInactivityDuration(DurationT Value)
-    {
-        _InactivityDuration = Value;
+    inline void SetInactivityDuration(DurationT Value) {
+        _inactivityDuration = Value;
     }
 Q_SIGNALS:
-    QT_WARNING_PUSH
-    QT_WARNING_DISABLE_GCC("-Wenum-compare")
     void widgetsHidden();
     void widgetsShowed();
-    QT_WARNING_POP
 private:
-    std::atomic<DurationT> _InactivityDuration;
-    QTimer _Timer;
+    std::atomic<DurationT> _inactivityDuration;
+    QTimer _timer;
     QWidgetList _qWidgetList;
 
-    inline bool eventFilter(QObject* pWatched, QEvent* pEvent) override
-    {
-        if (pEvent->type() == QEvent::MouseMove)
-        {
+    inline bool eventFilter(QObject* pWatched, QEvent* pEvent) override {
+        if (pEvent->type() == QEvent::MouseMove) {
             ControlVisibility(true);
 
-            if (_InactivityDuration != DurationT{}) {
-                _Timer.start(_InactivityDuration);
-            }
+            if (_inactivityDuration != DurationT{})
+                _timer.start(_inactivityDuration);
         }
 
         return QObject::eventFilter(pWatched, pEvent);
     }
 
-    inline void ControlVisibility(bool Show)
-    {
-        foreach (QWidget* widget, _qWidgetList) {
+    inline void ControlVisibility(bool Show) {
+        foreach (QWidget* widget, _qWidgetList)
             widget->setVisible(Show);
-        }
+
         Show ? emit widgetsShowed() : emit widgetsHidden();
     }
 };

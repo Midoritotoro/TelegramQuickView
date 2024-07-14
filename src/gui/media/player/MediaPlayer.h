@@ -25,16 +25,15 @@ class MediaPlayer : public QWidget
 {
 private:
 	Q_OBJECT
-	QMediaPlayer* MediaPlayerWidget = nullptr;
-	QAudioOutput* audioOutput = nullptr;
-	EnhancedSlider* VideoSlider = nullptr, *AudioSlider = nullptr;
-	QGraphicsView* GraphicsView = nullptr;
-	QGraphicsScene* GraphicsScene = nullptr;
-	QGraphicsVideoItem* GraphicsVideoItem = nullptr;
-	QGraphicsGridLayout* grid = nullptr, * toolLayout = nullptr, * containerLayout = nullptr;
-	QGraphicsWidget* form = nullptr, * containerWidget = nullptr, * toolWidget = nullptr, * GraphicsVolumeClickableLabel = nullptr,
-				   * GraphicsAudioSlider = nullptr,* GraphicsVideoSlider = nullptr, * GraphicsVideoTimeLabel = nullptr, * GraphicsVideoStopButton = nullptr,
-				   * GraphicsVideoPlayButton = nullptr;
+	QMediaPlayer* _mediaPlayerWidget = nullptr;
+	QAudioOutput* _audioOutput = nullptr;
+	EnhancedSlider* _videoSlider = nullptr, *_audioSlider = nullptr;
+	QGraphicsView* _videoView = nullptr;
+	QGraphicsScene* _videoScene = nullptr;
+	QGraphicsVideoItem* _videoItem = nullptr;
+	QGraphicsGridLayout* _videoFormLayout = nullptr, * _toolLayout = nullptr, * _containerLayout = nullptr;
+	QGraphicsWidget* _videoForm = nullptr, * _containerWidget = nullptr, * _toolWidget = nullptr,
+				   * _graphicsAudioSlider = nullptr, * GraphicsVideoTimeLabel = nullptr;
 	QToolButton* minButton = nullptr,* closeButton = nullptr, * maxButton = nullptr;
 	QLabel* videoTimeLabel = nullptr;
 	ClickableLabel *videoRepeatClickableLabel = nullptr, *videoStopClickableLabel = nullptr, *videoPlayClickableLabel = nullptr, * _VolumeClickableLabel = nullptr;
