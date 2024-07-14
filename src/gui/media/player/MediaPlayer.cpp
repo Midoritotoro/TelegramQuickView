@@ -1,4 +1,5 @@
 ﻿#include "MediaPlayer.h"
+#include <Windows.h>
 
 
 MediaPlayer::MediaPlayer(QWidget* parent) :
@@ -12,36 +13,36 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	setContentsMargins(0, 0, 0, 0);
 	QGridLayout* gridLayout = new QGridLayout();
 
-	_mediaPlayerWidget = new QMediaPlayer();
+	_mediaPlayer = new QMediaPlayer();
 	_audioOutput = new QAudioOutput();
 
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("color: rgba(1, 0, 0, 0)");
 
-	minButton = new QToolButton();
-	closeButton = new QToolButton();
-	maxButton = new QToolButton();
+	QToolButton* minimizeWindowButton = new QToolButton();
+	QToolButton* closeWindowButton = new QToolButton();
+	QToolButton* maximizeWindowButton = new QToolButton();
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
 	QPixmap maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
 
-	minButton->setIcon(minPix);
-	closeButton->setIcon(closePix);
-	maxButton->setIcon(maxPix);
+	minimizeWindowButton->setIcon(minPix);
+	closeWindowButton->setIcon(closePix);
+	maximizeWindowButton->setIcon(maxPix);
 
-	minButton->setAttribute(Qt::WA_NoSystemBackground);
-	closeButton->setAttribute(Qt::WA_NoSystemBackground);
-	maxButton->setAttribute(Qt::WA_NoSystemBackground);
+	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
+	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
+	maximizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 
-	minButton->setFixedSize(screenWidth / 60, screenHeight / 40);
-	closeButton->setFixedSize(screenWidth / 60, screenHeight / 40);
-	maxButton->setFixedSize(screenWidth / 60, screenHeight / 40);
+	minimizeWindowButton->setFixedSize(screenWidth / 60, screenHeight / 40);
+	closeWindowButton->setFixedSize(screenWidth / 60, screenHeight / 40);
+	maximizeWindowButton->setFixedSize(screenWidth / 60, screenHeight / 40);
 
-	minButton->setStyleSheet("background-color: transparent;");
-	closeButton->setStyleSheet("background-color: transparent;");
-	maxButton->setStyleSheet("background-color: transparent;");
+	minimizeWindowButton->setStyleSheet("background-color: transparent;");
+	closeWindowButton->setStyleSheet("background-color: transparent;");
+	maximizeWindowButton->setStyleSheet("background-color: transparent;");
 
 	_videoScene = new	QGraphicsScene();
 	_videoView = new QGraphicsView(_videoScene);
@@ -78,20 +79,20 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	QString playImagePath = assetsDir.absolutePath() + "/play.png";
 	QString repeatImagePath = assetsDir.absolutePath() + "/repeat.png";
 
-	_VolumeClickableLabel = new VolumeClickableLabel(speakerImagePath, _audioSlider);
-	_VolumeClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
+	ClickableLabel* volumeClickableLabel = new VolumeClickableLabel(speakerImagePath, _audioSlider);
+	volumeClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
 	_audioSlider->setRange(0, 100);
 	gridLayout->setContentsMargins(0, 0, 0, 0);
 	gridLayout->setSpacing(0);
 
-	videoTimeLabel = new QLabel();
-	videoTimeLabel->setStyleSheet("background-color: transparent");
-	videoTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
-	videoTimeLabel->setFixedSize(screenWidth / 30, screenHeight / 60);
+	_videoTimeLabel = new QLabel();
+	_videoTimeLabel->setStyleSheet("background-color: transparent");
+	_videoTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
+	_videoTimeLabel->setFixedSize(screenWidth / 30, screenHeight / 60);
 
-	videoStopClickableLabel = new ClickableLabel();
-	videoPlayClickableLabel = new ClickableLabel();
-	videoRepeatClickableLabel = new ClickableLabel();
+	ClickableLabel* videoStopClickableLabel = new ClickableLabel();
+	ClickableLabel* videoPlayClickableLabel = new ClickableLabel();
+	ClickableLabel* videoRepeatClickableLabel = new ClickableLabel();
 
 	QPixmap stopImagePixmap(stopImagePath);
 	videoStopClickableLabel->setBackgroundRole(QPalette::Dark);
@@ -126,10 +127,10 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	videoStopClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
 	videoPlayClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
 
-	videoStateWidget = new VideoStateWidget(videoPlayClickableLabel, videoStopClickableLabel, videoRepeatClickableLabel);
+	_videoStateWidget = new VideoStateWidget(videoPlayClickableLabel, videoStopClickableLabel, videoRepeatClickableLabel);
 
-	videoStateWidget->setStyleSheet("background-color: transparent");
-	videoStateWidget->setFixedSize(screenWidth / 60, screenHeight / 40);
+	_videoStateWidget->setStyleSheet("background-color: transparent");
+	_videoStateWidget->setFixedSize(screenWidth / 60, screenHeight / 40);
 
 	QDir qssDir(currentPath + "/../../src/css/");
 	QString VideoSliderStyle = qssDir.absolutePath() + "/VideoSliderStyle.css";
@@ -146,8 +147,8 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		AudioSliderStyleFile.close();
 	}
 
-	_mediaPlayerWidget->setAudioOutput(_audioOutput);
-	_mediaPlayerWidget->setVideoOutput(_videoItem);
+	_mediaPlayer->setAudioOutput(_audioOutput);
+	_mediaPlayer->setVideoOutput(_videoItem);
 
 	setLayout(gridLayout);
 
@@ -172,19 +173,19 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_toolWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 	_graphicsAudioSlider = _videoScene->addWidget(_audioSlider);
-	QGraphicsWidget* volumeClickableLabel = _videoScene->addWidget(_VolumeClickableLabel);
-	QGraphicsWidget* GraphicsVideoSlider = _videoScene->addWidget(_videoSlider);
-	GraphicsVideoTimeLabel = _videoScene->addWidget(videoTimeLabel);
-	QGraphicsWidget* GraphicsVideoStateWidget = _videoScene->addWidget(videoStateWidget);
+	QGraphicsWidget* graphicsVolumeClickableLabel = _videoScene->addWidget(volumeClickableLabel);
+	QGraphicsWidget* graphicsVideoSlider = _videoScene->addWidget(_videoSlider);
+	_graphicsVideoTimeLabel = _videoScene->addWidget(_videoTimeLabel);
+	QGraphicsWidget* graphicsVideoStateWidget = _videoScene->addWidget(_videoStateWidget);
 
-	QGraphicsWidget* GraphicsMinButton = _videoScene->addWidget(minButton);
-	QGraphicsWidget* GraphicsMaxButton = _videoScene->addWidget(maxButton);
-	QGraphicsWidget* GraphicsCloseButton = _videoScene->addWidget(closeButton);
+	QGraphicsWidget* GraphicsMinButton = _videoScene->addWidget(minimizeWindowButton);
+	QGraphicsWidget* GraphicsMaxButton = _videoScene->addWidget(maximizeWindowButton);
+	QGraphicsWidget* GraphicsCloseButton = _videoScene->addWidget(closeWindowButton);
 
 	_graphicsAudioSlider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	GraphicsVideoSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	GraphicsVideoTimeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	GraphicsVideoStateWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	graphicsVideoSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	_graphicsVideoTimeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	graphicsVideoStateWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	GraphicsMinButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	GraphicsMaxButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	GraphicsCloseButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -196,11 +197,11 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_containerWidget->setContentsMargins(0, 0, 0, 0);
 	_videoFormLayout->setContentsMargins(0, 0, 0, 0);
 
-	_containerLayout->addItem(GraphicsVideoSlider, 0, 0, 1, 5, Qt::AlignLeft | Qt::AlignBottom);
-	_containerLayout->addItem(GraphicsVideoStateWidget, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
-	_containerLayout->addItem(volumeClickableLabel, 1, 1, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(graphicsVideoSlider, 0, 0, 1, 5, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(graphicsVideoStateWidget, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(graphicsVolumeClickableLabel, 1, 1, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	_containerLayout->addItem(_graphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
-	_containerLayout->addItem(GraphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+	_containerLayout->addItem(_graphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 
 
 	_toolLayout->addItem(GraphicsMinButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
@@ -221,59 +222,59 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_videoScene->addItem(_videoForm);
 
 	connect(_videoSlider, &QSlider::sliderPressed, [this]() {
-		disconnect(_mediaPlayerWidget, &QMediaPlayer::positionChanged, _videoSlider, &QSlider::setValue);
-		_mediaPlayerWidget->pause();
-		});
+		disconnect(_mediaPlayer, &QMediaPlayer::positionChanged, _videoSlider, &QSlider::setValue);
+		_mediaPlayer->pause();
+	});
 
 	connect(_videoSlider, &QSlider::sliderReleased, [this]() {
-		connect(_mediaPlayerWidget, &QMediaPlayer::positionChanged, _videoSlider, &QSlider::setValue);
+		connect(_mediaPlayer, &QMediaPlayer::positionChanged, _videoSlider, &QSlider::setValue);
 		Sleep(1);
-		_mediaPlayerWidget->play();
-		});
+		_mediaPlayer->play();
+	});
 
-	connect(_mediaPlayerWidget, &QMediaPlayer::durationChanged, _videoSlider, &QSlider::setMaximum);
-	connect(_mediaPlayerWidget, &QMediaPlayer::positionChanged, this, &MediaPlayer::videoSliderSetValue);
-	connect(_mediaPlayerWidget, &QMediaPlayer::mediaStatusChanged, this, [this]() {
-		if (_mediaPlayerWidget->mediaStatus() == _mediaPlayerWidget->EndOfMedia) {
-			videoStateWidget->stackedWidget()->setCurrentIndex(2);
-		}
-		});
+	connect(_mediaPlayer, &QMediaPlayer::durationChanged, _videoSlider, &QSlider::setMaximum);
+	connect(_mediaPlayer, &QMediaPlayer::positionChanged, this, &MediaPlayer::videoSliderSetValue);
+	connect(_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this]() {
+		if (_mediaPlayer->mediaStatus() == _mediaPlayer->EndOfMedia)
+			_videoStateWidget->stackedWidget()->setCurrentIndex(2);
+	});
 
 	connect(_videoSlider, &QSlider::sliderMoved, this, &MediaPlayer::setMediaPlayerVideoPosition);
 	connect(_audioSlider, &QSlider::valueChanged, this, &MediaPlayer::volumeChanged);
 
-	connect(_VolumeClickableLabel, &ClickableLabel::clicked, this, [this]() {
+	connect(volumeClickableLabel, &ClickableLabel::clicked, this, [this]() {
 		if (_audioSlider->isHidden())
 			_audioSlider->show();
 		else
 			_audioSlider->hide();
 		adjustBottomWidgets();
-		});
+	});
 
-	connect(minButton, &QToolButton::clicked, this, &QWidget::showMinimized);
-	connect(closeButton, &QToolButton::clicked, this, &QWidget::close);
-	connect(maxButton, &QToolButton::clicked, this, [this]() {
+	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
+	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
+	connect(maximizeWindowButton, &QToolButton::clicked, this, [this]() {
 		isFullScreen() ? showNormal() : showFullScreen();
-		});
+	});
 
 	connect(videoPlayClickableLabel, &ClickableLabel::clicked, this, [this]() {
-		videoStateWidget->stackedWidget()->setCurrentIndex(0);
+		_videoStateWidget->stackedWidget()->setCurrentIndex(0);
 		videoClicked();
-		});
+	});
 	connect(videoStopClickableLabel, &ClickableLabel::clicked, this, [this]() {
-		videoStateWidget->stackedWidget()->setCurrentIndex(1);
+		_videoStateWidget->stackedWidget()->setCurrentIndex(1);
 		videoClicked();
-		});
+	});
 	connect(videoRepeatClickableLabel, &ClickableLabel::clicked, this, [this]() {
-		_mediaPlayerWidget->setPosition(0);
+		_mediaPlayer->setPosition(0);
 		_allowChangeVideoState = true;
-		if (_mediaPlayerWidget->playbackState() != _mediaPlayerWidget->PlayingState) {
-			_mediaPlayerWidget->play();
-		}
-		videoStateWidget->stackedWidget()->setCurrentIndex(0);
-		});
 
-	QWidgetList widgetsList = QWidgetList({ _videoSlider, _VolumeClickableLabel, videoStateWidget, videoTimeLabel, minButton, maxButton, closeButton });
+		if (_mediaPlayer->playbackState() != _mediaPlayer->PlayingState)
+			_mediaPlayer->play();
+
+		_videoStateWidget->stackedWidget()->setCurrentIndex(0);
+	});
+
+	QWidgetList widgetsList = QWidgetList({ _videoSlider, volumeClickableLabel, _videoStateWidget, _videoTimeLabel, minimizeWindowButton, maximizeWindowButton, closeWindowButton });
 	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList);
 	widgetsHider.SetInactivityDuration(3000);
 
@@ -281,12 +282,12 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	connect(&widgetsHider, &WidgetsHider::widgetsHidden, this, &MediaPlayer::adjustBottomWidgets);
 
 	_videoSlider->hide();
-	_VolumeClickableLabel->hide();
-	videoStateWidget->hide();
-	videoTimeLabel->hide();
-	minButton->hide();
-	maxButton->hide(); 
-	closeButton->hide();
+	volumeClickableLabel->hide();
+	_videoStateWidget->hide();
+	_videoTimeLabel->hide();
+	minimizeWindowButton->hide();
+	maximizeWindowButton->hide();
+	closeWindowButton->hide();
 
 	_audioSlider->setValue(50);
 }
@@ -297,31 +298,32 @@ void MediaPlayer::volumeChanged(int value) {
 }
 
 void MediaPlayer::videoSliderSetValue(int value) {
-	int position = _mediaPlayerWidget->position();
-	int duration = _mediaPlayerWidget->duration();
+	int position = _mediaPlayer->position();
+	int duration = _mediaPlayer->duration();
 
 	int positionSeconds = (position / 1000) % 60;
 	int positionMinutes = (position / 1000) / 60;
 
-	videoTimeLabel->setText(QString("%1:%2 / %3:%4")
+	_videoTimeLabel->setText(QString("%1:%2 / %3:%4")
 		.arg(positionMinutes, 2, 10, QChar('0'))
 		.arg(positionSeconds, 2, 10, QChar('0'))
 		.arg(duration / 60000)
 		.arg((duration / 1000) % 60));
 
 	int timeToEnd = duration - position;
+
 	if (timeToEnd <= 1000 && timeToEnd >= 0) {
-		_mediaPlayerWidget->pause();
+		_mediaPlayer->pause();
 		setMediaPlayerVideoPosition(duration-1);
 		_allowChangeVideoState = false;
-		videoStateWidget->stackedWidget()->setCurrentIndex(2);
+		_videoStateWidget->stackedWidget()->setCurrentIndex(2);
 		return;
 	}
 
-	if (videoStateWidget->stackedWidget()->currentIndex() == 2 && _allowChangeVideoState == false) {
+	if (_videoStateWidget->stackedWidget()->currentIndex() == 2 && _allowChangeVideoState == false) {
 		_allowChangeVideoState = true;
-		_mediaPlayerWidget->play();
-		videoStateWidget->stackedWidget()->setCurrentIndex(0);
+		_mediaPlayer->play();
+		_videoStateWidget->stackedWidget()->setCurrentIndex(0);
 	}
 	
 	_videoSlider->setValue(value);
@@ -329,7 +331,7 @@ void MediaPlayer::videoSliderSetValue(int value) {
 
 void MediaPlayer::setMediaPlayerVideoPosition(int value) {
 	if (_allowChangeVideoState)
-		_mediaPlayerWidget->setPosition(value);
+		_mediaPlayer->setPosition(value);
 }
 
 void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event) {
@@ -347,9 +349,8 @@ void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event) {
 }
 
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {
-	if (event->button() == Qt::LeftButton) {
+	if (event->button() == Qt::LeftButton)
 		videoClicked();
-	}
 	event->accept();
 }
 
@@ -358,12 +359,10 @@ void MediaPlayer::videoClicked() {
 	if (!_allowChangeVideoState)
 		return;
 
-	if (_mediaPlayerWidget->playbackState() == _mediaPlayerWidget->PlayingState) {
-		_mediaPlayerWidget->pause();
-	}
-	else if (_mediaPlayerWidget->playbackState() == _mediaPlayerWidget->PausedState) {
-		_mediaPlayerWidget->play();
-	}
+	if (_mediaPlayer->playbackState() == _mediaPlayer->PlayingState)
+		_mediaPlayer->pause();
+	else if (_mediaPlayer->playbackState() == _mediaPlayer->PausedState)
+		_mediaPlayer->play();
 }
 
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
@@ -392,7 +391,7 @@ void MediaPlayer::adjustVideoSize() {
 
 void MediaPlayer::adjustBottomWidgets() {
 	if (_audioSlider->isHidden()) {
-		_containerLayout->removeItem(GraphicsVideoTimeLabel);
+		_containerLayout->removeItem(_graphicsVideoTimeLabel);
 		QGraphicsLayoutItem* item = _containerLayout->itemAt(1, 2);
 
 		if (item == _graphicsAudioSlider) {
@@ -400,10 +399,10 @@ void MediaPlayer::adjustBottomWidgets() {
 			_containerLayout->addItem(_graphicsAudioSlider, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 		}
 
-		_containerLayout->addItem(GraphicsVideoTimeLabel, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+		_containerLayout->addItem(_graphicsVideoTimeLabel, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	}
 	else {
-		_containerLayout->removeItem(GraphicsVideoTimeLabel);
+		_containerLayout->removeItem(_graphicsVideoTimeLabel);
 		QGraphicsLayoutItem* item = _containerLayout->itemAt(1, 3);
 
 		if (item == _graphicsAudioSlider) {
@@ -411,7 +410,7 @@ void MediaPlayer::adjustBottomWidgets() {
 			_containerLayout->addItem(_graphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 		}
 
-		_containerLayout->addItem(GraphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+		_containerLayout->addItem(_graphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	}
 }
 
@@ -436,7 +435,7 @@ void MediaPlayer::setSource(const QUrl& source) {
 			}
 		}
 		_containerWidget->show();
-		_mediaPlayerWidget->setSource(source);
+		_mediaPlayer->setSource(source);
 		_videoItem->setSize(QSize(464, 848));
 		play();
 	}
@@ -448,5 +447,5 @@ void MediaPlayer::setSource(const QUrl& source) {
 }
 
 void MediaPlayer::play() {
-	_mediaPlayerWidget->play();
+	_mediaPlayer->play();
 }

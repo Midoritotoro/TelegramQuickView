@@ -6,24 +6,36 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>415</width>
+    <height>331</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPlainTextEdit" name="plainTextEdit">
+  <property name="styleSheet">
+   <string notr="true">*{
+font-family: centry gothic;
+font-size: 24px;
+}</string>
+  </property>
+  <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>160</y>
-     <width>401</width>
-     <height>141</height>
+     <y>180</y>
+     <width>421</width>
+     <height>151</height>
     </rect>
    </property>
-   <property name="plainText">
-    <string/>
+   <property name="styleSheet">
+    <string notr="true">QLabel {
+background: Wheat;
+color: black;
+}</string>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
    </property>
   </widget>
  </widget>
