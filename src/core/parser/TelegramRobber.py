@@ -1,6 +1,6 @@
 ﻿from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
-from typing import Callable
+from typing import Callable, Any
 from telethon.tl.types import InputPeerChannel, Message
 import asyncio
 from pathlib import Path
@@ -12,38 +12,43 @@ from datetime import datetime
 
 
 class HandlersManager:
-    def __init__(self, client: TelegramClient, downloadFunction: Callable, username: str) -> None:
+    def __init__(self: 'HandlersManager',
+                 client: TelegramClient,
+                 downloadFunction: Callable,
+                 username: str
+    ) -> None:
         self.__client = client
         self.__downloadFunction = downloadFunction
         self.__username = username
         self.__groupedMessageId = 0
         self.__groupedMessageDate: datetime 
     
-    async def createChannelHandler(self):
-        channel_entity = await self.__client.get_input_entity(self.__username)
-        if isinstance(channel_entity, InputPeerChannel):
-            @self.__client.on(events.NewMessage(chats=channel_entity))
-            async def handler(event: events.NewMessage.Event):
-                if event.message.grouped_id != None:
-                    if event.message.grouped_id != self.__groupedMessageId:
-                        self.__groupedMessageId = event.message.grouped_id
-                        self.__groupedMessageDate = event.message.date
-                        await self.__downloadFunction(self.__username, event.message)
-                    elif event.message.grouped_id == self.__groupedMessageId:
-                        if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 20):
-                            await self.__downloadFunction(self.__username, event.message)
-                elif event.message.grouped_id == None:
+    async def createChannelHandler(self: 'HandlersManager') -> None:
+        channelEntity = await self.__client.get_input_entity(self.__username)
+        
+        if isinstance(channelEntity, InputPeerChannel):
+            @self.__client.on(events.NewMessage(chats=channelEntity))
+            async def handler(event: events.NewMessage.Event) -> None:
+                if event.message.grouped_id == None:
                     await self.__downloadFunction(self.__username, event.message)
+                else:
+                    if event.message.grouped_id == self.__groupedMessageId:
+                        if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 30):
+                            await self.__downloadFunction(self.__username, event.message)
+                        else:
+                            self.__groupedMessageId = event.message.grouped_id
+                            self.__groupedMessageDate = event.message.date
+                            await self.__downloadFunction(self.__username, event.message)
 
 class Sleuth:
     def __init__(
-            self,
+            self: 'Sleuth',
             pathToSettingsJsonFile: str,
             pathToAppRootDirectory: str
-    ):
-        self.pathToSettingsJsonFile = pathToSettingsJsonFile
+    ) -> None:
         userSettings = self.__getUserSettings()
         
+        self.pathToSettingsJsonFile = pathToSettingsJsonFile
         self.__api_id = userSettings.get("apiId")
         self.__api_hash = userSettings.get("apiHash")
         self.__phone_number = userSettings.get("phoneNumber") 
@@ -58,48 +63,49 @@ class Sleuth:
         self.__pathToAppRootDirectory = pathToAppRootDirectory
         self.__pathToAppRootDirectoryContent = ""
         
-        exePath = os.path.dirname(os.path.abspath(__file__)).rsplit("\\", 3)[0]
-        sessionFile = os.path.join(exePath, "TelegramQuickView.session")
+        sessionFile = os.path.join(os.path.dirname(os.path.abspath(__file__)).rsplit("\\", 3)[0], "TelegramQuickView.session")
         self.__client = TelegramClient(sessionFile, self.__api_id, self.__api_hash, timeout=10)
         
-    def __getUserSettings(self) -> dict[str, str]:
+    def __getUserSettings(self: 'Sleuth') -> dict[str, Any]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
             data = json.load(jsonFile)
         return data
 
-    async def __get_singleMessage(self, username: str, message: Message):
+    async def __downloadSingleMessage(self: 'Sleuth', username: str, message: Message) -> None:
         postIndex = await self.__getPostIndex(username)
-        if message.grouped_id != None: 
+        
+        if message.grouped_id == None: 
+            await self.__checkDownloadPath(username, postIndex)
+            await self.__organizeDirectory(username)
+        else:
             self.__currentLastPostCount += 1
             if self.__lastMessageGroupId != message.grouped_id:
-                await self.__check_download_path(username, postIndex)
+                await self.__checkDownloadPath(username, postIndex)
                 await self.__organizeDirectory(username)
                 self.__lastMessageGroupId = message.grouped_id
-        elif message.grouped_id == None:
-            await self.__check_download_path(username, postIndex)
-            await self.__organizeDirectory(username)
+            
         if len(message.text) > 1:
-            await self.__export_to_txt(message.text, f"{self.__download_paths[5]}/text.txt")
+            await self.__exportToTxt(message.text, f"{self.__downloadPaths[5]}/text.txt")
+            
         if message.file != None:
-            file_type = message.file.mime_type.split('/')[0]
-            download_path = await self.__get_download_path(file_type)
-            await self.__client.download_media(message=message, file=download_path)
+            fileType = message.file.mime_type.split('/')[0]
+            downloadPath = await self.__getDownloadPath(fileType)
+            await self.__client.download_media(message=message, file=downloadPath)
 
-    async def __export_to_txt(self, message: str, output_path: str) -> None:
-        with open(output_path, "w", encoding="utf-8") as file:
+    async def __exportToTxt(self: 'Sleuth', message: str, outputPath: str) -> None:
+        with open(outputPath, "w", encoding="utf-8") as file:
             file.write(message)
 
-    async def __get_download_path(self, file_type) -> str:
+    async def __getDownloadPath(self: 'Sleuth', fileType: str) -> str:
         return {
-            'image': self.__download_paths[0],
-            'video': self.__download_paths[1],
-            'audio': self.__download_paths[2],
-            'documents': self.__download_paths[3],
-        }.get(file_type, self.__download_paths[4])
-
-    async def __check_download_path(self, username: str, postIndex: int) -> None:
-        self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex)
-        self.__download_paths = [
+            'image': self.__downloadPaths[0],
+            'video': self.__downloadPaths[1],
+            'audio': self.__downloadPaths[2],
+            'documents': self.__downloadPaths[3],
+        }.get(fileType, self.__downloadPaths[4])
+    
+    async def updateDownloadPaths(self: 'Sleuth'):
+        self.__downloadPaths = [
             f"{self.__pathToAppRootDirectoryContent}/Изображения",
             f"{self.__pathToAppRootDirectoryContent}/Видео",
             f"{self.__pathToAppRootDirectoryContent}/Аудио",
@@ -107,13 +113,17 @@ class Sleuth:
             f"{self.__pathToAppRootDirectoryContent}/Остальное",
             f"{self.__pathToAppRootDirectoryContent}/Текст"
         ]
-        
+
+    async def __checkDownloadPath(self: 'Sleuth', username: str, postIndex: int) -> None:
+        self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex)
+        await self.__updateDownloadPaths()
+
         if not Path(self.__pathToAppRootDirectoryContent).exists():
             Path(self.__pathToAppRootDirectoryContent).mkdir(parents=True)
-        for download_path in self.__download_paths:
+        for download_path in self.__downloadPaths:
             Path(download_path).mkdir(parents=True, exist_ok=True)
     
-    async def __organizeDirectory(self, username: str) -> None:
+    async def __organizeDirectory(self: 'Sleuth', username: str) -> None:
         dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])    
 
         if (int(dirObjects[-1]) > self.__lastPostsCount):  
@@ -125,53 +135,52 @@ class Sleuth:
                     rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
                     
         postIndex = await self.__getPostIndex(username)
+        
         self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex - 1)
-        self.__download_paths = [
-            f"{self.__pathToAppRootDirectoryContent}/Изображения",
-            f"{self.__pathToAppRootDirectoryContent}/Видео",
-            f"{self.__pathToAppRootDirectoryContent}/Аудио",
-            f"{self.__pathToAppRootDirectoryContent}/Документы",
-            f"{self.__pathToAppRootDirectoryContent}/Остальное",
-            f"{self.__pathToAppRootDirectoryContent}/Текст"
-        ]
+        await self.__updateDownloadPaths()
                 
-    async def __getPostIndex(self, username: str) -> int:
+    async def __getPostIndex(self: 'Sleuth', username: str) -> int:
         if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
             dirObjects = listdir(self.__pathToAppRootDirectory + f"/{username}/")
             if len(dirObjects) > 0:
                 return int(dirObjects[-1]) + 1
         return 1
 
-    async def __checkAndParseTelegramChannels(self) -> None:
+    async def __checkAndParseTelegramChannels(self: 'Sleuth') -> None:
         if self.__client.disconnected:
             await self.__client.connect()
+            
         if not await self.__client.is_user_authorized():
             await self.__client.sign_in(self.__phone_number, self.__code, phone_code_hash=self.__codeHash)
 
         for channel in self.__channels:
-            handlersManager = HandlersManager(self.__client, self.__get_singleMessage, channel)
+            handlersManager = HandlersManager(self.__client, self.__downloadSingleMessage, channel)
             await handlersManager.createChannelHandler()
 
         await self.__client.run_until_disconnected()
                     
-    async def __fetchRecentChannelsUpdates(self):
+    async def __fetchRecentChannelsUpdates(self: 'Sleuth'):
         if self.__client.disconnected:
             await self.__client.connect()
+            
         if not await self.__client.is_user_authorized():
             await self.__client.sign_in(self.__phone_number, self.__code, phone_code_hash=self.__codeHash)
+            
         for channel in self.__channels:
-            index = 0    
+            index = 0
             async for message in self.__client.iter_messages(
                 channel
             ):
                 if not message:
                     break
+                
                 index += 1
                 if index > self.__currentLastPostCount:
-                    break           
-                await self.__get_singleMessage(channel, message)
+                    break       
+                
+                await self.__downloadSingleMessage(channel, message)
                 self.__currentLastPostCount = self.__lastPostsCount
          
-    def start(self) -> None:
+    def start(self: 'Sleuth') -> None:
         self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
         self.__client.loop.run_until_complete(self.__checkAndParseTelegramChannels())
