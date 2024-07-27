@@ -3,6 +3,7 @@
 #include "../media/ClickableLabel.h"
 #include <Windows.h>
 #include <cmath>
+#include <QResizeEvent>
 
 MessageWidget::MessageWidget(QWidget* parent) :
 	QWidget(parent)
@@ -10,34 +11,31 @@ MessageWidget::MessageWidget(QWidget* parent) :
 
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	QGridLayout* grid = new QGridLayout(this);
 
-	int panelWidth = screenWidth / 3;
+	panelWidth = screenWidth / 3;
 
-	setFixedSize(screenWidth, screenHeight);
+	setFixedSize(panelWidth, screenHeight);
 
 	setContentsMargins(0, 0, 0, 0);
-	setStyleSheet("QWidget{ \n"
-		"background: Wheat;\n"
-	"}");
 
-	//QImage image("D:\\Media\\chatgpt3\\1\\Изображения\\photo_2024-07-12_09-49-17.jpg");
-	//if (image.width() > panelWidth || image.height() > screenHeight) {
-	//	QSize aspectRatio = getImageAspectRatio(image);
+	image = QImage("C:\\Users\\danya\\Downloads\\top.png");
+	messageWidget = new QWidget();
+	QGridLayout* gridLayout = new QGridLayout(messageWidget);
 
-	//	image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
-	//	image.
-	//	QLabel* imageLabel = new QLabel(this);
-	//	imageLabel->setPixmap(QPixmap::fromImage(image));
-	//	imageLabel->setGeometry(0, 0, panelWidth, 700);
-	//	QPainter painter(imageLabel);
-	//	//painter.setRenderHint(QPainter::Antialiasing, true);
-	//
-	//	painter.drawImage(QRect(0, 0, panelWidth, 700), image);
-	//}
+	grid->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignCenter);
+	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+
+	image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+	imageLabel = new QLabel(this);
+	imageLabel->setPixmap(QPixmap::fromImage(image));
+	gridLayout->setAlignment(Qt::AlignCenter);
+	imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	gridLayout->addWidget(imageLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
 
 }
 
-QSize MessageWidget::getImageAspectRatio(QImage& image) {
+QSize MessageWidget::getImageAspectRatio(const QImage& image) {
 	int width = image.width();
 	int height = image.height();
 
@@ -52,4 +50,15 @@ QSize MessageWidget::getImageAspectRatio(QImage& image) {
 	imageAspectRatioHeightToWidth = std::ceil(imageAspectRatioHeightToWidth / (gcd * 100));
 
 	return QSize(imageAspectRatioWidthToHeight, imageAspectRatioHeightToWidth);
+}
+
+QSize MessageWidget::getMinimumSizeWithAspectRatio(const QSize& aspectRatio, const QSize& imageSize, const int parentWidth) {
+	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
+}
+
+void MessageWidget::resizeEvent(QResizeEvent* event) {
+	QSize size = getMinimumSizeWithAspectRatio(getImageAspectRatio(image), image.size(), panelWidth);
+	QImage img2 = image.scaled(size, Qt::KeepAspectRatio);
+	imageLabel->setPixmap(QPixmap::fromImage(img2));
+	event->accept();
 }
