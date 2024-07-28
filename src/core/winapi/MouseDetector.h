@@ -13,8 +13,6 @@
 #include <windows.h>
 #include <tchar.h>
 
-#include "MessageHandler.h"
-
 class MouseDetector
 {	
 public:

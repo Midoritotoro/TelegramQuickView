@@ -37,8 +37,6 @@ SET(MAIN_SOURCES main.cpp
 	src/core/winapi/AutoRunRegistryUtils.h
 	src/core/winapi/MouseDetector.cpp
 	src/core/winapi/MouseDetector.h
-	src/core/winapi/MessageHandler.cpp
-	src/core/winapi/MessageHandler.h
 	src/gui/core/WidgetsHider.h
 
 	src/gui/media/ClickableLabel.cpp

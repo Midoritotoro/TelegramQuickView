@@ -14,8 +14,6 @@
 #include <pathcch.h>
 #pragma comment(lib, "Pathcch.lib")
 
-#include "MessageHandler.h"
-
 #define MINIMUM_WINDOWS_VERSION NTDDI_WIN10
 
 [[nodiscard]] bool IsWindowsGreaterThen(int version);
