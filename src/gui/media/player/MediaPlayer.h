@@ -19,9 +19,9 @@
 #include "../../core/WidgetsHider.h"
 #include "../ClickableLabel.h"
 #include "./VideoStateWidget.h"
+#include <QDialog>
 
-
-class MediaPlayer : public QWidget
+class MediaPlayer : public QDialog
 {
 private:
 	Q_OBJECT
@@ -36,6 +36,7 @@ private:
 				   * _graphicsAudioSlider = nullptr, * _graphicsVideoTimeLabel = nullptr;
 	QLabel* _videoTimeLabel = nullptr;
 	VideoStateWidget* _videoStateWidget = nullptr;
+	QGraphicsPixmapItem* _currentImageItem = nullptr;
 	bool _doubleClicked = false, _allowChangeVideoState = true;
 public:
 	MediaPlayer(QWidget* parent = nullptr);
@@ -52,6 +53,8 @@ protected:
 	void resizeEvent(QResizeEvent* event) override;
 public Q_SLOTS:
 	void play();
+	void stop();
+	void pause();
 	void setMediaPlayerVideoPosition(int value);
 	void volumeChanged(int value);
 	void videoSliderSetValue(int value);

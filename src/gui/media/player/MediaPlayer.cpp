@@ -1,9 +1,9 @@
 ﻿#include "MediaPlayer.h"
 #include <Windows.h>
-
+#include <QMediaMetaData>
 
 MediaPlayer::MediaPlayer(QWidget* parent) :
-	QWidget(parent)
+	QDialog(parent)
 {
 	setMouseTracking(true);
 
@@ -436,16 +436,26 @@ void MediaPlayer::setSource(const QUrl& source) {
 		}
 		_containerWidget->show();
 		_mediaPlayer->setSource(source);
-		_videoItem->setSize(QSize(464, 848));
-		play();
+		QMediaMetaData data = _mediaPlayer->metaData();
+		qDebug() << data.Resolution;
+		//_videoItem->setSize(QSize(data.Resolution));
+		//play();
 	}
 	else if (mediaType.contains("image")) {
 		_containerWidget->hide();
-		QGraphicsPixmapItem* m_currentImageItem = new QGraphicsPixmapItem(QPixmap(sourcePath));
-		_videoScene->addItem(m_currentImageItem);
+		_currentImageItem = new QGraphicsPixmapItem(QPixmap(sourcePath));
+		_videoScene->addItem(_currentImageItem);
 	}
 }
 
 void MediaPlayer::play() {
 	_mediaPlayer->play();
+}
+
+void MediaPlayer::stop() {
+	_mediaPlayer->stop();
+}
+
+void MediaPlayer::pause() {
+	_mediaPlayer->pause();
 }
