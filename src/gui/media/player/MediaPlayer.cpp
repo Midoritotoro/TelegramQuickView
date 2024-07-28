@@ -1,6 +1,8 @@
 ﻿#include "MediaPlayer.h"
 #include <Windows.h>
 #include <QMediaMetaData>
+#include <QVideoFrame>
+#include <QVideoSink>
 
 MediaPlayer::MediaPlayer(QWidget* parent) :
 	QDialog(parent)
@@ -418,6 +420,19 @@ QString MediaPlayer::detectMediaType(const QString& filePath) {
 	return QMimeDatabase().mimeTypeForFile(filePath).name();
 }
 
+QImage MediaPlayer::videoPreview(const QString& videoPath) {
+	QMediaPlayer player;
+
+	player.setSource(QUrl::fromLocalFile(videoPath));
+	player.setPosition(1000);
+
+	QImage image = player.videoSink()->videoFrame().toImage();
+	QString fileName = QFileInfo(videoPath).baseName() + ".jpg";
+
+	image.save(fileName);
+	return image;
+}
+
 void MediaPlayer::setSource(const QUrl& source) {
 	QString sourcePath;
 	if (source.path().at(0) == "/"[0])
@@ -440,11 +455,6 @@ void MediaPlayer::setSource(const QUrl& source) {
 		qDebug() << data.Resolution;
 		//_videoItem->setSize(QSize(data.Resolution));
 		//play();
-	}
-	else if (mediaType.contains("image")) {
-		_containerWidget->hide();
-		_currentImageItem = new QGraphicsPixmapItem(QPixmap(sourcePath));
-		_videoScene->addItem(_currentImageItem);
 	}
 }
 

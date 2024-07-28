@@ -9,39 +9,27 @@
 
 typedef QList<QUrl> QUrlList;
 
-class MessageAttachment {
+class MessageAttachment: public ClickableLabel {
 private:
+	Q_OBJECT
 	QString _attachmentPath;
 	QString _attachmentType;
 public:
-	MessageAttachment(QString attachmentPath);
+	MessageAttachment(QString attachmentPath, QWidget* parent = nullptr);
 	QString attachmentPath() const;
 	QString attachmentType() const;
-};
-
-class MessageAttachmentImage : public ClickableLabel, public MessageAttachment {
-private:
-	Q_OBJECT
-public:
-	MessageAttachmentImage(QString attachmentPath, QWidget* parent = nullptr);
-};
-
-class MessageAttachmentVideo: public ClickableLabel, public MessageAttachment {
-private:
-	Q_OBJECT
-public:
-	MessageAttachmentVideo(QString attachmentPath, QWidget* parent = nullptr);
 };
 
 class MessageWidget : public QWidget {
 private:
 	Q_OBJECT
-	ClickableLabel* imageLabel;
+	MessageAttachment* _messageAttachment = nullptr;
 	int panelWidth;
 	QImage image;
-	QWidget* messageWidget;
-	MediaPlayer* _mediaPlayer;
+	QWidget* messageWidget = nullptr;
+	MediaPlayer* _mediaPlayer = nullptr;
 	QGridLayout* gridLayout = nullptr;
+	QLabel* textLabel = nullptr;
 public:
 	MessageWidget(QWidget* parent = nullptr);
 	void setSource(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() });
