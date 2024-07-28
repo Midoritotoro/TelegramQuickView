@@ -16,32 +16,21 @@ MessageWidget::MessageWidget(QWidget* parent) :
 
 	QGridLayout* grid = new QGridLayout(this);
 
-
-	QWidget* textWidget = new QWidget();
-
-	textWidget->setStyleSheet("QWidget{\n"
-		"border-width: 15px; \n"
-		"border-color: white;\n"
-		"background: black;\n"
-		"}");
-
-	QGridLayout* textLayout = new QGridLayout(textWidget);
-	QLabel* textLabel = new QLabel(" на API продуkeorweorkwep fpijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfjjaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oi oidfjaiofjdoi fjdfi jdafj oidsfjodisfj oaisdfjsoidfj isdfjisdjfisajf iadsfj isaodfjктов Microsoft;*код… Читать ещё.");
+	QLabel* textLabel = new QLabel("dgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWidgetmessageWid");
 
 	setStyleSheet(QString::fromUtf8("*{\n"
 		"font-family: centry gothic;\n"
-		"font-size: 24px;\n"
+		"font-size: 20px;\n"
 		"}"));
 
 	textLabel->setStyleSheet("QLabel{\n"
-		"background: Wheat;\n"
-		"color: black;\n"
+		"background: transparent;\n"
+		"color: white;\n"
 		"}");
+
+	textLabel->setAttribute(Qt::WA_NoSystemBackground);
 	textLabel->setWordWrap(true);
 	textLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-	textLayout->setAlignment(Qt::AlignCenter);
-
-	textLayout->addWidget(textLabel, 0, 0, 1, 1);
 
 	panelWidth = screenWidth / 3;
 	setFixedSize(panelWidth, screenHeight);
@@ -50,6 +39,13 @@ MessageWidget::MessageWidget(QWidget* parent) :
 	image = QImage("C:\\Users\\danya\\Downloads\\top.png");
 	messageWidget = new QWidget();
 	QGridLayout* gridLayout = new QGridLayout(messageWidget);
+
+	messageWidget->setStyleSheet("QWidget{\n"
+		"background: Wheat;\n"
+		"border: 5px;\n"
+	"}");
+	
+
 	grid->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
 	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
@@ -58,14 +54,17 @@ MessageWidget::MessageWidget(QWidget* parent) :
 	imageLabel->setScaledContents(true);
 	imageLabel->setBackgroundRole(QPalette::Dark);
 	imageLabel->setPixmap(QPixmap::fromImage(image));
+
 	gridLayout->setAlignment(Qt::AlignCenter);
 	gridLayout->setVerticalSpacing(0);
+
 	messageWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 	imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	textWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 	gridLayout->addWidget(imageLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
-	gridLayout->addWidget(textWidget, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
+	gridLayout->addWidget(textLabel, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
 }
 
 QSize MessageWidget::getImageAspectRatio(const QImage& image) {
