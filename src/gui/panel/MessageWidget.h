@@ -25,7 +25,6 @@ private:
 	Q_OBJECT
 	MessageAttachment* _messageAttachment = nullptr;
 	int panelWidth;
-	QImage image;
 	QWidget* messageWidget = nullptr;
 	MediaPlayer* _mediaPlayer = nullptr;
 	QGridLayout* gridLayout = nullptr;
