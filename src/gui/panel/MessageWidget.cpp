@@ -51,8 +51,8 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 
-	minimizeWindowButton->setStyleSheet("background-color: transparent;");
-	closeWindowButton->setStyleSheet("background-color: transparent;");
+	minimizeWindowButton->setStyleSheet("background-color: transparent; padding: 5px;");
+	closeWindowButton->setStyleSheet("background-color: transparent; padding: 5px;");
 
 	_mediaPlayer = new MediaPlayer();
 	QGridLayout* grid = new QGridLayout(this);
@@ -62,22 +62,25 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	toolWidget->setObjectName("toolWidget");
 	toolWidget->setStyleSheet("#toolWidget{\n"
 		"border: 1px solid white;\n"
-		"background: blue;\n"
+		"background: rgba(36, 47, 61, 1);\n"
 	"}");
 	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-	toolLayout->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	toolLayout->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight);
+	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight);
 
-	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
-
-	grid->addWidget(toolWidget, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	toolLayout->setAlignment(Qt::AlignRight);
+	grid->setVerticalSpacing(0);
+	grid->addWidget(toolWidget, 0, 0, 1, 1);
 
 	textLabel = new QLabel();
 
 	setStyleSheet(QString::fromUtf8("*{\n"
 		"font-family: centry gothic;\n"
 		"font-size: 20px;\n"
+	"}\n"
+	"QWidget{\n"
+		"background: rgb(14,22,33)\n"
 	"}"));
 
 	textLabel->setStyleSheet("QLabel{\n"
@@ -102,7 +105,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	gridLayout = new QGridLayout(messageWidget);
 
 	messageWidget->setStyleSheet("QWidget{\n"
-		"background: darkblue;\n"
+		"background: rgb(24, 37, 51);\n"
 		"border: 5px;\n"
 	"}");
 
