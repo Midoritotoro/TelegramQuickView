@@ -45,7 +45,7 @@ public:
 	void adjustVideoSize();
 	void adjustBottomWidgets();
 
-	[[nodiscard]] QString detectMediaType(const QString& filePath);
+	[[nodiscard]] static QString detectMediaType(const QString& filePath);
 protected:
 	void videoClicked();
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
