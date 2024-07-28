@@ -15,7 +15,7 @@ private:
 public:
 	MessageWidget(QWidget* parent = nullptr);
 	[[nodiscard]] static QSize getImageAspectRatio(const QImage& image);
-	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(const QSize& aspectRatio, const QSize& imageSize, const int parentWidth);
+	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 };

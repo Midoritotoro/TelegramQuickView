@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <cmath>
 #include <QResizeEvent>
+#include <QTextEdit>
+
 
 MessageWidget::MessageWidget(QWidget* parent) :
 	QWidget(parent)
@@ -11,12 +13,38 @@ MessageWidget::MessageWidget(QWidget* parent) :
 
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
 	QGridLayout* grid = new QGridLayout(this);
 
+
+	QWidget* textWidget = new QWidget();
+
+	textWidget->setStyleSheet("QWidget{\n"
+		"border-width: 15px; \n"
+		"border-color: white;\n"
+		"background: black;\n"
+		"}");
+
+	QGridLayout* textLayout = new QGridLayout(textWidget);
+	QTextEdit* textLabel = new QTextEdit("Тестовый текст сообщения поста. ");
+
+	setStyleSheet(QString::fromUtf8("*{\n"
+		"font-family: centry gothic;\n"
+		"font-size: 24px;\n"
+		"}"));
+
+	textLabel->setStyleSheet("QTextEdit{\n"
+		"background: Wheat;\n"
+		"color: black;\n"
+		"}");
+
+	textLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+	textLayout->setAlignment(Qt::AlignCenter);
+
+	textLayout->addWidget(textLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
+
 	panelWidth = screenWidth / 3;
-
 	setFixedSize(panelWidth, screenHeight);
-
 	setContentsMargins(0, 0, 0, 0);
 
 	image = QImage("C:\\Users\\danya\\Downloads\\top.png");
@@ -26,13 +54,18 @@ MessageWidget::MessageWidget(QWidget* parent) :
 	grid->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignCenter);
 	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
-	image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+	image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 	imageLabel = new QLabel(this);
+	imageLabel->setBackgroundRole(QPalette::Dark);
 	imageLabel->setPixmap(QPixmap::fromImage(image));
 	gridLayout->setAlignment(Qt::AlignCenter);
-	imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	gridLayout->addWidget(imageLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
 
+	messageWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	textWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	gridLayout->addWidget(imageLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
+	gridLayout->addWidget(textWidget, 1, 0, 1, 1, Qt::AlignCenter);
 }
 
 QSize MessageWidget::getImageAspectRatio(const QImage& image) {
@@ -52,13 +85,13 @@ QSize MessageWidget::getImageAspectRatio(const QImage& image) {
 	return QSize(imageAspectRatioWidthToHeight, imageAspectRatioHeightToWidth);
 }
 
-QSize MessageWidget::getMinimumSizeWithAspectRatio(const QSize& aspectRatio, const QSize& imageSize, const int parentWidth) {
+QSize MessageWidget::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
 	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
 }
 
 void MessageWidget::resizeEvent(QResizeEvent* event) {
-	QSize size = getMinimumSizeWithAspectRatio(getImageAspectRatio(image), image.size(), panelWidth);
-	QImage img2 = image.scaled(size, Qt::KeepAspectRatio);
+	QSize size = getMinimumSizeWithAspectRatio( image.size(), panelWidth);
+	QImage img2 = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	imageLabel->setPixmap(QPixmap::fromImage(img2));
 	event->accept();
 }
