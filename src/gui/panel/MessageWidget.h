@@ -5,6 +5,7 @@
 #include <QGridLayout>
 #include <QPainter>
 
+
 class MessageWidget : public QWidget {
 private:
 	Q_OBJECT
@@ -14,7 +15,6 @@ private:
 	QWidget* messageWidget;
 public:
 	MessageWidget(QWidget* parent = nullptr);
-	[[nodiscard]] static QSize getImageAspectRatio(const QImage& image);
 	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
 protected:
 	void resizeEvent(QResizeEvent* event) override;
