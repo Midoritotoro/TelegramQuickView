@@ -26,22 +26,22 @@ MessageWidget::MessageWidget(QWidget* parent) :
 		"}");
 
 	QGridLayout* textLayout = new QGridLayout(textWidget);
-	QTextEdit* textLabel = new QTextEdit("Тестовый текст сообщения поста. ");
+	QLabel* textLabel = new QLabel(" на API продуkeorweorkwep fpijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfjjaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oijaifjdasifjsafdoijsadfjaifjis jfjda foijfiasd jfoidjfaodfj oidfjaiofjdoi fjdfi jdafj oi oidfjaiofjdoi fjdfi jdafj oidsfjodisfj oaisdfjsoidfj isdfjisdjfisajf iadsfj isaodfjктов Microsoft;*код… Читать ещё.");
 
 	setStyleSheet(QString::fromUtf8("*{\n"
 		"font-family: centry gothic;\n"
 		"font-size: 24px;\n"
 		"}"));
 
-	textLabel->setStyleSheet("QTextEdit{\n"
+	textLabel->setStyleSheet("QLabel{\n"
 		"background: Wheat;\n"
 		"color: black;\n"
 		"}");
-
+	textLabel->setWordWrap(true);
 	textLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 	textLayout->setAlignment(Qt::AlignCenter);
 
-	textLayout->addWidget(textLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
+	textLayout->addWidget(textLabel, 0, 0, 1, 1);
 
 	panelWidth = screenWidth / 3;
 	setFixedSize(panelWidth, screenHeight);
@@ -50,22 +50,22 @@ MessageWidget::MessageWidget(QWidget* parent) :
 	image = QImage("C:\\Users\\danya\\Downloads\\top.png");
 	messageWidget = new QWidget();
 	QGridLayout* gridLayout = new QGridLayout(messageWidget);
-
-	grid->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignCenter);
+	grid->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
 	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
 	image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 	imageLabel = new QLabel(this);
+	imageLabel->setScaledContents(true);
 	imageLabel->setBackgroundRole(QPalette::Dark);
 	imageLabel->setPixmap(QPixmap::fromImage(image));
 	gridLayout->setAlignment(Qt::AlignCenter);
-
+	gridLayout->setVerticalSpacing(0);
 	messageWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	gridLayout->addWidget(imageLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
-	gridLayout->addWidget(textWidget, 1, 0, 1, 1, Qt::AlignCenter);
+	gridLayout->addWidget(textWidget, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
 }
 
 QSize MessageWidget::getImageAspectRatio(const QImage& image) {
@@ -91,7 +91,7 @@ QSize MessageWidget::getMinimumSizeWithAspectRatio(const QSize& imageSize, const
 
 void MessageWidget::resizeEvent(QResizeEvent* event) {
 	QSize size = getMinimumSizeWithAspectRatio( image.size(), panelWidth);
-	QImage img2 = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	imageLabel->setPixmap(QPixmap::fromImage(img2));
+	QImage img = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	imageLabel->setPixmap(QPixmap::fromImage(img));
 	event->accept();
 }
