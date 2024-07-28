@@ -34,9 +34,10 @@ QString MessageAttachment::attachmentType() const {
 	return _attachmentType;
 }
 
-MessageWidget::MessageWidget(QWidget* parent) :
+MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachmentsPaths, QWidget* parent) :
 	QWidget(parent)
 {
+
 
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -58,9 +59,15 @@ MessageWidget::MessageWidget(QWidget* parent) :
 	textLabel->setAttribute(Qt::WA_NoSystemBackground);
 	textLabel->setWordWrap(true);
 	textLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-
+	QString sourcePath;
+	if (attachmentsPaths.at(0).path().at(0) == "/"[0])
+		sourcePath = attachmentsPaths.at(0).path().remove(0, 1);
+	else
+		sourcePath = attachmentsPaths.at(0).path();
+	image = QImage(sourcePath);
+	qDebug() << image.size();
 	panelWidth = screenWidth / 3;
-	//setFixedSize(panelWidth, screenHeight);
+	setFixedSize(panelWidth, screenHeight);
 	setContentsMargins(0, 0, 0, 0);
 
 	
@@ -74,13 +81,19 @@ MessageWidget::MessageWidget(QWidget* parent) :
 
 	grid->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
 	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+
+	_messageAttachment = new MessageAttachment(attachmentsPaths.at(0).path());
 	
 	gridLayout->setAlignment(Qt::AlignCenter);
 	gridLayout->setVerticalSpacing(0);
+	
+	setSource(messageText, attachmentsPaths);
+
 
 	messageWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+	
 	messageWidget->setMouseTracking(true);
 
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -88,21 +101,20 @@ MessageWidget::MessageWidget(QWidget* parent) :
 
 void MessageWidget::setSource(const QString& messageText, const QUrlList& attachmentsPaths) {
 	foreach(const QUrl& url, attachmentsPaths) {
+		QString sourcePath;
+		if (url.path().at(0) == "/"[0])
+			sourcePath = url.path().remove(0, 1);
+		else
+			sourcePath = url.path();
 		if (MediaPlayer::detectMediaType(url.path()).contains("image")) {
-			_messageAttachment = new MessageAttachment(url.path());
+			_messageAttachment = new MessageAttachment(sourcePath);
 			textLabel->setText(messageText);
 			gridLayout->addWidget(_messageAttachment, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
-			//gridLayout->addWidget(textLabel, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
-			_messageAttachment->setCursor(Qt::PointingHandCursor);
+			gridLayout->addWidget(textLabel, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
 
 			connect(_messageAttachment, &MessageAttachment::clicked, this, &MessageWidget::attachment_cliked);
 		}
 	}
-}
-
-void MessageWidget::setSource(const QString & messageText, const QUrl & attachmentPath) {
-	QUrlList urlList = { attachmentPath };
-	setSource(messageText, urlList);
 }
 
 QSize MessageWidget::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
@@ -110,8 +122,8 @@ QSize MessageWidget::getMinimumSizeWithAspectRatio(const QSize& imageSize, const
 }
 
 void MessageWidget::resizeEvent(QResizeEvent* event) {
-	if (image == QImage())
-		return;
+	//if (image.width() == 0)
+		//return;
 	QSize size = getMinimumSizeWithAspectRatio( image.size(), panelWidth);
 	image = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	_messageAttachment->setPixmap(QPixmap::fromImage(image));

@@ -31,9 +31,9 @@ private:
 	QGridLayout* gridLayout = nullptr;
 	QLabel* textLabel = nullptr;
 public:
-	MessageWidget(QWidget* parent = nullptr);
+	MessageWidget(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() }, QWidget* parent = nullptr);
 	void setSource(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() });
-	void setSource(const QString& messageText, const QUrl& attachmentPath);
+
 	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
 protected:
 	void resizeEvent(QResizeEvent* event) override;
