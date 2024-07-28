@@ -1,13 +1,5 @@
 ﻿#pragma once
 
-#ifndef UNICODE
-	#define UNICODE
-#endif
-
-#ifndef _UNICODE
-	#define _UNICODE
-#endif
-
 #define EDGE_OF_SCREEN_POSITION -1
 
 #include <windows.h>

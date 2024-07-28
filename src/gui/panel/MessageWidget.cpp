@@ -41,41 +41,43 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* closeWindowButton = new QToolButton();
-	QToolButton* maximizeWindowButton = new QToolButton();
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
-	QPixmap maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
 
 	minimizeWindowButton->setIcon(minPix);
 	closeWindowButton->setIcon(closePix);
-	maximizeWindowButton->setIcon(maxPix);
 
 	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-	maximizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-
-	//minimizeWindowButton->setFixedSize(panelWidth / 60, screenHeight / 40);
-	//closeWindowButton->setFixedSize(panelWidth / 60, screenHeight / 40);
-	//maximizeWindowButton->setFixedSize(panelWidth / 60, screenHeight / 40);
 
 	minimizeWindowButton->setStyleSheet("background-color: transparent;");
 	closeWindowButton->setStyleSheet("background-color: transparent;");
-	maximizeWindowButton->setStyleSheet("background-color: transparent;");
-
 
 	_mediaPlayer = new MediaPlayer();
 	QGridLayout* grid = new QGridLayout(this);
-	grid->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	grid->addWidget(maximizeWindowButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	grid->addWidget(closeWindowButton, 0, 2, 1, 1, Qt::AlignRight | Qt::AlignTop);
+
+	QWidget* toolWidget = new QWidget();
+	QGridLayout* toolLayout = new QGridLayout(toolWidget);
+	toolWidget->setObjectName("toolWidget");
+	toolWidget->setStyleSheet("#toolWidget{\n"
+		"border: 1px solid white;\n"
+		"background: blue;\n"
+	"}");
+	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	toolLayout->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
+
+	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
+
+	grid->addWidget(toolWidget, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
 
 	textLabel = new QLabel();
 
 	setStyleSheet(QString::fromUtf8("*{\n"
 		"font-family: centry gothic;\n"
 		"font-size: 20px;\n"
-		//"color: rgba(100, 0, 0, 0)\n"
 	"}"));
 
 	textLabel->setStyleSheet("QLabel{\n"
@@ -95,7 +97,6 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	move(screenWidth - width(), 0);
 	setContentsMargins(0, 0, 0, 0);
 	setWindowFlag(Qt::SplashScreen);
-	//setAttribute(Qt::WA_TranslucentBackground);
 
 	messageWidget = new QWidget();
 	gridLayout = new QGridLayout(messageWidget);
@@ -105,7 +106,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 		"border: 5px;\n"
 	"}");
 
-	grid->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
+	grid->addWidget(messageWidget, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
 	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
 	_messageAttachment = new MessageAttachment(attachmentsPaths.at(0).path());
@@ -123,9 +124,6 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 
 	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
 	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
-	connect(maximizeWindowButton, &QToolButton::clicked, this, [this]() {
-		isFullScreen() ? showNormal() : showFullScreen();
-		});
 }
 
 void MessageWidget::setSource(const QString& messageText, const QUrlList& attachmentsPaths) {

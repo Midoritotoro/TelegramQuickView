@@ -1,4 +1,12 @@
-﻿#include "src/core/winapi/AutoRunRegistryUtils.h"
+﻿#ifndef UNICODE
+    #define UNICODE
+#endif
+
+#ifndef _UNICODE
+    #define _UNICODE
+#endif
+
+#include "src/core/winapi/AutoRunRegistryUtils.h"
 
 #include <QApplication>
 #include "src/gui/settings/MainWindow.h"
