@@ -4,6 +4,7 @@
 #include <cmath>
 #include <QResizeEvent>
 #include <QStyleOptionTitleBar>
+#include <QFile>
 
 
 MessageAttachment::MessageAttachment(QString attachmentPath, QWidget* parent) :
@@ -42,6 +43,13 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* closeWindowButton = new QToolButton();
 
+	QString currentPath = QCoreApplication::applicationDirPath();
+	QDir cssDir(currentPath + "/../../src/css");
+
+	QString toolButtonStylePath = cssDir.absolutePath() + "/ToolButtonStyle.css";
+
+	qDebug() << toolButtonStylePath;
+
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
 
@@ -51,8 +59,15 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 
-	minimizeWindowButton->setStyleSheet("background-color: transparent; padding: 5px;");
-	closeWindowButton->setStyleSheet("background-color: transparent; padding: 5px;");
+	QFile toolButtonStyleFile(toolButtonStylePath);
+	if (toolButtonStyleFile.open(QFile::ReadOnly)) {
+
+		QByteArray style = toolButtonStyleFile.readAll();
+		closeWindowButton->setStyleSheet(style);
+		minimizeWindowButton->setStyleSheet(style);
+
+		toolButtonStyleFile.close();
+	}
 
 	_mediaPlayer = new MediaPlayer();
 	QGridLayout* grid = new QGridLayout(this);
@@ -61,15 +76,17 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	QGridLayout* toolLayout = new QGridLayout(toolWidget);
 	toolWidget->setObjectName("toolWidget");
 	toolWidget->setStyleSheet("#toolWidget{\n"
-		"border: 1px solid white;\n"
 		"background: rgba(36, 47, 61, 1);\n"
 	"}");
-	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+	toolWidget->setContentsMargins(0, 0, 0, 0);
+	toolLayout->setContentsMargins(0, 0, 0, 0);
+	toolLayout->setSpacing(0);
 
-	toolLayout->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight);
-	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight);
+	toolLayout->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
+	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
 
-	toolLayout->setAlignment(Qt::AlignRight);
+	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 	grid->setVerticalSpacing(0);
 	grid->addWidget(toolWidget, 0, 0, 1, 1);
 
@@ -99,6 +116,8 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	setFixedSize(panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 	setContentsMargins(0, 0, 0, 0);
+	grid->setContentsMargins(0, 0, 0, 0);
+	grid->setHorizontalSpacing(0);
 	setWindowFlag(Qt::SplashScreen);
 
 	messageWidget = new QWidget();
@@ -107,6 +126,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	messageWidget->setStyleSheet("QWidget{\n"
 		"background: rgb(24, 37, 51);\n"
 		"border: 5px;\n"
+		"border-radius: 10px;\n"
 	"}");
 
 	grid->addWidget(messageWidget, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
@@ -115,7 +135,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	_messageAttachment = new MessageAttachment(attachmentsPaths.at(0).path());
 	
 	gridLayout->setAlignment(Qt::AlignCenter);
-	gridLayout->setVerticalSpacing(0);
+	gridLayout->setVerticalSpacing(10);
 	
 	setSource(messageText, attachmentsPaths);
 
@@ -125,8 +145,8 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	messageWidget->setMouseTracking(true);
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
-	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
+	//connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
+	//connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
 }
 
 void MessageWidget::setSource(const QString& messageText, const QUrlList& attachmentsPaths) {

@@ -1,0 +1,6 @@
+QToolButton{
+    background-color: transparent;
+}
+QToolButton::hover {
+    background-color: rgba(50, 60, 75, 1);
+}
