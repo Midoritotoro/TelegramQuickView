@@ -5,6 +5,7 @@
 #include <QResizeEvent>
 #include <QStyleOptionTitleBar>
 #include <QFile>
+#include <QScrollBar>
 
 
 MessageAttachment::MessageAttachment(QString attachmentPath, QWidget* parent) :
@@ -129,7 +130,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	QStyleOptionTitleBar option;
 	option.initFrom(this);
 
-	panelWidth = screenWidth / 3;
+	panelWidth = (screenWidth / 3) - _chatScrollArea->horizontalScrollBar()->width();
 	setFixedSize(panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 	setContentsMargins(0, 0, 0, 15);
