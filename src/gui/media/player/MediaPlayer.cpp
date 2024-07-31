@@ -421,17 +421,21 @@ QString MediaPlayer::detectMediaType(const QString& filePath) {
 }
 
 QImage MediaPlayer::videoPreview(const QString& videoPath) {
+	QWidget pl;
 	QMediaPlayer player;
 
 	player.setSource(QUrl::fromLocalFile(videoPath));
 	player.play();
 	player.setPosition(1000);
 
+	while (player.mediaStatus() != QMediaPlayer::BufferedMedia) {
+		Sleep(10);
+	}
 	QImage image = player.videoSink()->videoFrame().toImage();
 	QString fileName = QFileInfo(videoPath).baseName() + ".jpg";
-
 	image.save(fileName);
 	player.stop();
+	qDebug() << "Success";
 	return image;
 }
 
