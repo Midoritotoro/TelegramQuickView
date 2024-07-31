@@ -43,20 +43,20 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	QWidget* chatScrollAreaWidget = new QWidget();
-	QGridLayout* chatScrollAreaLayout = new QGridLayout(chatScrollAreaWidget);
+	_chatScrollAreaLayout = new QGridLayout(chatScrollAreaWidget);
 	_chatScrollArea = new QScrollArea();
 	_chatScrollArea->setWidgetResizable(true);
 
-	chatScrollAreaLayout->setContentsMargins(0, 0, 0, 0);
+	_chatScrollAreaLayout->setContentsMargins(0, 0, 0, 0);
 	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
 	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
-	chatScrollAreaLayout->setHorizontalSpacing(0);
+	_chatScrollAreaLayout->setHorizontalSpacing(0);
 
 	chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
 	_chatScrollArea->setWidget(chatScrollAreaWidget);
 
@@ -138,7 +138,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	grid->setHorizontalSpacing(0);
 	setWindowFlag(Qt::SplashScreen);
 
-	messageWidget = new QWidget();
+	QWidget* messageWidget = new QWidget();
 	_messageLayout = new QGridLayout(messageWidget);
 	messageWidget->setContentsMargins(0, 0, 0, 0);
 	_messageLayout->setContentsMargins(0, 0, 0, 0);
@@ -149,11 +149,6 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 		"border-radius: 10px;\n"
 	"}");
 
-	grid->addWidget(_chatScrollArea, 1, 0, 1, 1);
-	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
-
-	chatScrollAreaLayout->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignCenter | Qt::AlignBottom);
-	
 	setSource(messageText, attachmentsPaths);
 
 	messageWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -165,8 +160,28 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
 	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
 	qDebug() << _chatScrollArea->size();
-	qDebug() << chatScrollAreaWidget->size();
 	qDebug() << messageWidget->size();
+}
+
+QWidget*  MessageWidget::createMessageWidget() {
+	QWidget* messageWidget = new QWidget();
+	_messageLayout = new QGridLayout(messageWidget);
+	messageWidget->setContentsMargins(0, 0, 0, 0);
+	_messageLayout->setContentsMargins(0, 0, 0, 0);
+
+	messageWidget->setStyleSheet("QWidget{\n"
+		"background: rgb(24, 37, 51);\n"
+		"border: 5px;\n"
+		"border-radius: 10px;\n"
+		"}");
+
+	setSource(messageText, attachmentsPaths);
+
+	messageWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	messageWidget->setMouseTracking(true);
+	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 
 void MessageWidget::setSource(const QString& messageText, const QUrlList& attachmentsPaths) {
@@ -190,9 +205,9 @@ void MessageWidget::setSource(const QString& messageText, const QUrlList& attach
 			textLabel->setText(messageText);
 			_messageLayout->addWidget(_messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 			_messageLayout->addWidget(textLabel, _messageLayout->rowCount(), 0, 1, 1);
+			_chatScrollAreaLayout->addWidget(messageWidget, 1, 0, 1, 1, Qt::AlignCenter);
 
 			connect(_messageAttachment, &MessageAttachment::clicked, this, &MessageWidget::attachment_cliked);
-			qDebug() << _messageAttachment->size();
 		}
 	}
 }

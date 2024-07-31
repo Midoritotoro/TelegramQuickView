@@ -29,13 +29,13 @@ private:
 	MessageAttachment* _messageAttachment = nullptr;
 	int panelWidth;
 	QScrollArea* _chatScrollArea = nullptr;
-	QWidget* messageWidget = nullptr;
 	MediaPlayer* _mediaPlayer = nullptr;
-	QGridLayout* _messageLayout = nullptr;
+	QGridLayout *_chatScrollAreaLayout = nullptr;
 	QLabel* textLabel = nullptr;
 public:
 	MessageWidget(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() }, QWidget* parent = nullptr);
 	void setSource(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() });
+	QWidget* createMessageWidget();
 
 	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
 public Q_SLOTS:
