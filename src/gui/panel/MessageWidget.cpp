@@ -111,8 +111,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	textLabel = new QLabel();
 
 	setStyleSheet(QString::fromUtf8("*{\n"
-		"font-family: centry gothic;\n"
-		"font-size: 20px;\n"
+		"font-size: 14px;\n"
 	"}\n"
 	"QWidget{\n"
 		"background: rgb(14,22,33)\n"
@@ -125,24 +124,24 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 
 	textLabel->setAttribute(Qt::WA_NoSystemBackground);
 	textLabel->setWordWrap(true);
-	textLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+	textLabel->setAlignment(Qt::AlignLeft);
+	textLabel->setContentsMargins(8, 0, 20, 8);
 
 	QStyleOptionTitleBar option;
 	option.initFrom(this);
-
-	panelWidth = (screenWidth / 3) - _chatScrollArea->horizontalScrollBar()->width();
+	qDebug() << _chatScrollArea->verticalScrollBar()->width();
+	panelWidth = (screenWidth / 3);
 	setFixedSize(panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 	setContentsMargins(0, 0, 0, 15);
-	grid->setContentsMargins(0, 0, 0, 0);
+	grid->setContentsMargins(0, 0, 0, 15);
 	grid->setHorizontalSpacing(0);
 	setWindowFlag(Qt::SplashScreen);
 
 	messageWidget = new QWidget();
-	gridLayout = new QGridLayout(messageWidget);
+	_messageLayout = new QGridLayout(messageWidget);
 	messageWidget->setContentsMargins(0, 0, 0, 0);
-	gridLayout->setSpacing(0);
-	gridLayout->setContentsMargins(0, 0, 0, 0);
+	_messageLayout->setContentsMargins(0, 0, 0, 0);
 
 	messageWidget->setStyleSheet("QWidget{\n"
 		"background: rgb(24, 37, 51);\n"
@@ -153,10 +152,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	grid->addWidget(_chatScrollArea, 1, 0, 1, 1);
 	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
-	chatScrollAreaLayout->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
-	
-	gridLayout->setAlignment(Qt::AlignCenter);
-	gridLayout->setVerticalSpacing(10);
+	chatScrollAreaLayout->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignCenter | Qt::AlignBottom);
 	
 	setSource(messageText, attachmentsPaths);
 
@@ -180,19 +176,20 @@ void MessageWidget::setSource(const QString& messageText, const QUrlList& attach
 			sourcePath = url.path().remove(0, 1);
 		else
 			sourcePath = url.path();
+
 		if (MediaPlayer::detectMediaType(url.path()).contains("image")) {
 			_messageAttachment = new MessageAttachment(sourcePath);
 
 			QImage image(sourcePath);
-			QSize size = getMinimumSizeWithAspectRatio( image.size(), panelWidth);
+			QSize size = getMinimumSizeWithAspectRatio( image.size(), panelWidth - _chatScrollArea->verticalScrollBar()->width());
 			image = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
 			_messageAttachment->setPixmap(QPixmap::fromImage(image));
 			_messageAttachment->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 			textLabel->setText(messageText);
-			gridLayout->addWidget(_messageAttachment, 0, 0, 1, 1);
-			gridLayout->addWidget(textLabel, 1, 0, 1, 1);
+			_messageLayout->addWidget(_messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+			_messageLayout->addWidget(textLabel, _messageLayout->rowCount(), 0, 1, 1);
 
 			connect(_messageAttachment, &MessageAttachment::clicked, this, &MessageWidget::attachment_cliked);
 			qDebug() << _messageAttachment->size();
