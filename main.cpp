@@ -17,6 +17,7 @@
 #include <QApplication>
 #include "src/gui/settings/MainWindow.h"
 #include "src/gui/panel/MessageWidget.h"
+#include "src/core/ffmpeg/VideoThumbnail.h"
 
 
 
@@ -28,10 +29,13 @@ int main(int argc, char* argv[])
         MessageBox(NULL, L"Приложение работает на версиях Windows от 10 и выше", L"Ошибка", MB_OK);
         return -1;
     }
+
+    getVideoThumbnail("C:\\Users\\danya\\Downloads\\videoRes.mp4");
+
     //if (!addParserToRegistryAutoRun())
      //  return -1;
 
-    QApplication app(argc, argv);
+   /* QApplication app(argc, argv);
 
     const QString text = "Очень длинный текст сообщения. Очень длинный текст сообщения. Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.";
     const QString path = "C:\\Users\\danya\\Downloads\\top.png";
@@ -47,5 +51,6 @@ int main(int argc, char* argv[])
     messageWidget.setSource(text, list2);
 
     messageWidget.show();
-    return app.exec();
+    return app.exec();*/
+    return 0;
 }

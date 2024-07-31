@@ -13,7 +13,7 @@ project("TelegramQuickView" LANGUAGES C CXX)
 
 find_package(Python3 COMPONENTS Development REQUIRED)
 
-SET(FFMPEG_LIBRARY_PATH "C:/Users/danya/tmp/build/ffmpeg")
+SET(FFMPEG_BUILD_PATH "D:/Packages/tmp/installed/lib/")
 
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
@@ -87,14 +87,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
-target_include_directories(${PROJECT_NAME} PUBLIC "C:/Users/danya/tmp/build/ffmpeg")
-target_link_directories(${PROJECT_NAME} PUBLIC ${FFMPEG_LIBRARY_PATH})
+target_include_directories(${PROJECT_NAME} PUBLIC "D:/Packages/tmp/installed/include/")
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	${FFMPEG_LIBRARY_PATH}/libavcodec/libavcodec.a
-	${FFMPEG_LIBRARY_PATH}/libavutil/libavutil.a
-	${FFMPEG_LIBRARY_PATH}/libavdevice/libavdevice.a
-	${FFMPEG_LIBRARY_PATH}/libswscale/libswscale.a
-	${FFMPEG_LIBRARY_PATH}/libswresample/libswresample.a
+	${FFMPEG_BUILD_PATH}/libavcodec.a
+	${FFMPEG_BUILD_PATH}/libavutil.a
+	${FFMPEG_BUILD_PATH}/libavdevice.a
+	${FFMPEG_BUILD_PATH}/libswscale.a
+	${FFMPEG_BUILD_PATH}/libswresample.a
 )
 
 
