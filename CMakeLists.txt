@@ -7,11 +7,13 @@ endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(QT6_DIR "D:/Packages/Qt/6.7.0/msvc2019_64/lib/cmake/Qt6")
-
+set(CMAKE_CXX_FLAGS "-D__STDC_CONSTANT_MACROS")
 
 project("TelegramQuickView" LANGUAGES C CXX)
 
 find_package(Python3 COMPONENTS Development REQUIRED)
+
+SET(FFMPEG_LIBRARY_PATH "C:/Users/danya/tmp/build/ffmpeg")
 
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
@@ -29,9 +31,11 @@ qt_standard_project_setup()
 
 SET(PARSER_SOURCES WIN32 src/core/parser/PythonCaller.cpp src/core/parser/main.cpp src/core/parser/TelegramRobber.py)
 
-
 SET(MAIN_SOURCES main.cpp
 	src/core/PythonQtWrapper.h
+	
+	src/core/ffmpeg/VideoThumbnail.cpp
+	src/core/ffmpeg/VideoThumbnail.h
 
 	src/core/winapi/AutoRunRegistryUtils.cpp
 	src/core/winapi/AutoRunRegistryUtils.h
@@ -83,6 +87,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
+target_include_directories(${PROJECT_NAME} PUBLIC "C:/Users/danya/tmp/build/ffmpeg")
+target_link_directories(${PROJECT_NAME} PUBLIC ${FFMPEG_LIBRARY_PATH})
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	${FFMPEG_LIBRARY_PATH}/libavcodec/libavcodec.a
+	${FFMPEG_LIBRARY_PATH}/libavutil/libavutil.a
+	${FFMPEG_LIBRARY_PATH}/libavdevice/libavdevice.a
+	${FFMPEG_LIBRARY_PATH}/libswscale/libswscale.a
+	${FFMPEG_LIBRARY_PATH}/libswresample/libswresample.a
+)
+
 
 execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED
                RESULT_VARIABLE result

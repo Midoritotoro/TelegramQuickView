@@ -18,6 +18,8 @@
 #include "src/gui/settings/MainWindow.h"
 #include "src/gui/panel/MessageWidget.h"
 
+
+
 int main(int argc, char* argv[])
 {
     AllocConsole();
