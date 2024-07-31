@@ -14,6 +14,7 @@ MessageAttachment::MessageAttachment(QString attachmentPath, QWidget* parent) :
 	setScaledContents(true);
 	setBackgroundRole(QPalette::Dark);
 	setCursor(Qt::PointingHandCursor);
+
 	if (_attachmentType.contains("image")) {
 		QImage attachmentImage(attachmentPath);
 		attachmentImage = attachmentImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
@@ -40,6 +41,24 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
+	QWidget* chatScrollAreaWidget = new QWidget();
+	QGridLayout* chatScrollAreaLayout = new QGridLayout(chatScrollAreaWidget);
+	_chatScrollArea = new QScrollArea();
+	_chatScrollArea->setWidgetResizable(true);
+
+	chatScrollAreaLayout->setContentsMargins(0, 0, 0, 0);
+	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
+	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
+	chatScrollAreaLayout->setHorizontalSpacing(0);
+
+	chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+	_chatScrollArea->setWidget(chatScrollAreaWidget);
+
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* closeWindowButton = new QToolButton();
 
@@ -47,8 +66,6 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	QDir cssDir(currentPath + "/../../src/css");
 
 	QString toolButtonStylePath = cssDir.absolutePath() + "/ToolButtonStyle.css";
-
-	qDebug() << toolButtonStylePath;
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
@@ -115,13 +132,16 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	panelWidth = screenWidth / 3;
 	setFixedSize(panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
-	setContentsMargins(0, 0, 0, 0);
+	setContentsMargins(0, 0, 0, 15);
 	grid->setContentsMargins(0, 0, 0, 0);
 	grid->setHorizontalSpacing(0);
 	setWindowFlag(Qt::SplashScreen);
 
 	messageWidget = new QWidget();
 	gridLayout = new QGridLayout(messageWidget);
+	messageWidget->setContentsMargins(0, 0, 0, 0);
+	gridLayout->setSpacing(0);
+	gridLayout->setContentsMargins(0, 0, 0, 0);
 
 	messageWidget->setStyleSheet("QWidget{\n"
 		"background: rgb(24, 37, 51);\n"
@@ -129,10 +149,10 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 		"border-radius: 10px;\n"
 	"}");
 
-	grid->addWidget(messageWidget, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
+	grid->addWidget(_chatScrollArea, 1, 0, 1, 1);
 	grid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
-	_messageAttachment = new MessageAttachment(attachmentsPaths.at(0).path());
+	chatScrollAreaLayout->addWidget(messageWidget, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
 	
 	gridLayout->setAlignment(Qt::AlignCenter);
 	gridLayout->setVerticalSpacing(10);
@@ -145,8 +165,11 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	messageWidget->setMouseTracking(true);
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-	//connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
-	//connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
+	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
+	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
+	qDebug() << _chatScrollArea->size();
+	qDebug() << chatScrollAreaWidget->size();
+	qDebug() << messageWidget->size();
 }
 
 void MessageWidget::setSource(const QString& messageText, const QUrlList& attachmentsPaths) {
@@ -164,30 +187,20 @@ void MessageWidget::setSource(const QString& messageText, const QUrlList& attach
 			image = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
 			_messageAttachment->setPixmap(QPixmap::fromImage(image));
+			_messageAttachment->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 			textLabel->setText(messageText);
-			gridLayout->addWidget(_messageAttachment, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignTop);
-			gridLayout->addWidget(textLabel, 1, 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
+			gridLayout->addWidget(_messageAttachment, 0, 0, 1, 1);
+			gridLayout->addWidget(textLabel, 1, 0, 1, 1);
 
 			connect(_messageAttachment, &MessageAttachment::clicked, this, &MessageWidget::attachment_cliked);
+			qDebug() << _messageAttachment->size();
 		}
 	}
 }
 
 QSize MessageWidget::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
 	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
-}
-
-void MessageWidget::resizeEvent(QResizeEvent* event) {
-
-	//if (image.width() == 0 || image.height() == 0)
-	//	return;
-
-	//QSize size = getMinimumSizeWithAspectRatio( image.size(), panelWidth);
-	//image = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	//_messageAttachment->setPixmap(QPixmap::fromImage(image));
-
-	event->accept();
 }
 
 void MessageWidget::attachment_cliked() {

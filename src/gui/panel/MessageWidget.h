@@ -4,8 +4,11 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QPainter>
+#include <QScrollArea>
+
 #include "../media/ClickableLabel.h"
 #include "../media/player/MediaPlayer.h"
+
 
 typedef QList<QUrl> QUrlList;
 
@@ -25,6 +28,7 @@ private:
 	Q_OBJECT
 	MessageAttachment* _messageAttachment = nullptr;
 	int panelWidth;
+	QScrollArea* _chatScrollArea = nullptr;
 	QWidget* messageWidget = nullptr;
 	MediaPlayer* _mediaPlayer = nullptr;
 	QGridLayout* gridLayout = nullptr;
@@ -34,8 +38,6 @@ public:
 	void setSource(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() });
 
 	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
-protected:
-	void resizeEvent(QResizeEvent* event) override;
 public Q_SLOTS:
 	void attachment_cliked();
 };
