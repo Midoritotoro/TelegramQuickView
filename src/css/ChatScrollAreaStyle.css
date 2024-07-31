@@ -1,25 +1,21 @@
 QScrollArea {
     border: none;
 }
-
 QScrollBar {
     background: gray;
     border-radius: 2px;
 }
-
-    QScrollBar:vertical {
-        width: 4px;
-        background-color: rgba(115, 121, 127, 100)
-    }
-
+QScrollBar:vertical {
+    width: 5px;
+    background-color: rgba(115, 121, 127, 100)
+}
 QScrollBar::handle {
     background: lightgray;
     border-radius: 2px;
 }
 
 QScrollBar::handle:vertical {
-    width: 3px;
-    min-height: 4px;
+    width: 5px;
 }
 
 QScrollBar::add-line {

@@ -15,6 +15,7 @@ MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth
 	setScaledContents(true);
 	setBackgroundRole(QPalette::Dark);
 	setCursor(Qt::PointingHandCursor);
+	qDebug() << _attachmentType;
 
 	if (_attachmentType.contains("image")) {
 		QImage attachmentImage(attachmentPath);
@@ -25,6 +26,7 @@ MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth
 	}
 	else if (_attachmentType.contains("video")) {
 		QImage attachmentVideoPreview = MediaPlayer::videoPreview(attachmentPath);
+		qDebug() << attachmentVideoPreview.size();
 		attachmentVideoPreview = attachmentVideoPreview.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 		QSize size = getMinimumSizeWithAspectRatio(attachmentVideoPreview.size(), attachmentWidth);
 		attachmentVideoPreview = attachmentVideoPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -55,7 +57,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	_chatScrollArea = new QScrollArea();
 	_chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(0, 0, 0, 0);
+	_chatScrollAreaLayout->setContentsMargins(10, 0, 10, 15);
 	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
 	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
 	_chatScrollAreaLayout->setHorizontalSpacing(0);
@@ -75,6 +77,7 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	QDir cssDir(currentPath + "/../../src/css");
 
 	QString toolButtonStylePath = cssDir.absolutePath() + "/ToolButtonStyle.css";
+	QString chatScrollAreaStylePath = cssDir.absolutePath() + "/ChatScrollAreaStyle.css";
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
@@ -86,13 +89,19 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 
 	QFile toolButtonStyleFile(toolButtonStylePath);
-	if (toolButtonStyleFile.open(QFile::ReadOnly)) {
+	QFile chatScrollAreaStyleFile(chatScrollAreaStylePath);
+	if (toolButtonStyleFile.open(QFile::ReadOnly) && chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
 
-		QByteArray style = toolButtonStyleFile.readAll();
-		closeWindowButton->setStyleSheet(style);
-		minimizeWindowButton->setStyleSheet(style);
+		QByteArray toolButtonStyle = toolButtonStyleFile.readAll();
+		QByteArray chatScrollAreaStyle = chatScrollAreaStyleFile.readAll();
+
+		closeWindowButton->setStyleSheet(toolButtonStyle);
+		minimizeWindowButton->setStyleSheet(toolButtonStyle);
+
+		_chatScrollArea->setStyleSheet(chatScrollAreaStyle);
 
 		toolButtonStyleFile.close();
+		chatScrollAreaStyleFile.close();
 	}
 
 	_mediaPlayer = new MediaPlayer();
@@ -127,9 +136,10 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	setFixedSize(panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
-	setContentsMargins(0, 0, 0, 15);
+	setContentsMargins(0, 0, 0, 0);
 
-	_grid->setContentsMargins(0, 0, 0, 15);
+	_grid->setContentsMargins(0, 0, 3, 10);
+	_grid->setVerticalSpacing(10);
 	_grid->setHorizontalSpacing(0);
 	_grid->addWidget(_chatScrollArea, _grid->rowCount(), 0, 1, 1);
 
@@ -190,12 +200,10 @@ void MessageWidget::setSource(const QString& messageText, const QUrlList& attach
 		else
 			sourcePath = url.path();
 
-		if (MediaPlayer::detectMediaType(url.path()).contains("image")) {
-			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, panelWidth - _chatScrollArea->verticalScrollBar()->width());
+		MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, panelWidth - _chatScrollArea->verticalScrollBar()->width());
 
-			messageLayout->addWidget(messageAttachment, messageLayout->rowCount(), 0, 1, 1);
-			connect(messageAttachment, &MessageAttachment::clicked, this, &MessageWidget::attachment_cliked);
-		}
+		messageLayout->addWidget(messageAttachment, messageLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignBottom);
+		connect(messageAttachment, &MessageAttachment::clicked, this, &MessageWidget::attachment_cliked);
 	}
 
 	if (messageText.length() > 0) {
@@ -204,7 +212,7 @@ void MessageWidget::setSource(const QString& messageText, const QUrlList& attach
 		messageLayout->addWidget(textLabel, messageLayout->rowCount(), 0, 1, 1);
 	}
 
-	_chatScrollAreaLayout->addWidget(messageWidget, messageLayout->rowCount(), 0, 1, 1, Qt::AlignCenter);
+	_chatScrollAreaLayout->addWidget(messageWidget, messageLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignBottom);
 }
 
 void MessageWidget::attachment_cliked() {

@@ -33,9 +33,16 @@ int main(int argc, char* argv[])
 
     const QString text = "Очень длинный текст сообщения. Очень длинный текст сообщения. Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.";
     const QString path = "C:\\Users\\danya\\Downloads\\top.png";
-    QUrlList list = { QUrl::fromLocalFile(path) };
-
+    const QString path2 = "C:\\Users\\danya\\Downloads\\videoRes.mp4";
+    QUrlList list = {  };
+    QUrlList list2 = {  };
+    
     MessageWidget messageWidget(text, list);
+    list.append(QUrl::fromLocalFile(path));
+    messageWidget.setSource(text, list);
+ 
+    list2.append(QUrl::fromLocalFile(path2));
+    messageWidget.setSource(text, list2);
 
     messageWidget.show();
     return app.exec();

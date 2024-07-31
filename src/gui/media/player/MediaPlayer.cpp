@@ -424,12 +424,14 @@ QImage MediaPlayer::videoPreview(const QString& videoPath) {
 	QMediaPlayer player;
 
 	player.setSource(QUrl::fromLocalFile(videoPath));
+	player.play();
 	player.setPosition(1000);
 
 	QImage image = player.videoSink()->videoFrame().toImage();
 	QString fileName = QFileInfo(videoPath).baseName() + ".jpg";
 
 	image.save(fileName);
+	player.stop();
 	return image;
 }
 
