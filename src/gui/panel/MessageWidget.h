@@ -18,7 +18,9 @@ private:
 	QString _attachmentPath;
 	QString _attachmentType;
 public:
-	MessageAttachment(QString attachmentPath, QWidget* parent = nullptr);
+	MessageAttachment(QString attachmentPath, int attachmentWidth, QWidget* parent = nullptr);
+	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
+
 	QString attachmentPath() const;
 	QString attachmentType() const;
 };
@@ -26,18 +28,15 @@ public:
 class MessageWidget : public QWidget {
 private:
 	Q_OBJECT
-	MessageAttachment* _messageAttachment = nullptr;
 	int panelWidth;
 	QScrollArea* _chatScrollArea = nullptr;
 	MediaPlayer* _mediaPlayer = nullptr;
-	QGridLayout *_chatScrollAreaLayout = nullptr;
-	QLabel* textLabel = nullptr;
+	QGridLayout *_chatScrollAreaLayout = nullptr, *_grid = nullptr;
 public:
 	MessageWidget(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() }, QWidget* parent = nullptr);
 	void setSource(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() });
 	QWidget* createMessageWidget();
-
-	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
+	QLabel* createMessageTextLabel();
 public Q_SLOTS:
 	void attachment_cliked();
 };
