@@ -1,7 +1,10 @@
 #pragma once
 
 #define PY_SSIZE_T_CLEAN
-#include "../../src/core/PythonQtWrapper.h"
+#pragma push_macro("slots")
+#undef slots
+#include "Python.h"
+#pragma pop_macro("slots")
 
 class TelegramAuthorizationChecker {
 private:

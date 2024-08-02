@@ -16,7 +16,7 @@
 #include <QGridLayout>
 #include <QMimeDatabase>
 
-#include "../../core/WidgetsHider.h"
+#include "../WidgetsHider.h"
 #include "../ClickableLabel.h"
 #include "./VideoStateWidget.h"
 #include <QDialog>

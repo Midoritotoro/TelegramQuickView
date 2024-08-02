@@ -26,40 +26,39 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES WIN32 src/core/parser/PythonCaller.cpp src/core/parser/main.cpp src/core/parser/TelegramRobber.py)
+SET(PARSER_SOURCES WIN32 src/parser/TelegramRobber.cpp src/parser/main.cpp src/parser/TelegramRobber.py)
 
 SET(MAIN_SOURCES main.cpp
-	src/core/PythonQtWrapper.h
 
-	src/core/winapi/AutoRunRegistryUtils.cpp
-	src/core/winapi/AutoRunRegistryUtils.h
-	src/core/winapi/MouseDetector.cpp
-	src/core/winapi/MouseDetector.h
-	src/gui/core/WidgetsHider.h
+	src/core/AutoRunUtils.cpp
+	src/core/AutoRunUtils.h
+	src/core/MouseDetector.cpp
+	src/core/MouseDetector.h
+	src/media/WidgetsHider.h
 
-	src/gui/media/ClickableLabel.cpp
-	src/gui/media/ClickableLabel.h
-	src/gui/media/EnhancedSlider.cpp
-	src/gui/media/EnhancedSlider.h
-	src/gui/media/VolumeClickableLabel.cpp
-	src/gui/media/VolumeClickableLabel.h
+	src/media/ClickableLabel.cpp
+	src/media/ClickableLabel.h
+	src/media/EnhancedSlider.cpp
+	src/media/EnhancedSlider.h
+	src/media/VolumeClickableLabel.cpp
+	src/media/VolumeClickableLabel.h
 
-	src/gui/media/player/MediaPlayer.cpp
-	src/gui/media/player/MediaPlayer.h
-	src/gui/media/player/VideoStateWidget.cpp
-	src/gui/media/player/VideoStateWidget.h
+	src/media/player/MediaPlayer.cpp
+	src/media/player/MediaPlayer.h
+	src/media/player/VideoStateWidget.cpp
+	src/media/player/VideoStateWidget.h
 
-	src/gui/settings/MainWindow.cpp
-	src/gui/settings/MainWindow.h
-	src/gui/settings/UserDataManager.cpp
-	src/gui/settings/UserDataManager.h
-	src/gui/settings/TelegramAuthorizationChecker.cpp
-	src/gui/settings/TelegramAuthorizationChecker.h
-	src/gui/settings/AuthenticationDialog.cpp
-	src/gui/settings/AuthenticationDialog.h
+	src/settings/MainWindow.cpp
+	src/settings/MainWindow.h
+	src/settings/UserDataManager.cpp
+	src/settings/UserDataManager.h
+	src/settings/TelegramAuthorizationChecker.cpp
+	src/settings/TelegramAuthorizationChecker.h
+	src/settings/AuthenticationDialog.cpp
+	src/settings/AuthenticationDialog.h
 
-	src/gui/panel/MessageWidget.cpp
-	src/gui/panel/MessageWidget.h
+	src/panel/MessageWidget.cpp
+	src/panel/MessageWidget.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})

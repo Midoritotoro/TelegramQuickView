@@ -1,4 +1,4 @@
-#include "AutoRunRegistryUtils.h"
+#include "AutoRunUtils.h"
 
 bool IsWindowsGreaterThen(int version)
 {

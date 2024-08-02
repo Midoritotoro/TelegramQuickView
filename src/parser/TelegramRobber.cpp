@@ -1,11 +1,11 @@
-﻿#include "PythonCaller.h"
+﻿#include "TelegramRobber.h"
 
 
-PythonCaller::PythonCaller(const char* pythonFilePath): _pythonFilePath(pythonFilePath) {
+TelegramRobber::TelegramRobber(const char* pythonFilePath): _pythonFilePath(pythonFilePath) {
     Py_Initialize();
 };
 
-PythonCaller::~PythonCaller() {
+TelegramRobber::~TelegramRobber() {
     Py_DECREF(PyClsInstance);
     Py_DECREF(PyArgs);
     Py_DECREF(PyClass);
@@ -20,7 +20,7 @@ PythonCaller::~PythonCaller() {
     Py_Finalize();
 };
 
-void PythonCaller::CallTelegramParseFunction(const char* moduleName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory) {
+void TelegramRobber::CallTelegramParseFunction(const char* moduleName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory) {
     const char* PyFunctionName = "start";
     const char* PyClassName = "Sleuth";
     Py_ssize_t PyClassArgumentsTupleSize = 2;

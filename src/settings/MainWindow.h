@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QLineEdit>
 
-#include "../../core/winapi/MouseDetector.h"
+#include "../core/MouseDetector.h"
 #include "UserDataManager.h"
 
 class MainWindow : public QWidget

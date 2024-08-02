@@ -2,18 +2,21 @@
 
 #define PY_SSIZE_T_CLEAN
 
-#include "../../src/core/PythonQtWrapper.h"
+#pragma push_macro("slots")
+#undef slots
+#include "Python.h"
+#pragma pop_macro("slots")
 
 
-class PythonCaller
+class TelegramRobber
 {
 private:
     PyObject* PyName = nullptr, * PyModule = nullptr, * PyDict = nullptr, * PyFunc = nullptr,
         * PyArgs = nullptr, * PySys = nullptr, * PyPath = nullptr, * PyClass = nullptr, * PyClsInstance = nullptr;
     const char* _pythonFilePath = nullptr;
 public:
-    PythonCaller(const char* pythonFilePath);
-    ~PythonCaller();
+    TelegramRobber(const char* pythonFilePath);
+    ~TelegramRobber();
 
     void CallTelegramParseFunction(const char* moduleName, const char* pathToSettingsJsonFile, const char* pathToAppRootDirectory);
 };

@@ -21,8 +21,8 @@ TelegramAuthorizationChecker::~TelegramAuthorizationChecker() {
 
 bool TelegramAuthorizationChecker::TelegramCredentialsValidCheck(const char* apiHash, const char* phoneNumber, long long apiId) {
     const char* PyFunctionName = "isTelegramCredentialsValid";
-    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
-    const char* moduleName = "TelegramAuthorization";
+    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\settings\\";
+    const char* moduleName = "TelegramAuthorizationChecker";
     bool BoolResult = false;
 
     PySys = PyImport_ImportModule("sys");
@@ -67,8 +67,8 @@ bool TelegramAuthorizationChecker::TelegramCredentialsValidCheck(const char* api
 
 bool TelegramAuthorizationChecker::sendTelegramCode(const char* apiHash, const char* phoneNumber, long long apiId, const char* pathToUserSettingsJson) {
     const char* PyFunctionName = "sendTelegramCode";
-    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
-    const char* moduleName = "TelegramAuthorization";
+    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\settings\\";
+    const char* moduleName = "TelegramAuthorizationChecker";
     bool BoolResult = false;
 
     PySys = PyImport_ImportModule("sys");
@@ -113,8 +113,8 @@ bool TelegramAuthorizationChecker::sendTelegramCode(const char* apiHash, const c
 
 bool TelegramAuthorizationChecker::TelegramCodeValidCheck(const char* apiHash, const char* phoneNumber, long long apiId, long code, const char* codeHash) {
     const char* PyFunctionName = "isTelegramPhoneNumberCodeValid";
-    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\gui\\settings\\";
-    const char* moduleName = "TelegramAuthorization";
+    const char* pythonFilePath = "D:\\TelegramQuickView\\src\\settings\\";
+    const char* moduleName = "TelegramAuthorizationChecker";
     bool BoolResult = false;
 
     PySys = PyImport_ImportModule("sys");
