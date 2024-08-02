@@ -52,16 +52,15 @@ MessageWidget::MessageWidget(const QString& messageText, const QUrlList& attachm
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	 _chatScrollAreaWidget = new QWidget();
-	_chatScrollAreaLayout = new QGridLayout(_chatScrollAreaWidget);
+	_chatScrollAreaLayout = new QVBoxLayout(_chatScrollAreaWidget);
 	_chatScrollArea = new QScrollArea();
 	_chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(10, 0, 10 + _chatScrollArea->verticalScrollBar()->width(), 0);
-	_chatScrollAreaLayout->setVerticalSpacing(15);
+	_chatScrollAreaLayout->setContentsMargins(10, 0, 10 + _chatScrollArea->verticalScrollBar()->width(), 15);
+	_chatScrollAreaLayout->setSpacing(15);
 
 	_chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
 	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
-	_chatScrollAreaLayout->setHorizontalSpacing(0);
 
 	_chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -189,6 +188,13 @@ QLabel* MessageWidget::createMessageTextLabel() {
 	return textLabel;
 }
 
+void MessageWidget::reorderMessages() {
+	for (int index = 0; index < _chatScrollAreaLayout->count(); index++) {
+		QWidget* reorderedWidget = _chatScrollAreaLayout->itemAt(index);
+		_chatScrollAreaLayout->removeWidget()
+	}
+}
+
 void MessageWidget::setSource(const QString& messageText, const QUrlList& attachmentsPaths) {
 	QWidget* messageWidget = createMessageWidget();
 	QGridLayout* messageLayout = qobject_cast<QGridLayout*>(messageWidget->layout());
@@ -213,7 +219,7 @@ void MessageWidget::setSource(const QString& messageText, const QUrlList& attach
 		messageLayout->addWidget(textLabel, messageLayout->rowCount(), 0, 1, 1);
 	}
 
-	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
+	_chatScrollAreaLayout->addWidget(messageWidget, 0, Qt::AlignHCenter | Qt::AlignBottom);
 }
 
 void MessageWidget::attachment_cliked() {

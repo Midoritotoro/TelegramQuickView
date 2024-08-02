@@ -39,10 +39,10 @@ int main(int argc, char* argv[])
     list.append(QUrl::fromLocalFile(path));
     MessageWidget messageWidget(text, list);
 
-    messageWidget.setSource(text, list);
-   //messageWidget.setSource(text, list);
-   // messageWidget.setSource(text, list);
-   // //messageWidget.setSource(text, list);
+    messageWidget.setSource(text + "2", list);
+    messageWidget.setSource(text + "3", list);
+    messageWidget.setSource(text + "4", list);
+    messageWidget.setSource(text + "5", list);
 
     messageWidget.show();
 
