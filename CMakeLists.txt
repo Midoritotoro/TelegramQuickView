@@ -12,8 +12,6 @@ project("TelegramQuickView" LANGUAGES C CXX)
 
 find_package(Python3 COMPONENTS Development REQUIRED)
 
-SET(FFMPEG_BUILD_PATH "D:/Packages/tmp/installed/lib/")
-
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
 			Widgets
@@ -32,9 +30,6 @@ SET(PARSER_SOURCES WIN32 src/core/parser/PythonCaller.cpp src/core/parser/main.c
 
 SET(MAIN_SOURCES main.cpp
 	src/core/PythonQtWrapper.h
-	
-	src/core/ffmpeg/VideoThumbnail.cpp
-	src/core/ffmpeg/VideoThumbnail.h
 
 	src/core/winapi/AutoRunRegistryUtils.cpp
 	src/core/winapi/AutoRunRegistryUtils.h
@@ -86,15 +81,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
-target_include_directories(${PROJECT_NAME} PUBLIC "D:/Packages/tmp/installed/include/")
-target_link_libraries(${PROJECT_NAME} PUBLIC
-	${FFMPEG_BUILD_PATH}/libavcodec.a
-	${FFMPEG_BUILD_PATH}/libavutil.a
-	${FFMPEG_BUILD_PATH}/libavdevice.a
-	${FFMPEG_BUILD_PATH}/libswscale.a
-	${FFMPEG_BUILD_PATH}/libswresample.a
-)
-
 
 execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED
                RESULT_VARIABLE result

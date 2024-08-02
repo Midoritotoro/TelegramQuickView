@@ -32,6 +32,7 @@ private:
 	QScrollArea* _chatScrollArea = nullptr;
 	MediaPlayer* _mediaPlayer = nullptr;
 	QGridLayout *_chatScrollAreaLayout = nullptr, *_grid = nullptr;
+	QWidget* _chatScrollAreaWidget = nullptr;
 public:
 	MessageWidget(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() }, QWidget* parent = nullptr);
 	void setSource(const QString& messageText, const QUrlList& attachmentsPaths = { QUrl() });
