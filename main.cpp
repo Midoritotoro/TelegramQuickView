@@ -12,11 +12,11 @@
     #pragma message("Невозможно запустить на UNIX системах")
 #endif // __unix__
 
-#include "src/core/winapi/AutoRunRegistryUtils.h"
+#include "src/core/AutoRunUtils.h"
 
 #include <QApplication>
-#include "src/gui/settings/MainWindow.h"
-#include "src/gui/panel/MessageWidget.h"
+#include "src/settings/MainWindow.h"
+#include "src/panel/MessageWidget.h"
 
 int main(int argc, char* argv[])
 {
