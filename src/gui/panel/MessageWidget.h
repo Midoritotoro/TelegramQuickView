@@ -31,7 +31,7 @@ private:
 	int panelWidth;
 	QScrollArea* _chatScrollArea = nullptr;
 	MediaPlayer* _mediaPlayer = nullptr;
-	QVBoxLayout* _chatScrollAreaLayout = nullptr;
+	QGridLayout* _chatScrollAreaLayout = nullptr;
 	QGridLayout* _grid = nullptr;
 	QWidget* _chatScrollAreaWidget = nullptr;
 public:

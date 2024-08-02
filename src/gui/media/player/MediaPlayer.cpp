@@ -435,7 +435,6 @@ QImage MediaPlayer::videoPreview(const QString& videoPath) {
 	QString fileName = QFileInfo(videoPath).baseName() + ".jpg";
 	image.save(fileName);
 	player.stop();
-	qDebug() << "Success";
 	return image;
 }
 
