@@ -22,7 +22,7 @@ def checkDatabaseAvailability(dataBasePath: str) -> tuple[sqlite3.Connection, sq
     
 def insertPostInfo(channelName: str, postAttachmentPath: str, postTime: str, postIndex: int) -> None:
     appDataPath = os.getenv('APPDATA')
-    dataBasePath = appDataPath + "\\TelegramQuickView\\downloadedPosts.db"
+    dataBasePath = appDataPath + "\\TelegramQuickView\\downloadedPosts.sqlite3"
 
     connection, cursor = checkDatabaseAvailability(dataBasePath)
 

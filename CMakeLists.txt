@@ -59,6 +59,9 @@ SET(MAIN_SOURCES main.cpp
 
 	src/panel/MessageWidget.cpp
 	src/panel/MessageWidget.h
+
+	src/sql/SqlContentManager.cpp
+	src/sql/SqlContentManager.h
 )
 
 add_executable(Parser ${PARSER_SOURCES})
