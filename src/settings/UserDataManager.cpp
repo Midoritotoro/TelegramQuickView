@@ -129,8 +129,8 @@ void UserDataManager::clearTelegramCredentials() {
 }
 
 bool UserDataManager::setTelegramCredentials(LPTelegramCredentials telegramCredentials) {
-	QJsonObject jsonObject;
 	QJsonDocument jsonDocument = getJsonDocument();
+	QJsonObject jsonObject = jsonDocument.object();
 
 	if (telegramCredentials->apiHash.length() < 32 || telegramCredentials->apiId.length() < 5)
 		return false;

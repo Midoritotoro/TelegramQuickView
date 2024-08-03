@@ -1,4 +1,5 @@
-﻿from dateutil.tz import tzlocal
+﻿from SqlParserContentManager import insertPostInfo
+from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
 from typing import Callable, Any
 from telethon.tl.types import InputPeerChannel, Message
@@ -32,6 +33,7 @@ class HandlersManager:
                 if event.message.grouped_id == None:
                     await self.__downloadFunction(self.__username, event.message)
                 else:
+                    print(event.message.grouped_id)
                     if event.message.grouped_id == self.__groupedMessageId:
                         if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 30):
                             await self.__downloadFunction(self.__username, event.message)
@@ -46,9 +48,9 @@ class Sleuth:
             pathToSettingsJsonFile: str,
             pathToAppRootDirectory: str
     ) -> None:
-        userSettings = self.__getUserSettings()
-        
         self.pathToSettingsJsonFile = pathToSettingsJsonFile
+        
+        userSettings = self.__getUserSettings()
         self.__api_id = userSettings.get("apiId")
         self.__api_hash = userSettings.get("apiHash")
         self.__phone_number = userSettings.get("phoneNumber") 
@@ -63,8 +65,10 @@ class Sleuth:
         self.__pathToAppRootDirectory = pathToAppRootDirectory
         self.__pathToAppRootDirectoryContent = ""
         
-        sessionFile = os.path.join(os.path.dirname(os.path.abspath(__file__)).rsplit("\\", 3)[0], "TelegramQuickView.session")
-        self.__client = TelegramClient(sessionFile, self.__api_id, self.__api_hash, timeout=10)
+        sessionFile = os.path.join(os.path.dirname(os.path.abspath(__file__)).rsplit("\\", 2)[0], "out/build/TelegramQuickView.session") # ----------------------- ?
+        # print(sessionFile) 
+        # print(os.path.dirname(os.path.abspath(__file__)))
+        self.__client = TelegramClient(sessionFile, self.__api_id, self.__api_hash, timeout=10) # ----------------------- ?
         
     def __getUserSettings(self: 'Sleuth') -> dict[str, Any]:
         with open(self.pathToSettingsJsonFile, "r", encoding="utf-8") as jsonFile:
@@ -73,7 +77,7 @@ class Sleuth:
 
     async def __downloadSingleMessage(self: 'Sleuth', username: str, message: Message) -> None:
         postIndex = await self.__getPostIndex(username)
-        
+        print(message.text)
         if message.grouped_id == None: 
             await self.__checkDownloadPath(username, postIndex)
             await self.__organizeDirectory(username)
@@ -86,11 +90,15 @@ class Sleuth:
             
         if len(message.text) > 1:
             await self.__exportToTxt(message.text, f"{self.__downloadPaths[5]}/text.txt")
+            insertPostInfo(username, f"{self.__downloadPaths[5]}/text.txt", message.date)
             
         if message.file != None:
             fileType = message.file.mime_type.split('/')[0]
             downloadPath = await self.__getDownloadPath(fileType)
+            insertPostInfo(username, downloadPath, message.date)
             await self.__client.download_media(message=message, file=downloadPath)
+            print("downloaded media: ", message.media)
+           
 
     async def __exportToTxt(self: 'Sleuth', message: str, outputPath: str) -> None:
         with open(outputPath, "w", encoding="utf-8") as file:
@@ -104,7 +112,7 @@ class Sleuth:
             'documents': self.__downloadPaths[3],
         }.get(fileType, self.__downloadPaths[4])
     
-    async def updateDownloadPaths(self: 'Sleuth'):
+    async def __updateDownloadPaths(self: 'Sleuth'):
         self.__downloadPaths = [
             f"{self.__pathToAppRootDirectoryContent}/Изображения",
             f"{self.__pathToAppRootDirectoryContent}/Видео",
@@ -182,5 +190,5 @@ class Sleuth:
                 self.__currentLastPostCount = self.__lastPostsCount
          
     def start(self: 'Sleuth') -> None:
-        self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
+        # self.__client.loop.run_until_complete(self.__fetchRecentChannelsUpdates())
         self.__client.loop.run_until_complete(self.__checkAndParseTelegramChannels())

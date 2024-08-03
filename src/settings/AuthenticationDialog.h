@@ -20,7 +20,7 @@ class AuthenticationDialog : public QDialog
 {
 private:
     Q_OBJECT
-        bool shakeSwitch = true;
+    bool shakeSwitch = true, _skipFirstAuthenticationStage = false;
     QFrame* firstAuthenticationStageFrame = nullptr, * secondAuthenticationStageFrame = nullptr;
     QPushButton* loginButton = nullptr, * confirmCodeButton = nullptr, * sendCodeButton = nullptr;
     QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr, * telegramCodeLineEdit = nullptr;

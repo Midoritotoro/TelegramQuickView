@@ -194,6 +194,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 }
 
 void AuthenticationDialog::skipFirstAuthorizationStage() {
+    _skipFirstAuthenticationStage = true;
     backButton_clicked();
     logInButton_clicked();
 }
@@ -228,36 +229,40 @@ void AuthenticationDialog::shake()
 }
 
 void AuthenticationDialog::logInButton_clicked() {
+    QString apiHash, apiId, phoneNumber;
+
     _incorrectTelegramCredentialsLabel->hide();
     _incorrectMobilePhoneLabel->hide();
     _incorrectTelegramCodeLabel->hide();
 
-    QString apiHash = apiHashLineEdit->text();
-    QString apiId = apiIdLineEdit->text();
-    QString phoneNumber = phoneNumberLineEdit->text();
+    apiHash = apiHashLineEdit->text();
+    apiId = apiIdLineEdit->text();
+    phoneNumber = phoneNumberLineEdit->text();
 
-    _telegramCredentials->apiHash = apiHash;
-    _telegramCredentials->apiId = apiId;
-    _telegramCredentials->phoneNumber = phoneNumber;
+    if (!_skipFirstAuthenticationStage) {
+        _telegramCredentials->apiHash = apiHash;
+        _telegramCredentials->apiId = apiId;
+        _telegramCredentials->phoneNumber = phoneNumber;
 
-    if (!_userDataManager->setTelegramCredentials(_telegramCredentials)) {
-        _incorrectTelegramCredentialsLabel->show();
-        _userDataManager->clearTelegramCredentials();
-        apiHashLineEdit->clear();
-        apiIdLineEdit->clear();
-        phoneNumberLineEdit->clear();
-        shake();
-        return;
-    }
+        if (!_userDataManager->setTelegramCredentials(_telegramCredentials)) {
+            _incorrectTelegramCredentialsLabel->show();
+            _userDataManager->clearTelegramCredentials();
+            apiHashLineEdit->clear();
+            apiIdLineEdit->clear();
+            phoneNumberLineEdit->clear();
+            shake();
+            return;
+        }
 
-    if (!_userDataManager->isTelegramCredentialsValid()) {
-        _incorrectTelegramCredentialsLabel->show();
-        _userDataManager->clearTelegramCredentials();
-        apiHashLineEdit->clear();
-        apiIdLineEdit->clear();
-        phoneNumberLineEdit->clear();
-        shake();
-        return;
+        if (!_userDataManager->isTelegramCredentialsValid()) {
+            _incorrectTelegramCredentialsLabel->show();
+            _userDataManager->clearTelegramCredentials();
+            apiHashLineEdit->clear();
+            apiIdLineEdit->clear();
+            phoneNumberLineEdit->clear();
+            shake();
+            return;
+        }
     }
 
     TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
@@ -275,6 +280,7 @@ void AuthenticationDialog::logInButton_clicked() {
     sendCodeButton->setToolTip("Кнопка неактивна в течение 180 секунд по причине ограничений Telegram. ");
     sendCodeButton->setText(QString("Осталось: %1 с").arg(timeRemaining));
     _stackedWidget->setCurrentIndex(1);
+    _skipFirstAuthenticationStage = false;
 }
 
 void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {

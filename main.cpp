@@ -26,25 +26,27 @@ int main(int argc, char* argv[])
         MessageBox(NULL, L"Приложение работает на версиях Windows от 10 и выше", L"Ошибка", MB_OK);
         return -1;
     }
-    //if (!addParserToRegistryAutoRun())
-     //  return -1;
+    if (!addParserToRegistryAutoRun())
+        return -1;
 
     QApplication app(argc, argv);
 
-    const QString text = "Очень длинный текст сообщения. Очень длинный текст сообщения. Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.";
-    const QString path = "C:\\Users\\danya\\Downloads\\top.png";
-    const QString path2 = "C:\\Users\\danya\\Downloads\\videoRes.mp4";
-    QUrlList list = {  };
-    QUrlList list2 = {  };
-    list.append(QUrl::fromLocalFile(path));
-    MessageWidget messageWidget(text, list);
+    //const QString text = "Очень длинный текст сообщения. Очень длинный текст сообщения. Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.Очень длинный текст сообщения.";
+    //const QString path = "C:\\Users\\danya\\Downloads\\top.png";
+    //const QString path2 = "C:\\Users\\danya\\Downloads\\videoRes.mp4";
+    //QUrlList list = {  };
+    //QUrlList list2 = {  };
+    //list.append(QUrl::fromLocalFile(path));
+    //MessageWidget messageWidget(text, list);
 
-    messageWidget.setSource(text + "2", list);
-    messageWidget.setSource(text + "3", list);
-    messageWidget.setSource(text + "4", list);
-    messageWidget.setSource(text + "5", list);
+    //messageWidget.setSource(text + "2", list);
+    //messageWidget.setSource(text + "3", list);
+    //messageWidget.setSource(text + "4", list);
+    //messageWidget.setSource(text + "5", list);
 
-    messageWidget.show();
+    //messageWidget.show();
+    MainWindow window;
+    window.show();
 
     return app.exec();
 }

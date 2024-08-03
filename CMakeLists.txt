@@ -26,7 +26,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES WIN32 src/parser/TelegramRobber.cpp src/parser/main.cpp src/parser/TelegramRobber.py)
+SET(PARSER_SOURCES src/parser/TelegramRobber.cpp src/parser/main.cpp src/parser/TelegramRobber.py src/parser/SqlParserContentManager.py)
 
 SET(MAIN_SOURCES main.cpp
 
