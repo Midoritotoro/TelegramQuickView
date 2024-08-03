@@ -75,37 +75,27 @@ class Sleuth:
                 await self.__checkDownloadPath(username, postIndex)
                 await self.__organizeDirectory(username)
                 self.__lastMessageGroupId = message.grouped_id
-            
+           
+        postIndex = await self.__getPostIndex(username)
+        
         if len(message.text) > 1:
-            await self.__exportToTxt(message.text, f"{self.__downloadPaths[5]}/text.txt")
-            insertPostInfo(username, f"{self.__downloadPaths[5]}/text.txt", message.date, postIndex - 1)
+            await self.__exportToTxt(message.text, f"{self.__downloadPaths[1]}/text.txt")
+            insertPostInfo(username, f"{self.__downloadPaths[1]}/text.txt", message.date, postIndex - 1)
             
         if message.file != None:
             fileType = message.file.mime_type.split('/')[0]
-            downloadPath = await self.__getDownloadPath(fileType)
+            downloadPath = self.__downloadPaths[0]
             insertPostInfo(username, downloadPath, message.date, postIndex - 1)
             await self.__client.download_media(message=message, file=downloadPath)
 
     async def __exportToTxt(self: 'Sleuth', message: str, outputPath: str) -> None:
         with open(outputPath, "w", encoding="utf-8") as file:
             file.write(message)
-
-    async def __getDownloadPath(self: 'Sleuth', fileType: str) -> str:
-        return {
-            'image': self.__downloadPaths[0],
-            'video': self.__downloadPaths[1],
-            'audio': self.__downloadPaths[2],
-            'documents': self.__downloadPaths[3],
-        }.get(fileType, self.__downloadPaths[4])
     
     async def __updateDownloadPaths(self: 'Sleuth'):
         self.__downloadPaths = [
-            f"{self.__pathToAppRootDirectoryContent}/Изображения",
-            f"{self.__pathToAppRootDirectoryContent}/Видео",
-            f"{self.__pathToAppRootDirectoryContent}/Аудио",
-            f"{self.__pathToAppRootDirectoryContent}/Документы",
-            f"{self.__pathToAppRootDirectoryContent}/Остальное",
-            f"{self.__pathToAppRootDirectoryContent}/Текст"
+            f"{self.__pathToAppRootDirectoryContent}/Attachments",
+            f"{self.__pathToAppRootDirectoryContent}/Text"
         ]
 
     async def __checkDownloadPath(self: 'Sleuth', username: str, postIndex: int) -> None:
