@@ -21,8 +21,6 @@ class HandlersManager:
         self.__client = client
         self.__downloadFunction = downloadFunction
         self.__username = username
-        self.__groupedMessageId = 0
-        self.__groupedMessageDate: datetime 
     
     async def createChannelHandler(self: 'HandlersManager') -> None:
         channelEntity = await self.__client.get_input_entity(self.__username)
@@ -30,17 +28,7 @@ class HandlersManager:
         if isinstance(channelEntity, InputPeerChannel):
             @self.__client.on(events.NewMessage(chats=channelEntity))
             async def handler(event: events.NewMessage.Event) -> None:
-                if event.message.grouped_id == None:
-                    await self.__downloadFunction(self.__username, event.message)
-                else:
-                    print(event.message.grouped_id)
-                    if event.message.grouped_id == self.__groupedMessageId:
-                        if event.message.date.minute == self.__groupedMessageDate.minute or (event.message.date.minute - self.__groupedMessageDate.minute == 1 and event.message.date.second <= 30):
-                            await self.__downloadFunction(self.__username, event.message)
-                        else:
-                            self.__groupedMessageId = event.message.grouped_id
-                            self.__groupedMessageDate = event.message.date
-                            await self.__downloadFunction(self.__username, event.message)
+                await self.__downloadFunction(self.__username, event.message)
 
 class Sleuth:
     def __init__(
@@ -90,15 +78,13 @@ class Sleuth:
             
         if len(message.text) > 1:
             await self.__exportToTxt(message.text, f"{self.__downloadPaths[5]}/text.txt")
-            insertPostInfo(username, f"{self.__downloadPaths[5]}/text.txt", message.date)
+            insertPostInfo(username, f"{self.__downloadPaths[5]}/text.txt", message.date, postIndex - 1)
             
         if message.file != None:
             fileType = message.file.mime_type.split('/')[0]
             downloadPath = await self.__getDownloadPath(fileType)
-            insertPostInfo(username, downloadPath, message.date)
+            insertPostInfo(username, downloadPath, message.date, postIndex - 1)
             await self.__client.download_media(message=message, file=downloadPath)
-            print("downloaded media: ", message.media)
-           
 
     async def __exportToTxt(self: 'Sleuth', message: str, outputPath: str) -> None:
         with open(outputPath, "w", encoding="utf-8") as file:

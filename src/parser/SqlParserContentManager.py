@@ -8,9 +8,10 @@ def checkDatabaseAvailability(dataBasePath: str) -> tuple[sqlite3.Connection, sq
     sqlQuery = """
     CREATE TABLE IF NOT EXISTS downloadedPosts(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        channelId INTEGER,
-        postPath TEXT,
-        postTime TEXT
+        channelName TEXT,
+        postAttachmentPath TEXT,
+        postTime TEXT,
+        postIndex INTEGER
         );
     """
     
@@ -19,17 +20,17 @@ def checkDatabaseAvailability(dataBasePath: str) -> tuple[sqlite3.Connection, sq
 
     return connection, cursor
     
-def insertPostInfo(channelId: int, postPath: str, postTime: str) -> None:
+def insertPostInfo(channelName: str, postAttachmentPath: str, postTime: str, postIndex: int) -> None:
     appDataPath = os.getenv('APPDATA')
     dataBasePath = appDataPath + "\\TelegramQuickView\\downloadedPosts.db"
 
     connection, cursor = checkDatabaseAvailability(dataBasePath)
 
     sqlInsertQuery = """
-    INSERT INTO downloadedPosts (channelId, postPath, postTime) VALUES (?, ?, ?)
+    INSERT INTO downloadedPosts (channelName, postAttachmentPath, postTime, postIndex) VALUES (?, ?, ?, ?)
     """
     
-    cursor.execute(sqlInsertQuery, (channelId, postPath, postTime))
+    cursor.execute(sqlInsertQuery, (channelName, postAttachmentPath, postTime, postIndex))
     connection.commit()
     
     connection.close()
