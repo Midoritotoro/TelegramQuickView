@@ -21,7 +21,7 @@ class HandlersManager:
         self.__client = client
         self.__downloadFunction = downloadFunction
         self.__username = username
-        self.queue = []
+        # self.queue = [] - ?
     
     async def createChannelHandler(self: 'HandlersManager') -> None:
         channelEntity = await self.__client.get_input_entity(self.__username)
