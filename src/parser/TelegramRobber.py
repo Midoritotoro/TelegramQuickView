@@ -21,6 +21,7 @@ class HandlersManager:
         self.__client = client
         self.__downloadFunction = downloadFunction
         self.__username = username
+        self.queue = []
     
     async def createChannelHandler(self: 'HandlersManager') -> None:
         channelEntity = await self.__client.get_input_entity(self.__username)
@@ -54,8 +55,6 @@ class Sleuth:
         self.__pathToAppRootDirectoryContent = ""
         
         sessionFile = os.path.join(os.path.dirname(os.path.abspath(__file__)).rsplit("\\", 2)[0], "out/build/TelegramQuickView.session") # ----------------------- ?
-        # print(sessionFile) 
-        # print(os.path.dirname(os.path.abspath(__file__)))
         self.__client = TelegramClient(sessionFile, self.__api_id, self.__api_hash, timeout=10) # ----------------------- ?
         
     def __getUserSettings(self: 'Sleuth') -> dict[str, Any]:

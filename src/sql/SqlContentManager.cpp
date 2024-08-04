@@ -11,7 +11,7 @@ TelegramMessagesList SqlContentManager::getLastMessages() {
 	const QDir appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
 	if (!appDataDir.mkpath("."))
-		return ;
+		return telegramMessagesList;
 
 	const QString dataBasePath = appDataDir.absolutePath() + "\\downloadedPosts.sqlite3";
 
@@ -21,7 +21,7 @@ TelegramMessagesList SqlContentManager::getLastMessages() {
 	const QString sqlSelectQuery = "SELECT * FROM downloadedPosts";
 
 	if (!query.exec(sqlSelectQuery))
-		return;
+		return telegramMessagesList;
 
 	while (query.next()) {
 		
@@ -30,12 +30,15 @@ TelegramMessagesList SqlContentManager::getLastMessages() {
 
 		telegramMessagesList.append(telegramMessage);
 	}
+	return telegramMessagesList;
 }
 TelegramMessage SqlContentManager::getLastMessage() {
+	TelegramMessage telegramMessage;
+
 	const QDir appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
 	if (!appDataDir.mkpath("."))
-		return;
+		return telegramMessage;
 
 	const QString dataBasePath = appDataDir.absolutePath() + "\\downloadedPosts.sqlite3";
 
@@ -43,4 +46,6 @@ TelegramMessage SqlContentManager::getLastMessage() {
 	QSqlQuery query(dataBase);
 
 	const QString sqlSelectQuery = "SELECT * FROM downloadedPosts";
+
+	return telegramMessage;
 }
