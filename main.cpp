@@ -30,6 +30,8 @@ int main(int argc, char* argv[])
         return -1;*/
 
     QApplication app(argc, argv);
+    MainWindow mainWindow;
 
+    mainWindow.show();
     return app.exec();
 }

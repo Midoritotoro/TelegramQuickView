@@ -49,10 +49,3 @@ def insertPostInfo(channelName: str, postAttachmentPath: str, postTime: str, pos
             cursor.execute("UPDATE downloadedPosts SET postAttachmentPath = ? WHERE channelName = ? AND postIndex = ?", (result[2] + ", " + postAttachmentPath, channelName, postIndex))
             connection.commit()
             connection.close()
-
-# if __name__ == "__main__":
-#     def main():
-#         insertPostInfo("erfwfr", "C:\\Users\\danya\\Downloads\\tickets.jpg", "2024",  1)
-#         insertPostInfo("erfwfr", "C:\\Users\\danya\\Downloads\\2024-07-29_02-28-57.png", "2024", 1)
-#         insertPostInfo("erfwfr", "C:\\Users\\danya\\Downloads\\videoRes.mp4", "2024", 1)
-#     main()

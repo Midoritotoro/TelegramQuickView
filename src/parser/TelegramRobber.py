@@ -1,16 +1,16 @@
 ﻿from SqlParserContentManager import insertPostInfo
 from dateutil.tz import tzlocal
 from telethon import TelegramClient, events
-from typing import Callable, Any
+from typing import Callable, Any, Generator
 from telethon.tl.types import InputPeerChannel, Message
 import asyncio
 from pathlib import Path
 from shutil import rmtree
 import json
-from os import listdir, rename
+from os import listdir, rename, scandir
 import os.path
 from datetime import datetime
-
+from collections.abc import Generator
 
 class HandlersManager:
     def __init__(self: 'HandlersManager',
@@ -67,15 +67,14 @@ class Sleuth:
         print(message.text)
         if message.grouped_id == None: 
             await self.__checkDownloadPath(username, postIndex)
-            await self.__organizeDirectory(username)
+            postIndex = await self.__organizeDirectory(username)
         else:
             self.__currentLastPostCount += 1
             if self.__lastMessageGroupId != message.grouped_id:
                 await self.__checkDownloadPath(username, postIndex)
-                await self.__organizeDirectory(username)
+                postIndex = await self.__organizeDirectory(username)
                 self.__lastMessageGroupId = message.grouped_id
-           
-        postIndex = await self.__getPostIndex(username)
+          
         
         if len(message.text) > 1:
             await self.__exportToTxt(message.text, f"{self.__downloadPaths[1]}/text.txt")
@@ -89,6 +88,7 @@ class Sleuth:
 
     async def __exportToTxt(self: 'Sleuth', message: str, outputPath: str) -> None:
         with open(outputPath, "w", encoding="utf-8") as file:
+            print("outputPath: ", outputPath)
             file.write(message)
     
     async def __updateDownloadPaths(self: 'Sleuth'):
@@ -99,6 +99,7 @@ class Sleuth:
 
     async def __checkDownloadPath(self: 'Sleuth', username: str, postIndex: int) -> None:
         self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex)
+        print("__checkDownloadPath: ", self.__pathToAppRootDirectoryContent)
         await self.__updateDownloadPaths()
 
         if not Path(self.__pathToAppRootDirectoryContent).exists():
@@ -106,21 +107,31 @@ class Sleuth:
         for download_path in self.__downloadPaths:
             Path(download_path).mkdir(parents=True, exist_ok=True)
     
-    async def __organizeDirectory(self: 'Sleuth', username: str) -> None:
+    async def __organizeDirectory(self: 'Sleuth', username: str) -> int:
         dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])    
 
-        if (int(dirObjects[-1]) > self.__lastPostsCount):  
-            rmtree(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
+        if (len(dirObjects) > self.__lastPostsCount):  
+            oldestDirectory = await self.__getOldestDir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
+            rmtree(oldestDirectory[1])
+            print("Deleted: ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
    
             dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
+            print("dirObjects: ", dirObjects)
             for index, obj in enumerate(dirObjects, start=1):
+
                 if obj != str(index):
                     rename(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
+                    print("renamed from: ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + obj, "to: ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + f"{index}")
                     
-        postIndex = await self.__getPostIndex(username)
-        
-        self.__pathToAppRootDirectoryContent = self.__pathToAppRootDirectory + f"/{username}/" + str(postIndex - 1)
-        await self.__updateDownloadPaths()
+            postIndex = await self.__getPostIndex(username)
+            
+            directory = await self.__getOldestDir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
+            print("__getOldestDir: ", directory[0], directory[1])
+            
+            self.__pathToAppRootDirectoryContent = directory[1]
+            await self.__updateDownloadPaths()  
+            return await self.__getPostIndex(username) - 1
+        return await self.__getPostIndex(username)
                 
     async def __getPostIndex(self: 'Sleuth', username: str) -> int:
         if Path(self.__pathToAppRootDirectory + f"/{username}/").exists():
@@ -128,6 +139,29 @@ class Sleuth:
             if len(dirObjects) > 0:
                 return int(dirObjects[-1]) + 1
         return 1
+
+    def __scanTree(self: 'Sleuth', path: str) -> Generator[os.DirEntry[str]]:
+        for entry in scandir(path):
+            if entry.is_dir(follow_symlinks=False):
+                yield entry
+                
+    async def __getOldestDir(self: 'Sleuth', path: str):
+        directories = []
+
+        for directory in self.__scanTree(path):
+            directories.append((directory.stat().st_mtime, directory.path))
+
+        directories.sort(key=lambda x:x[0])
+        return directories[0]
+
+    async def __getNewestDir(self: 'Sleuth', path: str):
+        directories = []
+
+        for directory in self.__scanTree(path):
+            directories.append((directory.stat().st_mtime, directory.path))
+
+        directories.sort(key=lambda x:x[0])
+        return directories[-1]
 
     async def __checkAndParseTelegramChannels(self: 'Sleuth') -> None:
         if self.__client.disconnected:

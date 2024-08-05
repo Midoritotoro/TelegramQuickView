@@ -6,5 +6,6 @@ int main() {
 	const char* PyModuleName = "TelegramRobber";
 	TelegramRobber* telegramRobber = new TelegramRobber("D:\\TelegramQuickView\\src\\parser\\");
 	telegramRobber->CallTelegramParseFunction(PyModuleName, "C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media");
+	PyErr_Print();
 	return 0;
 }
