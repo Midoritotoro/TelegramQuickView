@@ -112,7 +112,7 @@ class Sleuth:
 
         if (len(dirObjects) > self.__lastPostsCount):  
             oldestDirectory = await self.__getOldestDir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
-            rmtree(oldestDirectory[1])
+            rmtree(oldestDirectory)
             print("Deleted: ", self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0] + "/" + dirObjects[0])
    
             dirObjects = listdir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
@@ -125,10 +125,10 @@ class Sleuth:
                     
             postIndex = await self.__getPostIndex(username)
             
-            directory = await self.__getOldestDir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
-            print("__getOldestDir: ", directory[0], directory[1])
+            directory = await self.__getNewestDir(self.__pathToAppRootDirectoryContent.rsplit('/', 1)[0])
+            print("__getOldestDir: ", directory)
             
-            self.__pathToAppRootDirectoryContent = directory[1]
+            self.__pathToAppRootDirectoryContent = directory
             await self.__updateDownloadPaths()  
             return await self.__getPostIndex(username) - 1
         return await self.__getPostIndex(username)
@@ -143,25 +143,29 @@ class Sleuth:
     def __scanTree(self: 'Sleuth', path: str) -> Generator[os.DirEntry[str]]:
         for entry in scandir(path):
             if entry.is_dir(follow_symlinks=False):
+                yield from self.__scanTree(entry.path)
+            else:
                 yield entry
                 
-    async def __getOldestDir(self: 'Sleuth', path: str):
-        directories = []
-
-        for directory in self.__scanTree(path):
-            directories.append((directory.stat().st_mtime, directory.path))
-
-        directories.sort(key=lambda x:x[0])
-        return directories[0]
-
     async def __getNewestDir(self: 'Sleuth', path: str):
-        directories = []
+        files = []
 
-        for directory in self.__scanTree(path):
-            directories.append((directory.stat().st_mtime, directory.path))
+        for file in self.__scanTree(path):
+            files.append((file.stat().st_mtime, file.path))
 
-        directories.sort(key=lambda x:x[0])
-        return directories[-1]
+        files.sort(key=lambda x:x[0])
+        print("files[0]", files[0])
+        return files[0][1].rsplit('\\', 2)[0]
+
+    async def __getOldestDir(self: 'Sleuth', path: str):
+        files = []
+
+        for file in self.__scanTree(path):
+            files.append((file.stat().st_mtime, file.path))
+
+        files.sort(key=lambda x:x[0])
+        print("files[-1]", files[-1])
+        return files[-1][1].rsplit('\\', 2)[0]
 
     async def __checkAndParseTelegramChannels(self: 'Sleuth') -> None:
         if self.__client.disconnected:
