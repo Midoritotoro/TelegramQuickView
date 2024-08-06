@@ -59,6 +59,10 @@ SET(MAIN_SOURCES main.cpp
 
 	src/panel/MessageWidget.cpp
 	src/panel/MessageWidget.h
+	src/panel/TelegramPostQuickView.cpp
+	src/panel/TelegramPostQuickView.h
+	src/panel/MessageAttachment.cpp
+	src/panel/MessageAttachment.h
 
 	src/sql/SqlContentManager.cpp
 	src/sql/SqlContentManager.h
