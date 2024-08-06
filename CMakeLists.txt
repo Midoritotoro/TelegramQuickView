@@ -64,6 +64,7 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/MessageAttachment.cpp
 	src/panel/MessageAttachment.h
 
+
 	src/sql/SqlContentManager.cpp
 	src/sql/SqlContentManager.h
 )

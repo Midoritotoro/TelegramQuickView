@@ -5,7 +5,6 @@
 #include "../media/ClickableLabel.h"
 #include "../media/player/MediaPlayer.h"
 
-
 typedef QList<QUrl> QUrlList;
 
 class MessageAttachment: public ClickableLabel {

@@ -1,10 +1,11 @@
 ﻿#include "MessageWidget.h"
 
+#include <Windows.h>
+
 
 QWidget* MessageWidget::createMessageWidget() {
 	QWidget* messageWidget = new QWidget();
 	QGridLayout* messageLayout = new QGridLayout(messageWidget);
-
 	messageWidget->setContentsMargins(0, 0, 0, 0);
 	messageLayout->setContentsMargins(0, 0, 0, 0);
 

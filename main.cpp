@@ -16,7 +16,7 @@
 
 #include <QApplication>
 #include "src/settings/MainWindow.h"
-#include "src/panel/MessageWidget.h"
+#include "src/panel/TelegramPostQuickView.h"
 
 int main(int argc, char* argv[])
 {
@@ -30,8 +30,15 @@ int main(int argc, char* argv[])
         return -1;*/
 
     QApplication app(argc, argv);
-    MainWindow mainWindow;
+    TelegramPostQuickView view;
 
-    mainWindow.show();
+    view.addMessage("Test very long message. Tet very long message. Test very long message.");
+    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg") }); // , QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\top.png")}
+    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
+    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
+    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
+
+
+    view.show();
     return app.exec();
 }

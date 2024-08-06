@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <QScrollBar>
 
+
 TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const QUrlList& attachmentsPaths, QWidget* parent) :
 	QWidget(parent)
 {
@@ -113,8 +114,7 @@ void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlLis
 	QWidget* messageWidget = MessageWidget::createMessageWidget();
 	QGridLayout* messageLayout = qobject_cast<QGridLayout*>(messageWidget->layout());
 
-	foreach(const QUrl & url, attachmentsPaths) {
-
+	foreach(const QUrl& url, attachmentsPaths) {
 		QString sourcePath;
 		if (url.path().at(0) == "/"[0])
 			sourcePath = url.path().remove(0, 1);
@@ -133,7 +133,7 @@ void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlLis
 		messageLayout->addWidget(textLabel, messageLayout->rowCount(), 0, 1, 1);
 	}
 
-	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignHCenter | Qt::AlignBottom);
+	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
 }
 
 void TelegramPostQuickView::attachment_cliked() {

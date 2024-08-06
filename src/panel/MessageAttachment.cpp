@@ -1,4 +1,4 @@
-#include "MessageAttachment.h
+#include "MessageAttachment.h"
 
 
 MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth, QWidget* parent) :
