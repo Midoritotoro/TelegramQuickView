@@ -49,3 +49,18 @@ def insertPostInfo(channelName: str, postAttachmentPath: str, postTime: str, pos
             cursor.execute("UPDATE downloadedPosts SET postAttachmentPath = ? WHERE channelName = ? AND postIndex = ?", (result[2] + ", " + postAttachmentPath, channelName, postIndex))
             connection.commit()
             connection.close()
+            
+def deletePostInfo(channelName: str, postIndex: int):
+    appDataPath = os.getenv('APPDATA')
+    dataBasePath = appDataPath + "\\TelegramQuickView\\downloadedPosts.sqlite3"
+
+    connection, cursor = checkDatabaseAvailability(dataBasePath)
+
+    sqlDeleteQuery = """
+    DELETE FROM downloadedPosts WHERE channelName = ? AND postIndex = ?
+    """
+    
+    cursor.execute(sqlDeleteQuery, (channelName, postIndex))
+        
+    connection.commit()
+    connection.close()
