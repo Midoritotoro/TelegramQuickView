@@ -108,7 +108,7 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	setContentsMargins(0, 0, 0, 0);
 
 	_grid->setContentsMargins(0, 0, 3, 0);
-	_grid->setVerticalSpacing(10);
+	_grid->setVerticalSpacing(4);
 	_grid->setHorizontalSpacing(0);
 	_grid->addWidget(_chatScrollArea, _grid->rowCount(), 0, 1, 1);
 
