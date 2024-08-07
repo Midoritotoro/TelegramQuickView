@@ -1,16 +1,19 @@
 QScrollArea {
     border: none;
 }
+
 QScrollBar {
-    background: gray;
+    background: rgb(36, 42, 51);
     border-radius: 2px;
 }
+
 QScrollBar:vertical {
     width: 5px;
     background-color: rgba(115, 121, 127, 100)
 }
+
 QScrollBar::handle {
-    background: lightgray;
+    background: rgb(36, 42, 51);
     border-radius: 2px;
 }
 
@@ -21,19 +24,20 @@ QScrollBar::handle:vertical {
 QScrollBar::add-line {
     border: none;
     background: none;
-    background-color: rgba(115,121,127, 100);
+    background-color: rgba(115, 121, 127, 100);
 }
 
 QScrollBar::sub-line {
     border: none;
     background: none;
-    background-color: rgba(115,121,127, 100);
+    background-color: rgba(115, 121, 127, 100);
 }
+
 QScrollBar::sub-page:vertical {
-    background: rgba(115,121,127, 100);
+    background: rgba(115, 121, 127, 100);
 }
 
 QScrollBar::add-page:vertical {
-    background: rgba(115,121,127, 100);
+    background: rgba(115, 121, 127, 100);
 }
 

@@ -1,8 +1,9 @@
 #include "TelegramPostQuickView.h"
 
 #include <Windows.h>
-#include <QScrollBar>
+
 #include "../media/WidgetsHider.h"
+#include <QScrollBar>
 
 
 TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const QUrlList& attachmentsPaths, QWidget* parent) :
@@ -22,6 +23,7 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	_chatScrollAreaWidget = new QWidget();
 	_chatScrollAreaLayout = new QGridLayout(_chatScrollAreaWidget);
 	_chatScrollArea = new QScrollArea();
+
 	_chatScrollArea->setWidgetResizable(true);
 
 	_chatScrollAreaLayout->setContentsMargins(width() / 20, 0, width() / 3.5, 15);
@@ -37,6 +39,8 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
 	_chatScrollArea->setWidget(_chatScrollAreaWidget);
+	_chatScrollArea->setMouseTracking(true);
+	_chatScrollAreaWidget->setMouseTracking(true);
 
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* closeWindowButton = new QToolButton();
@@ -58,6 +62,7 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 
 	QFile toolButtonStyleFile(toolButtonStylePath);
 	QFile chatScrollAreaStyleFile(chatScrollAreaStylePath);
+
 	if (toolButtonStyleFile.open(QFile::ReadOnly) && chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
 
 		QByteArray toolButtonStyle = toolButtonStyleFile.readAll();
@@ -72,7 +77,7 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 		chatScrollAreaStyleFile.close();
 	}
 
-	_mediaPlayer = new MediaPlayer();
+	//_mediaPlayer = new MediaPlayer();
 	_grid = new QGridLayout(this);
 
 	QWidget* toolWidget = new QWidget();
@@ -112,45 +117,19 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	addMessage(messageText, attachmentsPaths);
 
 	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
-	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList);
+	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList, true);
 	widgetsHider.SetInactivityDuration(1000);
-
-	_chatScrollArea->verticalScrollBar()->hide();
 
 	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
 	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
-
 }
 
 void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlList& attachmentsPaths) {
-	QWidget* messageWidget = MessageWidget::createMessageWidget();
-	QGridLayout* messageLayout = qobject_cast<QGridLayout*>(messageWidget->layout());
+	const int maximumMessageWidth = panelWidth - (width() / 20 + width() / 3.5);
+	MessageWidget* messageWidget = new MessageWidget();
 
-	foreach(const QUrl& url, attachmentsPaths) {
-		QString sourcePath;
-		if (url.path().at(0) == "/"[0])
-			sourcePath = url.path().remove(0, 1);
-		else
-			sourcePath = url.path();
-
-		MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, panelWidth - (width() / 20 + width() / 3.5));
-
-		messageLayout->addWidget(messageAttachment, messageLayout->rowCount(), 0, 1, 1);
-		connect(messageAttachment, &MessageAttachment::clicked, this, &TelegramPostQuickView::attachment_cliked);
-	}
-
-	if (messageText.length() > 0) {
-		QLabel* textLabel = MessageWidget::createMessageTextLabel();
-		textLabel->setText(messageText);
-		messageLayout->addWidget(textLabel, messageLayout->rowCount(), 0, 1, 1);
-	}
+	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
+	messageWidget->addMessageText(messageText);
 
 	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
-}
-
-void TelegramPostQuickView::attachment_cliked() {
-	MessageAttachment* attachment = (MessageAttachment*)sender();
-
-	
-	
 }

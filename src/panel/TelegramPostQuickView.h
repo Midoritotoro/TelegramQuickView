@@ -19,7 +19,4 @@ private:
 public:
 	TelegramPostQuickView(const QString& messageText = "", const QUrlList& attachmentsPaths = {}, QWidget* parent = nullptr);
 	void addMessage(const QString& messageText, const QUrlList& attachmentsPaths = {});
-
-public Q_SLOTS:
-	void attachment_cliked();
 };

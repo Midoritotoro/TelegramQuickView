@@ -66,7 +66,6 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/MessageMediaViewer.cpp
 	src/panel/MessageMediaViewer.h
 
-
 	src/sql/SqlContentManager.cpp
 	src/sql/SqlContentManager.h
 )

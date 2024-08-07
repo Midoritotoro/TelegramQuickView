@@ -9,14 +9,17 @@
 class MessageWidget: public QWidget {
 private:
 	Q_OBJECT
+	QGridLayout* _messageLayout = nullptr;
 	QString _messageText;
 	QString _attachmentPath;
 public:
 	MessageWidget(QWidget* parent = nullptr);
 
-	[[nodiscard]] QWidget* createMessageWidget();
-	[[nodiscard]] QLabel* createMessageTextLabel();
+	void addMessageText(const QString& text);
+	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
 
-	[[nodiscard]] QString& const getMessageText();
-	[[nodiscard]] QString& const getMessageAttachmentsPath();
+	[[nodiscard]] QString getMessageText() const;
+	[[nodiscard]] QString getMessageAttachmentsPath() const;
+public Q_SLOTS:
+	void attachmentCliked();
 };
