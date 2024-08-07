@@ -32,11 +32,13 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     TelegramPostQuickView view;
 
-    view.addMessage("Test very long message. Tet very long message. Test very long message.");
-    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg") }); // , QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\top.png")}
-    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
-    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
-    view.addMessage("Test very long message. Tet very long message. Test very long message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
+    QString text = "Test very long message. Tet very long message. Test very long message.";
+
+    view.addMessage(text);
+    view.addMessage("", QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg")});
+    view.addMessage(text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
+    view.addMessage(text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
+    view.addMessage(text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
 
 
     view.show();

@@ -6,8 +6,17 @@
 #include "MessageAttachment.h"
 
 
-static class MessageWidget {
+class MessageWidget: public QWidget {
+private:
+	Q_OBJECT
+	QString _messageText;
+	QString _attachmentPath;
 public:
-	[[nodiscard]] static QWidget* createMessageWidget();
-	[[nodiscard]] static QLabel* createMessageTextLabel();
+	MessageWidget(QWidget* parent = nullptr);
+
+	[[nodiscard]] QWidget* createMessageWidget();
+	[[nodiscard]] QLabel* createMessageTextLabel();
+
+	[[nodiscard]] QString& const getMessageText();
+	[[nodiscard]] QString& const getMessageAttachmentsPath();
 };

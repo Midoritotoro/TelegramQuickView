@@ -2,7 +2,6 @@
 
 #include <Windows.h>
 
-
 QWidget* MessageWidget::createMessageWidget() {
 	QWidget* messageWidget = new QWidget();
 	QGridLayout* messageLayout = new QGridLayout(messageWidget);

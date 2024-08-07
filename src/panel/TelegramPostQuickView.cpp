@@ -2,20 +2,29 @@
 
 #include <Windows.h>
 #include <QScrollBar>
+#include "../media/WidgetsHider.h"
 
 
 TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const QUrlList& attachmentsPaths, QWidget* parent) :
 	QWidget(parent)
 {
+	setMouseTracking(true);
+
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	panelWidth = screenWidth / 3;
+	setFixedSize(panelWidth, screenHeight);
+	move(screenWidth - width(), 0);
+
+	_messageMediaViewer = new MessageMediaViewer();
 
 	_chatScrollAreaWidget = new QWidget();
 	_chatScrollAreaLayout = new QGridLayout(_chatScrollAreaWidget);
 	_chatScrollArea = new QScrollArea();
 	_chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(10 + _chatScrollArea->verticalScrollBar()->width() / 8, 0, 10 + _chatScrollArea->verticalScrollBar()->width(), 15);
+	_chatScrollAreaLayout->setContentsMargins(width() / 20, 0, width() / 3.5, 15);
 	_chatScrollAreaLayout->setVerticalSpacing(15);
 
 	_chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
@@ -91,10 +100,6 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 		"background: rgb(14,22,33)\n"
 		"}"));
 
-	panelWidth = (screenWidth / 3);
-	setFixedSize(panelWidth, screenHeight);
-	move(screenWidth - width(), 0);
-
 	setContentsMargins(0, 0, 0, 0);
 
 	_grid->setContentsMargins(0, 0, 3, 0);
@@ -106,8 +111,15 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 
 	addMessage(messageText, attachmentsPaths);
 
+	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
+	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList);
+	widgetsHider.SetInactivityDuration(1000);
+
+	_chatScrollArea->verticalScrollBar()->hide();
+
 	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
 	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
+
 }
 
 void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlList& attachmentsPaths) {
@@ -121,7 +133,7 @@ void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlLis
 		else
 			sourcePath = url.path();
 
-		MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, panelWidth - _chatScrollArea->verticalScrollBar()->width());
+		MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, panelWidth - (width() / 20 + width() / 3.5));
 
 		messageLayout->addWidget(messageAttachment, messageLayout->rowCount(), 0, 1, 1);
 		connect(messageAttachment, &MessageAttachment::clicked, this, &TelegramPostQuickView::attachment_cliked);
@@ -139,9 +151,6 @@ void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlLis
 void TelegramPostQuickView::attachment_cliked() {
 	MessageAttachment* attachment = (MessageAttachment*)sender();
 
-	if (attachment->attachmentType() == "image")
-		return;
-
-	_mediaPlayer->setSource(QUrl::fromLocalFile(attachment->attachmentPath()));
-	_mediaPlayer->exec();
+	
+	
 }
