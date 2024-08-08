@@ -28,6 +28,7 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 
 	_grid = new QGridLayout(this);
 	_mediaPlayer = new MediaPlayer();
+	_mediaPlayer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QWidget* toolWidget = new QWidget();
 	QGridLayout* toolLayout = new QGridLayout(toolWidget);
@@ -46,7 +47,7 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 	_grid->setVerticalSpacing(0);
 	//_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
-	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1, Qt::AlignCenter);
+	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1);
 
 	setContentsMargins(0, 0, 0, 0);
 	//setWindowFlag(Qt::SplashScreen);
@@ -60,7 +61,7 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 void MessageMediaViewer::openMessageAttachment(MessageAttachment* messageAttachment) {
 	_mediaPlayer->setVisible(true);
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachment->attachmentPath()));
-	_mediaPlayer->setFixedSize(1920, 1080);
+	showFullScreen();
 }
 
 void MessageMediaViewer::toNext() {

@@ -21,7 +21,7 @@
 #include "./VideoStateWidget.h"
 #include <QDialog>
 
-class MediaPlayer : public QDialog
+class MediaPlayer : public QWidget
 {
 private:
 	Q_OBJECT
@@ -31,8 +31,8 @@ private:
 	QGraphicsView* _videoView = nullptr;
 	QGraphicsScene* _videoScene = nullptr;
 	QGraphicsVideoItem* _videoItem = nullptr;
-	QGraphicsGridLayout* _videoFormLayout = nullptr, * _toolLayout = nullptr, * _containerLayout = nullptr;
-	QGraphicsWidget* _videoForm = nullptr, * _containerWidget = nullptr, * _toolWidget = nullptr,
+	QGraphicsGridLayout* _videoFormLayout = nullptr, * _containerLayout = nullptr;
+	QGraphicsWidget* _videoForm = nullptr, * _containerWidget = nullptr,
 				   * _graphicsAudioSlider = nullptr, * _graphicsVideoTimeLabel = nullptr;
 	QLabel* _videoTimeLabel = nullptr;
 	VideoStateWidget* _videoStateWidget = nullptr;

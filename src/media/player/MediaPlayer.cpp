@@ -5,7 +5,7 @@
 #include <QVideoSink>
 
 MediaPlayer::MediaPlayer(QWidget* parent) :
-	QDialog(parent)
+	QWidget(parent)
 {
 	setMouseTracking(true);
 
@@ -22,39 +22,12 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("color: rgba(1, 0, 0, 0)");
 
-	QToolButton* minimizeWindowButton = new QToolButton();
-	QToolButton* closeWindowButton = new QToolButton();
-	QToolButton* maximizeWindowButton = new QToolButton();
-
-	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
-	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
-	QPixmap maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
-
-	minimizeWindowButton->setIcon(minPix);
-	closeWindowButton->setIcon(closePix);
-	maximizeWindowButton->setIcon(maxPix);
-
-	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-	maximizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-
-	minimizeWindowButton->setFixedSize(screenWidth / 60, screenHeight / 40);
-	closeWindowButton->setFixedSize(screenWidth / 60, screenHeight / 40);
-	maximizeWindowButton->setFixedSize(screenWidth / 60, screenHeight / 40);
-
-	minimizeWindowButton->setStyleSheet("background-color: transparent;");
-	closeWindowButton->setStyleSheet("background-color: transparent;");
-	maximizeWindowButton->setStyleSheet("background-color: transparent;");
-
 	_videoScene = new	QGraphicsScene();
 	_videoView = new QGraphicsView(_videoScene);
 	_videoItem = new QGraphicsVideoItem();
 
 	_videoForm = new QGraphicsWidget();
 	_videoFormLayout = new QGraphicsGridLayout();
-
-	_toolWidget = new QGraphicsWidget();
-	_toolLayout = new QGraphicsGridLayout();
 
 	_containerWidget = new QGraphicsWidget();
 	_containerLayout = new QGraphicsGridLayout();
@@ -159,20 +132,10 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_videoForm->setMaximumSize(screenWidth, screenHeight);
 	_videoFormLayout->setMaximumSize(screenWidth, screenHeight);
 
-	_toolWidget->setMaximumSize(screenWidth, screenHeight);
-	_toolLayout->setMaximumSize(screenWidth, screenHeight);
-
-	_toolWidget->setContentsMargins(0, 0, 0, 0);
-	_toolLayout->setContentsMargins(0, 0, 0, 0);
-
 	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 
-	_toolWidget->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
-	_toolLayout->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
-
 	_videoForm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	_toolWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 	_graphicsAudioSlider = _videoScene->addWidget(_audioSlider);
 	QGraphicsWidget* graphicsVolumeClickableLabel = _videoScene->addWidget(volumeClickableLabel);
@@ -180,20 +143,12 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_graphicsVideoTimeLabel = _videoScene->addWidget(_videoTimeLabel);
 	QGraphicsWidget* graphicsVideoStateWidget = _videoScene->addWidget(_videoStateWidget);
 
-	QGraphicsWidget* GraphicsMinButton = _videoScene->addWidget(minimizeWindowButton);
-	QGraphicsWidget* GraphicsMaxButton = _videoScene->addWidget(maximizeWindowButton);
-	QGraphicsWidget* GraphicsCloseButton = _videoScene->addWidget(closeWindowButton);
-
 	_graphicsAudioSlider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	graphicsVideoSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	_graphicsVideoTimeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	graphicsVideoStateWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	GraphicsMinButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	GraphicsMaxButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	GraphicsCloseButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 	_containerWidget->setLayout(_containerLayout);
-	_toolWidget->setLayout(_toolLayout);
 
 	_containerLayout->setSpacing(screenWidth / 250);
 	_containerWidget->setContentsMargins(0, 0, 0, 0);
@@ -205,20 +160,13 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_containerLayout->addItem(_graphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	_containerLayout->addItem(_graphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 
-
-	_toolLayout->addItem(GraphicsMinButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	_toolLayout->addItem(GraphicsMaxButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	_toolLayout->addItem(GraphicsCloseButton, 0, 2, 1, 1, Qt::AlignRight | Qt::AlignTop);
-
 	_containerLayout->setRowSpacing(1, _graphicsAudioSlider->size().height() * 2);
-	_toolLayout->setHorizontalSpacing(0);
 
 	_containerLayout->setContentsMargins(10, 10, 10, 10);
 
 	_videoView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	_videoFormLayout->addItem(_toolWidget, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	_videoFormLayout->addItem(_containerWidget, 1, 0, 1, 1, Qt::AlignBottom);
+	_videoFormLayout->addItem(_containerWidget, 0, 0, 1, 1, Qt::AlignBottom);
 
 	_videoForm->setLayout(_videoFormLayout);
 	_videoScene->addItem(_videoForm);
@@ -252,12 +200,6 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		adjustBottomWidgets();
 	});
 
-	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
-	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
-	connect(maximizeWindowButton, &QToolButton::clicked, this, [this]() {
-		isFullScreen() ? showNormal() : showFullScreen();
-	});
-
 	connect(videoPlayClickableLabel, &ClickableLabel::clicked, this, [this]() {
 		_videoStateWidget->stackedWidget()->setCurrentIndex(0);
 		videoClicked();
@@ -276,7 +218,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		_videoStateWidget->stackedWidget()->setCurrentIndex(0);
 	});
 
-	QWidgetList widgetsList = QWidgetList({ _videoSlider, volumeClickableLabel, _videoStateWidget, _videoTimeLabel, minimizeWindowButton, maximizeWindowButton, closeWindowButton });
+	QWidgetList widgetsList = QWidgetList({ _videoSlider, volumeClickableLabel, _videoStateWidget, _videoTimeLabel });
 	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList);
 	widgetsHider.SetInactivityDuration(3000);
 
@@ -287,9 +229,6 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	volumeClickableLabel->hide();
 	_videoStateWidget->hide();
 	_videoTimeLabel->hide();
-	minimizeWindowButton->hide();
-	maximizeWindowButton->hide();
-	closeWindowButton->hide();
 
 	_audioSlider->setValue(50);
 }
@@ -373,18 +312,17 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 
-	_toolWidget->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
-	_toolLayout->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
-
 	if (_currentImageItem) {
 
-		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() &&
+		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
 			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
+			// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
 
 			qreal scale = qMin(_videoView->width() / (qreal)_currentImageItem->pixmap().width(), _videoView->height() / (qreal)_currentImageItem->pixmap().height());
 
 			_currentImageItem->setScale(scale);
 		}
+
 		_currentImageItem->setPos((_videoView->width() - _currentImageItem->pixmap().width() * _currentImageItem->scale()) / 2, (_videoView->height() - _currentImageItem->pixmap().height() * _currentImageItem->scale()) / 2);
 	}
 
@@ -469,14 +407,15 @@ void MediaPlayer::setSource(const QUrl& source) {
 		int imageWidth = pixmap.width();
 		int imageHeight = pixmap.height();
 
-		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() &&
+		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
 			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
-
+			// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
 
 			qreal scale = qMin(_videoView->width() / (qreal)imageWidth, _videoView->height() / (qreal)imageHeight);
 
 			_currentImageItem->setScale(scale);
 		}
+
 		_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2, (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
 
 		_videoScene->addItem(_currentImageItem);
