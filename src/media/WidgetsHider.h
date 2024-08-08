@@ -62,7 +62,7 @@ private:
         QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this); 
         widget->setGraphicsEffect(effect);
         QPropertyAnimation* fadeInAnimation = new QPropertyAnimation(effect, "opacity");
-        fadeInAnimation->setDuration(1000);
+        fadeInAnimation->setDuration(_inactivityDuration);
         fadeInAnimation->setStartValue(0);
         fadeInAnimation->setEndValue(1);
         fadeInAnimation->setEasingCurve(QEasingCurve::InBack);
@@ -73,7 +73,7 @@ private:
         QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this);
         widget->setGraphicsEffect(effect);
         QPropertyAnimation* fadeOutAnimation = new QPropertyAnimation(effect, "opacity");
-        fadeOutAnimation->setDuration(1000);
+        fadeOutAnimation->setDuration(_inactivityDuration);
         fadeOutAnimation->setStartValue(1);
         fadeOutAnimation->setEndValue(0);
         fadeOutAnimation->setEasingCurve(QEasingCurve::InBack);

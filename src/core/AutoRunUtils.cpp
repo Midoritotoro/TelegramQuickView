@@ -1,5 +1,6 @@
 #include "AutoRunUtils.h"
 
+
 bool IsWindowsGreaterThen(int version)
 {
     OSVERSIONINFOEXW osvi = {};

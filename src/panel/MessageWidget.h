@@ -11,7 +11,8 @@ private:
 	Q_OBJECT
 	QGridLayout* _messageLayout = nullptr;
 	QString _messageText;
-	QString _attachmentPath;
+	QUrlList _attachmentsPaths;
+	MessageAttachment* _messageAttachment = nullptr;
 public:
 	MessageWidget(QWidget* parent = nullptr);
 
@@ -19,7 +20,6 @@ public:
 	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
 
 	[[nodiscard]] QString getMessageText() const;
-	[[nodiscard]] QString getMessageAttachmentsPath() const;
-public Q_SLOTS:
-	void attachmentCliked();
+	[[nodiscard]] QUrlList getMessageAttachmentsPaths() const;
+	[[nodiscard]] MessageAttachment* getMessageAttachment() const;
 };

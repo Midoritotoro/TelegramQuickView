@@ -8,9 +8,9 @@
     #endif // _UNICODE
 #endif // _WIN32
 
-#ifdef __unix__
-    #pragma message("Невозможно запустить на UNIX системах")
-#endif // __unix__
+#ifdef __linux__
+    #pragma message("Невозможно запустить на Linux системах")
+#endif // __linux__
 
 #include "src/core/AutoRunUtils.h"
 
@@ -39,7 +39,9 @@ int main(int argc, char* argv[])
     view.addMessage(text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
     view.addMessage(text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
     view.addMessage(text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
-
+    for (int index = 0; index < 100; index++) {
+        view.addMessage(text);
+    }
 
     view.show();
     return app.exec();

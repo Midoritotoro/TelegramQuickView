@@ -1,6 +1,5 @@
 #include "TelegramPostQuickView.h"
 
-#include <Windows.h>
 
 #include "../media/WidgetsHider.h"
 #include <QScrollBar>
@@ -11,8 +10,8 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 {
 	setMouseTracking(true);
 
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+	int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
 	panelWidth = screenWidth / 3;
 	setFixedSize(panelWidth, screenHeight);
@@ -26,7 +25,7 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 
 	_chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(width() / 20, 0, width() / 3.5, 15);
+	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 3.5, 15);
 	_chatScrollAreaLayout->setVerticalSpacing(15);
 
 	_chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
@@ -48,7 +47,6 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../src/css");
 
-	QString toolButtonStylePath = cssDir.absolutePath() + "/ToolButtonStyle.css";
 	QString chatScrollAreaStylePath = cssDir.absolutePath() + "/ChatScrollAreaStyle.css";
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
@@ -60,24 +58,30 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 
-	QFile toolButtonStyleFile(toolButtonStylePath);
+	closeWindowButton->setStyleSheet("QToolButton{\n"
+		"background-color: transparent;\n"
+		"}\n"
+	"QToolButton::hover{\n"
+		"background-color: rgba(50, 60, 75, 1);\n"
+	"}");
+
+	minimizeWindowButton->setStyleSheet("QToolButton{\n"
+		"background-color: transparent;\n"
+		"}\n"
+		"QToolButton::hover{\n"
+		"background-color: rgba(50, 60, 75, 1);\n"
+		"}");
+
 	QFile chatScrollAreaStyleFile(chatScrollAreaStylePath);
 
-	if (toolButtonStyleFile.open(QFile::ReadOnly) && chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
+	if (chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
 
-		QByteArray toolButtonStyle = toolButtonStyleFile.readAll();
 		QByteArray chatScrollAreaStyle = chatScrollAreaStyleFile.readAll();
-
-		closeWindowButton->setStyleSheet(toolButtonStyle);
-		minimizeWindowButton->setStyleSheet(toolButtonStyle);
-
 		_chatScrollArea->setStyleSheet(chatScrollAreaStyle);
 
-		toolButtonStyleFile.close();
 		chatScrollAreaStyleFile.close();
 	}
 
-	//_mediaPlayer = new MediaPlayer();
 	_grid = new QGridLayout(this);
 
 	QWidget* toolWidget = new QWidget();
@@ -107,7 +111,7 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 
 	setContentsMargins(0, 0, 0, 0);
 
-	_grid->setContentsMargins(0, 0, 3, 0);
+	_grid->setContentsMargins(0, 0, 3, 4);
 	_grid->setVerticalSpacing(4);
 	_grid->setHorizontalSpacing(0);
 	_grid->addWidget(_chatScrollArea, _grid->rowCount(), 0, 1, 1);
@@ -125,11 +129,19 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 }
 
 void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlList& attachmentsPaths) {
-	const int maximumMessageWidth = panelWidth - (width() / 20 + width() / 3.5);
+	const int maximumMessageWidth = panelWidth - (width() / 25 + width() / 3.5);
 	MessageWidget* messageWidget = new MessageWidget();
 
 	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
 	messageWidget->addMessageText(messageText);
 
 	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
+	if (messageWidget->getMessageAttachment())
+		connect(messageWidget->getMessageAttachment(), &MessageAttachment::clicked, this, &TelegramPostQuickView::attachmentCliked);
+}
+
+void TelegramPostQuickView::attachmentCliked() {
+	MessageAttachment* attachment = (MessageAttachment*)sender();
+	_messageMediaViewer->show();
+	_messageMediaViewer->openMessageAttachment(attachment);
 }

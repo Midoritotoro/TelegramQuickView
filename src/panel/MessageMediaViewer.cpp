@@ -13,10 +13,9 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* closeWindowButton = new QToolButton();
 
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../src/css");
-
-	QString toolButtonStylePath = cssDir.absolutePath() + "/ToolButtonStyle.css";
+	//setWindowFlag(Qt::FramelessWindowHint);
+	//setAttribute(Qt::WA_TranslucentBackground);
+	//setStyleSheet("color: rgba(1, 0, 0, 0)");
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
@@ -27,24 +26,14 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
 
-	QFile toolButtonStyleFile(toolButtonStylePath);
-	if (toolButtonStyleFile.open(QFile::ReadOnly)) {
-
-		QByteArray toolButtonStyle = toolButtonStyleFile.readAll();
-
-		closeWindowButton->setStyleSheet(toolButtonStyle);
-		minimizeWindowButton->setStyleSheet(toolButtonStyle);
-
-		toolButtonStyleFile.close();
-	}
-
 	_grid = new QGridLayout(this);
+	_mediaPlayer = new MediaPlayer();
 
 	QWidget* toolWidget = new QWidget();
 	QGridLayout* toolLayout = new QGridLayout(toolWidget);
 	toolWidget->setObjectName("toolWidget");
 	toolWidget->setStyleSheet("#toolWidget{\n"
-		"background: rgba(36, 47, 61, 1);\n"
+		"background: transparent;\n"
 		"}");
 	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 	toolWidget->setContentsMargins(0, 0, 0, 0);
@@ -56,10 +45,22 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 
 	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 	_grid->setVerticalSpacing(0);
-	_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
+	//_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
+	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1, Qt::AlignCenter);
 
 	setContentsMargins(0, 0, 0, 0);
-	setWindowFlag(Qt::SplashScreen);
+	//setWindowFlag(Qt::SplashScreen);
+
+	_mediaPlayer->setVisible(false);
+
+	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
+	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
+}
+
+void MessageMediaViewer::openMessageAttachment(MessageAttachment* messageAttachment) {
+	_mediaPlayer->setVisible(true);
+	_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachment->attachmentPath()));
+	_mediaPlayer->setFixedSize(1920, 1080);
 }
 
 void MessageMediaViewer::toNext() {

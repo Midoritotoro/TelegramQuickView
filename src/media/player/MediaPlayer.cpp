@@ -1,5 +1,5 @@
 ﻿#include "MediaPlayer.h"
-#include <Windows.h>
+
 #include <QMediaMetaData>
 #include <QVideoFrame>
 #include <QVideoSink>
@@ -9,8 +9,8 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 {
 	setMouseTracking(true);
 
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = QApplication::primaryScreen()->availableGeometry().width();
+	int screenWidth = QApplication::primaryScreen()->availableGeometry().height();
 
 	setContentsMargins(0, 0, 0, 0);
 	QGridLayout* gridLayout = new QGridLayout();
@@ -230,7 +230,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 	connect(_videoSlider, &QSlider::sliderReleased, [this]() {
 		connect(_mediaPlayer, &QMediaPlayer::positionChanged, _videoSlider, &QSlider::setValue);
-		Sleep(1);
+		_sleep(1);
 		_mediaPlayer->play();
 	});
 
@@ -375,6 +375,19 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 
 	_toolWidget->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
 	_toolLayout->setGeometry(QRectF(_toolWidget->pos().x(), _toolWidget->pos().y(), size().width(), size().height()));
+
+	if (_currentImageItem) {
+
+		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() &&
+			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
+
+			qreal scale = qMin(_videoView->width() / (qreal)_currentImageItem->pixmap().width(), _videoView->height() / (qreal)_currentImageItem->pixmap().height());
+
+			_currentImageItem->setScale(scale);
+		}
+		_currentImageItem->setPos((_videoView->width() - _currentImageItem->pixmap().width() * _currentImageItem->scale()) / 2, (_videoView->height() - _currentImageItem->pixmap().height() * _currentImageItem->scale()) / 2);
+	}
+
 	if (_doubleClicked)
 		return;
 
@@ -420,24 +433,6 @@ QString MediaPlayer::detectMediaType(const QString& filePath) {
 	return QMimeDatabase().mimeTypeForFile(filePath).name();
 }
 
-QImage MediaPlayer::videoPreview(const QString& videoPath) {
-	QWidget pl;
-	QMediaPlayer player;
-
-	player.setSource(QUrl::fromLocalFile(videoPath));
-	player.play();
-	player.setPosition(1000);
-
-	while (player.mediaStatus() != QMediaPlayer::BufferedMedia) {
-		Sleep(10);
-	}
-	QImage image = player.videoSink()->videoFrame().toImage();
-	QString fileName = QFileInfo(videoPath).baseName() + ".jpg";
-	image.save(fileName);
-	player.stop();
-	return image;
-}
-
 void MediaPlayer::setSource(const QUrl& source) {
 	QString sourcePath;
 	if (source.path().at(0) == "/"[0])
@@ -456,10 +451,35 @@ void MediaPlayer::setSource(const QUrl& source) {
 		}
 		_containerWidget->show();
 		_mediaPlayer->setSource(source);
-		QMediaMetaData data = _mediaPlayer->metaData();
-		qDebug() << data.Resolution;
-		//_videoItem->setSize(QSize(data.Resolution));
-		//play();
+		_videoItem->setSize(QSize(QApplication::primaryScreen()->availableGeometry().width(), QApplication::primaryScreen()->availableGeometry().height()));
+		play();
+	}
+	else if (mediaType.contains("image")) {
+		QList<QGraphicsItem*> items = _videoScene->items();
+		for (QGraphicsItem* item : items) {
+			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
+				_videoScene->removeItem(item);
+				delete item;
+			}
+		}
+		_containerWidget->hide();
+		QPixmap pixmap(sourcePath); 
+		_currentImageItem = new QGraphicsPixmapItem(pixmap);
+
+		int imageWidth = pixmap.width();
+		int imageHeight = pixmap.height();
+
+		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() &&
+			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
+
+
+			qreal scale = qMin(_videoView->width() / (qreal)imageWidth, _videoView->height() / (qreal)imageHeight);
+
+			_currentImageItem->setScale(scale);
+		}
+		_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2, (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
+
+		_videoScene->addItem(_currentImageItem);
 	}
 }
 

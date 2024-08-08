@@ -1,4 +1,5 @@
 ﻿#include "MessageWidget.h"
+#include "MessageMediaViewer.h"
 
 
 MessageWidget::MessageWidget(QWidget* parent) :
@@ -26,7 +27,7 @@ void MessageWidget::addMessageText(const QString& text) {
 
 	textLabel->setWordWrap(true);
 	textLabel->setAlignment(Qt::AlignLeft);
-	textLabel->setContentsMargins(8, 0, 20, 8);
+	textLabel->setContentsMargins(8, 5, 20, 8);
 
 	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -50,28 +51,30 @@ void MessageWidget::addMessageText(const QString& text) {
 }
 
 void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth) {
+	_attachmentsPaths = attachmentsPaths;
+
 	foreach(const QUrl& url, attachmentsPaths) {
 		QString sourcePath;
+
 		if (url.path().at(0) == "/"[0])
 			sourcePath = url.path().remove(0, 1);
 		else
 			sourcePath = url.path();
 
-		MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth);
+		_messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth);
 
-		_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
-		connect(messageAttachment, &MessageAttachment::clicked, this, &MessageWidget::attachmentCliked);
+		_messageLayout->addWidget(_messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 	}
 }
 
-void MessageWidget::attachmentCliked() {
-	MessageAttachment* attachment = (MessageAttachment*)sender();
-}
-
-[[nodiscard]] QString MessageWidget::getMessageText() const {
+QString MessageWidget::getMessageText() const {
 	return _messageText;
 }
 
-[[nodiscard]] QString MessageWidget::getMessageAttachmentsPath() const {
-	return "";
+QUrlList MessageWidget::getMessageAttachmentsPaths() const {
+	return _attachmentsPaths;
+}
+
+MessageAttachment* MessageWidget::getMessageAttachment() const {
+	return _messageAttachment;
 }
