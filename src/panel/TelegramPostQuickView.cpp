@@ -144,4 +144,5 @@ void TelegramPostQuickView::attachmentCliked() {
 	MessageAttachment* attachment = (MessageAttachment*)sender();
 	_messageMediaViewer->show();
 	_messageMediaViewer->openMessageAttachment(attachment);
+	showMinimized();
 }
