@@ -55,21 +55,20 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	minimizeWindowButton->setIcon(minPix);
 	closeWindowButton->setIcon(closePix);
 
-	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-
 	closeWindowButton->setStyleSheet("QToolButton{\n"
 		"background-color: transparent;\n"
 		"}\n"
 	"QToolButton::hover{\n"
-		"background-color: rgba(50, 60, 75, 1);\n"
+		"background: rgb(57, 58, 59);\n"
+		"color: white;\n"
 	"}");
 
 	minimizeWindowButton->setStyleSheet("QToolButton{\n"
 		"background-color: transparent;\n"
 		"}\n"
 		"QToolButton::hover{\n"
-		"background-color: rgba(50, 60, 75, 1);\n"
+		"background: rgb(79, 80, 81);\n"
+		"color: white;\n"
 		"}");
 
 	QFile chatScrollAreaStyleFile(chatScrollAreaStylePath);
@@ -86,10 +85,10 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 
 	QWidget* toolWidget = new QWidget();
 	QGridLayout* toolLayout = new QGridLayout(toolWidget);
-	toolWidget->setObjectName("toolWidget");
-	toolWidget->setStyleSheet("#toolWidget{\n"
-		"background: rgba(36, 47, 61, 1);\n"
-		"}");
+	//toolWidget->setObjectName("toolWidget");
+	//toolWidget->setStyleSheet("#toolWidget{\n"
+	//	"background-color: rgba(35,36,37, 80);\n"
+	//	"}");
 	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 	toolWidget->setContentsMargins(0, 0, 0, 0);
 	toolLayout->setContentsMargins(0, 0, 0, 0);
@@ -100,13 +99,16 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 
 	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 	_grid->setVerticalSpacing(0);
-	_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
+	//_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
+
+	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+	setAttribute(Qt::WA_TranslucentBackground);
 
 	setStyleSheet(QString::fromUtf8("*{\n"
 		"font-size: 14px;\n"
 		"}\n"
 		"QWidget{\n"
-		"background: rgb(14,22,33)\n"
+		"background-color: rgba(35,36,37, 60);\n"
 		"}"));
 
 	setContentsMargins(0, 0, 0, 0);
@@ -115,8 +117,6 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	_grid->setVerticalSpacing(4);
 	_grid->setHorizontalSpacing(0);
 	_grid->addWidget(_chatScrollArea, _grid->rowCount(), 0, 1, 1);
-
-	setWindowFlag(Qt::SplashScreen);
 
 	addMessage(messageText, attachmentsPaths);
 

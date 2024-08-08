@@ -13,12 +13,15 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* maximizeWindowButton = new QToolButton();
 	QToolButton* closeWindowButton = new QToolButton();
-
+	
 	setWindowFlags(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
+	setContentsMargins(0, 0, 0, 0);
+
 	setStyleSheet("QWidget{\n "
-		"background-color: rgba(35,36,37, 0.5)\n"
+		"background-color: rgba(35,36,37, 50);\n"
 	"}");
+
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
@@ -37,6 +40,8 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 	maximizeWindowButton->setStyleSheet("background-color: transparent;");
 
 	_grid = new QGridLayout(this);
+	_grid->setContentsMargins(0, 0, 0, 0);
+	_grid->setSpacing(0);
 	_mediaPlayer = new MediaPlayer();
 	_mediaPlayer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -57,24 +62,25 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent):
 
 	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 	_grid->setVerticalSpacing(0);
-	_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
+	//_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
 	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1);
 
 	setContentsMargins(0, 0, 0, 0);
 
-	_mediaPlayer->setVisible(false);
-
 	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
-	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
 	connect(maximizeWindowButton, &QToolButton::clicked, this, [this]() {
 		isFullScreen() ? showNormal() : showFullScreen();
 	});
+	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageAttachment* messageAttachment) {
-	_mediaPlayer->setVisible(true);
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachment->attachmentPath()));
 	showFullScreen();
+	_mediaPlayer->show();
+	_mediaPlayer->showFullScreen();
+	qDebug() << size();
+	qDebug() << "MediaPlayer: " << _mediaPlayer->size();
 }
 
 void MessageMediaViewer::toNext() {

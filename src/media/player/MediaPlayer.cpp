@@ -20,7 +20,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
-	setStyleSheet("color: rgba(1, 0, 0, 0)");
+	setStyleSheet("background-color: rgba(1, 0, 0, 0)");
 
 	_videoScene = new	QGraphicsScene();
 	_videoView = new QGraphicsView(_videoScene);

@@ -1,5 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.24)
 
+# "C:\Windows\system32\cmd.exe" /c "%SYSTEMROOT%\System32\chcp.com 65001 >NUL && "D:\VS\2022\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe"  -G "Ninja"  -DCMAKE_PREFIX_PATH:STRING="D:/Packages/Qt/6.7.0/msvc2019_64" -DCMAKE_BUILD_TYPE:STRING="Release"   -DCMAKE_MAKE_PROGRAM="D:\VS\2022\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" "D:\TelegramQuickView" 2>&1"
+
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
@@ -15,13 +17,9 @@ find_package(Python3 COMPONENTS Development REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
 			Widgets
-			Qml
 			Multimedia
 			MultimediaWidgets
 			Sql
-			Quick
-			Xml
-			OpenGLWidgets
 )
 
 qt_standard_project_setup()
@@ -79,13 +77,9 @@ add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 					Qt6::Core
 					Qt6::Widgets
-					Qt6::Qml
 					Qt6::Multimedia
 					Qt6::MultimediaWidgets
 					Qt6::Sql
-					Qt6::Quick
-					Qt6::Xml
-					Qt6::OpenGLWidgets
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
