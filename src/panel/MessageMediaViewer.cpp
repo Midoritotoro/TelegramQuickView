@@ -128,7 +128,6 @@ void MessageMediaViewer::toNext() {
 	const MessageAttachmentsList& messageAttachmentsList = _currentMessage->getMessageAttachments();
 	int messageAttachmentsCount = messageAttachmentsList.length();
 
-	qDebug() << "toNext" << _currentMessageAttachmentIndex;
 	for (int index = 0; index < messageAttachmentsCount; ++index) {
 		if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0)
 			break;
@@ -136,7 +135,7 @@ void MessageMediaViewer::toNext() {
 		MessageAttachment* attachment = messageAttachmentsList.at(_currentMessageAttachmentIndex);
 
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
-			if (messageAttachmentsCount - (index + 1) >= 1) {
+			if (messageAttachmentsCount - (index + 1) > 0) {
 				_currentMessageAttachmentIndex = index + 1;
 				_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachmentsList.at(_currentMessageAttachmentIndex)->attachmentPath()));
 
@@ -147,7 +146,8 @@ void MessageMediaViewer::toNext() {
 			}
 		}
 	}
-	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0) {
+
+	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 1) { // Листать некуда
 		_nextAttachment->hide();
 	}
 }
@@ -155,17 +155,16 @@ void MessageMediaViewer::toNext() {
 void MessageMediaViewer::toPrevious() {
 	const MessageAttachmentsList& messageAttachmentsList = _currentMessage->getMessageAttachments();
 	int messageAttachmentsCount = messageAttachmentsList.length();
-	qDebug() << "toPrevious" << _currentMessageAttachmentIndex;
 
-	for (int index = 0; index < messageAttachmentsCount; ++index) {
+	for (int index = messageAttachmentsCount; index >= 0; --index) {
 		if (_currentMessageAttachmentIndex <= 0)
 			break;
 
 		MessageAttachment* attachment = messageAttachmentsList.at(_currentMessageAttachmentIndex);
 
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
-			if (messageAttachmentsCount - (index + 1) >= 1) {
-				_currentMessageAttachmentIndex =  index - 1;
+			if (index - 1 >= 0) {
+				_currentMessageAttachmentIndex = index - 1;
 				_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachmentsList.at(_currentMessageAttachmentIndex)->attachmentPath()));
 
 				if (_nextAttachment->isHidden())
@@ -175,7 +174,7 @@ void MessageMediaViewer::toPrevious() {
 			}
 		}
 	}
-	if (_currentMessageAttachmentIndex <= 0) {
+	if (_currentMessageAttachmentIndex <= 0) { // Листать некуда
 		_previousAttachment->hide();
 	}
 }
