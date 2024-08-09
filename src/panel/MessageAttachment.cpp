@@ -1,5 +1,5 @@
 #include "MessageAttachment.h"
-
+#include "MessageWidget.h"
 
 MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth, QWidget* parent) :
 	ClickableLabel(parent), _attachmentPath(attachmentPath), _attachmentType(MediaPlayer::detectMediaType(attachmentPath))
@@ -18,8 +18,13 @@ MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth
 	}
 }
 
+
 QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
 	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
+}
+
+void MessageAttachment::setParentMessage(MessageWidget* messageWidget) {
+	_parentMessage = messageWidget;
 }
 
 QString MessageAttachment::attachmentPath() const {
@@ -28,4 +33,8 @@ QString MessageAttachment::attachmentPath() const {
 
 QString MessageAttachment::attachmentType() const {
 	return _attachmentType;
+}
+
+MessageWidget* MessageAttachment::parentMessage() const {
+	return _parentMessage;
 }

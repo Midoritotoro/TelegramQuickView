@@ -5,14 +5,15 @@
 
 #include "MessageAttachment.h"
 
+typedef QList<MessageAttachment*> MessageAttachmentsList;
+
 
 class MessageWidget: public QWidget {
 private:
 	Q_OBJECT
 	QGridLayout* _messageLayout = nullptr;
 	QString _messageText;
-	QUrlList _attachmentsPaths;
-	MessageAttachment* _messageAttachment = nullptr;
+	MessageAttachmentsList _messageAttachmentsList;
 public:
 	MessageWidget(QWidget* parent = nullptr);
 
@@ -20,6 +21,8 @@ public:
 	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
 
 	[[nodiscard]] QString getMessageText() const;
-	[[nodiscard]] QUrlList getMessageAttachmentsPaths() const;
-	[[nodiscard]] MessageAttachment* getMessageAttachment() const;
+	[[nodiscard]] const MessageAttachmentsList& getMessageAttachments() const;
+
+	[[nodiscard]] int indexOfAttachment(MessageAttachment* messageAttachment);
+	[[nodiscard]] MessageAttachment* attachmentAt(int index);
 };

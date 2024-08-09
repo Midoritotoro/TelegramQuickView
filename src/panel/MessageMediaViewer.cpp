@@ -20,18 +20,9 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent) :
 		"background-color: rgba(35,36,37, 0.9)\n"
 		"}");
 
-	QPainter painter(&mask);
-	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setRenderHint(QPainter::SmoothPixmapTransform);
-	painter.fillRect(0, 0, size.width(), size.height(), Qt::white);
-	painter.setBrush(QColor(0, 0, 0));
-	painter.drawRoundedRect(0, 0, size.width(), size.height(), 99, 99);
-	QPixmap image = src.scaled(size);
-	image.setMask(mask);
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
 	QPixmap maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
-
 
 	minimizeWindowButton->setIcon(minPix);
 	maximizeWindowButton->setIcon(maxPix);
@@ -121,22 +112,72 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent) :
 	connect(_previousAttachment, &ClickableLabel::clicked, this, &MessageMediaViewer::toPrevious);
 }
 
-void MessageMediaViewer::openMessageAttachment(MessageAttachment* messageAttachment) {
-	_mediaPlayer->setVisible(true);
-	_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachment->attachmentPath()));
-	showFullScreen();
-	_mediaPlayer->showFullScreen();
-	qDebug() << _mediaPlayer->size();
-	qDebug() << size();
+void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
+	_currentMessage = messageWidget;
+	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
 
+	_mediaPlayer->setVisible(true);
+	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
+	
+	showFullScreen();
+	
+	_mediaPlayer->showFullScreen();
 }
 
 void MessageMediaViewer::toNext() {
+	const MessageAttachmentsList& messageAttachmentsList = _currentMessage->getMessageAttachments();
+	int messageAttachmentsCount = messageAttachmentsList.length();
 
+	qDebug() << "toNext" << _currentMessageAttachmentIndex;
+	for (int index = 0; index < messageAttachmentsCount; ++index) {
+		if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0)
+			break;
+
+		MessageAttachment* attachment = messageAttachmentsList.at(_currentMessageAttachmentIndex);
+
+		if (_currentMessage->indexOfAttachment(attachment) == index) {
+			if (messageAttachmentsCount - (index + 1) >= 1) {
+				_currentMessageAttachmentIndex = index + 1;
+				_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachmentsList.at(_currentMessageAttachmentIndex)->attachmentPath()));
+
+				if (_previousAttachment->isHidden())
+					_previousAttachment->show();
+
+				break;
+			}
+		}
+	}
+	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0) {
+		_nextAttachment->hide();
+	}
 }
 
 void MessageMediaViewer::toPrevious() {
+	const MessageAttachmentsList& messageAttachmentsList = _currentMessage->getMessageAttachments();
+	int messageAttachmentsCount = messageAttachmentsList.length();
+	qDebug() << "toPrevious" << _currentMessageAttachmentIndex;
 
+	for (int index = 0; index < messageAttachmentsCount; ++index) {
+		if (_currentMessageAttachmentIndex <= 0)
+			break;
+
+		MessageAttachment* attachment = messageAttachmentsList.at(_currentMessageAttachmentIndex);
+
+		if (_currentMessage->indexOfAttachment(attachment) == index) {
+			if (messageAttachmentsCount - (index + 1) >= 1) {
+				_currentMessageAttachmentIndex =  index - 1;
+				_mediaPlayer->setSource(QUrl::fromLocalFile(messageAttachmentsList.at(_currentMessageAttachmentIndex)->attachmentPath()));
+
+				if (_nextAttachment->isHidden())
+					_nextAttachment->show();
+
+				break;
+			}
+		}
+	}
+	if (_currentMessageAttachmentIndex <= 0) {
+		_previousAttachment->hide();
+	}
 }
 
 void MessageMediaViewer::resizeEvent(QResizeEvent* event) {

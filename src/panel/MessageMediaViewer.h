@@ -3,9 +3,10 @@
 #include <QWidget>
 #include <QGridLayout>
 
-#include "MessageAttachment.h"
 #include "../media/player/MediaPlayer.h"
 #include "../media/ClickableLabel.h"
+
+#include "MessageWidget.h"
 #include <QResizeEvent>
 
 
@@ -16,10 +17,12 @@ private:
 	MediaPlayer* _mediaPlayer = nullptr;
 	ClickableLabel* _nextAttachment = nullptr;
 	ClickableLabel* _previousAttachment = nullptr;
+	MessageWidget* _currentMessage = nullptr;
+	int _currentMessageAttachmentIndex = 0;
 public:
 	MessageMediaViewer(QWidget* parent = nullptr);
 
-	void openMessageAttachment(MessageAttachment* messageAttachment);
+	void openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex);
 	void toNext();
 	void toPrevious();
 protected:

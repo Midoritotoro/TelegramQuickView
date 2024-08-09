@@ -51,8 +51,6 @@ void MessageWidget::addMessageText(const QString& text) {
 }
 
 void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth) {
-	_attachmentsPaths = attachmentsPaths;
-
 	foreach(const QUrl& url, attachmentsPaths) {
 		QString sourcePath;
 
@@ -61,20 +59,26 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 		else
 			sourcePath = url.path();
 
-		_messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth);
-
-		_messageLayout->addWidget(_messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+		MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth);
+		_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+		messageAttachment->setParentMessage(this);
+		
+		_messageAttachmentsList.append(messageAttachment);
 	}
 }
 
 QString MessageWidget::getMessageText() const {
-	return _messageText;
+	return _messageText;	
 }
 
-QUrlList MessageWidget::getMessageAttachmentsPaths() const {
-	return _attachmentsPaths;
+const MessageAttachmentsList& MessageWidget::getMessageAttachments() const {
+	return _messageAttachmentsList;
 }
 
-MessageAttachment* MessageWidget::getMessageAttachment() const {
-	return _messageAttachment;
+int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) {
+	return _messageAttachmentsList.indexOf(messageAttachment);
+}
+
+MessageAttachment* MessageWidget::attachmentAt(int index) {
+	return _messageAttachmentsList.at(index);
 }
