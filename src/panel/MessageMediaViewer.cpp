@@ -17,12 +17,21 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent) :
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
-		"background-color: rgba(35,36,37, 0.7)\n"
+		"background-color: rgba(35,36,37, 0.9)\n"
 		"}");
 
+	QPainter painter(&mask);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform);
+	painter.fillRect(0, 0, size.width(), size.height(), Qt::white);
+	painter.setBrush(QColor(0, 0, 0));
+	painter.drawRoundedRect(0, 0, size.width(), size.height(), 99, 99);
+	QPixmap image = src.scaled(size);
+	image.setMask(mask);
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
 	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
 	QPixmap maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
+
 
 	minimizeWindowButton->setIcon(minPix);
 	maximizeWindowButton->setIcon(maxPix);
@@ -59,9 +68,46 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent) :
 	_grid->setSpacing(0);
 	_grid->setContentsMargins(0, 0, 0, 0);
 	setContentsMargins(0, 0, 0, 0);
-	//_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
+
 	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1);
 
+	QString currentPath = QCoreApplication::applicationDirPath();
+	QDir cssDir(currentPath + "/../../assets/images");
+
+	QString arrowPath = cssDir.absolutePath() + "/arrow_right.png";
+
+	_nextAttachment = new ClickableLabel(this);
+	_previousAttachment = new ClickableLabel(this);
+
+	_nextAttachment->setFixedSize(50, 50);
+	_previousAttachment->setFixedSize(50, 50);
+	
+	_nextAttachment->setBackgroundRole(QPalette::Dark);
+	_nextAttachment->setScaledContents(true);
+	_nextAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath)));
+	_nextAttachment->setCursor(Qt::PointingHandCursor);
+	QRegion region1(QRect(0, 0, _nextAttachment->width() - _nextAttachment->width() * 0.01, _nextAttachment->height() - _nextAttachment->height() * 0.01), QRegion::Ellipse);
+	_nextAttachment->setMask(region1);
+
+	_previousAttachment->setBackgroundRole(QPalette::Dark);
+	_previousAttachment->setScaledContents(true);
+	_previousAttachment->setCursor(Qt::PointingHandCursor);
+	QTransform transform;
+	transform.rotate(180);
+
+	_previousAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath)).transformed(transform));
+	QRegion region2(QRect(0, 0, _previousAttachment->width() - _previousAttachment->width() * 0.01, _previousAttachment->height() - _previousAttachment->height() * 0.01), QRegion::Ellipse);
+	_previousAttachment->setMask(region2);
+
+	_nextAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0.8)\n");
+
+	_previousAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0.8)\n");
+
+	_previousAttachment->move(_nextAttachment->width(), height() / 2);
+	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
+
+	_nextAttachment->show();
+	_previousAttachment->show();
 	setContentsMargins(0, 0, 0, 0);
 
 	_mediaPlayer->setVisible(false);
@@ -71,6 +117,8 @@ MessageMediaViewer::MessageMediaViewer(QWidget* parent) :
 	connect(maximizeWindowButton, &QToolButton::clicked, this, [this]() {
 		isFullScreen() ? showNormal() : showFullScreen();
 		});
+	connect(_nextAttachment, &ClickableLabel::clicked, this, &MessageMediaViewer::toNext);
+	connect(_previousAttachment, &ClickableLabel::clicked, this, &MessageMediaViewer::toPrevious);
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageAttachment* messageAttachment) {
@@ -89,4 +137,9 @@ void MessageMediaViewer::toNext() {
 
 void MessageMediaViewer::toPrevious() {
 
+}
+
+void MessageMediaViewer::resizeEvent(QResizeEvent* event) {
+	_previousAttachment->move(_nextAttachment->width(), height() / 2);
+	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
 }
