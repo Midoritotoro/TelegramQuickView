@@ -5,7 +5,7 @@
 #include <QScrollBar>
 
 
-TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const QUrlList& attachmentsPaths, QWidget* parent) :
+TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	QWidget(parent)
 {
 	setMouseTracking(true);
@@ -118,8 +118,6 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	_grid->setHorizontalSpacing(0);
 	_grid->addWidget(_chatScrollArea, _grid->rowCount(), 0, 1, 1);
 
-	addMessage(messageText, attachmentsPaths);
-
 	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
 	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList, true);
 	widgetsHider.SetInactivityDuration(1000);
@@ -128,9 +126,9 @@ TelegramPostQuickView::TelegramPostQuickView(const QString& messageText, const Q
 	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
 }
 
-void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlList& attachmentsPaths) {
+void TelegramPostQuickView::addMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {
 	const int maximumMessageWidth = panelWidth - (width() / 25 + width() / 3.5);
-	MessageWidget* messageWidget = new MessageWidget();
+	MessageWidget* messageWidget = new MessageWidget(author);
 
 	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
 	messageWidget->addMessageText(messageText);

@@ -63,6 +63,8 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/MessageAttachment.h
 	src/panel/MessageMediaViewer.cpp
 	src/panel/MessageMediaViewer.h
+	src/panel/History.cpp
+	src/panel/History.h
 
 	src/sql/SqlContentManager.cpp
 	src/sql/SqlContentManager.h

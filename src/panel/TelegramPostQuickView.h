@@ -19,9 +19,9 @@ private:
 	MessageMediaViewer* _messageMediaViewer = nullptr;
 	MessagesList _messagesList;
 public:
-	TelegramPostQuickView(const QString& messageText = "", const QUrlList& attachmentsPaths = {}, QWidget* parent = nullptr);
+	TelegramPostQuickView(QWidget* parent = nullptr);
 
-	void addMessage(const QString& messageText, const QUrlList& attachmentsPaths = {});
+	void addMessage(const QString& author, const QString& messageText = "", const QUrlList& attachmentsPaths = {});
 
 	[[nodiscard]] const MessagesList& messages() const;
 

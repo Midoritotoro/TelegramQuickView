@@ -7,8 +7,8 @@
 #include <QStyle>
 
 
-MessageMediaViewer::MessageMediaViewer(QWidget* parent) :
-	QWidget(parent)
+MessageMediaViewer::MessageMediaViewer(QWidget* parent)
+: QWidget(parent)
 {
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* maximizeWindowButton = new QToolButton();
@@ -125,7 +125,7 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 }
 
 bool MessageMediaViewer::isNextMediaAvailable() {
-
+	return true;
 }
 
 void MessageMediaViewer::toNext() {

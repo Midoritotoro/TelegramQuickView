@@ -2,7 +2,7 @@
 #include "MessageMediaViewer.h"
 
 
-MessageWidget::MessageWidget(QWidget* parent) :
+MessageWidget::MessageWidget(const QString& author, QWidget* parent) :
 	QWidget(parent)
 {
 	_messageLayout = new QGridLayout(this);

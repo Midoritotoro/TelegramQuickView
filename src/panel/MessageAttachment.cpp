@@ -1,8 +1,10 @@
 #include "MessageAttachment.h"
 #include "MessageWidget.h"
 
-MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth, QWidget* parent) :
-	ClickableLabel(parent), _attachmentPath(attachmentPath), _attachmentType(MediaPlayer::detectMediaType(attachmentPath))
+MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth, QWidget* parent)
+: ClickableLabel(parent)
+, _attachmentPath(attachmentPath)
+, _attachmentType(MediaPlayer::detectMediaType(attachmentPath))
 {
 	setMouseTracking(true);
 	setScaledContents(true);

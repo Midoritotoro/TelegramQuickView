@@ -15,7 +15,7 @@ private:
 	QString _messageText;
 	MessageAttachmentsList _messageAttachmentsList;
 public:
-	MessageWidget(QWidget* parent = nullptr);
+	MessageWidget(const QString& author, QWidget* parent = nullptr);
 
 	void addMessageText(const QString& text);
 	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
