@@ -1,13 +1,13 @@
 #pragma once
 
-#include <QUrl>
-
 #include "../media/ClickableLabel.h"
-#include "../media/player/MediaPlayer.h"
 
+
+class QUrl;
 typedef QList<QUrl> QUrlList;
 
 class MessageWidget;
+
 
 class MessageAttachment: public ClickableLabel {
 private:
@@ -22,7 +22,8 @@ public:
 
 	void setParentMessage(MessageWidget* messageWidget);
 
-	[[nodiscard]] QString attachmentPath() const;
-	[[nodiscard]] QString attachmentType() const;
-	[[nodiscard]] MessageWidget* parentMessage() const;
+	[[nodiscard]] QString attachmentPath() const noexcept;
+	[[nodiscard]] QString attachmentType() const noexcept;
+	[[nodiscard]] MessageWidget* parentMessage() const noexcept;
+	[[nodiscard]] static QString detectMediaType(const QString& filePath);
 };

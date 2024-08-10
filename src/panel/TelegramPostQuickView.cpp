@@ -13,33 +13,33 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
-	panelWidth = screenWidth / 3;
-	setFixedSize(panelWidth, screenHeight);
+	_panelWidth = screenWidth / 3;
+	setFixedSize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
 	_messageMediaViewer = new MessageMediaViewer();
 
-	_chatScrollAreaWidget = new QWidget();
-	_chatScrollAreaLayout = new QGridLayout(_chatScrollAreaWidget);
-	_chatScrollArea = new QScrollArea();
+	QWidget* chatScrollAreaWidget = new QWidget();
+	_chatScrollAreaLayout = new QGridLayout(chatScrollAreaWidget);
+	QScrollArea* chatScrollArea = new QScrollArea();
 
-	_chatScrollArea->setWidgetResizable(true);
+	chatScrollArea->setWidgetResizable(true);
 
 	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 3.5, 15);
 	_chatScrollAreaLayout->setVerticalSpacing(15);
 
-	_chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
-	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
+	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
+	chatScrollArea->setContentsMargins(0, 0, 0, 0);
 
-	_chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-	_chatScrollArea->setWidget(_chatScrollAreaWidget);
-	_chatScrollArea->setMouseTracking(true);
-	_chatScrollAreaWidget->setMouseTracking(true);
+	chatScrollArea->setWidget(chatScrollAreaWidget);
+	chatScrollArea->setMouseTracking(true);
+	chatScrollAreaWidget->setMouseTracking(true);
 
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* closeWindowButton = new QToolButton();
@@ -76,12 +76,12 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	if (chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
 
 		QByteArray chatScrollAreaStyle = chatScrollAreaStyleFile.readAll();
-		_chatScrollArea->setStyleSheet(chatScrollAreaStyle);
+		chatScrollArea->setStyleSheet(chatScrollAreaStyle);
 
 		chatScrollAreaStyleFile.close();
 	}
 
-	_grid = new QGridLayout(this);
+	QGridLayout* grid = new QGridLayout(this);
 
 	QWidget* toolWidget = new QWidget();
 	QGridLayout* toolLayout = new QGridLayout(toolWidget);
@@ -98,7 +98,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
 
 	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
-	_grid->setVerticalSpacing(0);
+	grid->setVerticalSpacing(0);
 	//_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
 
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -113,12 +113,12 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 	setContentsMargins(0, 0, 0, 0);
 
-	_grid->setContentsMargins(0, 0, 3, 4);
-	_grid->setVerticalSpacing(4);
-	_grid->setHorizontalSpacing(0);
-	_grid->addWidget(_chatScrollArea, _grid->rowCount(), 0, 1, 1);
+	grid->setContentsMargins(0, 0, 3, 4);
+	grid->setVerticalSpacing(4);
+	grid->setHorizontalSpacing(0);
+	grid->addWidget(chatScrollArea, grid->rowCount(), 0, 1, 1);
 
-	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
+	QWidgetList widgetsList = QWidgetList({ chatScrollArea->verticalScrollBar() });
 	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList, true);
 	widgetsHider.SetInactivityDuration(1000);
 
@@ -126,8 +126,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
 }
 
-void TelegramPostQuickView::addMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {
-	const int maximumMessageWidth = panelWidth - (width() / 25 + width() / 3.5);
+void TelegramPostQuickView::makeMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {
+	const int maximumMessageWidth = _panelWidth - (width() / 25 + width() / 3.5);
 	MessageWidget* messageWidget = new MessageWidget(author);
 
 	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
@@ -136,7 +136,7 @@ void TelegramPostQuickView::addMessage(const QString& author, const QString& mes
 	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
 	_messagesList.append(messageWidget);
 
-	const MessageAttachmentsList& messageAttachmentsList = messageWidget->getMessageAttachments();
+	const MessageAttachmentsList& messageAttachmentsList = messageWidget->messageAttachments();
 
 	if (messageAttachmentsList.isEmpty())
 		return;

@@ -1,10 +1,16 @@
 ﻿#include "MessageWidget.h"
-#include "MessageMediaViewer.h"
+
+#include <QWidget>
+#include <QLabel>
+#include <QGridLayout>
 
 
 MessageWidget::MessageWidget(const QString& author, QWidget* parent) :
 	QWidget(parent)
 {
+	_telegramMessage = new TelegramMessage();
+	_telegramMessage->author = author;
+
 	_messageLayout = new QGridLayout(this);
 	setContentsMargins(0, 0, 0, 0);
 	_messageLayout->setVerticalSpacing(0);
@@ -32,7 +38,7 @@ void MessageWidget::addMessageText(const QString& text) {
 	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 	textLabel->setText(text);
-	_messageText = text;
+	_telegramMessage->text = text;
 
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		textLabel->setStyleSheet("QLabel{\n"
@@ -51,6 +57,7 @@ void MessageWidget::addMessageText(const QString& text) {
 }
 
 void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth) {
+
 	foreach(const QUrl& url, attachmentsPaths) {
 		QString sourcePath;
 
@@ -63,26 +70,26 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 		_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 		messageAttachment->setParentMessage(this);
 		
-		_messageAttachmentsList.append(messageAttachment);
+		_telegramMessage->attachments.append(messageAttachment);
 	}
 }
 
-QString MessageWidget::getMessageText() const {
-	return _messageText;	
+QString MessageWidget::messageText() const noexcept {
+	return _telegramMessage->text;	
 }
 
-const MessageAttachmentsList& MessageWidget::getMessageAttachments() const {
-	return _messageAttachmentsList;
+const MessageAttachmentsList& MessageWidget::messageAttachments() const noexcept {
+	return _telegramMessage->attachments;
 }
 
-int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) {
-	return _messageAttachmentsList.indexOf(messageAttachment);
+int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) const noexcept {
+	return _telegramMessage->attachments.indexOf(messageAttachment);
 }
 
-MessageAttachment* MessageWidget::attachmentAt(int index) {
-	return _messageAttachmentsList.at(index);
+MessageAttachment* MessageWidget::attachmentAt(int index) const noexcept {
+	return _telegramMessage->attachments.at(index);
 }
 
-int MessageWidget::attachmentsLength() {
-	return _messageAttachmentsList.length();
+int MessageWidget::attachmentsLength() const noexcept {
+	return _telegramMessage->attachments.length();
 }

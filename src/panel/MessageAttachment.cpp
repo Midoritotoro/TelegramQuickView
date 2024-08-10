@@ -1,10 +1,15 @@
 #include "MessageAttachment.h"
+
 #include "MessageWidget.h"
+
+#include <QMimeDatabase>
+#include <QUrl>
+
 
 MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth, QWidget* parent)
 : ClickableLabel(parent)
 , _attachmentPath(attachmentPath)
-, _attachmentType(MediaPlayer::detectMediaType(attachmentPath))
+, _attachmentType(detectMediaType(attachmentPath))
 {
 	setMouseTracking(true);
 	setScaledContents(true);
@@ -20,7 +25,6 @@ MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth
 	}
 }
 
-
 QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
 	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
 }
@@ -29,14 +33,18 @@ void MessageAttachment::setParentMessage(MessageWidget* messageWidget) {
 	_parentMessage = messageWidget;
 }
 
-QString MessageAttachment::attachmentPath() const {
+QString MessageAttachment::attachmentPath() const noexcept {
 	return _attachmentPath;
 }
 
-QString MessageAttachment::attachmentType() const {
+QString MessageAttachment::attachmentType() const noexcept {
 	return _attachmentType;
 }
 
-MessageWidget* MessageAttachment::parentMessage() const {
+MessageWidget* MessageAttachment::parentMessage() const noexcept {
 	return _parentMessage;
+}
+
+QString MessageAttachment::detectMediaType(const QString& filePath) {
+	return QMimeDatabase().mimeTypeForFile(filePath).name();
 }

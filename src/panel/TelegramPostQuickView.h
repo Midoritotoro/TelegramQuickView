@@ -4,24 +4,20 @@
 
 #include "MessageWidget.h"
 #include "MessageMediaViewer.h"
-
-typedef QList<MessageWidget*> MessagesList;
+#include "History.h"
 
 
 class TelegramPostQuickView: public QWidget {
 private:
 	Q_OBJECT
-	int panelWidth;
-	QScrollArea* _chatScrollArea = nullptr;
+	int _panelWidth;
 	QGridLayout* _chatScrollAreaLayout = nullptr;
-	QGridLayout* _grid = nullptr;
-	QWidget* _chatScrollAreaWidget = nullptr;
 	MessageMediaViewer* _messageMediaViewer = nullptr;
 	MessagesList _messagesList;
 public:
 	TelegramPostQuickView(QWidget* parent = nullptr);
 
-	void addMessage(const QString& author, const QString& messageText = "", const QUrlList& attachmentsPaths = {});
+	void makeMessage(const QString& author, const QString& messageText = "", const QUrlList& attachmentsPaths = {});
 
 	[[nodiscard]] const MessagesList& messages() const;
 
