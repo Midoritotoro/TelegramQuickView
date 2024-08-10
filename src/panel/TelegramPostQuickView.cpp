@@ -9,6 +9,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	QWidget(parent)
 {
 	setMouseTracking(true);
+	_messagesHistory = new History();
 
 	int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
@@ -17,7 +18,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	setFixedSize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
-	_messageMediaViewer = new MessageMediaViewer();
+	_messageMediaViewer = new MessageMediaViewer(_messagesHistory);
 
 	QWidget* chatScrollAreaWidget = new QWidget();
 	_chatScrollAreaLayout = new QGridLayout(chatScrollAreaWidget);
@@ -137,6 +138,7 @@ void TelegramPostQuickView::makeMessage(const QString& author, const QString& me
 	_messagesList.append(messageWidget);
 
 	const MessageAttachmentsList& messageAttachmentsList = messageWidget->messageAttachments();
+	_messagesHistory->makeMessage(messageWidget);
 
 	if (messageAttachmentsList.isEmpty())
 		return;
@@ -162,6 +164,6 @@ int TelegramPostQuickView::indexOfMessage(MessageWidget* messageWidget) {
 	return _messagesList.indexOf(messageWidget);
 }
 
-MessageWidget* TelegramPostQuickView::messagetAt(int index) {
+MessageWidget* TelegramPostQuickView::messageAt(int index) {
 	return _messagesList.at(index);
 }

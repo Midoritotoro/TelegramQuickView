@@ -6,9 +6,12 @@
 #include <QApplication>
 #include <QStyle>
 
+#include "History.h"
 
-MessageMediaViewer::MessageMediaViewer(QWidget* parent)
+
+MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent)
 : QWidget(parent)
+, _messagesHistory(messagesHistory)
 {
 	QToolButton* minimizeWindowButton = new QToolButton();
 	QToolButton* maximizeWindowButton = new QToolButton();
@@ -132,8 +135,9 @@ void MessageMediaViewer::toNext() {
 	int messageAttachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = 0; index < messageAttachmentsCount; ++index) {
-		if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0)
+		if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0) {
 			break;
+		}
 
 		MessageAttachment* attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
 
@@ -150,7 +154,28 @@ void MessageMediaViewer::toNext() {
 		}
 	}
 
-	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 1) {
+	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 1) {  // Медиа в текущем сообщении нет, идём к следующему
+		int currentMessageHistoryIndex = _messagesHistory->indexOfMessage(_currentMessage);
+		qDebug() << "currentMessageHistoryIndex: " << currentMessageHistoryIndex;
+		qDebug() << "nextMessageHistoryIndex: " << currentMessageHistoryIndex + 1;
+		qDebug() << "_messagesHistory->messageAt(0): " << _messagesHistory->messageAt(0);
+
+		if (_messagesHistory->messagesWithAttachmentsCount() - currentMessageHistoryIndex > 0) {
+			int nextMessageIndex = currentMessageHistoryIndex + 1;
+			MessageWidget* nextMessage = _messagesHistory->messageAt(nextMessageIndex);
+
+			if (nextMessage) {
+				_currentMessage = nextMessage;
+
+				_currentMessageAttachmentIndex = 0;
+				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+
+				if (_previousAttachment->isHidden())
+					_previousAttachment->show();
+
+				return;
+			}
+		}
 		_nextAttachment->hide();
 	}
 }
@@ -176,7 +201,26 @@ void MessageMediaViewer::toPrevious() {
 			}
 		}
 	}
+
 	if (_currentMessageAttachmentIndex <= 0) {
+		int currentMessageHistoryIndex = _messagesHistory->indexOfMessage(_currentMessage);
+
+		if (currentMessageHistoryIndex > 1) {
+			int previousMessageIndex = currentMessageHistoryIndex - 1;
+			MessageWidget* previousMessage = _messagesHistory->messageAt(previousMessageIndex);
+
+			if (previousMessage) {
+				_currentMessage = previousMessage;
+
+				_currentMessageAttachmentIndex = _currentMessage->attachmentsLength() - 1;
+				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+
+				if (_nextAttachment->isHidden())
+					_nextAttachment->show();
+
+				return;
+			}
+		}
 		_previousAttachment->hide();
 	}
 }

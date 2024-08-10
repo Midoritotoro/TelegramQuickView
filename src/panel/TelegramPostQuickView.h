@@ -7,6 +7,9 @@
 #include "History.h"
 
 
+class History;
+
+
 class TelegramPostQuickView: public QWidget {
 private:
 	Q_OBJECT
@@ -14,6 +17,7 @@ private:
 	QGridLayout* _chatScrollAreaLayout = nullptr;
 	MessageMediaViewer* _messageMediaViewer = nullptr;
 	MessagesList _messagesList;
+	History* _messagesHistory = nullptr;
 public:
 	TelegramPostQuickView(QWidget* parent = nullptr);
 
@@ -22,7 +26,7 @@ public:
 	[[nodiscard]] const MessagesList& messages() const;
 
 	[[nodiscard]] int indexOfMessage(MessageWidget* messageWidget);
-	[[nodiscard]] MessageWidget* messagetAt(int index);
+	[[nodiscard]] MessageWidget* messageAt(int index);
 public Q_SLOTS:
 	void attachmentCliked();
 };

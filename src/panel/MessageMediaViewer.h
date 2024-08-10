@@ -9,6 +9,8 @@
 #include "MessageWidget.h"
 #include <QResizeEvent>
 
+class History;
+
 
 class MessageMediaViewer: public QWidget {
 private:
@@ -18,9 +20,10 @@ private:
 	ClickableLabel* _nextAttachment = nullptr;
 	ClickableLabel* _previousAttachment = nullptr;
 	MessageWidget* _currentMessage = nullptr;
+	History* _messagesHistory = nullptr;
 	int _currentMessageAttachmentIndex = 0;
 public:
-	MessageMediaViewer(QWidget* parent = nullptr);
+	MessageMediaViewer(History* messagesHistory, QWidget* parent = nullptr);
 
 	void openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex);
 

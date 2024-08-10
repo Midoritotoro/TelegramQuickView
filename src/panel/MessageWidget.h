@@ -10,14 +10,14 @@ typedef struct _TelegramMessage {
 	QString author;
 	QString text;
 	MessageAttachmentsList attachments;
-} TelegramMessage, *LPTelegramMessage;
+} TelegramMessage;
 
 
 class MessageWidget: public QWidget {
 private:
 	Q_OBJECT
 	QGridLayout* _messageLayout = nullptr;
-	LPTelegramMessage _telegramMessage = nullptr;
+	TelegramMessage* _telegramMessage = nullptr;
 public:
 	MessageWidget(const QString& author, QWidget* parent = nullptr);
 

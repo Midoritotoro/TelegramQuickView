@@ -34,13 +34,18 @@ int main(int argc, char* argv[])
 
     QString text = "Test very long message. Tet very long message. Test very long message.";
 
+    for (int index = 0; index < 50; index++) {
+        view.makeMessage("Username1", text);
+    }
+
     view.makeMessage("Username1", text);
     view.makeMessage("Username1", "", QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
     view.makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
     view.makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
     view.makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
-    for (int index = 0; index < 100; index++) {
-        view.makeMessage(text);
+
+    for (int index = 0; index < 50; index++) {
+        view.makeMessage("Username1", text);
     }
 
     view.show();
