@@ -87,7 +87,9 @@ int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) const
 }
 
 MessageAttachment* MessageWidget::attachmentAt(int index) const noexcept {
-	return _telegramMessage->attachments.at(index);
+	if (index >= 0 && attachmentsLength() > index)
+		return _telegramMessage->attachments.at(index);
+	return nullptr;
 }
 
 int MessageWidget::attachmentsLength() const noexcept {

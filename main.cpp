@@ -38,6 +38,8 @@ int main(int argc, char* argv[])
         view.makeMessage("Username1", text);
     }
 
+    QList<QString> t;
+
     view.makeMessage("Username1", text);
     view.makeMessage("Username1", "", QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
     view.makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });

@@ -25,12 +25,13 @@ private:
 public:
 	MessageMediaViewer(History* messagesHistory, QWidget* parent = nullptr);
 
+	void updateMediaNavigationButtons();
 	void openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex);
 
 	[[nodiscard]] bool isNextMediaAvailable();
 
-	[[nodiscard]] int nextMessageWithAttachmentIndex(int currentIndex) const;
-	[[nodiscard]] int previousMessageWithAttachmentIndex(int currentIndex) const;
+	[[nodiscard]] int nextMessageWithAttachmentsIndex(int currentIndex) const noexcept;
+	[[nodiscard]] int previousMessageWithAttachmentsIndex(int currentIndex) const noexcept;
 
 	void goToPreviousMessage();
 	void goToNextMessage();
