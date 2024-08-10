@@ -30,8 +30,10 @@ public:
 	[[nodiscard]] bool isNextMediaAvailable();
 
 	[[nodiscard]] int nextMessageWithAttachmentIndex(int currentIndex) const;
-	[[nodiscard]] int prevMessageWithAttachmentIndex(int currentIndex) const;
+	[[nodiscard]] int previousMessageWithAttachmentIndex(int currentIndex) const;
 
+	void goToPreviousMessage();
+	void goToNextMessage();
 public Q_SLOTS:
 	void toNext();
 	void toPrevious();
