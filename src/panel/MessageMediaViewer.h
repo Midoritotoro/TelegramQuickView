@@ -23,6 +23,9 @@ public:
 	MessageMediaViewer(QWidget* parent = nullptr);
 
 	void openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex);
+
+	[[nodiscard]] bool isNextMediaAvailable();
+public Q_SLOTS:
 	void toNext();
 	void toPrevious();
 protected:

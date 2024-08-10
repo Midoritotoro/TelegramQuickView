@@ -82,3 +82,7 @@ int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) {
 MessageAttachment* MessageWidget::attachmentAt(int index) {
 	return _messageAttachmentsList.at(index);
 }
+
+int MessageWidget::attachmentsLength() {
+	return _messageAttachmentsList.length();
+}

@@ -25,4 +25,5 @@ public:
 
 	[[nodiscard]] int indexOfAttachment(MessageAttachment* messageAttachment);
 	[[nodiscard]] MessageAttachment* attachmentAt(int index);
+	[[nodiscard]] int attachmentsLength();
 };

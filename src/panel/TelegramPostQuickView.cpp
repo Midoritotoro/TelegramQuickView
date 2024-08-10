@@ -136,6 +136,8 @@ void TelegramPostQuickView::addMessage(const QString& messageText, const QUrlLis
 	messageWidget->addMessageText(messageText);
 
 	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
+	_messagesList.append(messageWidget);
+
 	const MessageAttachmentsList& messageAttachmentsList = messageWidget->getMessageAttachments();
 
 	if (messageAttachmentsList.isEmpty())
@@ -152,4 +154,16 @@ void TelegramPostQuickView::attachmentCliked() {
 	_messageMediaViewer->show();
 	_messageMediaViewer->openMessageAttachment(attachmentParentMessage, attachmentParentMessage->indexOfAttachment(attachment));
 	showMinimized();
+}
+
+const MessagesList& TelegramPostQuickView::messages() const {
+	return _messagesList;
+}
+
+int TelegramPostQuickView::indexOfMessage(MessageWidget* messageWidget) {
+	return _messagesList.indexOf(messageWidget);
+}
+
+MessageWidget* TelegramPostQuickView::messagetAt(int index) {
+	return _messagesList.at(index);
 }
