@@ -28,6 +28,10 @@ public:
 	void openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex);
 
 	[[nodiscard]] bool isNextMediaAvailable();
+
+	[[nodiscard]] int nextMessageWithAttachmentIndex(int currentIndex) const;
+	[[nodiscard]] int prevMessageWithAttachmentIndex(int currentIndex) const;
+
 public Q_SLOTS:
 	void toNext();
 	void toPrevious();

@@ -131,6 +131,20 @@ bool MessageMediaViewer::isNextMediaAvailable() {
 	return true;
 }
 
+int MessageMediaViewer::nextMessageWithAttachmentIndex(int currentIndex) const {
+	for (int i = currentIndex + 1; i < _messagesHistory->count(); ++i)
+		if (_messagesHistory->messageAt(i)->hasAttachments())
+			return i;
+	return -1;
+}
+
+int MessageMediaViewer::prevMessageWithAttachmentIndex(int currentIndex) const {
+	for (int i = currentIndex - 1; i >= 0; --i)
+		if (_messagesHistory->messageAt(i)->hasAttachments())
+			return i;
+	return -1;
+}
+
 void MessageMediaViewer::toNext() {
 	int messageAttachmentsCount = _currentMessage->attachmentsLength();
 
@@ -155,25 +169,22 @@ void MessageMediaViewer::toNext() {
 	}
 
 	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 1) {  // Медиа в текущем сообщении нет, идём к следующему
-		int currentMessageHistoryIndex = _messagesHistory->indexOfMessage(_currentMessage);
-		qDebug() << "currentMessageHistoryIndex: " << currentMessageHistoryIndex;
-		qDebug() << "nextMessageHistoryIndex: " << currentMessageHistoryIndex + 1;
-		qDebug() << "_messagesHistory->messageAt(0): " << _messagesHistory->messageAt(0);
+		int currentMessageHistoryIndex = nextMessageWithAttachmentIndex(_messagesHistory->indexOfMessage(_currentMessage));
+		if (currentMessageHistoryIndex != -1) {
+			if (currentMessageHistoryIndex >= 0) {
+				MessageWidget* nextMessage = _messagesHistory->messageAt(currentMessageHistoryIndex);
 
-		if (_messagesHistory->messagesWithAttachmentsCount() - currentMessageHistoryIndex > 0) {
-			int nextMessageIndex = currentMessageHistoryIndex + 1;
-			MessageWidget* nextMessage = _messagesHistory->messageAt(nextMessageIndex);
+				if (nextMessage) {
+					_currentMessage = nextMessage;
 
-			if (nextMessage) {
-				_currentMessage = nextMessage;
+					_currentMessageAttachmentIndex = 0;
+					_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
 
-				_currentMessageAttachmentIndex = 0;
-				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+					if (_previousAttachment->isHidden())
+						_previousAttachment->show();
 
-				if (_previousAttachment->isHidden())
-					_previousAttachment->show();
-
-				return;
+					return;
+				}
 			}
 		}
 		_nextAttachment->hide();
@@ -203,22 +214,22 @@ void MessageMediaViewer::toPrevious() {
 	}
 
 	if (_currentMessageAttachmentIndex <= 0) {
-		int currentMessageHistoryIndex = _messagesHistory->indexOfMessage(_currentMessage);
+		int currentMessageHistoryIndex = prevMessageWithAttachmentIndex(_messagesHistory->indexOfMessage(_currentMessage));
+		if (currentMessageHistoryIndex != -1) {
+			if (currentMessageHistoryIndex >= 0) {
+				MessageWidget* previousMessage = _messagesHistory->messageAt(currentMessageHistoryIndex);
 
-		if (currentMessageHistoryIndex > 1) {
-			int previousMessageIndex = currentMessageHistoryIndex - 1;
-			MessageWidget* previousMessage = _messagesHistory->messageAt(previousMessageIndex);
+				if (previousMessage) {
+					_currentMessage = previousMessage;
 
-			if (previousMessage) {
-				_currentMessage = previousMessage;
+					_currentMessageAttachmentIndex = _currentMessage->attachmentsLength() - 1;
+					_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
 
-				_currentMessageAttachmentIndex = _currentMessage->attachmentsLength() - 1;
-				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+					if (_nextAttachment->isHidden())
+						_nextAttachment->show();
 
-				if (_nextAttachment->isHidden())
-					_nextAttachment->show();
-
-				return;
+					return;
+				}
 			}
 		}
 		_previousAttachment->hide();

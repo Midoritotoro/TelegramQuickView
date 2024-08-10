@@ -93,3 +93,7 @@ MessageAttachment* MessageWidget::attachmentAt(int index) const noexcept {
 int MessageWidget::attachmentsLength() const noexcept {
 	return _telegramMessage->attachments.length();
 }
+
+bool MessageWidget::hasAttachments() const noexcept {
+	return !_telegramMessage->attachments.isEmpty();
+}

@@ -30,4 +30,5 @@ public:
 	[[nodiscard]] int indexOfAttachment(MessageAttachment* messageAttachment) const noexcept;
 	[[nodiscard]] MessageAttachment* attachmentAt(int index) const noexcept;
 	[[nodiscard]] int attachmentsLength() const noexcept;
+	[[nodiscard]] bool hasAttachments() const noexcept;
 };

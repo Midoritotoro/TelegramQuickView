@@ -19,10 +19,10 @@ MessageWidget* History::messageAt(int index) const noexcept {
 int History::messagesWithAttachmentsCount() const noexcept {
 	int messagesWithAttachmentsCount = 0;
 
-	for (int index = 0; index < count(); ++index) {
-		if (messageAt(index)->attachmentsLength() > 0)
+	for (int index = 0; index < count(); ++index)
+		if (messageAt(index)->hasAttachments())
 			++messagesWithAttachmentsCount;
-	}
+
 	return messagesWithAttachmentsCount;
 }
 

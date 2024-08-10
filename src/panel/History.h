@@ -3,6 +3,7 @@
 #include <QList>
 
 class MessageWidget;
+
 typedef QList<MessageWidget*> MessagesList;
 
 
@@ -13,7 +14,10 @@ public:
 	void makeMessage(MessageWidget* messageWidget);
 
 	[[nodiscard]] int indexOfMessage(MessageWidget* message) const noexcept;
+	[[nodiscard]] int indexOfMessageWithAttachments(MessageWidget* message) const noexcept;
+
 	[[nodiscard]] MessageWidget* messageAt(int index) const noexcept;
+
 	[[nodiscard]] int messagesWithAttachmentsCount() const noexcept;
 	[[nodiscard]] int count() const noexcept;
 };
