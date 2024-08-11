@@ -1,4 +1,4 @@
-#include "MessageMediaViewer.h"
+ï»¿#include "MessageMediaViewer.h"
 
 #include <QToolButton>
 #include <QDir>
@@ -20,7 +20,7 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
-		"background-color: rgba(35,36,37, 0.9)\n"
+		"background-color: rgba(35,36,37, 90)\n"
 		"}");
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
@@ -70,18 +70,16 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 
 	QString arrowPath = cssDir.absolutePath() + "/arrow_right.png";
 
-	_nextAttachment = new ClickableLabel(this);
-	_previousAttachment = new ClickableLabel(this);
+	_nextAttachment = new MediaNavigationLabel(this);
+	_previousAttachment = new MediaNavigationLabel(this);
 
 	_nextAttachment->setFixedSize(50, 50);
 	_previousAttachment->setFixedSize(50, 50);
 	
 	_nextAttachment->setBackgroundRole(QPalette::Dark);
 	_nextAttachment->setScaledContents(true);
-	_nextAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath)));
+	_nextAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath).scaled(_nextAttachment->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 	_nextAttachment->setCursor(Qt::PointingHandCursor);
-	QRegion region1(QRect(0, 0, _nextAttachment->width() - _nextAttachment->width() * 0.01, _nextAttachment->height() - _nextAttachment->height() * 0.01), QRegion::Ellipse);
-	_nextAttachment->setMask(region1);
 
 	_previousAttachment->setBackgroundRole(QPalette::Dark);
 	_previousAttachment->setScaledContents(true);
@@ -89,13 +87,11 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	QTransform transform;
 	transform.rotate(180);
 
-	_previousAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath)).transformed(transform));
-	QRegion region2(QRect(0, 0, _previousAttachment->width() - _previousAttachment->width() * 0.01, _previousAttachment->height() - _previousAttachment->height() * 0.01), QRegion::Ellipse);
-	_previousAttachment->setMask(region2);
+	_previousAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath).scaled(_previousAttachment->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation)).transformed(transform));
 
-	_nextAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0.8)\n");
+	_nextAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0);\n");
 
-	_previousAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0.8)\n");
+	_previousAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0);\n");
 
 	_previousAttachment->move(_nextAttachment->width(), height() / 2);
 	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
@@ -117,20 +113,14 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 }
 
 void MessageMediaViewer::updateMediaNavigationButtons() {
-	qDebug() << (bool)(nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1);
-	qDebug() << (bool)(_currentMessage->attachmentAt(_currentMessageAttachmentIndex + 1) == nullptr);
-
-	qDebug() << (bool)(previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1);
-	qDebug() << (bool)(_currentMessage->attachmentAt(_currentMessageAttachmentIndex - 1) == nullptr);
-
 	if (nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex + 1) == nullptr
-	) // Âïåðåäè íåò ñîîáùåíèé ñ ìåäèà
+	) // Ð’Ð¿ÐµÑ€ÐµÐ´Ð¸ Ð½ÐµÑ‚ ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ð¹ Ñ Ð¼ÐµÐ´Ð¸Ð°
 		_nextAttachment->hide();
 
 	if (previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex - 1) == nullptr
-	) // Ïîçàäè íåò ñîîáùåíèé ñ ìåäèà
+	) // ÐŸÐ¾Ð·Ð°Ð´Ð¸ Ð½ÐµÑ‚ ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ð¹ Ñ Ð¼ÐµÐ´Ð¸Ð°
 		_previousAttachment->hide();
 }
 
@@ -232,7 +222,7 @@ void MessageMediaViewer::toNext() {
 	}
 
 	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 1) 
-		// Ìåäèà â òåêóùåì ñîîáùåíèè íåò, èä¸ì ê ñëåäóþùåìó
+		// ÐœÐµÐ´Ð¸Ð° Ð² Ñ‚ÐµÐºÑƒÑ‰ÐµÐ¼ ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ð¸ Ð½ÐµÑ‚, Ð¸Ð´Ñ‘Ð¼ Ðº ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÐµÐ¼Ñƒ
 		goToNextMessage();
 }
 
@@ -259,7 +249,7 @@ void MessageMediaViewer::toPrevious() {
 	}
 
 	if (_currentMessageAttachmentIndex <= 0)
-		// Ìåäèà â òåêóùåì ñîîáùåíèè íåò, èä¸ì ê ïðåäûäóùåìó
+		// ÐœÐµÐ´Ð¸Ð° Ð² Ñ‚ÐµÐºÑƒÑ‰ÐµÐ¼ ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ð¸ Ð½ÐµÑ‚, Ð¸Ð´Ñ‘Ð¼ Ðº Ð¿Ñ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰ÐµÐ¼Ñƒ
 		goToPreviousMessage();
 }
 
