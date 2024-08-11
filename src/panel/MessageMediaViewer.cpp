@@ -7,6 +7,7 @@
 #include <QStyle>
 
 #include "History.h"
+#include "NavigationButton.h"
 
 
 MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent)
@@ -20,7 +21,7 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
-		"background-color: rgba(35,36,37, 90)\n"
+		"background-color: rgba(35, 36, 37, 60)\n"
 		"}");
 
 	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
@@ -70,28 +71,20 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 
 	QString arrowPath = cssDir.absolutePath() + "/arrow_right.png";
 
-	_nextAttachment = new MediaNavigationLabel(this);
-	_previousAttachment = new MediaNavigationLabel(this);
+	_nextAttachment = new NavigationButton(this);
+	_previousAttachment = new NavigationButton(this);
 
 	_nextAttachment->setFixedSize(50, 50);
 	_previousAttachment->setFixedSize(50, 50);
 	
-	_nextAttachment->setBackgroundRole(QPalette::Dark);
-	_nextAttachment->setScaledContents(true);
-	_nextAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath).scaled(_nextAttachment->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+	_nextAttachment->setIcon(QIcon(arrowPath));
 	_nextAttachment->setCursor(Qt::PointingHandCursor);
 
-	_previousAttachment->setBackgroundRole(QPalette::Dark);
-	_previousAttachment->setScaledContents(true);
-	_previousAttachment->setCursor(Qt::PointingHandCursor);
 	QTransform transform;
 	transform.rotate(180);
-
-	_previousAttachment->setPixmap(QPixmap::fromImage(QImage(arrowPath).scaled(_previousAttachment->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation)).transformed(transform));
-
-	_nextAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0);\n");
-
-	_previousAttachment->setStyleSheet("background-color: rgba(35, 36, 37, 0);\n");
+	
+	_previousAttachment->setIcon(QIcon(QPixmap(arrowPath).transformed(transform)));
+	_previousAttachment->setCursor(Qt::PointingHandCursor);
 
 	_previousAttachment->move(_nextAttachment->width(), height() / 2);
 	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
@@ -108,8 +101,8 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 		isFullScreen() ? showNormal() : showFullScreen();
 		});
 
-	connect(_nextAttachment, &ClickableLabel::clicked, this, &MessageMediaViewer::toNext);
-	connect(_previousAttachment, &ClickableLabel::clicked, this, &MessageMediaViewer::toPrevious);
+	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::toNext);
+	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::toPrevious);
 }
 
 void MessageMediaViewer::updateMediaNavigationButtons() {
@@ -134,7 +127,6 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
 	
 	showFullScreen();
-	
 	_mediaPlayer->showFullScreen();
 }
 

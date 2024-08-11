@@ -18,6 +18,7 @@
 #include "src/settings/MainWindow.h"
 #include "src/panel/TelegramPostQuickView.h"
 
+
 int main(int argc, char* argv[])
 {
     AllocConsole();
@@ -30,6 +31,7 @@ int main(int argc, char* argv[])
         return -1;*/
 
     QApplication app(argc, argv);
+    
     TelegramPostQuickView* view = new TelegramPostQuickView();
 
     QString text = "Test very long message. Tet very long message. Test very long message.";
@@ -38,9 +40,6 @@ int main(int argc, char* argv[])
         view->makeMessage("Username1", text);
     }
 
-    QList<QString> t;
-
-    view->makeMessage("Username1", text);
     view->makeMessage("Username1", "", QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
     view->makeMessage("Username1", text);
