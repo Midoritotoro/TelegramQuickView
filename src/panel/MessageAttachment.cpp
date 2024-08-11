@@ -23,6 +23,13 @@ MessageAttachment::MessageAttachment(QString attachmentPath, int attachmentWidth
 		attachmentImage = attachmentImage.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 		setPixmap(QPixmap::fromImage(attachmentImage));
 	}
+	else if (_attachmentType.contains("video")) {
+		QImage attachmentImage(attachmentWidth, attachmentWidth, QImage::Format_ARGB32_Premultiplied);
+		attachmentImage.fill(Qt::white);
+		QSize size = getMinimumSizeWithAspectRatio(attachmentImage.size(), attachmentWidth);
+		attachmentImage = attachmentImage.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		setPixmap(QPixmap::fromImage(attachmentImage));
+	}
 }
 
 QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {

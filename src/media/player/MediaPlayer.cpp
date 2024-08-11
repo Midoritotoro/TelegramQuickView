@@ -24,7 +24,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		"background-color: rgba(1, 0, 0, 20);\n"
 	"}");
 
-	_videoScene = new	QGraphicsScene();
+	_videoScene = new QGraphicsScene();
 	_videoView = new QGraphicsView(_videoScene);
 	_videoItem = new QGraphicsVideoItem();
 

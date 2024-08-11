@@ -8,101 +8,69 @@
 
 #include "History.h"
 #include "NavigationButton.h"
+#include "../media/WidgetsHider.h"
+#include <QShortcut>
+#include <QKeySequence>
 
 
 MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent)
 : QWidget(parent)
 , _messagesHistory(messagesHistory)
 {
-	QToolButton* minimizeWindowButton = new QToolButton();
-	QToolButton* maximizeWindowButton = new QToolButton();
-	QToolButton* closeWindowButton = new QToolButton();
-
+	setMouseTracking(true);
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
 		"background-color: rgba(35, 36, 37, 60)\n"
 		"}");
 
-	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
-	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
-	QPixmap maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
+	QString currentPath = QCoreApplication::applicationDirPath();
+	QDir cssDir(currentPath + "/../../assets/images");
 
-	minimizeWindowButton->setIcon(minPix);
-	maximizeWindowButton->setIcon(maxPix);
-	closeWindowButton->setIcon(closePix);
-
-	minimizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-	closeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-	maximizeWindowButton->setAttribute(Qt::WA_NoSystemBackground);
-
-	minimizeWindowButton->setStyleSheet("background-color: transparent;");
-	closeWindowButton->setStyleSheet("background-color: transparent;");
-	maximizeWindowButton->setStyleSheet("background-color: transparent;");
+	QString arrowPath = cssDir.absolutePath() + "/arrow_right.png";
 
 	_grid = new QGridLayout(this);
 	_mediaPlayer = new MediaPlayer();
 	_mediaPlayer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	QWidget* toolWidget = new QWidget();
-	QGridLayout* toolLayout = new QGridLayout(toolWidget);
-	toolWidget->setObjectName("toolWidget");
-	toolWidget->setStyleSheet("#toolWidget{\n"
-		"background: transparent;\n"
-		"}");
-	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-	toolWidget->setContentsMargins(0, 0, 0, 0);
-	toolLayout->setContentsMargins(0, 0, 0, 0);
-	toolLayout->setSpacing(0);
-
-	toolLayout->addWidget(minimizeWindowButton, 0, toolLayout->columnCount(), 1, 1, Qt::AlignRight | Qt::AlignTop);
-	toolLayout->addWidget(maximizeWindowButton, 0, toolLayout->columnCount(), 1, 1, Qt::AlignRight | Qt::AlignTop);
-	toolLayout->addWidget(closeWindowButton, 0, toolLayout->columnCount(), 1, 1, Qt::AlignRight | Qt::AlignTop);
-
-	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 	_grid->setSpacing(0);
 	_grid->setContentsMargins(0, 0, 0, 0);
 	setContentsMargins(0, 0, 0, 0);
 
 	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1);
 
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../assets/images");
-
-	QString arrowPath = cssDir.absolutePath() + "/arrow_right.png";
+	QTransform transform;
+	transform.rotate(180);
 
 	_nextAttachment = new NavigationButton(this);
 	_previousAttachment = new NavigationButton(this);
 
 	_nextAttachment->setFixedSize(50, 50);
 	_previousAttachment->setFixedSize(50, 50);
-	
+
 	_nextAttachment->setIcon(QIcon(arrowPath));
 	_nextAttachment->setCursor(Qt::PointingHandCursor);
 
-	QTransform transform;
-	transform.rotate(180);
-	
 	_previousAttachment->setIcon(QIcon(QPixmap(arrowPath).transformed(transform)));
 	_previousAttachment->setCursor(Qt::PointingHandCursor);
 
-	_previousAttachment->move(_nextAttachment->width(), height() / 2);
-	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
-
-	_nextAttachment->show();
-	_previousAttachment->show();
-	setContentsMargins(0, 0, 0, 0);
-
 	_mediaPlayer->setVisible(false);
 
-	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
-	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
-	connect(maximizeWindowButton, &QToolButton::clicked, this, [this]() {
-		isFullScreen() ? showNormal() : showFullScreen();
-		});
+	_previousAttachment->setVisible(true);
+	_nextAttachment->setVisible(true);
 
-	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::toNext);
-	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::toPrevious);
+	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
+	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
+	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
+	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
+
+	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment });
+	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList, true);
+	widgetsHider.SetInactivityDuration(1000);
+
+	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
+	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 }
 
 void MessageMediaViewer::updateMediaNavigationButtons() {
@@ -128,10 +96,6 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 	
 	showFullScreen();
 	_mediaPlayer->showFullScreen();
-}
-
-bool MessageMediaViewer::isNextMediaAvailable() {
-	return true;
 }
 
 int MessageMediaViewer::nextMessageWithAttachmentsIndex(int currentIndex) const noexcept {
@@ -190,7 +154,7 @@ void MessageMediaViewer::goToNextMessage() {
 	updateMediaNavigationButtons();
 }
 
-void MessageMediaViewer::toNext() {
+void MessageMediaViewer::nextAttachmentButton_clicked() {
 	int messageAttachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = 0; index < messageAttachmentsCount; ++index) {
@@ -218,7 +182,7 @@ void MessageMediaViewer::toNext() {
 		goToNextMessage();
 }
 
-void MessageMediaViewer::toPrevious() {
+void MessageMediaViewer::previousAttachmentButton_clicked() {
 	int messageAttachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = messageAttachmentsCount; index >= 0; --index) {
