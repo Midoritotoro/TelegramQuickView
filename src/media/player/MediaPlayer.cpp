@@ -314,7 +314,7 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 
-	if (_currentImageItem) {
+	if (_currentImageItem != nullptr) {
 
 		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
 			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
@@ -383,7 +383,7 @@ void MediaPlayer::setSource(const QUrl& source) {
 	QString mediaType = detectMediaType(sourcePath);
 	if (mediaType.contains("video")) {
 		QList<QGraphicsItem*> items = _videoScene->items();
-		for (QGraphicsItem* item : items) {
+		foreach(QGraphicsItem* item, items) {
 			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
 				_videoScene->removeItem(item);
 				delete item;
@@ -395,8 +395,11 @@ void MediaPlayer::setSource(const QUrl& source) {
 		play();
 	}
 	else if (mediaType.contains("image")) {
+		if (_mediaPlayer->PlayingState)
+			stop();
+
 		QList<QGraphicsItem*> items = _videoScene->items();
-		for (QGraphicsItem* item : items) {
+		foreach (QGraphicsItem* item, items) {
 			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
 				_videoScene->removeItem(item);
 				delete item;
