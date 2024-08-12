@@ -92,8 +92,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	//	"}");
 	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 	toolWidget->setContentsMargins(0, 0, 0, 0);
-	toolLayout->setContentsMargins(0, 0, 0, 0);
-	toolLayout->setSpacing(0);
+	//toolLayout->setContentsMargins(0, 0, 0, 0);
+	//toolLayout->setSpacing(0);
 
 	toolLayout->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
 	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
@@ -120,8 +120,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	grid->addWidget(chatScrollArea, grid->rowCount(), 0, 1, 1);
 
 	QWidgetList widgetsList = QWidgetList({ chatScrollArea->verticalScrollBar() });
-	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList, true);
-	widgetsHider.SetInactivityDuration(1000);
+	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
+	widgetsHider->SetInactivityDuration(1000);
 
 	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
 	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);

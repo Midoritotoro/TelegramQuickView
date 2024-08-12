@@ -218,11 +218,11 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	});
 
 	QWidgetList widgetsList = QWidgetList({ _videoSlider, volumeClickableLabel, _videoStateWidget, _videoTimeLabel });
-	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList);
-	widgetsHider.SetInactivityDuration(3000);
+	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, false);
+	widgetsHider->SetInactivityDuration(3000);
 
-	connect(&widgetsHider, &WidgetsHider::widgetsShowed, this, &MediaPlayer::adjustBottomWidgets);
-	connect(&widgetsHider, &WidgetsHider::widgetsHidden, this, &MediaPlayer::adjustBottomWidgets);
+	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MediaPlayer::adjustBottomWidgets);
+	connect(widgetsHider, &WidgetsHider::widgetsHidden, this, &MediaPlayer::adjustBottomWidgets);
 
 	_videoSlider->hide();
 	volumeClickableLabel->hide();
@@ -317,10 +317,8 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 			// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
 
 			qreal scale = qMin(_videoView->width() / (qreal)_currentImageItem->pixmap().width(), _videoView->height() / (qreal)_currentImageItem->pixmap().height());
-
 			_currentImageItem->setScale(scale);
 		}
-
 		_currentImageItem->setPos((_videoView->width() - _currentImageItem->pixmap().width() * _currentImageItem->scale()) / 2, (_videoView->height() - _currentImageItem->pixmap().height() * _currentImageItem->scale()) / 2);
 	}
 
@@ -369,6 +367,15 @@ QString MediaPlayer::detectMediaType(const QString& filePath) {
 	return QMimeDatabase().mimeTypeForFile(filePath).name();
 }
 
+void MediaPlayer::clearScene() {
+	QList<QGraphicsItem*> items = _videoScene->items();
+	foreach(QGraphicsItem * item, items) {
+		if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
+			_videoScene->removeItem(item);
+		}
+	}
+}
+
 void MediaPlayer::setSource(const QUrl& source) {
 	QString sourcePath;
 	if (source.path().at(0) == "/"[0])
@@ -377,33 +384,19 @@ void MediaPlayer::setSource(const QUrl& source) {
 		sourcePath = source.path();
 
 	QString mediaType = detectMediaType(sourcePath);
-	if (mediaType.contains("video")) {
-		qDebug() << "Video";
-		if (_mediaPlayer->PlayingState)
-			stop();
 
-		QList<QGraphicsItem*> items = _videoScene->items();
-		foreach(QGraphicsItem* item, items) {
-			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
-				_videoScene->removeItem(item);
-			}
-		}
+	if (_mediaPlayer->PlayingState)
+		stop();
+
+	if (mediaType.contains("video")) {
+		clearScene();
 		_containerWidget->show();
 		_mediaPlayer->setSource(source);
 		_videoItem->setSize(QSize(QApplication::primaryScreen()->availableGeometry().width(), QApplication::primaryScreen()->availableGeometry().height()));
 		play();
 	}
 	else if (mediaType.contains("image")) {
-		qDebug() << "Imageeee";
-		if (_mediaPlayer->PlayingState)
-			stop();
-
-		QList<QGraphicsItem*> items = _videoScene->items();
-		foreach (QGraphicsItem* item, items) {
-			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
-				_videoScene->removeItem(item);
-			}
-		}
+		clearScene();
 		_containerWidget->hide();
 		QPixmap pixmap(sourcePath);
 
@@ -418,12 +411,10 @@ void MediaPlayer::setSource(const QUrl& source) {
 			// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
 
 			qreal scale = qMin(_videoView->width() / (qreal)imageWidth, _videoView->height() / (qreal)imageHeight);
-
 			_currentImageItem->setScale(scale);
 		}
 
 		_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2, (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
-
 		_videoScene->addItem(_currentImageItem);
 	}
 }

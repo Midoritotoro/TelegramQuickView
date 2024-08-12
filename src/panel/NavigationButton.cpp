@@ -651,3 +651,5 @@ void NavigationButton::updateHoverControl(const QPoint& _pos)
     if (hoverControl_ != lastControl)
         update();
 }
+
+

@@ -66,8 +66,8 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 
 	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment });
-	WidgetsHider& widgetsHider = WidgetsHider::Instance(widgetsList, true);
-	widgetsHider.SetInactivityDuration(1000);
+	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
+	widgetsHider->SetInactivityDuration(1000);
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
@@ -91,7 +91,6 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 
 	updateMediaNavigationButtons();
 
-	qDebug() << _currentMessage->attachmentsLength();
 	_mediaPlayer->setVisible(true);
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
 	

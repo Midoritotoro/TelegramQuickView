@@ -15,11 +15,6 @@ class WidgetsHider : public QObject
 public:
     using DurationT = int;
 
-    static inline WidgetsHider& Instance(QWidgetList& qWidgetList, bool fadeInOutAnimation = false) {
-        static WidgetsHider i(qWidgetList, fadeInOutAnimation);
-        return i;
-    }
-
     explicit inline WidgetsHider(QWidgetList& qWidgetList, bool fadeInOutAnimation) : _inactivityDuration{ DurationT{} },
         _qWidgetList(qWidgetList), _fadeInOutAnimation(fadeInOutAnimation) 
     {
@@ -85,9 +80,8 @@ private:
         {
             if (_fadeInOutAnimation)
                 Show ? FadeOutAnimation(widget) : FadeInAnimation(widget);
-            else {
+            else
                 widget->setVisible(Show);
-            }
         }
        Show ? emit widgetsShowed() : emit widgetsHidden();
     }

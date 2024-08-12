@@ -21,6 +21,7 @@
 #include "./VideoStateWidget.h"
 #include <QDialog>
 
+
 class MediaPlayer : public QWidget
 {
 private:
@@ -46,6 +47,7 @@ public:
 	void adjustBottomWidgets();
 
 	[[nodiscard]] static QString detectMediaType(const QString& filePath);
+	void clearScene();
 protected:
 	void videoClicked();
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
