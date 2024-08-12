@@ -143,7 +143,7 @@ void MessageMediaViewer::goToNextMessage() {
 
 			if (nextMessage) {
 				_currentMessage = nextMessage;
-
+				
 				_currentMessageAttachmentIndex = 0;
 				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
 
@@ -159,15 +159,15 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 	int messageAttachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = 0; index < messageAttachmentsCount; ++index) {
-		if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0) {
+		if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0)
 			break;
-		}
 
 		MessageAttachment* attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
 
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (messageAttachmentsCount - (index + 1) > 0) {
 				_currentMessageAttachmentIndex = index + 1;
+				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
 				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
 
 				if (_previousAttachment->isHidden())
@@ -195,6 +195,7 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (index - 1 >= 0) {
 				_currentMessageAttachmentIndex = index - 1;
+				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
 				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
 
 				if (_nextAttachment->isHidden())

@@ -32,29 +32,35 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
     
-    TelegramPostQuickView* view = new TelegramPostQuickView();
+    //TelegramPostQuickView* view = new TelegramPostQuickView();
 
-    QString text = "Test very long message. Tet very long message. Test very long message.";
+    //QString text = "Test very long message. Tet very long message. Test very long message.";
 
-    for (int index = 0; index < 3; index++) {
-        view->makeMessage("Username1", text);
-    }
+    //for (int index = 0; index < 3; index++) {
+    //    view->makeMessage("Username1", text);
+    //}
 
-    view->makeMessage("Username1", "", QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
-    view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
-    view->makeMessage("Username1", text);
-    view->makeMessage("Username1", text);
-    view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
-    view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
+    //view->makeMessage("Username1", "", QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
+    //view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
+    //view->makeMessage("Username1", text);
+    //view->makeMessage("Username1", text);
+    //view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
+    //view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
 
-    for (int index = 0; index < 10; index++) {
-        view->makeMessage("Username1", text);
-    }
+    //for (int index = 0; index < 10; index++) {
+    //    view->makeMessage("Username1", text);
+    //}
 
     //for (int index = 0; index < 10; index++) {
     //    view->makeMessage("Username1", "", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
     //}
+    MediaPlayer* mediaPlayer = new MediaPlayer();
+    qDebug() << "rrr";
 
-    view->show();
+    mediaPlayer->show();
+       // mediaPlayer->setSource(QUrl::fromLocalFile("C:/Users/danya/Downloads/videoRes.mp4"));
+    //mediaPlayer->setSource(QUrl::fromLocalFile("C:/Users/danya/Downloads/test4.jpg"));
+    mediaPlayer->setSource(QUrl::fromLocalFile("C:/Users/danya/Downloads/videoRes.mp4"));
+    //view->show();
     return app.exec();
 }

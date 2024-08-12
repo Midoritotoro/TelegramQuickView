@@ -57,7 +57,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	QString repeatImagePath = assetsDir.absolutePath() + "/repeat.png";
 
 	ClickableLabel* volumeClickableLabel = new VolumeClickableLabel(speakerImagePath, _audioSlider);
-	volumeClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
+	volumeClickableLabel->setFixedSize(screenWidth / 40, screenWidth / 40);
 	_audioSlider->setRange(0, 100);
 	gridLayout->setContentsMargins(0, 0, 0, 0);
 	gridLayout->setSpacing(0);
@@ -65,7 +65,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_videoTimeLabel = new QLabel();
 	_videoTimeLabel->setStyleSheet("background-color: transparent");
 	_videoTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
-	_videoTimeLabel->setFixedSize(screenWidth / 30, screenHeight / 60);
+	_videoTimeLabel->setFixedSize(screenWidth / 30, screenWidth / 40);
 
 	ClickableLabel* videoStopClickableLabel = new ClickableLabel();
 	ClickableLabel* videoPlayClickableLabel = new ClickableLabel();
@@ -93,21 +93,18 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	videoPlayClickableLabel->setStyleSheet("background-color: transparent");
 	videoRepeatClickableLabel->setStyleSheet("background-color: transparent");
 
-	videoStopClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
-	videoPlayClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
-	videoRepeatClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
+	videoStopClickableLabel->setFixedSize(screenWidth / 40, screenWidth / 40);
+	videoPlayClickableLabel->setFixedSize(screenWidth / 40, screenWidth / 40);
+	videoRepeatClickableLabel->setFixedSize(screenWidth / 40, screenWidth / 40);
 
 	videoStopClickableLabel->setAttribute(Qt::WA_NoSystemBackground);
 	videoPlayClickableLabel->setAttribute(Qt::WA_NoSystemBackground);
 	videoRepeatClickableLabel->setAttribute(Qt::WA_NoSystemBackground);
 
-	videoStopClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
-	videoPlayClickableLabel->setFixedSize(screenWidth / 60, screenHeight / 40);
-
 	_videoStateWidget = new VideoStateWidget(videoPlayClickableLabel, videoStopClickableLabel, videoRepeatClickableLabel);
 
 	_videoStateWidget->setStyleSheet("background-color: transparent");
-	_videoStateWidget->setFixedSize(screenWidth / 60, screenHeight / 40);
+	_videoStateWidget->setFixedSize(screenWidth / 40, screenWidth / 40);
 
 	QDir qssDir(currentPath + "/../../src/css/");
 	QString VideoSliderStyle = qssDir.absolutePath() + "/VideoSliderStyle.css";
@@ -310,12 +307,17 @@ void MediaPlayer::videoClicked() {
 
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	Q_UNUSED(event);
+	qDebug() << "resizeEvent";
 
 	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
 
-	if (_currentImageItem != nullptr) {
-
+	if (_currentImageItem) {
+		qDebug() << _currentImageItem;
+		qDebug() << (bool)(_currentImageItem->pixmap().width());
+		qDebug() << (bool)(_currentImageItem->pixmap().height());
+		qDebug() << (bool)(QApplication::primaryScreen()->availableGeometry().width());
+		qDebug() << (bool)(QApplication::primaryScreen()->availableGeometry().height());
 		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
 			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
 			// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
@@ -395,6 +397,7 @@ void MediaPlayer::setSource(const QUrl& source) {
 		play();
 	}
 	else if (mediaType.contains("image")) {
+		qDebug() << "Imageeee";
 		if (_mediaPlayer->PlayingState)
 			stop();
 
@@ -406,11 +409,18 @@ void MediaPlayer::setSource(const QUrl& source) {
 			}
 		}
 		_containerWidget->hide();
-		QPixmap pixmap(sourcePath); 
-		_currentImageItem = new QGraphicsPixmapItem(pixmap);
+		QPixmap pixmap(sourcePath);
 
-		int imageWidth = pixmap.width();
-		int imageHeight = pixmap.height();
+		if (_currentImageItem) {
+			delete _currentImageItem;
+			_currentImageItem = nullptr; 
+		}
+		qDebug() << pixmap.size();
+		_currentImageItem = new QGraphicsPixmapItem();
+		_currentImageItem->setPixmap(pixmap);
+
+		int imageWidth = _currentImageItem->pixmap().width();
+		int imageHeight = _currentImageItem->pixmap().height();
 
 		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
 			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {

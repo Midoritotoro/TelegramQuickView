@@ -87,7 +87,6 @@ private:
                 Show ? FadeOutAnimation(widget) : FadeInAnimation(widget);
             else {
                 widget->setVisible(Show);
-                qDebug() << !widget->isHidden();
             }
         }
        Show ? emit widgetsShowed() : emit widgetsHidden();
