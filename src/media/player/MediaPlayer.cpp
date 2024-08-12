@@ -131,8 +131,8 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_videoForm->setMaximumSize(screenWidth, screenHeight);
 	_videoFormLayout->setMaximumSize(screenWidth, screenHeight);
 
-	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
-	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
+	_videoForm->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
+	_videoFormLayout->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 
 	_videoForm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -252,7 +252,7 @@ void MediaPlayer::videoSliderSetValue(int value) {
 
 	int timeToEnd = duration - position;
 
-	if (timeToEnd <= 1000 && timeToEnd >= 0) {
+	if (timeToEnd <= 1) {
 		_mediaPlayer->pause();
 		setMediaPlayerVideoPosition(duration-1);
 		_allowChangeVideoState = false;
@@ -307,17 +307,11 @@ void MediaPlayer::videoClicked() {
 
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	Q_UNUSED(event);
-	qDebug() << "resizeEvent";
 
-	_videoForm->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
-	_videoFormLayout->setGeometry(QRectF(_videoForm->pos().x(), _videoForm->pos().y(), size().width(), size().height()));
+	_videoForm->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
+	_videoFormLayout->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 
 	if (_currentImageItem) {
-		qDebug() << _currentImageItem;
-		qDebug() << (bool)(_currentImageItem->pixmap().width());
-		qDebug() << (bool)(_currentImageItem->pixmap().height());
-		qDebug() << (bool)(QApplication::primaryScreen()->availableGeometry().width());
-		qDebug() << (bool)(QApplication::primaryScreen()->availableGeometry().height());
 		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
 			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
 			// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
@@ -384,11 +378,14 @@ void MediaPlayer::setSource(const QUrl& source) {
 
 	QString mediaType = detectMediaType(sourcePath);
 	if (mediaType.contains("video")) {
+		qDebug() << "Video";
+		if (_mediaPlayer->PlayingState)
+			stop();
+
 		QList<QGraphicsItem*> items = _videoScene->items();
 		foreach(QGraphicsItem* item, items) {
 			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
 				_videoScene->removeItem(item);
-				delete item;
 			}
 		}
 		_containerWidget->show();
@@ -405,17 +402,11 @@ void MediaPlayer::setSource(const QUrl& source) {
 		foreach (QGraphicsItem* item, items) {
 			if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
 				_videoScene->removeItem(item);
-				delete item;
 			}
 		}
 		_containerWidget->hide();
 		QPixmap pixmap(sourcePath);
 
-		if (_currentImageItem) {
-			delete _currentImageItem;
-			_currentImageItem = nullptr; 
-		}
-		qDebug() << pixmap.size();
 		_currentImageItem = new QGraphicsPixmapItem();
 		_currentImageItem->setPixmap(pixmap);
 
