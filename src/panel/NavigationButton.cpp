@@ -8,6 +8,7 @@
 #include <QPixmap>
 #include <QString>
 
+
 namespace
 {
     constexpr int kBorderWidth = 2;
@@ -135,6 +136,7 @@ namespace
         return enabled && (pressed || checked) ? Qt::black : Qt::white;
     }
 }
+
 
 NavigationButton::NavigationButton(QWidget* _parent)
     : NavigationButton(QString{}, _parent)

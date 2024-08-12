@@ -9,6 +9,7 @@
 #include <QPropertyAnimation>
 #include <QGraphicsOpacityEffect>
 
+
 class WidgetsHider : public QObject
 {
     Q_OBJECT
@@ -19,7 +20,7 @@ public:
         _qWidgetList(qWidgetList), _fadeInOutAnimation(fadeInOutAnimation) 
     {
         QCoreApplication::instance()->installEventFilter(this);
-
+        _effect = new QGraphicsOpacityEffect(this);
         _timer.setSingleShot(true);
         _timer.callOnTimeout(
             [this]() {
@@ -39,6 +40,7 @@ private:
     QTimer _timer;
     QWidgetList _qWidgetList;
     bool _fadeInOutAnimation;
+    QGraphicsOpacityEffect* _effect = nullptr;
 
     inline bool eventFilter(QObject* pWatched, QEvent* pEvent) override {
         if (pEvent->type() == QEvent::MouseMove) {
@@ -52,23 +54,22 @@ private:
         return QObject::eventFilter(pWatched, pEvent);
     }
 
-    void FadeInAnimation(QWidget* widget) {
-
-        QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this); 
-        widget->setGraphicsEffect(effect);
-        QPropertyAnimation* fadeInAnimation = new QPropertyAnimation(effect, "opacity");
-        fadeInAnimation->setDuration(_inactivityDuration);
+    void FadeInAnimation(QWidget* widget) { // Появление
+        qDebug() << "FadeInAnimation";
+        widget->setGraphicsEffect(_effect);
+        QPropertyAnimation* fadeInAnimation = new QPropertyAnimation(_effect, "opacity");
+        fadeInAnimation->setDuration(1200);
         fadeInAnimation->setStartValue(0);
         fadeInAnimation->setEndValue(1);
         fadeInAnimation->setEasingCurve(QEasingCurve::InBack);
         fadeInAnimation->start(QPropertyAnimation::DeleteWhenStopped);
     }
 
-    void FadeOutAnimation(QWidget* widget) {
-        QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this);
-        widget->setGraphicsEffect(effect);
-        QPropertyAnimation* fadeOutAnimation = new QPropertyAnimation(effect, "opacity");
-        fadeOutAnimation->setDuration(_inactivityDuration);
+    void FadeOutAnimation(QWidget* widget) { // Исчезание
+        qDebug() << "FadeOutAnimation";
+        widget->setGraphicsEffect(_effect);
+        QPropertyAnimation* fadeOutAnimation = new QPropertyAnimation(_effect, "opacity");
+        fadeOutAnimation->setDuration(1200);
         fadeOutAnimation->setStartValue(1);
         fadeOutAnimation->setEndValue(0);
         fadeOutAnimation->setEasingCurve(QEasingCurve::InBack);
