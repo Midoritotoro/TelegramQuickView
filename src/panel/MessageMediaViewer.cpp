@@ -131,7 +131,6 @@ void MessageMediaViewer::goToPreviousMessage() {
 			}
 		}
 	}
-	updateMediaNavigationButtons();
 }
 
 void MessageMediaViewer::goToNextMessage() {
@@ -152,23 +151,26 @@ void MessageMediaViewer::goToNextMessage() {
 			}
 		}
 	}
-	updateMediaNavigationButtons();
 }
 
 void MessageMediaViewer::nextAttachmentButton_clicked() {
 	int messageAttachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = 0; index < messageAttachmentsCount; ++index) {
-		if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 0)
+		if ((messageAttachmentsCount - (_currentMessageAttachmentIndex + 1)) <= 0) {
+			// Медиа в текущем сообщении нет, идём к следующему
+			goToNextMessage();
 			break;
+		}
 
 		MessageAttachment* attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
 
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (messageAttachmentsCount - (index + 1) > 0) {
 				_currentMessageAttachmentIndex = index + 1;
-				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
+
 				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
 
 				if (_previousAttachment->isHidden())
 					_previousAttachment->show();
@@ -177,26 +179,27 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 			}
 		}
 	}
-
-	if ((messageAttachmentsCount - _currentMessageAttachmentIndex) <= 1) 
-		// Медиа в текущем сообщении нет, идём к следующему
-		goToNextMessage();
+	updateMediaNavigationButtons();
 }
 
 void MessageMediaViewer::previousAttachmentButton_clicked() {
 	int messageAttachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = messageAttachmentsCount; index >= 0; --index) {
-		if (_currentMessageAttachmentIndex <= 0)
+		if (_currentMessageAttachmentIndex <= 0) {
+			goToPreviousMessage();
+			// Медиа в текущем сообщении нет, идём к предыдущему
 			break;
+		}
 
 		MessageAttachment* attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
 
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (index - 1 >= 0) {
 				_currentMessageAttachmentIndex = index - 1;
-				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
+				
 				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
 
 				if (_nextAttachment->isHidden())
 					_nextAttachment->show();
@@ -205,10 +208,7 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 			}
 		}
 	}
-
-	if (_currentMessageAttachmentIndex <= 0)
-		// Медиа в текущем сообщении нет, идём к предыдущему
-		goToPreviousMessage();
+	updateMediaNavigationButtons();
 }
 
 void MessageMediaViewer::resizeEvent(QResizeEvent* event) {

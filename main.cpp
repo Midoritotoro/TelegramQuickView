@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     
     TelegramPostQuickView* view = new TelegramPostQuickView();
+    //view->setSource(QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"));
+    //view->setSource(QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"));
 
     QString text = "Test very long message. Tet very long message. Test very long message.";
 
@@ -50,10 +52,6 @@ int main(int argc, char* argv[])
     for (int index = 0; index < 10; index++) {
         view->makeMessage("Username1", text);
     }
-
-    //for (int index = 0; index < 10; index++) {
-    //    view->makeMessage("Username1", "", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
-    //}
 
     view->show();
     return app.exec();
