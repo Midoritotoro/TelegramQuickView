@@ -1,7 +1,6 @@
 ﻿#include "MessageWidget.h"
+#include "MessageAttachment.h"
 
-#include <QWidget>
-#include <QLabel>
 #include <QGridLayout>
 
 
@@ -98,4 +97,8 @@ int MessageWidget::attachmentsLength() const noexcept {
 
 bool MessageWidget::hasAttachments() const noexcept {
 	return !_telegramMessage->attachments.isEmpty();
+}
+
+bool MessageWidget::hasText() const noexcept {
+	return !_telegramMessage->text.isEmpty();
 }

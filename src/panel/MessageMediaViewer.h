@@ -13,6 +13,7 @@
 
 class History;
 class NavigationButton;
+class MessageTextView;
 
 
 class MessageMediaViewer: public QWidget {
@@ -24,11 +25,13 @@ private:
 	NavigationButton* _previousAttachment = nullptr;
 	MessageWidget* _currentMessage = nullptr;
 	History* _messagesHistory = nullptr;
+	MessageTextView* _messageTextView = nullptr;
 	int _currentMessageAttachmentIndex = 0;
 public:
 	MessageMediaViewer(History* messagesHistory, QWidget* parent = nullptr);
 
 	void updateMediaNavigationButtons();
+	void updateMessageTextView();
 	void openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex);
 
 	[[nodiscard]] int nextMessageWithAttachmentsIndex(int currentIndex) const noexcept;

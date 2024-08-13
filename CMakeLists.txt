@@ -67,6 +67,8 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/History.h
 	src/panel/NavigationButton.cpp
 	src/panel/NavigationButton.h
+	src/panel/MessageTextView.cpp
+	src/panel/MessageTextView.h
 
 	src/sql/SqlContentManager.cpp
 	src/sql/SqlContentManager.h

@@ -1,17 +1,18 @@
 ﻿#include "MessageMediaViewer.h"
 
+#include "History.h"
+#include "NavigationButton.h"
+#include "../media/WidgetsHider.h"
+#include "MessageTextView.h"
+#include "MessageAttachment.h"
+
 #include <QToolButton>
 #include <QDir>
 #include <QFile>
 #include <QApplication>
 #include <QStyle>
-
-#include "History.h"
-#include "NavigationButton.h"
-#include "../media/WidgetsHider.h"
 #include <QShortcut>
 #include <QKeySequence>
-
 
 MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent)
 : QWidget(parent)
@@ -39,6 +40,8 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 
 	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1);
 
+	_messageTextView = new MessageTextView(this);
+
 	QTransform transform;
 	transform.rotate(180);
 
@@ -65,9 +68,9 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 
-	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment });
-	WidgetsHider widgetsHider(widgetsList, false);
-	widgetsHider.SetInactivityDuration(1500);
+	//QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment });
+	//WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, false);
+	//widgetsHider->SetInactivityDuration(1500);
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
@@ -83,6 +86,10 @@ void MessageMediaViewer::updateMediaNavigationButtons() {
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex - 1) == nullptr
 	) // Позади нет сообщений с медиа
 		_previousAttachment->hide();
+}
+
+void MessageMediaViewer::updateMessageTextView() {
+
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {

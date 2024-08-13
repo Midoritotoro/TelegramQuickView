@@ -1,6 +1,9 @@
 #pragma once
 
-#include "MessageAttachment.h"
+#include <QWidget>
+#include <QList>
+
+class MessageAttachment;
 
 typedef QList<MessageAttachment*> MessageAttachmentsList;
 class QGridLayout;
@@ -31,4 +34,5 @@ public:
 	[[nodiscard]] MessageAttachment* attachmentAt(int index) const noexcept;
 	[[nodiscard]] int attachmentsLength() const noexcept;
 	[[nodiscard]] bool hasAttachments() const noexcept;
+	[[nodiscard]] bool hasText() const noexcept;
 };
