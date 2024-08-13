@@ -13,6 +13,8 @@
 #include <QStyle>
 #include <QShortcut>
 #include <QKeySequence>
+#include <QPoint>
+
 
 MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent)
 : QWidget(parent)
@@ -89,7 +91,23 @@ void MessageMediaViewer::updateMediaNavigationButtons() {
 }
 
 void MessageMediaViewer::updateMessageTextView() {
+	if (!_currentMessage->hasText()) {
+		if (!_messageTextView->isHidden())
+			_messageTextView->setVisible(false);
+		return;
+	}
 
+	if (_messageTextView->isHidden())
+		_messageTextView->setVisible(true);
+
+	const QSize& mediaSize = _mediaPlayer->occupiedMediaSpace();
+	const QPoint& mediaPosition = _mediaPlayer->mediaPosition();
+
+	const int freeBottomPlace = height() - mediaPosition.y() - mediaSize.height();
+
+	_messageTextView->setText(_currentMessage->messageText());
+	if (_messageTextView->height() < freeBottomPlace)
+		_messageTextView->move((width() / 2) / _messageTextView->width(), freeBottomPlace);
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
@@ -97,6 +115,7 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
 
 	updateMediaNavigationButtons();
+	updateMessageTextView();
 
 	_mediaPlayer->setVisible(true);
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
@@ -186,6 +205,7 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 		}
 	}
 	updateMediaNavigationButtons();
+	updateMessageTextView();
 }
 
 void MessageMediaViewer::previousAttachmentButton_clicked() {
@@ -215,6 +235,7 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 		}
 	}
 	updateMediaNavigationButtons();
+	updateMessageTextView();
 }
 
 void MessageMediaViewer::resizeEvent(QResizeEvent* event) {

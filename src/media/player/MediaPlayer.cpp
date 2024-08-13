@@ -376,6 +376,18 @@ void MediaPlayer::clearScene() {
 	}
 }
 
+const QSize& MediaPlayer::occupiedMediaSpace() const noexcept {
+	if (_currentImageItem)
+		return _currentImageItem->boundingRect().size().toSize();
+	return _videoItem->size().toSize();
+}
+
+const QPoint& MediaPlayer::mediaPosition() const noexcept {
+	if (_currentImageItem)
+		return _currentImageItem->pos().toPoint();
+	return _videoItem->pos().toPoint();
+}
+
 void MediaPlayer::setSource(const QUrl& source) {
 	QString sourcePath;
 	if (source.path().at(0) == "/"[0])

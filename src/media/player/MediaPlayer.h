@@ -20,7 +20,8 @@
 #include "../ClickableLabel.h"
 #include "./VideoStateWidget.h"
 #include <QDialog>
-
+#include <QPoint>
+#include <QSize>
 
 class MediaPlayer : public QWidget
 {
@@ -48,6 +49,8 @@ public:
 
 	[[nodiscard]] static QString detectMediaType(const QString& filePath);
 	void clearScene();
+	[[nodiscard]] const QSize& occupiedMediaSpace() const noexcept;
+	[[nodiscard]] const QPoint& mediaPosition() const noexcept;
 protected:
 	void videoClicked();
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
