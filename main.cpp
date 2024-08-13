@@ -36,22 +36,22 @@ int main(int argc, char* argv[])
     //view->setSource(QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"));
     //view->setSource(QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"));
 
-    QString text = "Test very long message. Tet very long message. Test very long message.";
+    QString text = "Test very long message. Tet very long message. Test very long message. Test very long message. Test very long message. Test very long message. Test very long message.";
 
-    for (int index = 0; index < 3; index++) {
-        view->makeMessage("Username1", text);
-    }
+    //for (int index = 0; index < 3; index++) {
+      //  view->makeMessage("Username1", text);
+   // }
 
-    view->makeMessage("Username1", "", QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
+    view->makeMessage("Username1", text, QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4") });
-    view->makeMessage("Username1", text);
-    view->makeMessage("Username1", text);
+    //view->makeMessage("Username1", text);
+    //view->makeMessage("Username1", text);
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
 
-    for (int index = 0; index < 10; index++) {
-        view->makeMessage("Username1", text);
-    }
+    //for (int index = 0; index < 10; index++) {
+    //    view->makeMessage("Username1", text);
+    //}
 
     view->show();
     return app.exec();

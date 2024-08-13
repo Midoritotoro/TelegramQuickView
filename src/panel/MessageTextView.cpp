@@ -6,12 +6,12 @@
 MessageTextView::MessageTextView(QWidget* parent):
 	QWidget(parent)
 {
-	setAttribute(Qt::WA_TranslucentBackground);
+	//setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n"
-		"background-color:  rgba(35, 36, 37, 90);\n"
+		//"background-color:  rgba(35, 36, 37, 90);\n"
 		"border-radius: 5px;\n"
 	"}");
-	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	_textLabel = new QLabel();
 	_textLabel->setAttribute(Qt::WA_TranslucentBackground);

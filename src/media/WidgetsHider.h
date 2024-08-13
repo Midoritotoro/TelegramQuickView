@@ -55,7 +55,6 @@ private:
     }
 
     void FadeInAnimation(QWidget* widget) { // Появление
-        qDebug() << "FadeInAnimation";
         widget->setGraphicsEffect(_effect);
         QPropertyAnimation* fadeInAnimation = new QPropertyAnimation(_effect, "opacity");
         fadeInAnimation->setDuration(1200);
@@ -66,7 +65,6 @@ private:
     }
 
     void FadeOutAnimation(QWidget* widget) { // Исчезание
-        qDebug() << "FadeOutAnimation";
         widget->setGraphicsEffect(_effect);
         QPropertyAnimation* fadeOutAnimation = new QPropertyAnimation(_effect, "opacity");
         fadeOutAnimation->setDuration(1200);
