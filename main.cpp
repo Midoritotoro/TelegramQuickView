@@ -17,7 +17,7 @@
 #include <QApplication>
 #include "src/settings/MainWindow.h"
 #include "src/panel/TelegramPostQuickView.h"
-
+#include "src/panel/MessageTextView.h"
 
 int main(int argc, char* argv[])
 {
@@ -31,28 +31,21 @@ int main(int argc, char* argv[])
         return -1;*/
 
     QApplication app(argc, argv);
-    
-    TelegramPostQuickView* view = new TelegramPostQuickView();
-    //view->setSource(QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"));
-    //view->setSource(QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"));
 
     QString text = "Test very long message. Tet very long message. Test very long message. Test very long message. Test very long message. Test very long message. Test very long message.";
-
-    //for (int index = 0; index < 3; index++) {
-      //  view->makeMessage("Username1", text);
-   // }
-
+    TelegramPostQuickView* view = new TelegramPostQuickView();
     view->makeMessage("Username1", text, QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
+    text = "Test message 2";
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4") });
-    //view->makeMessage("Username1", text);
-    //view->makeMessage("Username1", text);
+    text = "Test message 3";
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
+    text = "Test message 4";
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
 
-    //for (int index = 0; index < 10; index++) {
-    //    view->makeMessage("Username1", text);
-    //}
-
     view->show();
+
+    //MessageTextView v;
+    //v.setText(text);
+    //v.show();
     return app.exec();
 }

@@ -6,18 +6,16 @@
 MessageTextView::MessageTextView(QWidget* parent):
 	QWidget(parent)
 {
-	//setAttribute(Qt::WA_TranslucentBackground);
-	setStyleSheet("QWidget{\n"
-		//"background-color:  rgba(35, 36, 37, 90);\n"
+	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+	setAttribute(Qt::WA_TranslucentBackground);
+	setStyleSheet("QWidget {\n"
+		"background-color: rgba(35, 36, 37, 90);\n"
+		"border: 5px;\n"
 		"border-radius: 5px;\n"
 	"}");
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	_textLabel = new QLabel();
-	_textLabel->setAttribute(Qt::WA_TranslucentBackground);
-	_textLabel->setStyleSheet("QLabel{\n"
-		"background: transparent;\n"
-		"}");
+	_textLabel = new QLabel(this);
 	_textLabel->setWordWrap(true);
 	_textLabel->setAlignment(Qt::AlignLeft);
 	_textLabel->setContentsMargins(8, 5, 20, 8);

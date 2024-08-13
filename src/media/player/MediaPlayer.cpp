@@ -308,6 +308,15 @@ void MediaPlayer::videoClicked() {
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	Q_UNUSED(event);
 
+	if (_currentImageItem) {
+		_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
+		_currentMediaPosition = _currentImageItem->pos().toPoint();
+	}
+	else {
+		_currentMediaSize = _videoItem->boundingRect().size().toSize();
+		_currentMediaPosition = _videoItem->pos().toPoint();
+	}
+
 	_videoForm->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 	_videoFormLayout->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 
@@ -376,16 +385,12 @@ void MediaPlayer::clearScene() {
 	}
 }
 
-const QSize& MediaPlayer::occupiedMediaSpace() const noexcept {
-	if (_currentImageItem)
-		return _currentImageItem->boundingRect().size().toSize();
-	return _videoItem->size().toSize();
+QSize MediaPlayer::occupiedMediaSpace() const noexcept {
+	return _currentMediaSize;
 }
 
-const QPoint& MediaPlayer::mediaPosition() const noexcept {
-	if (_currentImageItem)
-		return _currentImageItem->pos().toPoint();
-	return _videoItem->pos().toPoint();
+QPoint MediaPlayer::mediaPosition() const noexcept {
+	return _currentMediaPosition;
 }
 
 void MediaPlayer::setSource(const QUrl& source) {
@@ -405,6 +410,8 @@ void MediaPlayer::setSource(const QUrl& source) {
 		_containerWidget->show();
 		_mediaPlayer->setSource(source);
 		_videoItem->setSize(QSize(QApplication::primaryScreen()->availableGeometry().width(), QApplication::primaryScreen()->availableGeometry().height()));
+		_currentMediaSize = _videoItem->boundingRect().size().toSize();
+		_currentMediaPosition = _videoItem->pos().toPoint();
 		play();
 	}
 	else if (mediaType.contains("image")) {
@@ -428,6 +435,8 @@ void MediaPlayer::setSource(const QUrl& source) {
 
 		_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2, (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
 		_videoScene->addItem(_currentImageItem);
+		_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
+		_currentMediaPosition = _currentImageItem->pos().toPoint();
 	}
 }
 

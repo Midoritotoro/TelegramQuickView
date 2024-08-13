@@ -15,6 +15,7 @@
 #include <QKeySequence>
 #include <QPoint>
 #include <utility>
+#include <QApplication>
 
 
 MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent)
@@ -22,6 +23,11 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 , _messagesHistory(messagesHistory)
 {
 	setMouseTracking(true);
+
+
+	const int screenHeight = QApplication::primaryScreen()->availableGeometry().width();
+	const int screenWidth = QApplication::primaryScreen()->availableGeometry().height();
+
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
@@ -43,17 +49,17 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 
 	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1);
 
-	_messageTextView = new MessageTextView(this);
-
 	QTransform transform;
 	transform.rotate(180);
 
 	_nextAttachment = new NavigationButton(this);
 	_previousAttachment = new NavigationButton(this);
+	_messageTextView = new MessageTextView(this);
 
 	_nextAttachment->setFixedSize(50, 50);
 	_previousAttachment->setFixedSize(50, 50);
-
+	//_messageTextView->setMinimumSize(screenWidth / 5, screenHeight / 15);
+	
 	_nextAttachment->setIcon(QIcon(arrowPath));
 	_nextAttachment->setCursor(Qt::PointingHandCursor);
 
@@ -65,9 +71,11 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	_previousAttachment->setVisible(true);
 	_nextAttachment->setVisible(true);
 	_messageTextView->setVisible(true);
+	//_messageTextView->setMinimumSize(screenWidth / 10, screenHeight / 20);
 
 	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
 	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
 
 	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
@@ -97,26 +105,33 @@ void MessageMediaViewer::updateMessageTextView() {
 		return;
 
 	if (!_currentMessage->hasText()) {
-		//if (!_messageTextView->isHidden())
-			//_messageTextView->setVisible(false);
+		if (!_messageTextView->isHidden())
+			_messageTextView->setVisible(false);
 		return;
 	}
 
-	//if (_messageTextView->isHidden())
-		//_messageTextView->setVisible(true);
+	if (_messageTextView->isHidden())
+		_messageTextView->setVisible(true);
 
-	const QSize& mediaSize = _mediaPlayer->occupiedMediaSpace();
-	const QPoint& mediaPosition = _mediaPlayer->mediaPosition();
-
-	const int freeBottomPlace = std::max(0, height() - mediaPosition.y() - mediaSize.height());;
-	qDebug() << freeBottomPlace;
+	QSize mediaSize = _mediaPlayer->occupiedMediaSpace();
+	QPoint mediaPosition = _mediaPlayer->mediaPosition();
+	qDebug() << "mediaSize.height(): " << mediaSize.height();
+	qDebug() << "mediaPosition.y(): " << mediaPosition.y();
+	const int freeBottomSpace = std::max(0, mediaPosition.y() - mediaSize.height());
 
 	_messageTextView->setText(_currentMessage->messageText());
-	if (freeBottomPlace > _messageTextView->height()) 
+	qDebug() << "freeBottomSpace: " << freeBottomSpace;
+	if (freeBottomSpace > _messageTextView->height()) {
 		// Виджет с текстом сообщения помещается в свободное пространство под медиа
-		_messageTextView->move((width() / 2) - _messageTextView->width(), freeBottomPlace);
-	else 
-		_messageTextView->move((width() / 2) - _messageTextView->width(), _messageTextView->height() * 2);
+		qDebug() << "_messageTextView->move((width() / 2) - _messageTextView->width(), freeBottomPlace);";
+		_messageTextView->move((width() / 2) - _messageTextView->width(), freeBottomSpace);
+	}
+	else {
+		qDebug() << "_messageTextView->move((width() / 2) - _messageTextView->width(), height() - _messageTextView->height();";
+		qDebug() << "height() - _messageTextView->height(): " << height() - _messageTextView->height();
+		_messageTextView->move((width() / 2) - _messageTextView->width(), height() - _messageTextView->height());
+	}
+
 	qDebug() << _messageTextView->size();
 	qDebug() << _messageTextView->pos();
 }
@@ -125,14 +140,14 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 	_currentMessage = messageWidget;
 	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
 
-	updateMediaNavigationButtons();
-	updateMessageTextView();
-
 	_mediaPlayer->setVisible(true);
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
 	
 	showFullScreen();
 	_mediaPlayer->showFullScreen();
+
+	updateMediaNavigationButtons();
+	updateMessageTextView();
 }
 
 int MessageMediaViewer::nextMessageWithAttachmentsIndex(int currentIndex) const noexcept {

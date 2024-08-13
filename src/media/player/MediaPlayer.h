@@ -39,6 +39,8 @@ private:
 	QLabel* _videoTimeLabel = nullptr;
 	VideoStateWidget* _videoStateWidget = nullptr;
 	QGraphicsPixmapItem* _currentImageItem = nullptr;
+	QSize _currentMediaSize;
+	QPoint _currentMediaPosition;
 	bool _doubleClicked = false, _allowChangeVideoState = true;
 public:
 	MediaPlayer(QWidget* parent = nullptr);
@@ -49,8 +51,8 @@ public:
 
 	[[nodiscard]] static QString detectMediaType(const QString& filePath);
 	void clearScene();
-	[[nodiscard]] const QSize& occupiedMediaSpace() const noexcept;
-	[[nodiscard]] const QPoint& mediaPosition() const noexcept;
+	[[nodiscard]] QSize occupiedMediaSpace() const noexcept;
+	[[nodiscard]] QPoint mediaPosition() const noexcept;
 protected:
 	void videoClicked();
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
