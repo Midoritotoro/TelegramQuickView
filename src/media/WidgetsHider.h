@@ -23,21 +23,27 @@ public:
         , _animationDuration( DurationT{2000} )
     {
         QCoreApplication::instance()->installEventFilter(this);
-        _effect = new QGraphicsOpacityEffect(this);
         _timer.setSingleShot(true);
         _timer.callOnTimeout(
             [this]() {
                 ControlVisibility(false);
             }
         );
+        if (fadeInOutAnimation) {
+            _animationTimer.setSingleShot(true);
+            _animationTimer.callOnTimeout(
+                [this]() {
+                    ControlAnimationVisibility(false);
+                });
+        }
     }
 
-    inline void SetInactivityDuration(DurationT mSec) {
-        _inactivityDuration = mSec;
+    inline void SetInactivityDuration(DurationT msecs) {
+        _inactivityDuration = msecs;
     }
 
-    inline void SetAnimationDuration(DurationT mSec) {
-        _animationDuration = mSec;
+    inline void SetAnimationDuration(DurationT msecs) {
+        _animationDuration = msecs;
     }
 
 Q_SIGNALS:
@@ -45,10 +51,9 @@ Q_SIGNALS:
     void widgetsShowed();
 private:
     std::atomic<DurationT> _inactivityDuration, _animationDuration;
-    QTimer _timer;
+    QTimer _timer, _animationTimer;
     QWidgetList _qWidgetList;
     bool _fadeInOutAnimation;
-    QGraphicsOpacityEffect* _effect = nullptr;
 
     inline bool eventFilter(QObject* pWatched, QEvent* pEvent) override {
         if (pEvent->type() == QEvent::MouseMove) {
@@ -57,14 +62,21 @@ private:
 
             if (_inactivityDuration != DurationT{})
                 _timer.start(_inactivityDuration);
+
+            if (_fadeInOutAnimation) {
+                ControlAnimationVisibility(true);
+                if (_inactivityDuration != DurationT{})
+                    _animationTimer.start(_animationDuration);
+            }
         }
 
         return QObject::eventFilter(pWatched, pEvent);
     }
 
     void FadeInAnimation(QWidget* widget) { // Появление
-        widget->setGraphicsEffect(_effect);
-        QPropertyAnimation* fadeInAnimation = new QPropertyAnimation(_effect, "opacity");
+        QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this);
+        widget->setGraphicsEffect(effect);
+        QPropertyAnimation* fadeInAnimation = new QPropertyAnimation(effect, "opacity");
         fadeInAnimation->setDuration(_animationDuration);
         fadeInAnimation->setStartValue(0);
         fadeInAnimation->setEndValue(1);
@@ -73,14 +85,21 @@ private:
     }
 
     void FadeOutAnimation(QWidget* widget) { // Исчезание
-        widget->setGraphicsEffect(_effect);
-        QPropertyAnimation* fadeOutAnimation = new QPropertyAnimation(_effect, "opacity");
+        QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this);
+        widget->setGraphicsEffect(effect);
+        QPropertyAnimation* fadeOutAnimation = new QPropertyAnimation(effect, "opacity");
         fadeOutAnimation->setDuration(_animationDuration);
         fadeOutAnimation->setStartValue(1);
         fadeOutAnimation->setEndValue(0);
         fadeOutAnimation->setEasingCurve(QEasingCurve::InBack);
         fadeOutAnimation->start(QPropertyAnimation::DeleteWhenStopped);
+        
+    }
 
+    inline void ControlAnimationVisibility(bool Show) {
+        foreach(QWidget * widget, _qWidgetList)
+            widget->setVisible(Show);
+        Show ? emit widgetsShowed() : emit widgetsHidden();
     }
 
     inline void ControlVisibility(bool Show) {
@@ -90,6 +109,7 @@ private:
             else
                 widget->setVisible(Show);
         }
-       Show ? emit widgetsShowed() : emit widgetsHidden();
+        if (!_fadeInOutAnimation)
+            Show ? emit widgetsShowed() : emit widgetsHidden();
     }
 };

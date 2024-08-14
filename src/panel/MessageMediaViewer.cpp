@@ -81,11 +81,8 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 
-	QWidgetList navigationList = QWidgetList({ _previousAttachment, _nextAttachment });
-	QWidgetList textViewList = QWidgetList({ _messageTextView });
-
-	WidgetsHider* widgetsHider = new WidgetsHider(navigationList, true);
-	WidgetsHider* widgetsHider2 = new WidgetsHider(textViewList, true);
+	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
+	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
