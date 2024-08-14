@@ -115,25 +115,19 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	QSize mediaSize = _mediaPlayer->occupiedMediaSpace();
 	QPoint mediaPosition = _mediaPlayer->mediaPosition();
+
+	const int freeBottomSpace = std::max(0, mediaPosition.y() - mediaSize.height());
+	_messageTextView->setText(_currentMessage->messageText());
+
+	if (freeBottomSpace > _messageTextView->height())
+		// Виджет с текстом сообщения помещается в свободное пространство под медиа
+		_messageTextView->move((width() / 2) - _messageTextView->width(), freeBottomSpace);
+	else
+		_messageTextView->move((width() / 2) - _messageTextView->width(), height() - _messageTextView->height());
+	_messageTextView->adjustSize();
+
 	qDebug() << "mediaSize.height(): " << mediaSize.height();
 	qDebug() << "mediaPosition.y(): " << mediaPosition.y();
-	const int freeBottomSpace = std::max(0, mediaPosition.y() - mediaSize.height());
-
-	_messageTextView->setText(_currentMessage->messageText());
-	qDebug() << "freeBottomSpace: " << freeBottomSpace;
-	if (freeBottomSpace > _messageTextView->height()) {
-		// Виджет с текстом сообщения помещается в свободное пространство под медиа
-		qDebug() << "_messageTextView->move((width() / 2) - _messageTextView->width(), freeBottomPlace);";
-		_messageTextView->move((width() / 2) - _messageTextView->width(), freeBottomSpace);
-	}
-	else {
-		qDebug() << "_messageTextView->move((width() / 2) - _messageTextView->width(), height() - _messageTextView->height();";
-		qDebug() << "height() - _messageTextView->height(): " << height() - _messageTextView->height();
-		_messageTextView->move((width() / 2) - _messageTextView->width(), height() - _messageTextView->height());
-	}
-
-	qDebug() << _messageTextView->size();
-	qDebug() << _messageTextView->pos();
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
