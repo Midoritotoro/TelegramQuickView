@@ -68,8 +68,5 @@ int main(int argc, char* argv[])
 
     view->show();
 
-    //MessageTextView v;
-    //v.setText(text);
-    //v.show();
     return app.exec();
 }

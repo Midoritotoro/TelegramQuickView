@@ -79,6 +79,9 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 
 	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
+	widgetsHider->SetInactivityDuration(3000);
+	widgetsHider->SetAnimationDuration(3000);
+
 
 	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
 	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);

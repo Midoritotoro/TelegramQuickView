@@ -26,7 +26,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 	chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(width() / 25, 4, width() / 3.5, 15);
+	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 3.5, 15);
 	_chatScrollAreaLayout->setVerticalSpacing(15);
 
 	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
