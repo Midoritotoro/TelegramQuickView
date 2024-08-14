@@ -86,7 +86,7 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 
 	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
 
-	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::updateMediaNavigationButtons);
+	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 }
 
