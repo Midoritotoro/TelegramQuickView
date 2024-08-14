@@ -30,6 +30,9 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 {
 	setMouseTracking(true);
 
+	const int screenHeight = QApplication::primaryScreen()->availableGeometry().width();
+	const int screenWidth = QApplication::primaryScreen()->availableGeometry().height();
+
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
@@ -72,6 +75,7 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	_previousAttachment->setVisible(true);
 	_nextAttachment->setVisible(true);
 	_messageTextView->setVisible(true);
+	_messageTextView->setMaximumWidth(screenWidth / 2);
 
 	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
@@ -129,7 +133,6 @@ void MessageMediaViewer::updateMessageTextView() {
 	const int freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
 
 	_messageTextView->setText(_currentMessage->messageText());
-	_messageTextView->adjustSize();
 
 	if (freeBottomSpace >= _messageTextView->height() * 1.5) {
 		// Виджет с текстом сообщения помещается в свободное пространство под медиа, его можно центрировать по вертикали

@@ -1,10 +1,14 @@
 #include "MessageTextView.h"
 
 #include <QGridLayout>
+#include <QApplication>
+#include <QScreen>
+
 
 MessageTextView::MessageTextView(QWidget* parent):
 	QWidget(parent)
 {
+
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget {\n"
@@ -19,6 +23,9 @@ MessageTextView::MessageTextView(QWidget* parent):
 	_textLabel->setWordWrap(true);
 	_textLabel->setAlignment(Qt::AlignLeft);
 	_textLabel->setContentsMargins(8, 5, 8, 8);
+	_textLabel->setStyleSheet("QLabel{\n"
+		"font-size: 13px;\n"
+	"}");
 
 	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	
@@ -31,4 +38,14 @@ MessageTextView::MessageTextView(QWidget* parent):
 
 void MessageTextView::setText(const QString& text) {
 	_textLabel->setText(text);
+	_textLabel->adjustSize();
+
+	const int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
+	const int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+
+	if (_textLabel->height() >= screenHeight / 4) {
+		_textLabel->setMinimumWidth(screenWidth * 0.8);
+		setMinimumWidth(screenWidth * 0.8);
+	}
+	adjustSize();
 }

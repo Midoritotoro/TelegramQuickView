@@ -9,8 +9,8 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 {
 	setMouseTracking(true);
 
-	int screenHeight = QApplication::primaryScreen()->availableGeometry().width();
-	int screenWidth = QApplication::primaryScreen()->availableGeometry().height();
+	const int screenHeight = QApplication::primaryScreen()->availableGeometry().width();
+	const int screenWidth = QApplication::primaryScreen()->availableGeometry().height();
 
 	setContentsMargins(0, 0, 0, 0);
 	QGridLayout* gridLayout = new QGridLayout();
