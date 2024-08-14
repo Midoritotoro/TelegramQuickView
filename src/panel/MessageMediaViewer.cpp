@@ -78,11 +78,16 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 
 	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
 	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+	QShortcut* showMinimizedShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+
 
 	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
 
 	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
+	connect(showMinimizedShortcut, &QShortcut::activated, this, [this]() {
+		showMinimized();
+		});
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
@@ -122,13 +127,12 @@ void MessageMediaViewer::updateMessageTextView() {
 	QPoint mediaPosition = _mediaPlayer->mediaPosition();
 
 	const int freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
-	qDebug() << "freeBottomSpace: " << freeBottomSpace;
+
 	_messageTextView->setText(_currentMessage->messageText());
 	_messageTextView->adjustSize();
 
 	if (freeBottomSpace >= _messageTextView->height() * 1.5) {
 		// Виджет с текстом сообщения помещается в свободное пространство под медиа, его можно центрировать по вертикали
-		qDebug() << "(freeBottomSpace - _messageTextView->height()) >= _messageTextView->height()";
 		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))) - messageTextViewBottomIndent;
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	} 
@@ -145,7 +149,6 @@ void MessageMediaViewer::updateMessageTextView() {
 		}
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	}
-	qDebug() << "_messageTextView->height(): " << _messageTextView->height();
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {

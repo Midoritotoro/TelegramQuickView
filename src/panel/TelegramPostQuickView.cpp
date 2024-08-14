@@ -11,8 +11,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	setMouseTracking(true);
 	_messagesHistory = new History();
 
-	int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
-	int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
+	const int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+	const int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
 	_panelWidth = screenWidth / 3;
 	setFixedSize(_panelWidth, screenHeight);
@@ -26,7 +26,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 	chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 3.5, 15);
+	_chatScrollAreaLayout->setContentsMargins(width() / 25, 4, width() / 3.5, 15);
 	_chatScrollAreaLayout->setVerticalSpacing(15);
 
 	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
@@ -42,38 +42,12 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	chatScrollArea->setMouseTracking(true);
 	chatScrollAreaWidget->setMouseTracking(true);
 
-	QToolButton* minimizeWindowButton = new QToolButton();
-	QToolButton* closeWindowButton = new QToolButton();
-
+	
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../src/css");
 
 	QString chatScrollAreaStylePath = cssDir.absolutePath() + "/ChatScrollAreaStyle.css";
-
-	QPixmap minPix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
-	QPixmap closePix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
-
-	minimizeWindowButton->setIcon(minPix);
-	closeWindowButton->setIcon(closePix);
-
-	closeWindowButton->setStyleSheet("QToolButton{\n"
-		"background-color: transparent;\n"
-		"}\n"
-	"QToolButton::hover{\n"
-		"background: rgb(57, 58, 59);\n"
-		"color: white;\n"
-	"}");
-
-	minimizeWindowButton->setStyleSheet("QToolButton{\n"
-		"background-color: transparent;\n"
-		"}\n"
-		"QToolButton::hover{\n"
-		"background: rgb(79, 80, 81);\n"
-		"color: white;\n"
-		"}");
-
 	QFile chatScrollAreaStyleFile(chatScrollAreaStylePath);
-
 	if (chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
 
 		QByteArray chatScrollAreaStyle = chatScrollAreaStyleFile.readAll();
@@ -84,23 +58,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 	QGridLayout* grid = new QGridLayout(this);
 
-	QWidget* toolWidget = new QWidget();
-	QGridLayout* toolLayout = new QGridLayout(toolWidget);
-	//toolWidget->setObjectName("toolWidget");
-	//toolWidget->setStyleSheet("#toolWidget{\n"
-	//	"background-color: rgba(35,36,37, 80);\n"
-	//	"}");
-	toolWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-	toolWidget->setContentsMargins(0, 0, 0, 0);
-	//toolLayout->setContentsMargins(0, 0, 0, 0);
-	//toolLayout->setSpacing(0);
-
-	toolLayout->addWidget(minimizeWindowButton, 0, 0, 1, 1, Qt::AlignRight | Qt::AlignTop);
-	toolLayout->addWidget(closeWindowButton, 0, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
-
-	toolLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 	grid->setVerticalSpacing(0);
-	//_grid->addWidget(toolWidget, _grid->rowCount(), 0, 1, 1);
 
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
@@ -121,10 +79,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 	QWidgetList widgetsList = QWidgetList({ chatScrollArea->verticalScrollBar() });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
-	widgetsHider->SetInactivityDuration(1000);
-
-	connect(minimizeWindowButton, &QToolButton::clicked, this, &QWidget::showMinimized);
-	connect(closeWindowButton, &QToolButton::clicked, this, &QWidget::close);
+	widgetsHider->SetInactivityDuration(1500);
+	widgetsHider->SetAnimationDuration(1500);
 }
 
 void TelegramPostQuickView::makeMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {

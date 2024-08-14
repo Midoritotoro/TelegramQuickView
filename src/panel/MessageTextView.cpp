@@ -10,7 +10,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 	setStyleSheet("QWidget {\n"
 		"background-color: rgba(27,27,28, 95);\n"
 		"border: 5px;\n"
-		"border-radius: 5px;\n"
+		"border-radius: 10px;\n"
 	"}");
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setContentsMargins(0, 0, 0, 0);
