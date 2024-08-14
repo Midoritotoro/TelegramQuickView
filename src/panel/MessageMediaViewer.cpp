@@ -29,9 +29,6 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 {
 	setMouseTracking(true);
 
-	const int screenHeight = QApplication::primaryScreen()->availableGeometry().width();
-	const int screenWidth = QApplication::primaryScreen()->availableGeometry().height();
-
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
@@ -74,17 +71,17 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	_previousAttachment->setVisible(true);
 	_nextAttachment->setVisible(true);
 	_messageTextView->setVisible(true);
-	
-	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
-	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
-
-	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
-	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 
 	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
 
+	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
+	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
 	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
+
+	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
+	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);

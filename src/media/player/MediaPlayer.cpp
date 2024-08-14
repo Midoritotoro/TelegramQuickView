@@ -219,7 +219,6 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 	QWidgetList widgetsList = QWidgetList({ _videoSlider, volumeClickableLabel, _videoStateWidget, _videoTimeLabel });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, false);
-	widgetsHider->SetInactivityDuration(3000);
 
 	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MediaPlayer::adjustBottomWidgets);
 	connect(widgetsHider, &WidgetsHider::widgetsHidden, this, &MediaPlayer::adjustBottomWidgets);
