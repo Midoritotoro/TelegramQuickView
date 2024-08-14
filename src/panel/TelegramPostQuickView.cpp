@@ -60,7 +60,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 	grid->setVerticalSpacing(0);
 
-	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 
 	setStyleSheet(QString::fromUtf8("*{\n"
@@ -87,9 +87,6 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 void TelegramPostQuickView::makeMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {
 	const int maximumMessageWidth = _panelWidth - (width() / 12.5);
-	qDebug() << "maximumMessageWidth: " << maximumMessageWidth;
-	qDebug() << "width() / 3.5: " << width() / 3.5;
-	qDebug() << "width() / 25: " << width() / 25;
 	MessageWidget* messageWidget = new MessageWidget(author);
 
 	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
