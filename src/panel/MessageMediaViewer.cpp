@@ -116,18 +116,16 @@ void MessageMediaViewer::updateMessageTextView() {
 	QSize mediaSize = _mediaPlayer->occupiedMediaSpace();
 	QPoint mediaPosition = _mediaPlayer->mediaPosition();
 
-	const int freeBottomSpace = std::max(0, mediaPosition.y() - mediaSize.height());
+	const int freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
+
 	_messageTextView->setText(_currentMessage->messageText());
+	_messageTextView->adjustSize();
 
 	if (freeBottomSpace > _messageTextView->height())
 		// Виджет с текстом сообщения помещается в свободное пространство под медиа
-		_messageTextView->move((width() / 2) - _messageTextView->width(), freeBottomSpace);
+		_messageTextView->move((width() - _messageTextView->width()) / 2, height() - freeBottomSpace);
 	else
-		_messageTextView->move((width() / 2) - _messageTextView->width(), height() - _messageTextView->height());
-	_messageTextView->adjustSize();
-
-	qDebug() << "mediaSize.height(): " << mediaSize.height();
-	qDebug() << "mediaPosition.y(): " << mediaPosition.y();
+		_messageTextView->move((width() - _messageTextView->width()) / 2, height() - _messageTextView->height());
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
@@ -213,9 +211,7 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (messageAttachmentsCount - (index + 1) > 0) {
 				_currentMessageAttachmentIndex = index + 1;
-
 				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
-				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
 
 				if (_previousAttachment->isHidden())
 					_previousAttachment->show();
@@ -243,9 +239,7 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (index - 1 >= 0) {
 				_currentMessageAttachmentIndex = index - 1;
-				
 				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
-				qDebug() << _currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath();
 
 				if (_nextAttachment->isHidden())
 					_nextAttachment->show();

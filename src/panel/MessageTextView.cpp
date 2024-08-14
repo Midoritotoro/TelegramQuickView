@@ -18,7 +18,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 	_textLabel = new QLabel(this);
 	_textLabel->setWordWrap(true);
 	_textLabel->setAlignment(Qt::AlignLeft);
-	_textLabel->setContentsMargins(8, 5, 20, 8);
+	_textLabel->setContentsMargins(8, 5, 8, 8);
 
 	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	
