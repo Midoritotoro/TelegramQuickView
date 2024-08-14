@@ -13,6 +13,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 		"border-radius: 5px;\n"
 	"}");
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	setContentsMargins(0, 0, 0, 0);
 
 	_textLabel = new QLabel(this);
 	_textLabel->setWordWrap(true);
@@ -22,6 +23,9 @@ MessageTextView::MessageTextView(QWidget* parent):
 	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	
 	QGridLayout* gridLayout = new QGridLayout(this);
+	gridLayout->setContentsMargins(0, 0, 0, 0);
+	gridLayout->setSpacing(0);
+
 	gridLayout->addWidget(_textLabel, 0, 0, 1, 1, Qt::AlignCenter);
 }
 

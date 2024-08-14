@@ -18,8 +18,9 @@
 #include <QApplication>
 #include <QMargins>
 
+
 namespace {
-	constexpr int messageTextViewBottomIndent = 8;
+	constexpr int messageTextViewBottomIndent = 5;
 }
 
 
@@ -93,12 +94,12 @@ void MessageMediaViewer::updateMediaNavigationButtons() {
 
 	if (nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex + 1) == nullptr
-	) // Впереди нет сообщений с медиа
+	) // Впереди нет сообщений с медиа и в текущем сообщении не существует больше медиа
 		_nextAttachment->hide();
 
 	if (previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex - 1) == nullptr
-	) // Позади нет сообщений с медиа
+	) // Позади нет сообщений с медиа и в текущем сообщении не существует больше медиа
 		_previousAttachment->hide();
 }
 
@@ -128,7 +129,7 @@ void MessageMediaViewer::updateMessageTextView() {
 	if ((freeBottomSpace - _messageTextView->height()) >= messageTextViewBottomIndent) {
 		// Виджет с текстом сообщения помещается в свободное пространство под медиа
 		yCoordinate = height() - freeBottomSpace;
-		if ((height() - freeBottomSpace - _messageTextView->height()) >= 10)
+		if ((height() - freeBottomSpace - _messageTextView->height()) >= messageTextViewBottomIndent)
 			yCoordinate = height() - freeBottomSpace - messageTextViewBottomIndent;
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 		
@@ -235,6 +236,7 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 			}
 		}
 	}
+
 	updateMediaNavigationButtons();
 	updateMessageTextView();
 }
@@ -263,6 +265,7 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 			}
 		}
 	}
+
 	updateMediaNavigationButtons();
 	updateMessageTextView();
 }
