@@ -18,6 +18,7 @@
 #include "src/settings/MainWindow.h"
 #include "src/panel/TelegramPostQuickView.h"
 #include "src/panel/MessageTextView.h"
+#include <QFont>
 
 int main(int argc, char* argv[])
 {
@@ -32,7 +33,7 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
 
-    QString text = "Test very long message. Tet very long message. Test very long message. Test very long message. Test very long message. Test very long message. Test very long message.";
+    QString text = "Test very long message.\n Tet very long message. \n\n Test very long message. Test very long message.\n It`s a title.\r\n Test very long message. Test very long message. Test very long message.";
     TelegramPostQuickView* view = new TelegramPostQuickView();
     view->makeMessage("Username1", text, QUrlList{QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
     text = "Test message 2";
