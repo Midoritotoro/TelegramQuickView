@@ -393,6 +393,10 @@ QPoint MediaPlayer::mediaPosition() const noexcept {
 	return _currentMediaPosition;
 }
 
+int MediaPlayer::getVideoControlsHeight() const noexcept {
+	return _containerWidget->boundingRect().height();
+}
+
 void MediaPlayer::setSource(const QUrl& source) {
 	QString sourcePath;
 	if (source.path().at(0) == "/"[0])

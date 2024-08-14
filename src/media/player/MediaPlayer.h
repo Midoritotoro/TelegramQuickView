@@ -53,6 +53,7 @@ public:
 	void clearScene();
 	[[nodiscard]] QSize occupiedMediaSpace() const noexcept;
 	[[nodiscard]] QPoint mediaPosition() const noexcept;
+	[[nodiscard]] int getVideoControlsHeight() const noexcept;
 protected:
 	void videoClicked();
 	void mouseDoubleClickEvent(QMouseEvent* event) override;

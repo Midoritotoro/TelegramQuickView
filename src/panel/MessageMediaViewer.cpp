@@ -110,6 +110,8 @@ void MessageMediaViewer::updateMessageTextView() {
 		return;
 	}
 
+	int yCoordinate;
+
 	if (_messageTextView->isHidden())
 		_messageTextView->setVisible(true);
 
@@ -121,15 +123,21 @@ void MessageMediaViewer::updateMessageTextView() {
 	_messageTextView->setText(_currentMessage->messageText());
 	_messageTextView->adjustSize();
 
-	if (freeBottomSpace > _messageTextView->height()) {
+	if ((freeBottomSpace - _messageTextView->height()) >= messageTextViewBottomIndent) {
 		// Виджет с текстом сообщения помещается в свободное пространство под медиа
-		int yCoordinate = height() - freeBottomSpace;
+		yCoordinate = height() - freeBottomSpace;
 		if ((height() - freeBottomSpace - _messageTextView->height()) >= 10)
 			yCoordinate = height() - freeBottomSpace - messageTextViewBottomIndent;
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
+		
 	}
 	else {
-		_messageTextView->move((width() - _messageTextView->width()) / 2, height() - _messageTextView->height() - messageTextViewBottomIndent);
+		yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent;
+		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video")) {
+			const int videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
+			yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent - videoControlsHeight;
+		}
+		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	}
 }
 
