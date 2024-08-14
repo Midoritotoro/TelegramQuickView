@@ -81,6 +81,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
+
+	connect(_messageMediaViewer, &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
 }
 
 void TelegramPostQuickView::makeMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {

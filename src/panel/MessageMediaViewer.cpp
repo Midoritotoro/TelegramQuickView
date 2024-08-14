@@ -80,13 +80,13 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
 	QShortcut* showMinimizedShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);
 
-
 	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
 
 	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 	connect(showMinimizedShortcut, &QShortcut::activated, this, [this]() {
 		showMinimized();
+		emit escaped();
 		});
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
@@ -281,4 +281,9 @@ void MessageMediaViewer::resizeEvent(QResizeEvent* event) {
 	_previousAttachment->move(_nextAttachment->width(), height() / 2);
 	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
 	updateMessageTextView();
+}
+
+void MessageMediaViewer::closeEvent(QCloseEvent* event) {
+	emit escaped();
+	QWidget::closeEvent(event);
 }

@@ -8,8 +8,9 @@
 
 #include "MessageWidget.h"
 #include <QResizeEvent>
-#include <QPaintEvent>
+#include <QCloseEvent>
 #include <QPainter>
+
 
 class History;
 class NavigationButton;
@@ -39,9 +40,12 @@ public:
 
 	void goToPreviousMessage();
 	void goToNextMessage();
+Q_SIGNALS:
+	void escaped();
 public Q_SLOTS:
 	void nextAttachmentButton_clicked();
 	void previousAttachmentButton_clicked();
 protected:
 	void resizeEvent(QResizeEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
 };

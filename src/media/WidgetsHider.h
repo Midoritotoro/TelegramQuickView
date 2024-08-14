@@ -20,7 +20,7 @@ public:
         : _inactivityDuration{ DurationT{4000} }
         , _qWidgetList(qWidgetList)
         , _fadeInOutAnimation(fadeInOutAnimation)
-        , _animationDuration( DurationT{2000} )
+        , _animationDuration(DurationT{ 2000 })
     {
         QCoreApplication::instance()->installEventFilter(this);
         _timer.setSingleShot(true);
@@ -57,7 +57,7 @@ private:
 
     inline bool eventFilter(QObject* pWatched, QEvent* pEvent) override {
         if (pEvent->type() == QEvent::MouseMove) {
-            
+
             ControlVisibility(true);
 
             if (_inactivityDuration != DurationT{})
@@ -93,7 +93,7 @@ private:
         fadeOutAnimation->setEndValue(0);
         fadeOutAnimation->setEasingCurve(QEasingCurve::InBack);
         fadeOutAnimation->start(QPropertyAnimation::DeleteWhenStopped);
-        
+
     }
 
     inline void ControlAnimationVisibility(bool Show) {
