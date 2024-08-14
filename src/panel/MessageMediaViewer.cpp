@@ -84,11 +84,16 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
 
-	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
+	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
+
+	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::updateMediaNavigationButtons);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 }
 
 void MessageMediaViewer::updateMediaNavigationButtons() {
+	if (!_currentMessage)
+		return;
+
 	if (nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex + 1) == nullptr
 	) // Впереди нет сообщений с медиа
