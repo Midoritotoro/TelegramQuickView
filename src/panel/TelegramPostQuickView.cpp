@@ -14,7 +14,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	const int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
-	_panelWidth = screenWidth / 3;
+	_panelWidth = screenWidth / 3.5;
 	setFixedSize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
@@ -26,7 +26,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 
 	chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 3.5, 15);
+	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 25, 15);
 	_chatScrollAreaLayout->setVerticalSpacing(15);
 
 	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
@@ -86,7 +86,10 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 }
 
 void TelegramPostQuickView::makeMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {
-	const int maximumMessageWidth = _panelWidth - (width() / 25 + width() / 3.5);
+	const int maximumMessageWidth = _panelWidth - (width() / 12.5);
+	qDebug() << "maximumMessageWidth: " << maximumMessageWidth;
+	qDebug() << "width() / 3.5: " << width() / 3.5;
+	qDebug() << "width() / 25: " << width() / 25;
 	MessageWidget* messageWidget = new MessageWidget(author);
 
 	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
