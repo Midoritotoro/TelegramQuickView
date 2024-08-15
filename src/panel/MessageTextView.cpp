@@ -12,7 +12,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget {\n"
-		"background-color: rgba(27,27,28, 95);\n"
+		"background-color: rgba(27, 27, 27, 99);\n"
 		//"border: 5px;\n"
 		"border-radius: 5px;\n"
 		//"border-bottom-right-radius: 5px;\n"

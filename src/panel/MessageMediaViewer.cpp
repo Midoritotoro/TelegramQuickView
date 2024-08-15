@@ -36,7 +36,7 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
-		"background-color: rgba(35, 36, 37, 60)\n"
+		"background-color: rgba(35, 36, 37, 90)\n"
 		"}");
 
 	QString currentPath = QCoreApplication::applicationDirPath();
@@ -132,17 +132,13 @@ void MessageMediaViewer::updateMessageTextView() {
 	QSize mediaSize = _mediaPlayer->occupiedMediaSpace();
 	QPoint mediaPosition = _mediaPlayer->mediaPosition();
 
-	qDebug() << "mediaSize: " << mediaSize;
-	qDebug() << "mediaPosition: " << mediaPosition;
-
 	const int freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
-
-	qDebug() << "freeBottomSpace: " << freeBottomSpace;
 
 	_messageTextView->setText(_currentMessage->messageText());
 
 	if (freeBottomSpace >= _messageTextView->height() * 1.5) {
-		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))) - messageTextViewBottomIndent;
+		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))
+			* (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height() * 1.5))) - messageTextViewBottomIndent;
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	} 
 	else if ((freeBottomSpace - _messageTextView->height()) >= messageTextViewBottomIndent) {
