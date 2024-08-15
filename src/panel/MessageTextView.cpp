@@ -13,8 +13,10 @@ MessageTextView::MessageTextView(QWidget* parent):
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget {\n"
 		"background-color: rgba(27,27,28, 95);\n"
-		"border: 5px;\n"
-		"border-radius: 10px;\n"
+		//"border: 5px;\n"
+		"border-radius: 5px;\n"
+		//"border-bottom-right-radius: 5px;\n"
+		//"border-bottom-left-radius: 5px;\n"
 	"}");
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setContentsMargins(0, 0, 0, 0);
@@ -47,5 +49,11 @@ void MessageTextView::setText(const QString& text) {
 		_textLabel->setMinimumWidth(screenWidth * 0.8);
 		setMinimumWidth(screenWidth * 0.8);
 	}
+	else { 
+		_textLabel->setMinimumWidth(0);
+		setMinimumWidth(0);
+	}
+	_textLabel->adjustSize();
 	adjustSize();
+
 }

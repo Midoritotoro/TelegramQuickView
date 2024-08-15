@@ -251,9 +251,9 @@ void MediaPlayer::videoSliderSetValue(int value) {
 
 	int timeToEnd = duration - position;
 
-	if (timeToEnd <= 1) {
+	if (timeToEnd <= 10) {
 		_mediaPlayer->pause();
-		setMediaPlayerVideoPosition(duration-1);
+		setMediaPlayerVideoPosition(duration-10);
 		_allowChangeVideoState = false;
 		_videoStateWidget->stackedWidget()->setCurrentIndex(2);
 		return;
@@ -307,15 +307,6 @@ void MediaPlayer::videoClicked() {
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	Q_UNUSED(event);
 
-	if (_currentImageItem) {
-		_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
-		_currentMediaPosition = _currentImageItem->pos().toPoint();
-	}
-	else {
-		_currentMediaSize = _videoItem->boundingRect().size().toSize();
-		_currentMediaPosition = _videoItem->pos().toPoint();
-	}
-
 	_videoForm->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 	_videoFormLayout->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 
@@ -328,6 +319,15 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 			_currentImageItem->setScale(scale);
 		}
 		_currentImageItem->setPos((_videoView->width() - _currentImageItem->pixmap().width() * _currentImageItem->scale()) / 2, (_videoView->height() - _currentImageItem->pixmap().height() * _currentImageItem->scale()) / 2);
+	}
+
+	if (_currentImageItem) {
+		_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
+		_currentMediaPosition = _currentImageItem->pos().toPoint();
+	}
+	else {
+		_currentMediaSize = _videoItem->boundingRect().size().toSize();
+		_currentMediaPosition = _videoItem->pos().toPoint();
 	}
 
 	if (_doubleClicked)
@@ -405,21 +405,25 @@ void MediaPlayer::setSource(const QUrl& source) {
 
 	QString mediaType = detectMediaType(sourcePath);
 
-	if (_mediaPlayer->PlayingState)
-		stop();
+	if (_mediaPlayer->playbackState()) // Удаление видео из плеера
+		_mediaPlayer->setSource(QUrl());
 
 	if (mediaType.contains("video")) {
 		clearScene();
 		_containerWidget->show();
+
 		_mediaPlayer->setSource(source);
 		_videoItem->setSize(QSize(QApplication::primaryScreen()->availableGeometry().width(), QApplication::primaryScreen()->availableGeometry().height()));
+
 		_currentMediaSize = _videoItem->boundingRect().size().toSize();
 		_currentMediaPosition = _videoItem->pos().toPoint();
+
 		play();
 	}
 	else if (mediaType.contains("image")) {
 		clearScene();
 		_containerWidget->hide();
+
 		QPixmap pixmap(sourcePath);
 
 		_currentImageItem = new QGraphicsPixmapItem();
@@ -438,6 +442,7 @@ void MediaPlayer::setSource(const QUrl& source) {
 
 		_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2, (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
 		_videoScene->addItem(_currentImageItem);
+
 		_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
 		_currentMediaPosition = _currentImageItem->pos().toPoint();
 	}

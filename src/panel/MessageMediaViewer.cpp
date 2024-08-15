@@ -82,7 +82,6 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	widgetsHider->SetInactivityDuration(3000);
 	widgetsHider->SetAnimationDuration(3000);
 
-
 	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
 	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
 	QShortcut* showMinimizedShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);
@@ -133,17 +132,20 @@ void MessageMediaViewer::updateMessageTextView() {
 	QSize mediaSize = _mediaPlayer->occupiedMediaSpace();
 	QPoint mediaPosition = _mediaPlayer->mediaPosition();
 
+	qDebug() << "mediaSize: " << mediaSize;
+	qDebug() << "mediaPosition: " << mediaPosition;
+
 	const int freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
+
+	qDebug() << "freeBottomSpace: " << freeBottomSpace;
 
 	_messageTextView->setText(_currentMessage->messageText());
 
 	if (freeBottomSpace >= _messageTextView->height() * 1.5) {
-		// Виджет с текстом сообщения помещается в свободное пространство под медиа, его можно центрировать по вертикали
 		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))) - messageTextViewBottomIndent;
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	} 
 	else if ((freeBottomSpace - _messageTextView->height()) >= messageTextViewBottomIndent) {
-		// Виджет с текстом сообщения ровно помещается в свободное пространство под медиа
 		yCoordinate = height() - freeBottomSpace - messageTextViewBottomIndent;
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	}
