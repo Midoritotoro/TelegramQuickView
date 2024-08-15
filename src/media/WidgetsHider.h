@@ -56,7 +56,8 @@ private:
     bool _fadeInOutAnimation;
 
     inline bool eventFilter(QObject* pWatched, QEvent* pEvent) override {
-        if (pEvent->type() == QEvent::MouseMove) {
+        if (pEvent->type() == QEvent::MouseMove
+            || pEvent->type() == QEvent::MouseButtonPress) {
 
             ControlVisibility(true);
 

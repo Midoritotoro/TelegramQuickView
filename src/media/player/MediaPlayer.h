@@ -41,7 +41,7 @@ private:
 	QGraphicsPixmapItem* _currentImageItem = nullptr;
 	QSize _currentMediaSize;
 	QPoint _currentMediaPosition;
-	bool _doubleClicked = false, _allowChangeVideoState = true;
+	bool _allowChangeVideoState = true;
 public:
 	MediaPlayer(QWidget* parent = nullptr);
 
@@ -56,7 +56,6 @@ public:
 	[[nodiscard]] int getVideoControlsHeight() const noexcept;
 protected:
 	void videoClicked();
-	void mouseDoubleClickEvent(QMouseEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 public Q_SLOTS:

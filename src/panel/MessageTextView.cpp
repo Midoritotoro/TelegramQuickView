@@ -53,7 +53,7 @@ void MessageTextView::setText(const QString& text) {
 		_textLabel->setMinimumWidth(0);
 		setMinimumWidth(0);
 	}
+
 	_textLabel->adjustSize();
 	adjustSize();
-
 }

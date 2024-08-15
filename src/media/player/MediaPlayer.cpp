@@ -273,20 +273,6 @@ void MediaPlayer::setMediaPlayerVideoPosition(int value) {
 		_mediaPlayer->setPosition(value);
 }
 
-void MediaPlayer::mouseDoubleClickEvent(QMouseEvent* event) {
-	_doubleClicked = true;
-	mousePressEvent(event);
-
-	if (isMaximized() || isFullScreen())
-		showNormal();
-	else
-		showFullScreen();
-
-	adjustVideoSize();
-	_doubleClicked = false;
-	event->accept();
-}
-
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton)
 		videoClicked();
@@ -329,9 +315,6 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 		_currentMediaSize = _videoItem->boundingRect().size().toSize();
 		_currentMediaPosition = _videoItem->pos().toPoint();
 	}
-
-	if (_doubleClicked)
-		return;
 
 	adjustVideoSize();
 
