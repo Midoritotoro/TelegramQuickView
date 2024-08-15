@@ -16,7 +16,6 @@
 #include <QPoint>
 #include <utility>
 #include <QApplication>
-#include <QMargins>
 
 
 namespace {
@@ -158,12 +157,15 @@ void MessageMediaViewer::updateMessageTextView() {
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
 	_currentMessage = messageWidget;
 	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
-
+	 
 	_mediaPlayer->setVisible(true);
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
-	
-	showFullScreen();
+
+	showNormal();
+	_mediaPlayer->showNormal();
+
 	_mediaPlayer->showFullScreen();
+	showFullScreen();
 
 	updateMediaNavigationButtons();
 	updateMessageTextView();
@@ -284,6 +286,7 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 void MessageMediaViewer::resizeEvent(QResizeEvent* event) {
 	_previousAttachment->move(_nextAttachment->width(), height() / 2);
 	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
+
 	updateMessageTextView();
 }
 
