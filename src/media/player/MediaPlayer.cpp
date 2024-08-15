@@ -21,7 +21,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{ \n"
-		"background-color: rgba(1, 0, 0, 90);\n"
+		"background-color: rgba(15, 15, 15, 99);\n"
 	"}");
 
 	_videoScene = new QGraphicsScene();
@@ -388,8 +388,11 @@ void MediaPlayer::setSource(const QUrl& source) {
 
 	QString mediaType = detectMediaType(sourcePath);
 
-	if (_mediaPlayer->playbackState()) // Удаление видео из плеера
+	if (!_mediaPlayer->source().isEmpty()) {
+		// Удаление видео из плеера
+		_mediaPlayer->stop();
 		_mediaPlayer->setSource(QUrl());
+	}
 
 	if (mediaType.contains("video")) {
 		clearScene();

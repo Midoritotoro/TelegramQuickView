@@ -12,11 +12,9 @@ MessageTextView::MessageTextView(QWidget* parent):
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget {\n"
-		"background-color: rgba(27, 27, 27, 99);\n"
-		//"border: 5px;\n"
+		"background-color: rgba(41, 41, 54, 99);\n"
+		"border: 7px;\n"
 		"border-radius: 5px;\n"
-		//"border-bottom-right-radius: 5px;\n"
-		//"border-bottom-left-radius: 5px;\n"
 	"}");
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setContentsMargins(0, 0, 0, 0);

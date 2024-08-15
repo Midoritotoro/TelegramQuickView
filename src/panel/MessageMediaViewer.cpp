@@ -36,7 +36,7 @@ MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setStyleSheet("QWidget{\n "
-		"background-color: rgba(35, 36, 37, 90)\n"
+		"background-color: rgba(15, 15, 15, 99)\n"
 		"}");
 
 	QString currentPath = QCoreApplication::applicationDirPath();
