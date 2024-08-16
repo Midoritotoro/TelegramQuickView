@@ -40,16 +40,7 @@ int main(int argc, char* argv[])
 
     TelegramPostQuickView* view = new TelegramPostQuickView();
     view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4") });
-    text = "Test message 3. Test message 3. Test message 3. Test message 3. Test message 3.";
-    view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
-    /*text = "Test message 2";
-    view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg") });
-    text = "Test message 4";
-    view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
-
-    for (int index = 0; index < 100; ++index) {
-        view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videoRes.mp4") });
-    }*/
+    view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
 
     view->show();
     qint64 elapsed = timer.elapsed();

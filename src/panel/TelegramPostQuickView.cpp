@@ -3,6 +3,7 @@
 
 #include "../media/WidgetsHider.h"
 #include <QScrollBar>
+#include <QShowEvent>
 
 
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
@@ -21,28 +22,27 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	_messageMediaViewer = new MessageMediaViewer(_messagesHistory);
 
 	QWidget* chatScrollAreaWidget = new QWidget();
-	_chatScrollAreaLayout = new QGridLayout(chatScrollAreaWidget);
-	QScrollArea* chatScrollArea = new QScrollArea();
+	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
+	_chatScrollArea = new ScrollArea();
 
-	chatScrollArea->setWidgetResizable(true);
+	_chatScrollArea->setWidgetResizable(true);
 
 	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 25, 15);
-	_chatScrollAreaLayout->setVerticalSpacing(15);
+	_chatScrollAreaLayout->setSpacing(15);
 
 	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
-	chatScrollArea->setContentsMargins(0, 0, 0, 0);
+	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
 
 	chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-	chatScrollArea->setWidget(chatScrollAreaWidget);
-	chatScrollArea->setMouseTracking(true);
+	_chatScrollArea->setWidget(chatScrollAreaWidget);
+	_chatScrollArea->setMouseTracking(true);
 	chatScrollAreaWidget->setMouseTracking(true);
 
-	
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../src/css");
 
@@ -51,7 +51,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	if (chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
 
 		QByteArray chatScrollAreaStyle = chatScrollAreaStyleFile.readAll();
-		chatScrollArea->setStyleSheet(chatScrollAreaStyle);
+		_chatScrollArea->setStyleSheet(chatScrollAreaStyle);
 
 		chatScrollAreaStyleFile.close();
 	}
@@ -75,14 +75,16 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent) :
 	grid->setContentsMargins(0, 0, 3, 4);
 	grid->setVerticalSpacing(4);
 	grid->setHorizontalSpacing(0);
-	grid->addWidget(chatScrollArea, grid->rowCount(), 0, 1, 1);
+	grid->addWidget(_chatScrollArea, grid->rowCount(), 0, 1, 1);
 
-	QWidgetList widgetsList = QWidgetList({ chatScrollArea->verticalScrollBar() });
+	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
 	connect(_messageMediaViewer, &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
+	connect(_chatScrollArea->verticalScrollBar(), &QScrollBar::valueChanged, _chatScrollArea, &ScrollArea::scrollHandler);
+	connect(_chatScrollArea, &ScrollArea::addContentsNeeded, this, &TelegramPostQuickView::addContentsRequest);
 }
 
 void TelegramPostQuickView::makeMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {
@@ -92,7 +94,7 @@ void TelegramPostQuickView::makeMessage(const QString& author, const QString& me
 	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
 	messageWidget->addMessageText(messageText);
 
-	_chatScrollAreaLayout->addWidget(messageWidget, _chatScrollAreaLayout->rowCount(), 0, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
+	_chatScrollAreaLayout->addWidget(messageWidget, 0, Qt::AlignHCenter | Qt::AlignTop);
 	_messagesList.append(messageWidget);
 
 	const MessageAttachmentsList& messageAttachmentsList = messageWidget->messageAttachments();
@@ -124,4 +126,14 @@ int TelegramPostQuickView::indexOfMessage(MessageWidget* messageWidget) {
 
 MessageWidget* TelegramPostQuickView::messageAt(int index) {
 	return _messagesList.at(index);
+}
+
+void TelegramPostQuickView::showEvent(QShowEvent* event) {
+	_chatScrollArea->verticalScrollBar()->setValue(_chatScrollArea->verticalScrollBar()->minimum());
+	QWidget::showEvent(event);
+}
+
+void TelegramPostQuickView::addContentsRequest() {
+	// Запарсить файл с постами и подгрузить более старые
+	makeMessage("Username1", "text", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4") });
 }
