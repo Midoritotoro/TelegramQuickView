@@ -4,6 +4,7 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 
+
 MediaPlayer::MediaPlayer(QWidget* parent) :
 	QWidget(parent)
 {
@@ -296,36 +297,32 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	_videoForm->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 	_videoFormLayout->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 
-	if (_currentImageItem) {
-		if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
-			_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
-			// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
-
-			qreal scale = qMin(_videoView->width() / (qreal)_currentImageItem->pixmap().width(), _videoView->height() / (qreal)_currentImageItem->pixmap().height());
-			_currentImageItem->setScale(scale);
-		}
-		_currentImageItem->setPos((_videoView->width() - _currentImageItem->pixmap().width() * _currentImageItem->scale()) / 2, (_videoView->height() - _currentImageItem->pixmap().height() * _currentImageItem->scale()) / 2);
-	}
-
-	if (_currentImageItem) {
-		_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
-		_currentMediaPosition = _currentImageItem->pos().toPoint();
-	}
-	else {
-		_currentMediaSize = _videoItem->boundingRect().size().toSize();
-		_currentMediaPosition = _videoItem->pos().toPoint();
-	}
-
 	adjustVideoSize();
 
-	if (windowState() != Qt::WindowMaximized && windowState() != Qt::WindowFullScreen)
-		return;
+	if (!_currentImageItem) {
+		_currentMediaSize = _videoItem->boundingRect().size().toSize();
+		_currentMediaPosition = _videoItem->pos().toPoint();
 
-	isFullScreen() ? showNormal() : showFullScreen();
+		return;
+	}
+
+	if (_currentImageItem->pixmap().width() > QApplication::primaryScreen()->availableGeometry().width() && 
+		_currentImageItem->pixmap().height() > QApplication::primaryScreen()->availableGeometry().height()) {
+		// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
+
+		qreal scale = qMin(_videoView->width() / (qreal)_currentImageItem->pixmap().width(), _videoView->height() / (qreal)_currentImageItem->pixmap().height());
+		_currentImageItem->setScale(scale);
+	}
+	_currentImageItem->setPos((_videoView->width() - _currentImageItem->pixmap().width() * _currentImageItem->scale()) / 2, (_videoView->height() - _currentImageItem->pixmap().height() * _currentImageItem->scale()) / 2);
+
+	_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
+	_currentMediaPosition = _currentImageItem->pos().toPoint();
+
 }
 
 void MediaPlayer::adjustVideoSize() {
-	_videoItem->setSize(size());
+	if (!_currentImageItem)
+		_videoItem->setSize(size());
 	_videoScene->setSceneRect(QRectF(QPointF(0, 0), size()));
 }
 
@@ -360,7 +357,11 @@ QString MediaPlayer::detectMediaType(const QString& filePath) {
 
 void MediaPlayer::clearScene() {
 	QList<QGraphicsItem*> items = _videoScene->items();
-	foreach(QGraphicsItem * item, items) {
+
+	if (items.count() == 0)
+		return;
+	
+	foreach(QGraphicsItem* item, items) {
 		if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
 			_videoScene->removeItem(item);
 		}
@@ -401,10 +402,11 @@ void MediaPlayer::setSource(const QUrl& source) {
 		_mediaPlayer->setSource(source);
 		_videoItem->setSize(QSize(QApplication::primaryScreen()->availableGeometry().width(), QApplication::primaryScreen()->availableGeometry().height()));
 
+		play();
+
 		_currentMediaSize = _videoItem->boundingRect().size().toSize();
 		_currentMediaPosition = _videoItem->pos().toPoint();
 
-		play();
 	}
 	else if (mediaType.contains("image")) {
 		clearScene();

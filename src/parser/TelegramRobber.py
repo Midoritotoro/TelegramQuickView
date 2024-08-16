@@ -12,6 +12,7 @@ import os.path
 from datetime import datetime
 from collections.abc import Generator
 
+
 class HandlersManager:
     def __init__(self: 'HandlersManager',
                  client: TelegramClient,
@@ -30,6 +31,7 @@ class HandlersManager:
             @self.__client.on(events.NewMessage(chats=channelEntity))
             async def handler(event: events.NewMessage.Event) -> None:
                 await self.__downloadFunction(self.__username, event.message)
+
 
 class Sleuth:
     def __init__(

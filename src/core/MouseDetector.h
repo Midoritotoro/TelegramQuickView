@@ -8,10 +8,10 @@
 class MouseDetector
 {	
 public:
-	typedef enum _Direction {
+	enum class Direction {
 		Left,
 		Right
-	} Direction;
+	};
 
 	typedef struct _ThreadParameters {
 		Direction direction;

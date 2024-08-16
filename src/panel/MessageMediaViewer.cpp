@@ -158,14 +158,16 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 	_currentMessage = messageWidget;
 	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
 	 
-	_mediaPlayer->setVisible(true);
-	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
-
 	showNormal();
 	_mediaPlayer->showNormal();
 
 	_mediaPlayer->showFullScreen();
 	showFullScreen();
+
+	if (_mediaPlayer->isHidden())
+		_mediaPlayer->setVisible(true);
+
+	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
 
 	updateMediaNavigationButtons();
 	updateMessageTextView();

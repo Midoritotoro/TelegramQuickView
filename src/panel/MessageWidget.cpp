@@ -37,6 +37,7 @@ void MessageWidget::addMessageText(const QString& text) {
 	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 	textLabel->setText(text);
+
 	_telegramMessage->text = text;
 
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение

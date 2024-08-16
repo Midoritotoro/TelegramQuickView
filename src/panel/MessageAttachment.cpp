@@ -2,6 +2,7 @@
 
 #include "MessageWidget.h"
 
+
 #include <QMimeDatabase>
 #include <QUrl>
 
