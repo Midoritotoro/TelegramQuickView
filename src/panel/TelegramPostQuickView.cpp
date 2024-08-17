@@ -4,11 +4,12 @@
 #include "../media/WidgetsHider.h"
 #include <QScrollBar>
 #include <QShowEvent>
+#include <QElapsedTimer>
 
 
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 QWidget(parent)
-, _displayMode(MessageMediaDisplayMode::Stack)
+, _displayMode(MessageWidget::MessageMediaDisplayMode::Stack)
 {
 	setMouseTracking(true);
 	_messagesHistory = new History();
@@ -38,7 +39,7 @@ QWidget(parent)
 	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
 	_chatScrollArea->setWidget(chatScrollAreaWidget);
 	_chatScrollArea->setMouseTracking(true);
@@ -73,7 +74,7 @@ QWidget(parent)
 
 	setContentsMargins(0, 0, 0, 0);
 
-	grid->setContentsMargins(0, 0, 3, 4);
+	grid->setContentsMargins(0, 0, 5, 4);
 	grid->setVerticalSpacing(4);
 	grid->setHorizontalSpacing(0);
 	grid->addWidget(_chatScrollArea, grid->rowCount(), 0, 1, 1);
@@ -89,19 +90,17 @@ QWidget(parent)
 }
 
 void TelegramPostQuickView::makeMessage(const QString& author, const QString& messageText, const QUrlList& attachmentsPaths) {
+	QElapsedTimer timer;
+	timer.start();
+
 	const int maximumMessageWidth = _panelWidth - (width() / 12.5);
 	MessageWidget* messageWidget = new MessageWidget(author);
 
+	messageWidget->setMessageMediaDisplayMode(_displayMode);
 	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
 	messageWidget->addMessageText(messageText);
 
-	switch (_displayMode) {
-	case MessageMediaDisplayMode::PreviewWithCount:
-	case MessageMediaDisplayMode::Compact:
-		default:
-			_chatScrollAreaLayout->addWidget(messageWidget, 0, Qt::AlignHCenter | Qt::AlignTop);
-	}
-
+	_chatScrollAreaLayout->addWidget(messageWidget, 0, Qt::AlignHCenter | Qt::AlignTop);
 	_messagesList.append(messageWidget);
 
 	const MessageAttachmentsList& messageAttachmentsList = messageWidget->messageAttachments();
@@ -112,9 +111,11 @@ void TelegramPostQuickView::makeMessage(const QString& author, const QString& me
 
 	foreach(MessageAttachment* messageAttachment, messageAttachmentsList)
 		connect(messageAttachment, &MessageAttachment::clicked, this, &TelegramPostQuickView::attachmentCliked);
+
+	qDebug() << "TelegramPostQuickView::makeMessage: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
 }
 
-void TelegramPostQuickView::setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) {
+void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode displayMode) {
 	_displayMode = displayMode;
 }
 

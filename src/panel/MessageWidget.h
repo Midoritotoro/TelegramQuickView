@@ -15,22 +15,31 @@ typedef struct _TelegramMessage {
 
 
 class MessageWidget: public QWidget {
-private:
-	Q_OBJECT
-	QGridLayout* _messageLayout = nullptr;
-	TelegramMessage* _telegramMessage = nullptr;
+Q_OBJECT
 public:
+	enum class MessageMediaDisplayMode {
+		Stack,
+		PreviewWithCount,
+	};
+
 	MessageWidget(const QString& author, QWidget* parent = nullptr);
 
 	void addMessageText(const QString& text);
 	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
+	void setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode);
 
+	[[nodiscard]] MessageMediaDisplayMode messsageMediaDisplayMode() const noexcept;
 	[[nodiscard]] QString messageText() const noexcept;
 	[[nodiscard]] const MessageAttachmentsList& messageAttachments() const noexcept;
 
 	[[nodiscard]] int indexOfAttachment(MessageAttachment* messageAttachment) const noexcept;
 	[[nodiscard]] MessageAttachment* attachmentAt(int index) const noexcept;
 	[[nodiscard]] int attachmentsLength() const noexcept;
+
 	[[nodiscard]] bool hasAttachments() const noexcept;
 	[[nodiscard]] bool hasText() const noexcept;
+private:
+	QGridLayout* _messageLayout = nullptr;
+	TelegramMessage* _telegramMessage = nullptr;
+	MessageMediaDisplayMode _mediaDisplayMode;
 };

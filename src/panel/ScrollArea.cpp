@@ -5,7 +5,7 @@
 ScrollArea::ScrollArea(QWidget* parent):
 	QScrollArea(parent)
 {
-
+	
 }
 
 void ScrollArea::scrollHandler() {

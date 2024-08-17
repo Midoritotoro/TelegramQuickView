@@ -4,8 +4,12 @@
 #include <QGridLayout>
 
 
-MessageWidget::MessageWidget(const QString& author, QWidget* parent) :
-	QWidget(parent)
+MessageWidget::MessageWidget(
+	const QString& author,
+	QWidget* parent
+):
+QWidget(parent)
+, _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
 	_telegramMessage = new TelegramMessage();
 	_telegramMessage->author = author;
@@ -57,21 +61,48 @@ void MessageWidget::addMessageText(const QString& text) {
 }
 
 void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth) {
+	switch (_mediaDisplayMode) {
+		case MessageMediaDisplayMode::PreviewWithCount:
 
-	foreach(const QUrl& url, attachmentsPaths) {
-		QString sourcePath;
+			foreach(const QUrl & url, attachmentsPaths) {
+				QString sourcePath;
 
-		if (url.path().at(0) == "/"[0])
-			sourcePath = url.path().remove(0, 1);
-		else
-			sourcePath = url.path();
+				if (url.path().at(0) == "/"[0])
+					sourcePath = url.path().remove(0, 1);
+				else
+					sourcePath = url.path();
 
-		MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth);
-		_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
-		messageAttachment->setParentMessage(this);
-		
-		_telegramMessage->attachments.append(messageAttachment);
-	}
+				MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
+				if (_messageLayout->rowCount() <= 1)
+					_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+				_telegramMessage->attachments.append(messageAttachment);
+			}
+			break;
+		case MessageMediaDisplayMode::Stack:
+			foreach(const QUrl & url, attachmentsPaths) {
+				QString sourcePath;
+
+				if (url.path().at(0) == "/"[0])
+					sourcePath = url.path().remove(0, 1);
+				else
+					sourcePath = url.path();
+
+				MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
+				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+
+				_telegramMessage->attachments.append(messageAttachment);
+				
+			}
+			break;
+		}
+}
+
+void MessageWidget::setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) {
+	_mediaDisplayMode = displayMode;
+}
+
+MessageWidget::MessageMediaDisplayMode MessageWidget::messsageMediaDisplayMode() const noexcept {
+	return _mediaDisplayMode;
 }
 
 QString MessageWidget::messageText() const noexcept {

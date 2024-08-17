@@ -16,16 +16,10 @@ class History;
 class TelegramPostQuickView: public QWidget {
 	Q_OBJECT
 public:
-	enum class MessageMediaDisplayMode {
-		Stack,
-		PreviewWithCount,
-		Compact,
-	};
-
 	TelegramPostQuickView(QWidget* parent = nullptr);
 
 	void makeMessage(const QString& author, const QString& messageText = "", const QUrlList& attachmentsPaths = {});
-	void setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode);
+	void setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode displayMode);
 
 	[[nodiscard]] const MessagesList& messages() const;
 
@@ -43,5 +37,5 @@ private:
 	MessagesList _messagesList;
 	History* _messagesHistory = nullptr;
 	ScrollArea* _chatScrollArea = nullptr;
-	MessageMediaDisplayMode _displayMode;
+	MessageWidget::MessageMediaDisplayMode _displayMode;
 };

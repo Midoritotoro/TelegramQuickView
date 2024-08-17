@@ -65,8 +65,6 @@ private:
 
     void updateHoverControl(const QPoint& _pos);
 
-
-
 private:
     mutable QSize sizeHint_;
     QVariant badgeValue_;
