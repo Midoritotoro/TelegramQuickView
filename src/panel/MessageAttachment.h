@@ -20,7 +20,7 @@ private:
 	QImage _attachmentPreview;
 	int _attachmentWidth = 0;
 public:
-	MessageAttachment(QString attachmentPath, int attachmentWidth, MessageWidget* parentMessage, QWidget* parent = nullptr);
+	MessageAttachment(QString attachmentPath, int attachmentWidth, MessageWidget* parentMessage);
 
 	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
 
@@ -30,7 +30,7 @@ public:
 	[[nodiscard]] QString attachmentType() const noexcept;
 
 	[[nodiscard]] MessageWidget* parentMessage() const noexcept;
-	[[nodiscard]] static QString detectMediaType(const QString& filePath);
+	[[nodiscard]] static QString detectMediaType(const QString& filePath) noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;

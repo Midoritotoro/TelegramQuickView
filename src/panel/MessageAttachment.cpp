@@ -17,14 +17,12 @@ namespace {
 	}
 }
 
-
 MessageAttachment::MessageAttachment(
 	QString attachmentPath,
 	int attachmentWidth,
-	MessageWidget* parentMessage,
-	QWidget* parent
+	MessageWidget* parentMessage
 )
-: ClickableLabel(parent)
+: ClickableLabel(nullptr)
 , _attachmentPath(attachmentPath)
 , _attachmentType(detectMediaType(attachmentPath))
 , _parentMessage(parentMessage)
@@ -61,7 +59,7 @@ MessageWidget* MessageAttachment::parentMessage() const noexcept {
 	return _parentMessage;
 }
 
-QString MessageAttachment::detectMediaType(const QString& filePath) {
+QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 	return QMimeDatabase().mimeTypeForFile(filePath).name();
 }
 
@@ -113,10 +111,12 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 
 void MessageAttachment::updatePreviewSize() {
 	if (_attachmentType.contains("image")) {
+		QSize size = getMinimumSizeWithAspectRatio(_attachmentPreview.size(), _attachmentWidth);
+
 		if (_attachmentPreview.format() != QImage::Format_ARGB32_Premultiplied)
 			_attachmentPreview = _attachmentPreview.convertToFormat(QImage::Format_ARGB32_Premultiplied);
-		QSize size = getMinimumSizeWithAspectRatio(_attachmentPreview.size(), _attachmentWidth);
-		_attachmentPreview = _attachmentPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		if (_attachmentPreview.size() != size)
+			_attachmentPreview = _attachmentPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	}
 	else if (_attachmentType.contains("video")) {
 		_attachmentPreview = QImage(_attachmentWidth / 2, _attachmentWidth / 2, QImage::Format_ARGB32_Premultiplied);
