@@ -119,7 +119,8 @@ void MessageAttachment::updatePreviewSize() {
 		_attachmentPreview = _attachmentPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	}
 	else if (_attachmentType.contains("video")) {
+		_attachmentPreview = QImage(_attachmentWidth / 2, _attachmentWidth / 2, QImage::Format_ARGB32_Premultiplied);
+		_attachmentPreview = _attachmentPreview.scaled(Qt::IgnoreAspectRatio, Qt::FastTransformation);
 		_attachmentPreview.fill(Qt::white);
-		_attachmentPreview = _attachmentPreview.scaled(_attachmentWidth / 2, _attachmentWidth / 2, Qt::IgnoreAspectRatio, Qt::FastTransformation);
 	}
 }
