@@ -2,14 +2,10 @@
 
 #include "../media/ClickableLabel.h"
 
-#include <QPaintEvent>
-#include <QResizeEvent>
-
-class QUrl;
-typedef QList<QUrl> QUrlList;
-
 class MessageWidget;
-
+class QImage;
+class QPaintEvent;
+class QResizeEvent;
 
 class MessageAttachment: public ClickableLabel {
 private:

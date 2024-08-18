@@ -1,10 +1,14 @@
 #include "TelegramPostQuickView.h"
 
-
 #include "../media/WidgetsHider.h"
-#include <QScrollBar>
+#include "MessageAttachment.h"
+#include "MessageMediaViewer.h"
+#include "History.h"
+#include "ScrollArea.h"
+
 #include <QShowEvent>
 #include <QElapsedTimer>
+#include <QScrollBar>
 
 
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
@@ -101,11 +105,9 @@ void TelegramPostQuickView::makeMessage(const QString& author, const QString& me
 	messageWidget->addMessageText(messageText);
 
 	_chatScrollAreaLayout->addWidget(messageWidget, 0, Qt::AlignHCenter | Qt::AlignTop);
-	_messagesList.append(messageWidget);
-
-	const MessageAttachmentsList& messageAttachmentsList = messageWidget->messageAttachments();
 	_messagesHistory->makeMessage(messageWidget);
 
+	const MessageAttachmentsList& messageAttachmentsList = messageWidget->messageAttachments();
 	if (messageAttachmentsList.isEmpty())
 		return;
 
@@ -126,18 +128,6 @@ void TelegramPostQuickView::attachmentCliked() {
 	_messageMediaViewer->show();
 	_messageMediaViewer->openMessageAttachment(attachmentParentMessage, attachmentParentMessage->indexOfAttachment(attachment));
 	showMinimized();
-}
-
-const MessagesList& TelegramPostQuickView::messages() const {
-	return _messagesList;
-}
-
-int TelegramPostQuickView::indexOfMessage(MessageWidget* messageWidget) {
-	return _messagesList.indexOf(messageWidget);
-}
-
-MessageWidget* TelegramPostQuickView::messageAt(int index) {
-	return _messagesList.at(index);
 }
 
 void TelegramPostQuickView::showEvent(QShowEvent* event) {

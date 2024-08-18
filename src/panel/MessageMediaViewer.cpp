@@ -5,6 +5,7 @@
 #include "../media/WidgetsHider.h"
 #include "MessageTextView.h"
 #include "MessageAttachment.h"
+#include "MessageWidget.h"
 
 #include <QToolButton>
 #include <QDir>

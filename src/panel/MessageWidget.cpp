@@ -1,7 +1,7 @@
 ﻿#include "MessageWidget.h"
 #include "MessageAttachment.h"
 
-#include <QGridLayout>
+#include <QElapsedTimer>
 
 
 MessageWidget::MessageWidget(
@@ -16,7 +16,7 @@ QWidget(parent)
 
 	_messageLayout = new QGridLayout(this);
 	setContentsMargins(0, 0, 0, 0);
-	_messageLayout->setVerticalSpacing(0);
+	_messageLayout->setSpacing(0);
 	_messageLayout->setContentsMargins(0, 0, 0, 0);
 
 	setStyleSheet("QWidget{\n"
@@ -38,11 +38,11 @@ void MessageWidget::addMessageText(const QString& text) {
 	textLabel->setAlignment(Qt::AlignLeft);
 	textLabel->setContentsMargins(8, 5, 20, 8);
 
+	textLabel->setText(text);
+	_telegramMessage->text = text;
+
 	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-	textLabel->setText(text);
-
-	_telegramMessage->text = text;
 
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		textLabel->setStyleSheet("QLabel{\n"
@@ -56,45 +56,56 @@ void MessageWidget::addMessageText(const QString& text) {
 			"border-radius: 10px;\n"
 		"}");
 
-
 	_messageLayout->addWidget(textLabel, _messageLayout->rowCount(), 0, 1, 1);
 }
 
 void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth) {
+	if (attachmentsPaths.length() < 1)
+		return;
+
+	QElapsedTimer timer;
 	switch (_mediaDisplayMode) {
-		case MessageMediaDisplayMode::PreviewWithCount:
+	case MessageMediaDisplayMode::PreviewWithCount:
+		timer.start();
 
-			foreach(const QUrl & url, attachmentsPaths) {
-				QString sourcePath;
+		foreach(const QUrl & url, attachmentsPaths) {
+			QString sourcePath;
 
-				if (url.path().at(0) == "/"[0])
-					sourcePath = url.path().remove(0, 1);
-				else
-					sourcePath = url.path();
+			if (url.path().at(0) == "/"[0])
+				sourcePath = url.path().remove(0, 1);
+			else
+				sourcePath = url.path();
+			QElapsedTimer timer2;
+			timer2.start();
 
-				MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
-				if (_messageLayout->rowCount() <= 1)
-					_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
-				_telegramMessage->attachments.append(messageAttachment);
-			}
-			break;
-		case MessageMediaDisplayMode::Stack:
-			foreach(const QUrl & url, attachmentsPaths) {
-				QString sourcePath;
-
-				if (url.path().at(0) == "/"[0])
-					sourcePath = url.path().remove(0, 1);
-				else
-					sourcePath = url.path();
-
-				MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
+			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
+			qDebug() << "messageAttachment init: " << static_cast<double>(timer2.elapsed()) / 1000 << " s";
+			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+			_telegramMessage->attachments.append(messageAttachment);
 
-				_telegramMessage->attachments.append(messageAttachment);
-				
-			}
-			break;
 		}
+		qDebug() << "PreviewWithCount: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
+		break;
+	case MessageMediaDisplayMode::Stack:
+		timer.start();
+
+		foreach(const QUrl & url, attachmentsPaths) {
+			QString sourcePath;
+
+			if (url.path().at(0) == "/"[0])
+				sourcePath = url.path().remove(0, 1);
+			else
+				sourcePath = url.path();
+
+			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
+			_messageLayout->addWidget(messageAttachment);
+
+			_telegramMessage->attachments.append(messageAttachment);
+		}
+		qDebug() << "PreviewWithCount: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
+		break;
+	}
 }
 
 void MessageWidget::setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) {

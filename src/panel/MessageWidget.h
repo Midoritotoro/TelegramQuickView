@@ -1,10 +1,14 @@
 #pragma once
 
-#include "MessageAttachment.h"
+#include <QWidget>
+#include <QGridLayout>
+#include <QList>
+#include <QUrl>
 
+class MessageAttachment;
+
+typedef QList<QUrl> QUrlList;
 typedef QList<MessageAttachment*> MessageAttachmentsList;
-class QGridLayout;
-
 
 typedef struct _TelegramMessage {
 	QString date;
@@ -15,7 +19,7 @@ typedef struct _TelegramMessage {
 
 
 class MessageWidget: public QWidget {
-Q_OBJECT
+	Q_OBJECT
 public:
 	enum class MessageMediaDisplayMode {
 		Stack,
