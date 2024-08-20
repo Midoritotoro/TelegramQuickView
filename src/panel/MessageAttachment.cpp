@@ -63,8 +63,6 @@ QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
-	QElapsedTimer timer;
-	timer.start();
 	QLabel::paintEvent(event);
 
 	if (_attachmentPreview.isNull())
@@ -105,36 +103,30 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 		}
 		break;
 	}
-
-	qDebug() << "MessageAttachment::paintEvent: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
 }
 
 void MessageAttachment::resizeEvent(QResizeEvent* event) {
-	QElapsedTimer timer;
-	timer.start();
-
 	ClickableLabel::resizeEvent(event);
 
-	if (_attachmentType.contains("image") 
+	if (_attachmentType.contains("image")
 		&& _attachmentPreview.isNull())
-		_attachmentPreview = QImage(_attachmentPath);
+		_attachmentPreview = QImage(_attachmentPath).convertToFormat(QImage::Format_ARGB32_Premultiplied);
+	else if (_attachmentType.contains("video") 
+		&& _attachmentPreview.isNull())
+		_attachmentPreview = QImage(_attachmentWidth / 2, _attachmentWidth / 2, QImage::Format_ARGB32_Premultiplied);
 
 	updatePreviewSize();
-
-	qDebug() << "MessageAttachment::resizeEvent: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
 }
 
 void MessageAttachment::updatePreviewSize() {
 	if (_attachmentType.contains("image")) {
-		QSize size = getMinimumSizeWithAspectRatio(_attachmentPreview.size(), _attachmentWidth);
-
-		if (_attachmentPreview.format() != QImage::Format_ARGB32_Premultiplied)
-			_attachmentPreview = _attachmentPreview.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+		QSize size = getMinimumSizeWithAspectRatio(QImage(_attachmentPath).size(), _attachmentWidth);
 		if (_attachmentPreview.size() != size)
 			_attachmentPreview = _attachmentPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	}
 	else if (_attachmentType.contains("video")) {
 		_attachmentPreview.fill(Qt::white);
-		_attachmentPreview = _attachmentPreview.scaled(_attachmentWidth / 2, _attachmentWidth / 2, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+		QSize size = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
+		_attachmentPreview = _attachmentPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	}
 }

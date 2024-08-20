@@ -7,6 +7,7 @@ class QImage;
 class QPaintEvent;
 class QResizeEvent;
 
+
 class MessageAttachment: public ClickableLabel {
 private:
 	Q_OBJECT

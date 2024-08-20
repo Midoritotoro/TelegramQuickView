@@ -23,7 +23,7 @@ class MessageWidget: public QWidget {
 public:
 	enum class MessageMediaDisplayMode {
 		Stack,
-		PreviewWithCount,
+		PreviewWithCount
 	};
 
 	MessageWidget(const QString& author, QWidget* parent = nullptr);

@@ -3,7 +3,6 @@
 #include <QList>
 
 class MessageWidget;
-
 typedef QList<MessageWidget*> MessagesList;
 
 

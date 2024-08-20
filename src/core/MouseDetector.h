@@ -2,8 +2,9 @@
 
 #define EDGE_OF_SCREEN_POSITION -1
 
-#include <windows.h>
-#include <tchar.h>
+#include <Windows.h>
+#include "../panel/TelegramPostQuickView.h"
+
 
 class MouseDetector
 {	
@@ -16,18 +17,24 @@ public:
 	typedef struct _ThreadParameters {
 		Direction direction;
 		BOOL running;
-	} ThreadParameters, *LPThreadParameters;
+	} ThreadParameters;
 
 private:
 	HANDLE _thread = nullptr;
-	LPThreadParameters _lpThreadParameters = new ThreadParameters();
+	ThreadParameters* _lpThreadParameters = nullptr;
 public:
-	VOID TrackMouse(Direction direction);
-	BOOL KillThread();
+	MouseDetector();
+
+	void trackMouse();
+	bool killThread();
+
+	void setDirection(Direction direction);
+
 	[[nodiscard]] Direction getDirection() { return _lpThreadParameters->direction; }
 	[[nodiscard]] BOOL isRunning() { return _lpThreadParameters->running; }
-	[[nodiscard]] static DWORD WINAPI CheckMousePosition(LPVOID lpSelf);
+	
+	[[nodiscard]] static DWORD WINAPI checkMousePosition(LPVOID lpSelf);
 protected:
-	DWORD WINAPI CheckMousePositionMember();
+	DWORD WINAPI checkMousePositionMember();
 };
 

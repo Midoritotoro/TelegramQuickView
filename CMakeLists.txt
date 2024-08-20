@@ -108,7 +108,6 @@ set(CMAKE_INSTALL_PREFIX "D:/TelegramQuickView/")
 install(TARGETS Parser DESTINATION out/build)
 install(TARGETS TelegramQuickView DESTINATION out/build)
 
-
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET TelegramQuickView PROPERTY CXX_STANDARD 20)
 endif()

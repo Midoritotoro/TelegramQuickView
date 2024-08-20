@@ -16,6 +16,9 @@
 // Добавление | Замена | Просмотр каналов, новости из которых будут парситься
 // Сторона появления панели с контентом каналов
 // Количество последних постов, которые нужно брать из каналов
+// Метод отображения медиа в сообщениях: Stack, PreviewWithCount
+// Путь, по которому будут скачиваться временные медиа файлы из указанных каналов. Стандарт: несистемный диск с большим количеством места
+// Частота проверки контента в каналах. Стандарт: 10 секунд
 
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -37,7 +40,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
 	QMenuBar* channelOptionsMenuBar = new QMenuBar(this);
-	mouseDetector = new MouseDetector();
 	QLabel* TelegramParserTextLabel = new QLabel("Телеграм каналы: ");
 
 	QMenu* channelOptionsMenu = channelOptionsMenuBar->addMenu("Появление панели");
@@ -63,8 +65,6 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	TelegramParserTextLabel->setAlignment(Qt::AlignCenter);
 	GridLayout->setAlignment(Qt::AlignCenter);
-	connect(LeftPartOfScreenAction, SIGNAL(triggered()), this, SLOT(LeftPartOfScreenAction_triggered()));
-	connect(RightPartOfScreenAction, SIGNAL(triggered()), this, SLOT(RightPartOfScreenAction_triggered()));
 
 	connect(AddChannelsButton, SIGNAL(clicked()), this, SLOT(on_AddChannelsButton_click()));
 	connect(ReplaceChannelsButton, SIGNAL(clicked()), this, SLOT(on_ReplaceChannelsButton_click()));
@@ -106,24 +106,4 @@ void MainWindow::on_GetChannelsFromFileButton_click() {
 		DialogWindow->layout()->addWidget(ReadedChannelsTextEdit);
 		DialogWindow->exec();
 	}
-}
-
-void MainWindow::LeftPartOfScreenAction_triggered() {
-	BOOL mouseDetectorDirection = mouseDetector->isRunning();
-	if (mouseDetectorDirection) {
-		mouseDetector->KillThread();
-		delete mouseDetector;
-		mouseDetector = new MouseDetector();
-	}
-	mouseDetector->TrackMouse(MouseDetector::Direction::Left);
-}
-
-void MainWindow::RightPartOfScreenAction_triggered() {
-	BOOL mouseDetectorDirection = mouseDetector->isRunning();
-	if (mouseDetectorDirection) {
-		mouseDetector->KillThread();
-		delete mouseDetector;
-		mouseDetector = new MouseDetector();
-	}
-	mouseDetector->TrackMouse(MouseDetector::Direction::Right);
 }
