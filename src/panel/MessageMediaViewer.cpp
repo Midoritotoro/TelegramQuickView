@@ -105,8 +105,10 @@ void MessageMediaViewer::updateMediaNavigationButtons() {
 
 	if (nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex + 1) == nullptr
-	) // Впереди нет сообщений с медиа и в текущем сообщении не существует больше медиа
+		) {
+		// Впереди нет сообщений с медиа и в текущем сообщении не существует больше медиа
 		_nextAttachment->hide();
+	}
 
 	if (previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex - 1) == nullptr

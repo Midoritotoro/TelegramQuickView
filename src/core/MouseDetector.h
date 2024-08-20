@@ -2,7 +2,10 @@
 
 #define EDGE_OF_SCREEN_POSITION -1
 
-#include <Windows.h>
+#ifdef _WIN32
+	#include <Windows.h>
+#endif // _WIN32
+
 #include "../panel/TelegramPostQuickView.h"
 
 
@@ -30,8 +33,8 @@ public:
 
 	void setDirection(Direction direction);
 
-	[[nodiscard]] Direction getDirection() { return _lpThreadParameters->direction; }
-	[[nodiscard]] BOOL isRunning() { return _lpThreadParameters->running; }
+	[[nodiscard]] inline Direction getDirection() { return _lpThreadParameters->direction; }
+	[[nodiscard]] inline BOOL isRunning() { return _lpThreadParameters->running; }
 	
 	[[nodiscard]] static DWORD WINAPI checkMousePosition(LPVOID lpSelf);
 protected:

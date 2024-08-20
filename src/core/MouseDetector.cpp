@@ -9,7 +9,9 @@ MouseDetector::MouseDetector()
 
 void MouseDetector::trackMouse() {
 	_lpThreadParameters->running = TRUE;
+#ifdef _WIN32	
 	_thread = CreateThread(NULL, 0, checkMousePosition, (LPVOID)this, 0, 0);
+#endif // _WIN32
 }
 
 bool MouseDetector::killThread() {
@@ -26,6 +28,7 @@ DWORD WINAPI MouseDetector::checkMousePositionMember() {
 
 	while (_lpThreadParameters->running)
 	{
+		Sleep(10);
 		BOOL isSuccessfullyGetCursorPos = GetCursorPos(&lpCursorPointParameters);
 		if (isSuccessfullyGetCursorPos == FALSE)
 			continue;
@@ -39,7 +42,6 @@ DWORD WINAPI MouseDetector::checkMousePositionMember() {
 		else if (_lpThreadParameters->direction == Direction::Left && lpCursorPointParameters.x <= menuThresholdWidthRatio && lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION) {
 			;
 		}
-		Sleep(200);
 	}
 	return 0;
 }
