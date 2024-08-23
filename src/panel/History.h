@@ -12,9 +12,9 @@ private:
 public:
 	void makeMessage(MessageWidget* messageWidget);
 
-	[[nodiscard]] int indexOfMessage(MessageWidget* message) const noexcept;
+	[[nodiscard]] inline int indexOfMessage(MessageWidget* message) const noexcept { return _messagesList.indexOf(message); }
 	[[nodiscard]] MessageWidget* messageAt(int index) const noexcept;
 
 	[[nodiscard]] int messagesWithAttachmentsCount() const noexcept;
-	[[nodiscard]] int count() const noexcept;
+	[[nodiscard]] inline int count() const noexcept { return _messagesList.length(); }
 };

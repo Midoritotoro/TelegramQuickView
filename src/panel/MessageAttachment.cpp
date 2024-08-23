@@ -42,25 +42,10 @@ QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, c
 	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
 }
 
-void MessageAttachment::setParentMessage(MessageWidget* parentMessage) {
-	_parentMessage = parentMessage;
-}
-
-QString MessageAttachment::attachmentPath() const noexcept {
-	return _attachmentPath;
-}
-
-QString MessageAttachment::attachmentType() const noexcept {
-	return _attachmentType;
-}
-
-MessageWidget* MessageAttachment::parentMessage() const noexcept {
-	return _parentMessage;
-}
-
 QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 	return QMimeDatabase().mimeTypeForFile(filePath).name();
 }
+
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QLabel::paintEvent(event);

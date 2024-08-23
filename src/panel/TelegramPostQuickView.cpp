@@ -53,6 +53,7 @@ QWidget(parent)
 	QDir cssDir(currentPath + "/../../src/css");
 
 	QString chatScrollAreaStylePath = cssDir.absolutePath() + "/ChatScrollAreaStyle.css";
+
 	QFile chatScrollAreaStyleFile(chatScrollAreaStylePath);
 	if (chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
 

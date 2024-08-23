@@ -6,10 +6,6 @@ void History::makeMessage(MessageWidget* messageWidget) {
 	return _messagesList.append(messageWidget);
 }
 
-int History::indexOfMessage(MessageWidget* message) const noexcept {
-	return _messagesList.indexOf(message);
-}
-
 MessageWidget* History::messageAt(int index) const noexcept {
 	if (count() > 0)
 		return _messagesList.at(index);
@@ -26,6 +22,3 @@ int History::messagesWithAttachmentsCount() const noexcept {
 	return messagesWithAttachmentsCount;
 }
 
-int History::count() const noexcept {
-	return _messagesList.length();
-}

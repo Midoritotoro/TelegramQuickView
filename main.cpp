@@ -16,6 +16,7 @@
 
 #include <QApplication>
 #include "src/core/MouseDetector.h"
+#include "src/panel/TelegramPostQuickView.h"
 
 
 int main(int argc, char* argv[])
@@ -34,8 +35,15 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
 
-    MouseDetector* mouseDetector = new MouseDetector();
-    mouseDetector->trackMouse();
+    QString text = "Дверь, ведущая в недра планеты, открылась с легким скрипом. Пыль, застоявшаяся за миллионы лет, взметнулась, окутывая нас облаком времени. Профессор Лион, мой компаньон в этом безумном приключении, уже забирался внутрь, его глаза сияли детским восторгом. Я, Эмили, его ассистентка, исследовательница, и просто любопытная душа, следовала за ним, сдерживая дрожь, пробежавшую по спине.";
+
+    TelegramPostQuickView* view = new TelegramPostQuickView();
+    view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
+
+    for (int index = 0; index < 1000; ++index)
+        view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
+
+    view->show();
 
     return app.exec();
 }

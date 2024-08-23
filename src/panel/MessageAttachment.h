@@ -21,12 +21,12 @@ public:
 
 	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
 
-	void setParentMessage(MessageWidget* parentMessage);
+	inline void setParentMessage(MessageWidget* parentMessage) noexcept { _parentMessage = parentMessage; }
 
-	[[nodiscard]] QString attachmentPath() const noexcept;
-	[[nodiscard]] QString attachmentType() const noexcept;
+	[[nodiscard]] inline QString attachmentPath() const noexcept { return _attachmentPath;  }
+	[[nodiscard]] inline QString attachmentType() const noexcept { return _attachmentType; }
 
-	[[nodiscard]] MessageWidget* parentMessage() const noexcept;
+	[[nodiscard]] inline MessageWidget* parentMessage() const noexcept { return _parentMessage; }
 	[[nodiscard]] static QString detectMediaType(const QString& filePath) noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;

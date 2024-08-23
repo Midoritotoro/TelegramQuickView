@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include <QList>
 #include <QUrl>
+#include <memory>
 
 class MessageAttachment;
 
@@ -30,20 +31,20 @@ public:
 
 	void addMessageText(const QString& text);
 	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
-	void setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode);
+	inline void setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) { _mediaDisplayMode = displayMode; }
 
-	[[nodiscard]] MessageMediaDisplayMode messsageMediaDisplayMode() const noexcept;
-	[[nodiscard]] QString messageText() const noexcept;
-	[[nodiscard]] const MessageAttachmentsList& messageAttachments() const noexcept;
+	[[nodiscard]] inline MessageMediaDisplayMode messsageMediaDisplayMode() const noexcept { return _mediaDisplayMode; }
+	[[nodiscard]] inline QString messageText() const noexcept { return _telegramMessage->text; }
+	[[nodiscard]] inline const MessageAttachmentsList& messageAttachments() const noexcept { return _telegramMessage->attachments; }
 
-	[[nodiscard]] int indexOfAttachment(MessageAttachment* messageAttachment) const noexcept;
+	[[nodiscard]] inline int indexOfAttachment(MessageAttachment* messageAttachment) const noexcept { return _telegramMessage->attachments.indexOf(messageAttachment); }
 	[[nodiscard]] MessageAttachment* attachmentAt(int index) const noexcept;
-	[[nodiscard]] int attachmentsLength() const noexcept;
+	[[nodiscard]] inline int attachmentsLength() const noexcept { return _telegramMessage->attachments.length(); }
 
-	[[nodiscard]] bool hasAttachments() const noexcept;
-	[[nodiscard]] bool hasText() const noexcept;
+	[[nodiscard]] inline bool hasAttachments() const noexcept { return !_telegramMessage->attachments.isEmpty(); }
+	[[nodiscard]] inline bool hasText() const noexcept { return !_telegramMessage->text.isEmpty(); }
 private:
+	std::shared_ptr<TelegramMessage> _telegramMessage = nullptr;
 	QGridLayout* _messageLayout = nullptr;
-	TelegramMessage* _telegramMessage = nullptr;
 	MessageMediaDisplayMode _mediaDisplayMode;
 };

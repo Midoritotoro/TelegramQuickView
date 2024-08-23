@@ -11,7 +11,7 @@ MessageWidget::MessageWidget(
 QWidget(parent)
 , _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
-	_telegramMessage = new TelegramMessage();
+	_telegramMessage = std::make_shared<TelegramMessage>();
 	_telegramMessage->author = author;
 
 	_messageLayout = new QGridLayout(this);
@@ -63,11 +63,9 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 	if (attachmentsPaths.length() < 1)
 		return;
 
-	//QElapsedTimer timer;
 	switch (_mediaDisplayMode) {
-	case MessageMediaDisplayMode::PreviewWithCount:
-		//timer.start();
 
+	case MessageMediaDisplayMode::PreviewWithCount:
 		foreach(const QUrl & url, attachmentsPaths) {
 			QString sourcePath;
 
@@ -75,22 +73,19 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 				sourcePath = url.path().remove(0, 1);
 			else
 				sourcePath = url.path();
-			//QElapsedTimer timer2;
-			//timer2.start();
 
 			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
 			messageAttachment->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-			//qDebug() << "messageAttachment init: " << static_cast<double>(timer2.elapsed()) / 1000 << " s";
+
 			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 			_telegramMessage->attachments.append(messageAttachment);
 
 		}
-		//qDebug() << "PreviewWithCount: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
-		break;
-	case MessageMediaDisplayMode::Stack:
-		//timer.start();
 
+		break;
+
+	case MessageMediaDisplayMode::Stack:
 		foreach(const QUrl & url, attachmentsPaths) {
 			QString sourcePath;
 
@@ -104,45 +99,12 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 
 			_telegramMessage->attachments.append(messageAttachment);
 		}
-		//qDebug() << "PreviewWithCount: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
 		break;
 	}
-}
-
-void MessageWidget::setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) {
-	_mediaDisplayMode = displayMode;
-}
-
-MessageWidget::MessageMediaDisplayMode MessageWidget::messsageMediaDisplayMode() const noexcept {
-	return _mediaDisplayMode;
-}
-
-QString MessageWidget::messageText() const noexcept {
-	return _telegramMessage->text;	
-}
-
-const MessageAttachmentsList& MessageWidget::messageAttachments() const noexcept {
-	return _telegramMessage->attachments;
-}
-
-int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) const noexcept {
-	return _telegramMessage->attachments.indexOf(messageAttachment);
 }
 
 MessageAttachment* MessageWidget::attachmentAt(int index) const noexcept {
 	if (index >= 0 && attachmentsLength() > index)
 		return _telegramMessage->attachments.at(index);
 	return nullptr;
-}
-
-int MessageWidget::attachmentsLength() const noexcept {
-	return _telegramMessage->attachments.length();
-}
-
-bool MessageWidget::hasAttachments() const noexcept {
-	return !_telegramMessage->attachments.isEmpty();
-}
-
-bool MessageWidget::hasText() const noexcept {
-	return !_telegramMessage->text.isEmpty();
 }
