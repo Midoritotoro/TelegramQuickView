@@ -5,14 +5,12 @@
 
 
 MessageWidget::MessageWidget(
-	const QString& author,
 	QWidget* parent
 ):
 QWidget(parent)
 , _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
 	_telegramMessage = std::make_shared<TelegramMessage>();
-	_telegramMessage->author = author;
 
 	_messageLayout = new QGridLayout(this);
 	setContentsMargins(0, 0, 0, 0);

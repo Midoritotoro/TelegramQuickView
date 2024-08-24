@@ -39,11 +39,11 @@ int main(int argc, char* argv[])
 
     TelegramPostQuickView* view = new TelegramPostQuickView();
     view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
+    view->show();
 
     for (int index = 0; index < 1000; ++index)
-        view->makeMessage("Username1", text, QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg") });
+        view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test5.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test6.jpg") } ));
 
-    view->show();
 
     return app.exec();
 }

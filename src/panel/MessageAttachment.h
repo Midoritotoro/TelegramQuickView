@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../media/ClickableLabel.h"
+#include <QPixmap>
 
 class MessageWidget;
-class QImage;
 class QPaintEvent;
 class QResizeEvent;
 
@@ -14,7 +14,7 @@ private:
 	QString _attachmentPath;
 	QString _attachmentType;
 	MessageWidget* _parentMessage = nullptr;
-	QImage _attachmentPreview;
+	QSize _attachmentPreviewSize;
 	int _attachmentWidth = 0;
 public:
 	MessageAttachment(QString attachmentPath, int attachmentWidth, MessageWidget* parentMessage);

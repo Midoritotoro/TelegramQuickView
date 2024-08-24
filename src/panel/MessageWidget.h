@@ -12,8 +12,6 @@ typedef QList<QUrl> QUrlList;
 typedef QList<MessageAttachment*> MessageAttachmentsList;
 
 typedef struct _TelegramMessage {
-	QString date;
-	QString author;
 	QString text;
 	MessageAttachmentsList attachments;
 } TelegramMessage;
@@ -27,7 +25,7 @@ public:
 		PreviewWithCount
 	};
 
-	MessageWidget(const QString& author, QWidget* parent = nullptr);
+	MessageWidget(QWidget* parent = nullptr);
 
 	void addMessageText(const QString& text);
 	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);

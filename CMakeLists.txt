@@ -106,6 +106,6 @@ SET_SOURCE_FILES_PROPERTIES(
   GENERATED true
 )
 
-set(CMAKE_IMSTALL_PREFIX "D:/TelegramQuickView")
+set(CMAKE_INSTALL_PREFIX "D:/TelegramQuickView/")
 install(TARGETS TelegramParser DESTINATION out/build)
 install(TARGETS TelegramQuickViewSettings DESTINATION out/build)

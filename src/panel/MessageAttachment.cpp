@@ -50,7 +50,9 @@ QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QLabel::paintEvent(event);
 
-	if (_attachmentPreview.isNull())
+	QPixmap preview = QPixmap(_attachmentPath);
+
+	if (preview.isNull())
 		return;
 
 	QPainter painter(this);
@@ -59,15 +61,13 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 
 	case MessageWidget::MessageMediaDisplayMode::Stack:
-		painter.drawImage(0, 0, _attachmentPreview);
-		setFixedSize(_attachmentPreview.size());
+		painter.drawPixmap(0, 0, preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 		break;
 
 	case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
 		if ((_parentMessage->attachmentsLength() - 1) > 0) {
 			painter.setOpacity(0.4);
-			painter.drawImage(0, 0, _attachmentPreview);
-			setFixedSize(_attachmentPreview.size());
+			painter.drawPixmap(0, 0, preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 			painter.setPen(Qt::lightGray);
 			QFont font("Arial", 18);
@@ -83,8 +83,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
 		}
 		else {
-			painter.drawImage(0, 0, _attachmentPreview);
-			setFixedSize(_attachmentPreview.size());
+			painter.drawPixmap(0, 0, preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 		}
 		break;
 	}
@@ -93,25 +92,18 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 void MessageAttachment::resizeEvent(QResizeEvent* event) {
 	ClickableLabel::resizeEvent(event);
 
-	if (_attachmentType.contains("image")
-		&& _attachmentPreview.isNull())
-		_attachmentPreview = QImage(_attachmentPath).convertToFormat(QImage::Format_ARGB32_Premultiplied);
-	else if (_attachmentType.contains("video") 
-		&& _attachmentPreview.isNull())
-		_attachmentPreview = QImage(_attachmentWidth / 2, _attachmentWidth / 2, QImage::Format_ARGB32_Premultiplied);
-
 	updatePreviewSize();
+	setFixedSize(_attachmentPreviewSize);
 }
 
 void MessageAttachment::updatePreviewSize() {
 	if (_attachmentType.contains("image")) {
-		QSize size = getMinimumSizeWithAspectRatio(QImage(_attachmentPath).size(), _attachmentWidth);
-		if (_attachmentPreview.size() != size)
-			_attachmentPreview = _attachmentPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		QSize size = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
+		_attachmentPreviewSize = size;
+	
 	}
 	else if (_attachmentType.contains("video")) {
-		_attachmentPreview.fill(Qt::white);
 		QSize size = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
-		_attachmentPreview = _attachmentPreview.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		_attachmentPreviewSize = size;
 	}
 }
