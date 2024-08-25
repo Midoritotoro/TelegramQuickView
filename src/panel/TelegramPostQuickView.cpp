@@ -22,7 +22,7 @@ QWidget(parent)
 	const int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
 	_panelWidth = screenWidth / 3.5;
-	setFixedSize(_panelWidth, screenHeight);
+	resize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
 	_messageMediaViewer = new MessageMediaViewer(_messagesHistory);
