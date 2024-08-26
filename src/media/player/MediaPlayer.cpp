@@ -17,7 +17,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	QGridLayout* gridLayout = new QGridLayout();
 
 	_mediaPlayer = new QMediaPlayer();
-	_audioOutput = new QAudioOutput();
+	QAudioOutput* _audioOutput = new QAudioOutput();
 
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
@@ -25,15 +25,16 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		"background-color: rgba(15, 15, 15, 99);\n"
 	"}");
 
-	_videoScene = new QGraphicsScene();
+	QGraphicsScene* _videoScene = new QGraphicsScene();
 	_videoView = new QGraphicsView(_videoScene);
+
 	_videoItem = new QGraphicsVideoItem();
 
 	_videoForm = new QGraphicsWidget();
-	_videoFormLayout = new QGraphicsGridLayout();
+	QGraphicsGridLayout* _videoFormLayout = new QGraphicsGridLayout();
 
 	_containerWidget = new QGraphicsWidget();
-	_containerLayout = new QGraphicsGridLayout();
+	QGraphicsGridLayout* _containerLayout = new QGraphicsGridLayout();
 
 	_videoView->setScene(_videoScene);
 
@@ -234,7 +235,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 void MediaPlayer::volumeChanged(int value) {
 	qreal linearVolume = QAudio::convertVolume(value / qreal(100), QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
-	_audioOutput->setVolume(linearVolume);
+	_mediaPlayer->audioOutput()->setVolume(linearVolume);
 }
 
 void MediaPlayer::videoSliderSetValue(int value) {
@@ -295,7 +296,7 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	Q_UNUSED(event);
 
 	_videoForm->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
-	_videoFormLayout->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
+	_videoForm->layout()->setGeometry(QRectF(width() / 2 - (width() / 8), _videoForm->pos().y(), width() / 4, size().height()));
 
 	adjustVideoSize();
 
@@ -323,31 +324,33 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 void MediaPlayer::adjustVideoSize() {
 	if (!_currentImageItem)
 		_videoItem->setSize(size());
-	_videoScene->setSceneRect(QRectF(QPointF(0, 0), size()));
+	_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), size()));
 }
 
 void MediaPlayer::adjustBottomWidgets() {
+	QGraphicsGridLayout* containerLayout = static_cast<QGraphicsGridLayout*>(_containerWidget->layout());
+
 	if (_audioSlider->isHidden()) {
-		_containerLayout->removeItem(_graphicsVideoTimeLabel);
-		QGraphicsLayoutItem* item = _containerLayout->itemAt(1, 2);
+		containerLayout->removeItem(_graphicsVideoTimeLabel);
+		QGraphicsLayoutItem* item = containerLayout->itemAt(1, 2);
 
 		if (item == _graphicsAudioSlider) {
-			_containerLayout->removeItem(_graphicsAudioSlider);
-			_containerLayout->addItem(_graphicsAudioSlider, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+			containerLayout->removeItem(_graphicsAudioSlider);
+			containerLayout->addItem(_graphicsAudioSlider, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 		}
 
-		_containerLayout->addItem(_graphicsVideoTimeLabel, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+		containerLayout->addItem(_graphicsVideoTimeLabel, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	}
 	else {
-		_containerLayout->removeItem(_graphicsVideoTimeLabel);
-		QGraphicsLayoutItem* item = _containerLayout->itemAt(1, 3);
+		containerLayout->removeItem(_graphicsVideoTimeLabel);
+		QGraphicsLayoutItem* item = containerLayout->itemAt(1, 3);
 
 		if (item == _graphicsAudioSlider) {
-			_containerLayout->removeItem(_graphicsAudioSlider);
-			_containerLayout->addItem(_graphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+			containerLayout->removeItem(_graphicsAudioSlider);
+			containerLayout->addItem(_graphicsAudioSlider, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 		}
 
-		_containerLayout->addItem(_graphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
+		containerLayout->addItem(_graphicsVideoTimeLabel, 1, 3, 1, 1, Qt::AlignLeft | Qt::AlignBottom);
 	}
 }
 
@@ -356,14 +359,15 @@ QString MediaPlayer::detectMediaType(const QString& filePath) {
 }
 
 void MediaPlayer::clearScene() {
-	QList<QGraphicsItem*> items = _videoScene->items();
+	QGraphicsScene* scene = _videoView->scene();
+	QList<QGraphicsItem*> items = scene->items();
 
 	if (items.count() == 0)
 		return;
 	
 	foreach(QGraphicsItem* item, items) {
 		if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
-			_videoScene->removeItem(item);
+			scene->removeItem(item);
 		}
 	}
 }
@@ -429,7 +433,7 @@ void MediaPlayer::setSource(const QUrl& source) {
 		}
 
 		_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2, (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
-		_videoScene->addItem(_currentImageItem);
+		_videoView->scene()->addItem(_currentImageItem);
 
 		_currentMediaSize = _currentImageItem->boundingRect().size().toSize();
 		_currentMediaPosition = _currentImageItem->pos().toPoint();

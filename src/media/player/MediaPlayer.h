@@ -28,12 +28,9 @@ class MediaPlayer : public QWidget
 private:
 	Q_OBJECT
 	QMediaPlayer* _mediaPlayer = nullptr;
-	QAudioOutput* _audioOutput = nullptr;
 	EnhancedSlider* _videoSlider = nullptr, *_audioSlider = nullptr;
 	QGraphicsView* _videoView = nullptr;
-	QGraphicsScene* _videoScene = nullptr;
 	QGraphicsVideoItem* _videoItem = nullptr;
-	QGraphicsGridLayout* _videoFormLayout = nullptr, * _containerLayout = nullptr;
 	QGraphicsWidget* _videoForm = nullptr, * _containerWidget = nullptr,
 				   * _graphicsAudioSlider = nullptr, * _graphicsVideoTimeLabel = nullptr;
 	QLabel* _videoTimeLabel = nullptr;
