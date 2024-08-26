@@ -2,9 +2,8 @@
 
 #include "MessageWidget.h"
 #include <QVBoxLayout>
+#include "History.h"
 
-
-class History;
 class MessageMediaViewer;
 class ScrollArea;
 
@@ -12,11 +11,13 @@ class TelegramPostQuickView: public QWidget {
 	Q_OBJECT
 private:
 	int _panelWidth;
+	MessageWidget::MessageMediaDisplayMode _displayMode;
+
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;
 	MessageMediaViewer* _messageMediaViewer = nullptr;
-	History* _messagesHistory = nullptr;
 	ScrollArea* _chatScrollArea = nullptr;
-	MessageWidget::MessageMediaDisplayMode _displayMode;
+
+	std::shared_ptr<History> _messagesHistory;
 public:
 	TelegramPostQuickView(QWidget* parent = nullptr);
 

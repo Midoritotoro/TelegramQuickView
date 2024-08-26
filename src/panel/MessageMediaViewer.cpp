@@ -1,11 +1,11 @@
 ﻿#include "MessageMediaViewer.h"
 
-#include "History.h"
 #include "NavigationButton.h"
 #include "../media/WidgetsHider.h"
 #include "MessageTextView.h"
 #include "MessageAttachment.h"
 #include "MessageWidget.h"
+#include "History.h"
 
 #include <QToolButton>
 #include <QDir>
@@ -24,7 +24,10 @@ namespace {
 }
 
 
-MessageMediaViewer::MessageMediaViewer(History* messagesHistory, QWidget* parent)
+MessageMediaViewer::MessageMediaViewer(
+	History* messagesHistory,
+	QWidget* parent
+)
 : QWidget(parent)
 , _messagesHistory(messagesHistory)
 {

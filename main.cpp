@@ -27,10 +27,10 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    if (!addParserToRegistryAutoRun()) {
-        MessageBox(NULL, L"Произошла ошибка при добавлении парсера Телеграм в автозагрузку", L"Ошибка", MB_OK);
-        return -1;
-    }
+    //if (!addParserToRegistryAutoRun()) {
+    //    MessageBox(NULL, L"Произошла ошибка при добавлении парсера Телеграм в автозагрузку", L"Ошибка", MB_OK);
+    //    return -1;
+    //}
 
     QApplication app(argc, argv);
 
@@ -39,8 +39,8 @@ int main(int argc, char* argv[])
     TelegramPostQuickView* view = new TelegramPostQuickView();
     view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
-    for (int index = 0; index < 5; ++index)
-        view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") } ));
+   /* for (int index = 0; index < 5; ++index)
+        view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") } ));*/
 
     view->show();
     return app.exec();

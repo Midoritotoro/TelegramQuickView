@@ -10,9 +10,9 @@
 #include <QResizeEvent>
 #include <QCloseEvent>
 #include <QPainter>
+#include <memory>
+#include "History.h"
 
-
-class History;
 class NavigationButton;
 class MessageTextView;
 
@@ -25,7 +25,7 @@ private:
 	NavigationButton* _nextAttachment = nullptr;
 	NavigationButton* _previousAttachment = nullptr;
 	MessageWidget* _currentMessage = nullptr;
-	History* _messagesHistory = nullptr;
+	History* _messagesHistory;
 	MessageTextView* _messageTextView = nullptr;
 	int _currentMessageAttachmentIndex = 0;
 public:

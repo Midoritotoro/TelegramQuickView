@@ -10,7 +10,7 @@ MessageWidget::MessageWidget(
 QWidget(parent)
 , _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
-	_telegramMessage = std::make_shared<TelegramMessage>();
+	_telegramMessage = std::make_unique<TelegramMessage>();
 
 	_messageLayout = new QGridLayout(this);
 	setContentsMargins(0, 0, 0, 0);

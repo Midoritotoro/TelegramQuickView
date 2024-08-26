@@ -42,7 +42,7 @@ public:
 	[[nodiscard]] inline bool hasAttachments() const noexcept { return !_telegramMessage->attachments.isEmpty(); }
 	[[nodiscard]] inline bool hasText() const noexcept { return !_telegramMessage->text.isEmpty(); }
 private:
-	std::shared_ptr<TelegramMessage> _telegramMessage = nullptr;
+	std::unique_ptr<TelegramMessage> _telegramMessage = nullptr;
 	QGridLayout* _messageLayout = nullptr;
 	MessageMediaDisplayMode _mediaDisplayMode;
 };

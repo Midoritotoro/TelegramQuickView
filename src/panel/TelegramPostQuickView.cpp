@@ -3,6 +3,7 @@
 #include "../media/WidgetsHider.h"
 #include "MessageAttachment.h"
 #include "MessageMediaViewer.h"
+
 #include "History.h"
 #include "ScrollArea.h"
 
@@ -16,7 +17,8 @@ QWidget(parent)
 , _displayMode(MessageWidget::MessageMediaDisplayMode::Stack)
 {
 	setMouseTracking(true);
-	_messagesHistory = new History();
+
+	_messagesHistory = std::make_shared<History>();
 
 	const int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
@@ -25,7 +27,7 @@ QWidget(parent)
 	resize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
-	_messageMediaViewer = new MessageMediaViewer(_messagesHistory);
+	_messageMediaViewer = new MessageMediaViewer(_messagesHistory.get());
 
 	QWidget* chatScrollAreaWidget = new QWidget();
 	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
