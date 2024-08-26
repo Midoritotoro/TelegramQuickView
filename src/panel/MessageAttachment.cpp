@@ -9,9 +9,6 @@
 #include <QResizeEvent>
 #include <QUrl>
 
-#include <QMediaPlayer>
-#include <QVideoFrame>
-#include <QVideoSink>
 
 //void AlbumThumbnail::paintPlayVideo(QPainter& p, QRect geometry) {
 //	const auto innerSize = st::msgFileLayout.thumbSize;
@@ -36,11 +33,6 @@ namespace {
 
 	QSize textSize(const QString& text, const QFont& font) {
 		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
-	}
-
-	QImage getVideoThumbnail(const QString& path) {
-		QMediaPlayer player;
-		
 	}
 }
 
@@ -71,7 +63,15 @@ QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QLabel::paintEvent(event);
 
-	QPixmap preview(_attachmentPath);
+	QPixmap preview;
+
+	if (_attachmentType.contains("image")) {
+		preview = QPixmap(_attachmentPath);
+	}
+	else if (_attachmentType.contains("video")) {
+		preview = QPixmap(_attachmentPreviewSize);
+		preview.fill(Qt::gray);
+	}
 
 	if (preview.isNull())
 		return;
@@ -79,8 +79,6 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 
-	if (_attachmentType.contains("video"))
-		preview.fill(Qt::white);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 
@@ -93,8 +91,8 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			painter.setOpacity(0.4);
 			painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : preview);
 
-			painter.setPen(Qt::lightGray);
-			QFont font("Arial", 18);
+			painter.setPen(Qt::white);
+			QFont font("Arial", 16);
 
 			const QString attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
 			const QSize attachmentsCountTextSize = textSize(attachmentsCountText, font);

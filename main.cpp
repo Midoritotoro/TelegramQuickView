@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     QString text = "Дверь, ведущая в недра планеты, открылась с легким скрипом. Пыль, застоявшаяся за миллионы лет, взметнулась, окутывая нас облаком времени. Профессор Лион, мой компаньон в этом безумном приключении, уже забирался внутрь, его глаза сияли детским восторгом. Я, Эмили, его ассистентка, исследовательница, и просто любопытная душа, следовала за ним, сдерживая дрожь, пробежавшую по спине.";
 
     TelegramPostQuickView* view = new TelegramPostQuickView();
-    view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::Stack);
+    view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
     for (int index = 0; index < 5; ++index)
         view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") } ));
