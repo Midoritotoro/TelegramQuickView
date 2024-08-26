@@ -1,3 +1,0 @@
-[submodule "ThirdParty/pybind11-2.13.1"]
-	path = ThirdParty/pybind11-2.13.1
-	url = https://github.com/pybind/pybind11.git

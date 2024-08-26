@@ -64,7 +64,7 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 	switch (_mediaDisplayMode) {
 
 	case MessageMediaDisplayMode::PreviewWithCount:
-		foreach(const QUrl & url, attachmentsPaths) {
+		foreach(const QUrl& url, attachmentsPaths) {
 			QString sourcePath;
 
 			if (url.path().at(0) == "/"[0])
@@ -84,7 +84,7 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 		break;
 
 	case MessageMediaDisplayMode::Stack:
-		foreach(const QUrl & url, attachmentsPaths) {
+		foreach(const QUrl& url, attachmentsPaths) {
 			QString sourcePath;
 
 			if (url.path().at(0) == "/"[0])
@@ -93,7 +93,7 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 				sourcePath = url.path();
 
 			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
-			_messageLayout->addWidget(messageAttachment);
+			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
 			_telegramMessage->attachments.append(messageAttachment);
 		}

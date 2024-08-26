@@ -9,8 +9,25 @@
 #include <QResizeEvent>
 #include <QUrl>
 
-#include <QElapsedTimer>
+#include <QMediaPlayer>
+#include <QVideoFrame>
+#include <QVideoSink>
 
+//void AlbumThumbnail::paintPlayVideo(QPainter& p, QRect geometry) {
+//	const auto innerSize = st::msgFileLayout.thumbSize;
+//	const auto inner = QRect(
+//		geometry.x() + (geometry.width() - innerSize) / 2,
+//		geometry.y() + (geometry.height() - innerSize) / 2,
+//		innerSize,
+//		innerSize);
+//	{
+//		PainterHighQualityEnabler hq(p);
+//		p.setPen(Qt::NoPen);
+//		p.setBrush(st::msgDateImgBg);
+//		p.drawEllipse(inner);
+//	}
+//	st::historyFileThumbPlay.paintInCenter(p, inner);
+//}
 
 namespace {
 	QSize textSize(const QString& text, const QFontMetrics& metrics) {
@@ -19,6 +36,11 @@ namespace {
 
 	QSize textSize(const QString& text, const QFont& font) {
 		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
+	}
+
+	QImage getVideoThumbnail(const QString& path) {
+		QMediaPlayer player;
+		
 	}
 }
 
@@ -49,13 +71,16 @@ QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QLabel::paintEvent(event);
 
-	QPixmap preview = QPixmap(_attachmentPath);
+	QPixmap preview(_attachmentPath);
 
 	if (preview.isNull())
 		return;
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
+
+	if (_attachmentType.contains("video"))
+		preview.fill(Qt::white);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 
@@ -96,12 +121,13 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 }
 
 void MessageAttachment::updatePreviewSize() {
-	if (_attachmentType.contains("image")) {
-		QSize size = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
-		_attachmentPreviewSize = size;
-	}
-	else if (_attachmentType.contains("video")) {
-		QSize size = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
-		_attachmentPreviewSize = size;
-	}
+	QSize size;
+
+	if (_attachmentType.contains("image"))
+		size = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
+	else if (_attachmentType.contains("video"))
+		size = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
+
+	_attachmentPreviewSize = size;
+
 }
