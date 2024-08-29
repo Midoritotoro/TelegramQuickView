@@ -27,7 +27,7 @@ QWidget(parent)
 }
 
 void MessageWidget::addMessageText(const QString& text) {
-	if (text.length() == 0)
+	if (text.length() < 1)
 		return;
 
 	QLabel* textLabel = new QLabel();

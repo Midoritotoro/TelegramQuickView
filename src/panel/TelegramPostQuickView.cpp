@@ -27,8 +27,6 @@ QWidget(parent)
 	resize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
-	_messageMediaViewer = new MessageMediaViewer(_messagesHistory.get());
-
 	QWidget* chatScrollAreaWidget = new QWidget();
 	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
 	_chatScrollArea = new ScrollArea();
@@ -91,7 +89,6 @@ QWidget(parent)
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
-	connect(_messageMediaViewer, &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
 	connect(_chatScrollArea->verticalScrollBar(), &QScrollBar::valueChanged, _chatScrollArea, &ScrollArea::scrollHandler);
 	connect(_chatScrollArea, &ScrollArea::addContentsNeeded, this, &TelegramPostQuickView::addContentsRequest);
 }
@@ -125,6 +122,11 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 }
 
 void TelegramPostQuickView::attachmentCliked() {
+	if (_messageMediaViewer == nullptr || _messageMediaViewer.get() == nullptr) {
+		_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+		connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
+	}
+
 	MessageAttachment* attachment = (MessageAttachment*)sender();
 	MessageWidget* attachmentParentMessage = attachment->parentMessage();
 

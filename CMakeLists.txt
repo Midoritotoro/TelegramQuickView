@@ -8,11 +8,11 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 project("TelegramQuickViewSettings" LANGUAGES C CXX)
 
-set(Td_DIR "D:/Packages/tdlib/lib/cmake/Td")
+#set(Td_DIR "D:/Packages/tdlib/lib/cmake/Td")
 
-include_directories("D:/Packages/json/include")
+#include_directories("D:/Packages/json/include")
 
-find_package(Td 1.8.35 REQUIRED)
+#find_package(Td 1.8.35 REQUIRED)
 find_package(Python3 COMPONENTS Development REQUIRED)
 
 find_package(Qt6 REQUIRED COMPONENTS 
@@ -60,8 +60,8 @@ SET(MAIN_SOURCES main.cpp
 	src/settings/TelegramAuthorizationChecker.h
 	src/settings/AuthenticationDialog.cpp
 	src/settings/AuthenticationDialog.h
-	src/settings/TelegramParser.cpp
-	src/settings/TelegramParser.h
+	#src/settings/TelegramParser.cpp
+	#src/settings/TelegramParser.h
 
 	src/panel/MessageWidget.cpp
 	src/panel/MessageWidget.h
@@ -102,7 +102,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
-target_link_libraries(${PROJECT_NAME} PUBLIC Td::TdJson)
+#target_link_libraries(${PROJECT_NAME} PUBLIC Td::TdJson)
 
 execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED
                RESULT_VARIABLE result

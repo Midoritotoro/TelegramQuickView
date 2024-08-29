@@ -8,6 +8,7 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QUrl>
+#include <QPixmapCache>
 
 
 //void AlbumThumbnail::paintPlayVideo(QPainter& p, QRect geometry) {
@@ -66,10 +67,16 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QPixmap preview;
 
 	if (_attachmentType.contains("image")) {
-		preview = QPixmap(_attachmentPath);
+		if (!QPixmapCache::find(_attachmentPath, &preview)) {
+			preview = QPixmap(_attachmentPath);
+			QPixmapCache::insert(_attachmentPath, preview);  // Сохранить в кэш
+		}
 	}
 	else if (_attachmentType.contains("video")) {
-		preview = QPixmap(_attachmentPreviewSize);
+		if (!QPixmapCache::find(_attachmentPath, &preview)) {
+			preview = QPixmap(_attachmentPreviewSize); 
+			QPixmapCache::insert(_attachmentPath, preview);  // Сохранить в кэш
+		}
 		preview.fill(Qt::gray);
 	}
 
@@ -119,13 +126,8 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 }
 
 void MessageAttachment::updatePreviewSize() {
-	QSize size;
-
 	if (_attachmentType.contains("image"))
-		size = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
+		_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
 	else if (_attachmentType.contains("video"))
-		size = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
-
-	_attachmentPreviewSize = size;
-
+		_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
 }
