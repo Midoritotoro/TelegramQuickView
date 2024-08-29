@@ -21,7 +21,7 @@ class MessageMediaViewer: public QWidget {
 private:
 	Q_OBJECT
 	QGridLayout* _grid = nullptr;
-	MediaPlayer* _mediaPlayer = nullptr;
+	std::unique_ptr<MediaPlayer> _mediaPlayer = nullptr;
 	NavigationButton* _nextAttachment = nullptr;
 	NavigationButton* _previousAttachment = nullptr;
 	MessageWidget* _currentMessage = nullptr;

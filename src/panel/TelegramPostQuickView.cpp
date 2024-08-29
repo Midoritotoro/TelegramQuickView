@@ -31,6 +31,8 @@ QWidget(parent)
 	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
 	_chatScrollArea = new ScrollArea();
 
+	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+
 	_chatScrollArea->setWidgetResizable(true);
 
 	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 25, 15);
@@ -89,6 +91,7 @@ QWidget(parent)
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
+	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
 	connect(_chatScrollArea->verticalScrollBar(), &QScrollBar::valueChanged, _chatScrollArea, &ScrollArea::scrollHandler);
 	connect(_chatScrollArea, &ScrollArea::addContentsNeeded, this, &TelegramPostQuickView::addContentsRequest);
 }
@@ -122,11 +125,6 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 }
 
 void TelegramPostQuickView::attachmentCliked() {
-	if (_messageMediaViewer == nullptr || _messageMediaViewer.get() == nullptr) {
-		_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
-		connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
-	}
-
 	MessageAttachment* attachment = (MessageAttachment*)sender();
 	MessageWidget* attachmentParentMessage = attachment->parentMessage();
 
@@ -142,6 +140,6 @@ void TelegramPostQuickView::showEvent(QShowEvent* event) {
 
 void TelegramPostQuickView::addContentsRequest() {
 	// Запарсить файл с постами и подгрузить более старые
-	qDebug() << "addContentsRequest";
-	makeMessage( " of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message." , QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test7.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test8.jpg") });
+	//qDebug() << "addContentsRequest";
+//	makeMessage( " of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message of messong text of message." , QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test7.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test8.jpg") });
 }

@@ -368,6 +368,8 @@ void MediaPlayer::clearScene() {
 	foreach(QGraphicsItem* item, items) {
 		if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
 			scene->removeItem(item);
+			delete item;
+			item = nullptr;
 		}
 	}
 }

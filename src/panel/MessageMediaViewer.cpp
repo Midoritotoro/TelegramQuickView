@@ -48,14 +48,14 @@ MessageMediaViewer::MessageMediaViewer(
 	QString arrowPath = cssDir.absolutePath() + "/arrow_right.png";
 
 	_grid = new QGridLayout(this);
-	_mediaPlayer = new MediaPlayer();
+	_mediaPlayer = std::make_unique<MediaPlayer>();
 	_mediaPlayer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	_grid->setSpacing(0);
 	_grid->setContentsMargins(0, 0, 0, 0);
 	setContentsMargins(0, 0, 0, 0);
 
-	_grid->addWidget(_mediaPlayer, _grid->rowCount(), 0, 1, 1);
+	_grid->addWidget(_mediaPlayer.get(), _grid->rowCount(), 0, 1, 1);
 
 	QTransform transform;
 	transform.rotate(180);
