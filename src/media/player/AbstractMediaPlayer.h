@@ -4,12 +4,15 @@
 
 class QMediaPlayer;
 
+
 class AbstractMediaPlayer: public QWidget {
 	Q_OBJECT
 	QMediaPlayer* _mediaPlayer = nullptr;
 	QGraphicsPixmapItem* _currentImageItem = nullptr;
+	QGraphicsView* _videoView = nullptr;
 	QPointF _currentMediaPosition;
 	QSizeF _currentMediaSize;
+	bool _allowChangeVideoState = false;
 public:
 	explicit AbstractMediaPlayer(QWidget* parent = nullptr);
 
@@ -17,14 +20,13 @@ public:
 	void clearScene();
 
 	[[nodiscard]] static QString detectMediaType(const QString& filePath);
-	[[nodiscard]] QSize occupiedMediaSpace() const noexcept;
-	[[nodiscard]] QPoint mediaPosition() const noexcept;
+	[[nodiscard]] QSizeF occupiedMediaSpace() const noexcept;
+	[[nodiscard]] QPointF mediaPosition() const noexcept;
 protected:
-	void videoClickedEvent();
+	void videoClicked();
 	void mousePressEvent(QMouseEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 public Q_SLOTS:
-	void setMediaPlayerVideoPosition(int value);
-	void changeVolume(int value);
 	void videoRewind(int value);
+	void changeVolume(int value);
 };

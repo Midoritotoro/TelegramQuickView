@@ -19,47 +19,15 @@
 #include "../WidgetsHider.h"
 #include "../ClickableLabel.h"
 #include "./VideoStateWidget.h"
+#include "AbstractMediaPlayer.h"
 #include <QDialog>
 #include <QPoint>
 #include <QSize>
 
-class MediaPlayer : public QWidget
+class MediaPlayer : public AbstractMediaPlayer
 {
 private:
 	Q_OBJECT
-	QMediaPlayer* _mediaPlayer = nullptr;
-	EnhancedSlider* _videoSlider = nullptr, *_audioSlider = nullptr;
-	QGraphicsView* _videoView = nullptr;
-	QGraphicsVideoItem* _videoItem = nullptr;
-	QGraphicsWidget* _videoForm = nullptr, * _containerWidget = nullptr,
-				   * _graphicsAudioSlider = nullptr, * _graphicsVideoTimeLabel = nullptr;
-	QLabel* _videoTimeLabel = nullptr;
-	VideoStateWidget* _videoStateWidget = nullptr;
-	QGraphicsPixmapItem* _currentImageItem = nullptr;
-	QSize _currentMediaSize;
-	QPoint _currentMediaPosition;
-	bool _allowChangeVideoState = true;
 public:
 	MediaPlayer(QWidget* parent = nullptr);
-
-	void setSource(const QUrl& source);
-	void adjustVideoSize();
-	void adjustBottomWidgets();
-
-	[[nodiscard]] static QString detectMediaType(const QString& filePath);
-	void clearScene();
-	[[nodiscard]] QSize occupiedMediaSpace() const noexcept;
-	[[nodiscard]] QPoint mediaPosition() const noexcept;
-	[[nodiscard]] int getVideoControlsHeight() const noexcept;
-protected:
-	void videoClicked();
-	void mousePressEvent(QMouseEvent* event) override;
-	void resizeEvent(QResizeEvent* event) override;
-public Q_SLOTS:
-	void play();
-	void stop();
-	void pause();
-	void setMediaPlayerVideoPosition(int value);
-	void changeVolume(int value);
-	void videoSliderSetValue(int value);
 };
