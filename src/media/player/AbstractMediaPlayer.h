@@ -2,6 +2,9 @@
 
 #include <QWidget>
 
+#include <QGraphicsView>
+#include <QGraphicsPixmapItem>
+
 class QMediaPlayer;
 
 
@@ -22,7 +25,11 @@ public:
 	[[nodiscard]] static QString detectMediaType(const QString& filePath);
 	[[nodiscard]] QSizeF occupiedMediaSpace() const noexcept;
 	[[nodiscard]] QPointF mediaPosition() const noexcept;
+
+	virtual [[nodiscard]] int getVideoControlsHeight() const noexcept = 0;
 protected:
+	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
+
 	void videoClicked();
 	void mousePressEvent(QMouseEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;

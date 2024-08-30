@@ -133,9 +133,9 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	if (_messageTextView->isHidden())
 		_messageTextView->setVisible(true);
-
-	QSize mediaSize = _mediaPlayer->occupiedMediaSpace();
-	QPoint mediaPosition = _mediaPlayer->mediaPosition();
+	
+	QSize mediaSize = _mediaPlayer->occupiedMediaSpace().toSize();
+	QPoint mediaPosition = _mediaPlayer->mediaPosition().toPoint();
 
 	const int freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
 

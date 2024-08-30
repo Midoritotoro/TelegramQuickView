@@ -1,7 +1,7 @@
-#include "VolumeClickableLabel.h"
+#include "VolumeController.h"
 
 
-VolumeClickableLabel::VolumeClickableLabel(const QString& imagePath, QSlider* VolumeSlider, QWidget* parent) :
+VolumeController::VolumeController(const QString& imagePath, QSlider* VolumeSlider, QWidget* parent) :
     ClickableLabel(parent), m_VolumeSlider(VolumeSlider)
 {
 	QPixmap pixmap(imagePath);
@@ -14,7 +14,7 @@ VolumeClickableLabel::VolumeClickableLabel(const QString& imagePath, QSlider* Vo
 	setCursor(Qt::PointingHandCursor);
 }
 
-void VolumeClickableLabel::hideEvent(QHideEvent* event) {
+void VolumeController::hideEvent(QHideEvent* event) {
     Q_UNUSED(event);
     m_VolumeSlider->hide();
 }

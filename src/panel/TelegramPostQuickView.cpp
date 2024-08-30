@@ -10,6 +10,7 @@
 #include <QShowEvent>
 #include <QElapsedTimer>
 #include <QScrollBar>
+#include <QDir>
 
 
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):

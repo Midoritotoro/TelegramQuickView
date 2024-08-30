@@ -42,13 +42,15 @@ SET(MAIN_SOURCES main.cpp
 
 	src/media/ClickableLabel.cpp
 	src/media/ClickableLabel.h
-	src/media/EnhancedSlider.cpp
-	src/media/EnhancedSlider.h
-	src/media/VolumeClickableLabel.cpp
-	src/media/VolumeClickableLabel.h
+	src/media/player/EnhancedSlider.cpp
+	src/media/player/EnhancedSlider.h
+	src/media/player/VolumeController.cpp
+	src/media/player/VolumeController.h
 
 	src/media/player/AbstractMediaPlayer.cpp
 	src/media/player/AbstractMediaPlayer.h
+	src/media/player/MediaPlayerPanel.cpp
+	src/media/player/MediaPlayerPanel.h
 	src/media/player/MediaPlayer.cpp
 	src/media/player/MediaPlayer.h
 	src/media/player/VideoStateWidget.cpp

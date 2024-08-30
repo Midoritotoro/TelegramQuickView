@@ -1,12 +1,12 @@
 #include "AbstractMediaPlayer.h"
 
+
 #include <QMimeDatabase>
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QGraphicsScene>
 #include <QGraphicsWidget>
 #include <QGraphicsVideoItem>
-#include <QGraphicsView>
 #include <QGraphicsGridLayout>
 #include <QApplication>
 
@@ -57,7 +57,6 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 
 	if (mediaType.contains("video")) {
 		clearScene();
-
 		mediaPlayerOutput->setSize(QSizeF(screenWidth, screenHeight));
 
 		_mediaPlayer->setSource(source);
@@ -69,7 +68,6 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 	}
 	else if (mediaType.contains("image")) {
 		clearScene();
-
 		QPixmap pixmap(sourcePath);
 
 		_currentImageItem = new QGraphicsPixmapItem();
@@ -120,6 +118,10 @@ QSizeF AbstractMediaPlayer::occupiedMediaSpace() const noexcept {
 
 QPointF AbstractMediaPlayer::mediaPosition() const noexcept {
 	return _currentMediaPosition;
+}
+
+QMediaPlayer* AbstractMediaPlayer::mediaPlayer() const noexcept {
+	return _mediaPlayer;
 }
 
 void AbstractMediaPlayer::videoClicked() {
