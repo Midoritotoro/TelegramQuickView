@@ -191,7 +191,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	});
 
 	connect(_videoSlider, &QSlider::sliderMoved, this, &MediaPlayer::setMediaPlayerVideoPosition);
-	connect(_audioSlider, &QSlider::valueChanged, this, &MediaPlayer::volumeChanged);
+	connect(_audioSlider, &QSlider::valueChanged, this, &MediaPlayer::changeVolume);
 
 	connect(volumeClickableLabel, &ClickableLabel::clicked, this, [this]() {
 		if (_audioSlider->isHidden())
@@ -233,7 +233,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	_audioSlider->setValue(50);
 }
 
-void MediaPlayer::volumeChanged(int value) {
+void MediaPlayer::changeVolume(int value) {
 	qreal linearVolume = QAudio::convertVolume(value / qreal(100), QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 	_mediaPlayer->audioOutput()->setVolume(linearVolume);
 }

@@ -6,7 +6,7 @@ if (POLICY CMP0141)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-project("TelegramQuickViewSettings" LANGUAGES C CXX)
+project("TelegramQuickView" LANGUAGES C CXX)
 
 #set(Td_DIR "D:/Packages/tdlib/lib/cmake/Td")
 
@@ -47,6 +47,8 @@ SET(MAIN_SOURCES main.cpp
 	src/media/VolumeClickableLabel.cpp
 	src/media/VolumeClickableLabel.h
 
+	src/media/player/AbstractMediaPlayer.cpp
+	src/media/player/AbstractMediaPlayer.h
 	src/media/player/MediaPlayer.cpp
 	src/media/player/MediaPlayer.h
 	src/media/player/VideoStateWidget.cpp
@@ -91,7 +93,7 @@ target_link_libraries(TelegramParser PRIVATE ${Python3_LIBRARIES})
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
 set_property(TARGET TelegramParser PROPERTY CXX_STANDARD 20)
-set_property(TARGET TelegramQuickViewSettings PROPERTY CXX_STANDARD 20)
+set_property(TARGET TelegramQuickView PROPERTY CXX_STANDARD 20)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 					Qt6::Core
@@ -118,4 +120,4 @@ SET_SOURCE_FILES_PROPERTIES(
 
 set(CMAKE_INSTALL_PREFIX "D:/TelegramQuickView/")
 install(TARGETS TelegramParser DESTINATION out/build)
-install(TARGETS TelegramQuickViewSettings DESTINATION out/build)
+install(TARGETS TelegramQuickView DESTINATION out/build)

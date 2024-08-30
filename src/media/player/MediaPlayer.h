@@ -60,6 +60,6 @@ public Q_SLOTS:
 	void stop();
 	void pause();
 	void setMediaPlayerVideoPosition(int value);
-	void volumeChanged(int value);
+	void changeVolume(int value);
 	void videoSliderSetValue(int value);
 };

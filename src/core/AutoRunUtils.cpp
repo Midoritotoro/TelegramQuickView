@@ -1,5 +1,6 @@
 #include "AutoRunUtils.h"
 
+#ifdef _WIN32
 
 bool IsWindowsGreaterThen(int version)
 {
@@ -19,22 +20,7 @@ bool IsWindowsGreaterThen(int version)
     return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR, dwlConditionMask) != FALSE;
 }
 
-BOOL addParserToRegistryAutoRun()
-{
-    TCHAR szExeName[MAX_PATH];
-    TCHAR fileName[12] = L"\\Parser.exe";
-    rsize_t stringSize = MAX_PATH;
-    GetModuleFileName(NULL, szExeName, stringSize);
-
-    if (FAILED(PathCchRemoveFileSpec(szExeName, stringSize)))
-        return FALSE;
-
-    _tcscat_s(szExeName, stringSize, fileName);
-    return SetRegistryAutoRunKey(szExeName);
-
-}
-
-BOOL SetRegistryAutoRunKey(LPWSTR path)
+bool SetAutoRunKey(LPWSTR path)
 {
     LPCWSTR lpSubKey = TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
     LONG result = NULL;
@@ -57,4 +43,24 @@ BOOL SetRegistryAutoRunKey(LPWSTR path)
     }
     RegCloseKey(hKey);
     return TRUE;
+}
+
+#endif // _WIN32
+
+bool addParserToAutoRun()
+{
+#if defined(_WIN32)
+    TCHAR szExeName[MAX_PATH];
+    TCHAR fileName[12] = L"\\Parser.exe";
+    rsize_t stringSize = MAX_PATH;
+    GetModuleFileName(NULL, szExeName, stringSize);
+
+    if (FAILED(PathCchRemoveFileSpec(szExeName, stringSize)))
+        return FALSE;
+
+    _tcscat_s(szExeName, stringSize, fileName);
+    return SetAutoRunKey(szExeName);
+#elif defined(__linux__)
+    ;
+#endif
 }
