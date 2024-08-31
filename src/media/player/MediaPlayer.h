@@ -2,7 +2,6 @@
 
 #include "AbstractMediaPlayer.h"
 
-
 class MediaPlayerPanel;
 
 class MediaPlayer : public AbstractMediaPlayer

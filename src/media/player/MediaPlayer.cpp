@@ -6,7 +6,10 @@
 MediaPlayer::MediaPlayer(QWidget* parent) :
 	AbstractMediaPlayer(parent)
 {
+	setMouseTracking(true);
+
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
+	_mediaPlayerPanel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {

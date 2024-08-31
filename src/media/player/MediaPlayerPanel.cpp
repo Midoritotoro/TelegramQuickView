@@ -33,4 +33,5 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::black);
 	painter.setBrush(Qt::NoBrush);
 	painter.drawPixmap(0, 0, QPixmap());
+	raise();
 }

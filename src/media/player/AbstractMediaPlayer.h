@@ -5,6 +5,7 @@
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
 
+class QGraphicsVideoItem;
 class QMediaPlayer;
 
 
@@ -13,6 +14,7 @@ class AbstractMediaPlayer: public QWidget {
 	QMediaPlayer* _mediaPlayer = nullptr;
 	QGraphicsPixmapItem* _currentImageItem = nullptr;
 	QGraphicsView* _videoView = nullptr;
+	QGraphicsVideoItem* _videoItem = nullptr;
 	QPointF _currentMediaPosition;
 	QSizeF _currentMediaSize;
 	bool _allowChangeVideoState = false;
@@ -31,6 +33,8 @@ protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
 
 	void videoClicked();
+	void adjustVideoSize();
+
 	void mousePressEvent(QMouseEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 public Q_SLOTS:

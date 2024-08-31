@@ -17,7 +17,7 @@
 #include <QApplication>
 #include "src/panel/TelegramPostQuickView.h"
 #include "src/settings/MainWindow.h"
-
+#include "src/media/player/MediaPlayer.h"
 
 int main(int argc, char* argv[])
 {
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
     //for (int index = 0; index < 1000; ++index)
-    view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") }));
+    view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") }));
 
     view->show();
     return app.exec();
