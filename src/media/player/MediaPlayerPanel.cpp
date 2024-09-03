@@ -1,5 +1,9 @@
 #include "MediaPlayerPanel.h"
 
+#include "VideoStateWidget.h"
+#include "VolumeController.h"
+#include "EnhancedSlider.h"
+
 #include <QPaintEvent>
 #include <QMargins>
 #include <QPainter>
@@ -8,8 +12,8 @@
 namespace {
 	constexpr QMargins mediaPlayerPanelMargins = { 10, 10, 10, 10 };
 	constexpr int mediaPlayerPanelWidth = 344;
-	constexpr int mediaPlayerPanelHeight = 288;
 }
+
 
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	QWidget(parent) 
@@ -18,20 +22,50 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	updateSize();
 }
 
-void MediaPlayerPanel::updateSize() {
-	int width = mediaPlayerPanelMargins.left() + mediaPlayerPanelWidth + mediaPlayerPanelMargins.right();
-	int height = mediaPlayerPanelMargins.top();
+int MediaPlayerPanel::contentLeft() const noexcept {	
+	return mediaPlayerPanelMargins.left();
+}
 
-	height += mediaPlayerPanelHeight + mediaPlayerPanelMargins.bottom();
+int MediaPlayerPanel::contentTop() const noexcept {
+	return mediaPlayerPanelMargins.top();
+}
+
+int MediaPlayerPanel::contentRight() const noexcept {
+	return mediaPlayerPanelMargins.right();
+}
+
+int MediaPlayerPanel::contentBottom() const noexcept {
+	return mediaPlayerPanelMargins.bottom();
+}
+
+int MediaPlayerPanel::contentWidth() const noexcept {
+	return width() - contentLeft() - contentRight();
+}
+
+int MediaPlayerPanel::contentHeight() const noexcept {
+	return height() - contentTop() - contentBottom();
+}
+
+void MediaPlayerPanel::updateSize() {
+	const auto width = contentLeft() + mediaPlayerPanelWidth + contentRight();
+	const auto height = contentTop() + contentHeight() + contentBottom();
+
 	resize(width, height);
 }
 
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
+	QWidget::paintEvent(event);
+
+	qDebug() << "MediaPlayerPanel::paintEvent";
+
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	painter.setPen(Qt::black);
 	painter.setBrush(Qt::NoBrush);
-	painter.drawPixmap(0, 0, QPixmap());
-	raise();
+
+	QPixmap pixmap(width(), height());
+	pixmap.fill(Qt::black);
+
+	painter.drawPixmap(0, 0, pixmap);
 }

@@ -39,8 +39,8 @@ void MessageTextView::setText(const QString& text) {
 	_textLabel->adjustSize();
 	adjustSize();
 
-	const int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
-	const int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
+	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 
 	if (height() >= screenHeight / 5) {
 		_textLabel->setMinimumWidth(screenWidth * 0.8);

@@ -11,18 +11,18 @@ class QMediaPlayer;
 
 class AbstractMediaPlayer: public QWidget {
 	Q_OBJECT
+private:
 	QMediaPlayer* _mediaPlayer = nullptr;
 	QGraphicsPixmapItem* _currentImageItem = nullptr;
 	QGraphicsView* _videoView = nullptr;
 	QGraphicsVideoItem* _videoItem = nullptr;
 	QPointF _currentMediaPosition;
 	QSizeF _currentMediaSize;
-	bool _allowChangeVideoState = false;
+	bool _allowChangeVideoState = true;
 public:
 	explicit AbstractMediaPlayer(QWidget* parent = nullptr);
 
 	void setSource(const QUrl& source);
-	void clearScene();
 
 	[[nodiscard]] static QString detectMediaType(const QString& filePath);
 	[[nodiscard]] QSizeF occupiedMediaSpace() const noexcept;
@@ -31,6 +31,9 @@ public:
 	virtual [[nodiscard]] int getVideoControlsHeight() const noexcept = 0;
 protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
+
+	void clearScene();
+	void updateCurrentImageRect(int imageWidth, int imageHeight);
 
 	void videoClicked();
 	void adjustVideoSize();

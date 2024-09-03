@@ -137,7 +137,7 @@ void MessageMediaViewer::updateMessageTextView() {
 	QSize mediaSize = _mediaPlayer->occupiedMediaSpace().toSize();
 	QPoint mediaPosition = _mediaPlayer->mediaPosition().toPoint();
 
-	const int freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
+	const auto freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
 
 	_messageTextView->setText(_currentMessage->messageText());
 
@@ -153,7 +153,7 @@ void MessageMediaViewer::updateMessageTextView() {
 	else {
 		yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent;
 		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video")) {
-			const int videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
+			const auto videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
 			yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent - videoControlsHeight;
 		}
 		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);

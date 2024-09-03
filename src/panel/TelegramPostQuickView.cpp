@@ -21,8 +21,8 @@ QWidget(parent)
 
 	_messagesHistory = std::make_shared<History>();
 
-	const int screenWidth = QApplication::primaryScreen()->availableGeometry().width();
-	const int screenHeight = QApplication::primaryScreen()->availableGeometry().height();
+	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
 	_panelWidth = screenWidth / 3.5;
 	resize(_panelWidth, screenHeight);
@@ -101,7 +101,7 @@ void TelegramPostQuickView::makeMessage(const QString& messageText, const QUrlLi
 	QElapsedTimer timer;
 	timer.start();
 
-	const int maximumMessageWidth = _panelWidth - (width() / 12.5);
+	const auto maximumMessageWidth = _panelWidth - (width() / 12.5);
 	MessageWidget* messageWidget = new MessageWidget();
 
 	messageWidget->setMessageMediaDisplayMode(_displayMode);

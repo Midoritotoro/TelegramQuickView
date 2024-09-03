@@ -2,6 +2,10 @@
 
 #include "MediaPlayerPanel.h"
 
+namespace {
+	constexpr int mediaPlayerPanelBottomIndent = 5;
+}
+
 
 MediaPlayer::MediaPlayer(QWidget* parent) :
 	AbstractMediaPlayer(parent)
@@ -9,7 +13,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	setMouseTracking(true);
 
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
-	_mediaPlayerPanel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	_mediaPlayerPanel->show();
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
@@ -18,5 +22,6 @@ int MediaPlayer::getVideoControlsHeight() const noexcept {
 
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	AbstractMediaPlayer::resizeEvent(event);
-	_mediaPlayerPanel->move(width() / 2 - _mediaPlayerPanel->width(), _mediaPlayerPanel->pos().y());
+
+	_mediaPlayerPanel->move((width() - _mediaPlayerPanel->width()) / 2, height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent);
 }

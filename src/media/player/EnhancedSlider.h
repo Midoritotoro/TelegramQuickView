@@ -10,6 +10,7 @@ class EnhancedSlider : public QSlider
 private:
     Q_OBJECT
     uint16_t m_HandleLen;
+    bool bIsMove = false;
 public:
     EnhancedSlider(Qt::Orientation orientation = Qt::Horizontal, uint16_t handleLen = 0, QWidget* parent = nullptr);
 

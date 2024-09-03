@@ -1,6 +1,5 @@
 ﻿#include "EnhancedSlider.h"
 
-static bool bIsMove = false;
 
 EnhancedSlider::EnhancedSlider(Qt::Orientation orientation, uint16_t handleLen, QWidget* parent)
     : QSlider(parent), m_HandleLen(handleLen) 

@@ -69,13 +69,13 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	if (_attachmentType.contains("image")) {
 		if (!QPixmapCache::find(_attachmentPath, &preview)) {
 			preview = QPixmap(_attachmentPath);
-			QPixmapCache::insert(_attachmentPath, preview);  // Сохранить в кэш
+			QPixmapCache::insert(_attachmentPath, preview);
 		}
 	}
 	else if (_attachmentType.contains("video")) {
 		if (!QPixmapCache::find(_attachmentPath, &preview)) {
 			preview = QPixmap(_attachmentPreviewSize); 
-			QPixmapCache::insert(_attachmentPath, preview);  // Сохранить в кэш
+			QPixmapCache::insert(_attachmentPath, preview);
 		}
 		preview.fill(Qt::gray);
 	}
@@ -101,8 +101,8 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			painter.setPen(Qt::white);
 			QFont font("Arial", 16);
 
-			const QString attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
-			const QSize attachmentsCountTextSize = textSize(attachmentsCountText, font);
+			const auto attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
+			const auto attachmentsCountTextSize = textSize(attachmentsCountText, font);
 
 			QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
 			attachmentsCountTextRect.moveCenter(rect().center());
