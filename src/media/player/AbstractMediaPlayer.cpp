@@ -16,8 +16,6 @@
 AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	QWidget(parent)
 {
-	setMouseTracking(true);
-
 	QGridLayout* grid = new QGridLayout(this);
 
 	_mediaPlayer = new QMediaPlayer();
@@ -64,8 +62,12 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
+
 	QString sourcePath;
-	source.path().at(0) == "/"[0] ? sourcePath = source.path().remove(0, 1) : sourcePath = source.path();
+
+	source.path().at(0) == "/"[0] 
+	? sourcePath = source.path().remove(0, 1)
+	: sourcePath = source.path();
 
 	QString mediaType = detectMediaType(sourcePath);
 
@@ -173,9 +175,10 @@ void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
 }
 
 void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
-	QWidget::resizeEvent(event);
-
 	adjustVideoSize();
+
+	if (event->size() == size())
+		return;
 
 	if (!_currentImageItem && _videoItem != nullptr) {
 		_currentMediaSize = _videoItem->boundingRect().size().toSize();
@@ -184,8 +187,10 @@ void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 		return;
 	}
 
-	const auto imageWidth = (qreal)_currentImageItem->pixmap().width();
-	const auto imageHeight = (qreal)_currentImageItem->pixmap().height();
+	_Analysis_assume_(_currentImageItem != NULL) // Отключение предупреждения
+
+	const auto imageWidth = _currentImageItem->pixmap().width();
+	const auto imageHeight = _currentImageItem->pixmap().height();
 
 	updateCurrentImageRect(imageWidth, imageHeight);
 }

@@ -18,6 +18,14 @@ namespace {
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	QWidget(parent) 
 {
+	_videoStateWidget = new VideoStateWidget(this);
+	_volumeSlider = new EnhancedSlider();
+	_playbackSlider = new EnhancedSlider();
+
+	_videoStateWidget->resize(50, 50);
+	_videoStateWidget->setState(VideoStateWidget::State::Pause);
+	_videoStateWidget->show();
+
 	hide();
 	updateSize();
 }
@@ -49,7 +57,8 @@ int MediaPlayerPanel::contentHeight() const noexcept {
 void MediaPlayerPanel::updateSize() {
 	const auto width = contentLeft() + mediaPlayerPanelWidth + contentRight();
 	const auto height = contentTop() + contentHeight() + contentBottom();
-
+	
+	adjustSize();
 	resize(width, height);
 }
 
@@ -68,4 +77,12 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	pixmap.fill(Qt::black);
 
 	painter.drawPixmap(0, 0, pixmap);
+	//updateSize();
+}
+
+void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
+	QWidget::resizeEvent(event);
+
+	//updateSize();
+	//_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, height() - contentBottom());
 }

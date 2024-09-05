@@ -1,15 +1,25 @@
 #pragma once
 
 #include "../ClickableLabel.h"
-#include <QStackedWidget>
+#include <QPushButton>
 
-class VideoStateWidget : public QWidget {
-private:
+
+class VideoStateWidget : public QPushButton {
     Q_OBJECT
-    Q_PROPERTY(QStackedWidget* _stackedWidget READ stackedWidget)
-    ClickableLabel* _playClickableLabel = nullptr, * _stopClickableLabel = nullptr, *_repeatClickableLabel = nullptr;
-    QStackedWidget* _stackedWidget = nullptr;
 public:
-    VideoStateWidget(ClickableLabel* playClickableLabel, ClickableLabel* stopClickableLabel, ClickableLabel* repeatClickableLabel, QWidget* parent = nullptr);
-    [[nodiscard]] QStackedWidget* stackedWidget() { return _stackedWidget; }
+    enum class State {
+        Play,
+        Pause,
+        Repeat
+    };
+private:
+    QString _pauseImagePath, _playImagePath, _repeatImagePath;
+    State _state;
+public:
+    VideoStateWidget(QWidget* parent = nullptr);
+
+    void setState(State state);
+protected:
+    void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 };

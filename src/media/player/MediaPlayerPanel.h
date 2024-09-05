@@ -27,4 +27,5 @@ public:
 protected:
 	void updateSize();
 	void paintEvent(QPaintEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
 };
