@@ -1,20 +1,32 @@
 #include "VolumeController.h"
 
+#include <QCoreApplication>
+#include <QDir>
+#include <QPainter>
 
-VolumeController::VolumeController(const QString& imagePath, QSlider* VolumeSlider, QWidget* parent) :
-    ClickableLabel(parent), m_VolumeSlider(VolumeSlider)
+
+VolumeController::VolumeController(QWidget* parent) :
+    ClickableLabel(parent)
 {
-	QPixmap pixmap(imagePath);
-	setBackgroundRole(QPalette::Dark);
-	setScaledContents(true);
-	setPixmap(pixmap);
-	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	setStyleSheet("background-color: transparent");
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
 }
 
-void VolumeController::hideEvent(QHideEvent* event) {
-    Q_UNUSED(event);
-    m_VolumeSlider->hide();
+void VolumeController::paintEvent(QPaintEvent* event) {
+	QString currentPath = QCoreApplication::applicationDirPath();
+	QDir cssDir(currentPath + "/../../assets/images");
+
+	QString speakerImagePath = cssDir.absolutePath() + "/speaker_white.png";
+
+	QPixmap pixmap(speakerImagePath);
+
+	QPainter painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	if (pixmap.size() != size())
+		pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+	painter.setPen(Qt::NoPen);
+	painter.setBrush(Qt::NoBrush);
+	painter.drawPixmap(0, 0, pixmap);
 }

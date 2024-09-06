@@ -21,11 +21,10 @@ QSlider::handle:horizontal {
     background: rgba(200, 200, 200, 0); /* ярко-серый цвет дл€ ручки */
     border: none; /* ќбводка ручки */
     width: 14px;
-    height: 6px;
+    height: 12px;
     border-radius: 7px;
     margin-top: 2px;
     margin-bottom: 2px;
-
 }
 
 QSlider::groove:horizontal:hover {

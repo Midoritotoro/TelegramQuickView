@@ -28,29 +28,34 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_videoStateWidget = new VideoStateWidget(this);
 	_volumeSlider = new EnhancedSlider(this);
 	_playbackSlider = new EnhancedSlider(this);
+	_volumeToggle = new VolumeController(this);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../src/css");
 
-	QString videoSliderStylePath = cssDir.absolutePath() + "/VideoSliderStyle.css";
+	QString sliderStylePath = cssDir.absolutePath() + "/SliderStyle.css";
 
-	QFile videoSliderStyleFile(videoSliderStylePath);
-	if (videoSliderStyleFile.open(QFile::ReadOnly)) {
+	QFile sliderStyleFile(sliderStylePath);
+	if (sliderStyleFile.open(QFile::ReadOnly)) {
 
-		QByteArray videoSliderStyle = videoSliderStyleFile.readAll();
-		_playbackSlider->setStyleSheet(videoSliderStyle);
+		QByteArray sliderStyle = sliderStyleFile.readAll();
 
-		videoSliderStyleFile.close();
+		_playbackSlider->setStyleSheet(sliderStyle);
+		_volumeSlider->setStyleSheet(sliderStyle);
+
+		sliderStyleFile.close();
 	}
 
-	_videoStateWidget->resize(30, 30);
+	_videoStateWidget->resize(20, 20);
 
 	_volumeSlider->setFixedHeight(20);
 	_playbackSlider->setFixedHeight(20);
+	_volumeToggle->resize(20, 20);
 
 	resize(width(), height() + _videoStateWidget->height() + _playbackSlider->height());
 
-	_volumeSlider->hide();
+	_volumeSlider->show();
+	_volumeToggle->show();
 	_videoStateWidget->show();
 	_playbackSlider->show();
 
@@ -136,7 +141,11 @@ void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
 	updateSize();
 
 	_playbackSlider->resize(width() - contentLeft() - contentRight(), _playbackSlider->height());
+	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
 
 	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, contentTop());
 	_playbackSlider->move(contentLeft(),  height() - contentBottom() - _playbackSlider->height());
+
+	_volumeToggle->move(contentLeft(), contentTop());
+	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
 }
