@@ -7,7 +7,6 @@
 
 VideoStateWidget::VideoStateWidget(QWidget* parent):
     QPushButton(parent)
-    , _state(VideoStateWidget::State::Pause)
 {
     QString currentPath = QCoreApplication::applicationDirPath();
     QDir assetsDir(currentPath + "/../../assets/images");
@@ -18,6 +17,7 @@ VideoStateWidget::VideoStateWidget(QWidget* parent):
 
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
+    setState(State::Pause);
 }
 
 void VideoStateWidget::setState(State state) {

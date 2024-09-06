@@ -10,8 +10,6 @@ namespace {
 MediaPlayer::MediaPlayer(QWidget* parent) :
 	AbstractMediaPlayer(parent)
 {
-	setMouseTracking(true);
-
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
 	_mediaPlayerPanel->show();
 }

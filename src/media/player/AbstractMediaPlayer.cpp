@@ -55,13 +55,8 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 }
 
 void AbstractMediaPlayer::setSource(const QUrl& source) {
-	if (_mediaPlayer->playbackState() == QMediaPlayer::PlaybackState::PlayingState) {
+	if (_mediaPlayer->playbackState() == QMediaPlayer::PlaybackState::PlayingState)
 		_mediaPlayer->stop();
-	}
-
-	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
-	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
-
 
 	QString sourcePath;
 
@@ -73,14 +68,9 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 
 	if (mediaType.contains("video")) {
 		clearScene();
-		_videoItem->setSize(QSizeF(screenWidth, screenHeight));
 
 		_mediaPlayer->setSource(source);
 		_mediaPlayer->play();
-
-		_currentMediaSize = _videoItem->boundingRect().size().toSize();
-		_currentMediaPosition = _videoItem->pos().toPoint();
-
 	}
 	else if (mediaType.contains("image")) {
 		clearScene();
@@ -89,8 +79,8 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 		_currentImageItem = new QGraphicsPixmapItem();
 		_currentImageItem->setPixmap(pixmap);
 
-		const auto imageWidth = _currentImageItem->pixmap().width();
-		const auto imageHeight = _currentImageItem->pixmap().height();
+		const auto imageWidth = pixmap.width();
+		const auto imageHeight = pixmap.height();
 
 		updateCurrentImageRect(imageWidth, imageHeight);
 	}
@@ -120,8 +110,8 @@ void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight
 		_currentImageItem->pixmap().height() > screenHeight) {
 		// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
 
-		const qreal scale = qMin(_videoView->width() / (qreal)imageWidth,
-			_videoView->height() / (qreal)imageHeight);
+		const auto scale = qMin(_videoView->width() / imageWidth,
+			_videoView->height() / imageHeight);
 
 		_currentImageItem->setScale(scale);
 	}
@@ -162,10 +152,12 @@ void AbstractMediaPlayer::videoClicked() {
 }
 
 void AbstractMediaPlayer::adjustVideoSize() {
-	if (_currentImageItem == nullptr
-		&& _videoItem != nullptr)
-		_videoItem->setSize(size());
-	_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), size()));
+	if (_currentImageItem == nullptr && _videoItem != nullptr)
+		if (_videoItem->boundingRect().size().toSize() != size())
+			_videoItem->setSize(size());
+
+	if (_videoView->scene()->sceneRect() != QRectF(QPointF(0, 0), size()))
+		_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), size()));
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
@@ -201,6 +193,7 @@ void AbstractMediaPlayer::videoRewind(int value) {
 }
 
 void AbstractMediaPlayer::changeVolume(int value) {
-	qreal linearVolume = QAudio::convertVolume(value / qreal(100), QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
+	const auto linearVolume = QAudio::convertVolume(value / qreal(100),
+							  QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 	_mediaPlayer->audioOutput()->setVolume(linearVolume);
 }

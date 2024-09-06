@@ -26,6 +26,10 @@ public:
 	int contentHeight() const noexcept;
 protected:
 	void updateSize();
+	
+	void drawRoundedCorners(QPainter& painter, int borderRadius);
+
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
+
 };

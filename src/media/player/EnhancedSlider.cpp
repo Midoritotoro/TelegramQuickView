@@ -1,7 +1,7 @@
 ﻿#include "EnhancedSlider.h"
 
 
-EnhancedSlider::EnhancedSlider(Qt::Orientation orientation, uint16_t handleLen, QWidget* parent)
+EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uint16_t handleLen)
     : QSlider(parent), m_HandleLen(handleLen) 
 {
     setOrientation(orientation);
