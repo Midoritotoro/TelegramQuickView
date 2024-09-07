@@ -18,6 +18,10 @@ MessageTextView::MessageTextView(QWidget* parent):
 {
 	setContentsMargins(0, 0, 0, 0);
 
+	setStyleSheet("QWidget {\n"
+		"font-size: 13px;\n"
+	"}");
+
 	_textLabel = new QLabel(this);
 
 	_textLabel->setWordWrap(true);
@@ -63,6 +67,7 @@ void MessageTextView::paintEvent(QPaintEvent* event) {
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);
+	painter.setOpacity(0.5);
 
 	drawRoundedCorners(painter, messageTextViewBorderRadius);
 }
