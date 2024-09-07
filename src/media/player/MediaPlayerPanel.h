@@ -20,13 +20,6 @@ private:
 public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
 
-	int contentLeft() const noexcept;
-	int contentTop() const noexcept;
-	int contentRight() const noexcept;
-	int contentBottom() const noexcept;
-
-	int contentWidth() const noexcept;
-	int contentHeight() const noexcept;
 protected:
 	void updateSize();
 	
@@ -34,5 +27,12 @@ protected:
 
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
+private:
+	int contentLeft() const noexcept;
+	int contentTop() const noexcept;
+	int contentRight() const noexcept;
+	int contentBottom() const noexcept;
 
+	int contentWidth() const noexcept;
+	int contentHeight() const noexcept;
 };

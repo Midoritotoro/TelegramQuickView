@@ -72,31 +72,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		else {
 			_volumeSlider->setSliderValue(_previousVolumeSliderValue);
 		}
-		});
-}
-
-int MediaPlayerPanel::contentLeft() const noexcept {	
-	return mediaPlayerPanelMargins.left();
-}
-
-int MediaPlayerPanel::contentTop() const noexcept {
-	return mediaPlayerPanelMargins.top();
-}
-
-int MediaPlayerPanel::contentRight() const noexcept {
-	return mediaPlayerPanelMargins.right();
-}
-
-int MediaPlayerPanel::contentBottom() const noexcept {
-	return mediaPlayerPanelMargins.bottom();
-}
-
-int MediaPlayerPanel::contentWidth() const noexcept {
-	return width() - contentLeft() - contentRight();
-}
-
-int MediaPlayerPanel::contentHeight() const noexcept {
-	return height() - contentTop() - contentBottom();
+	});
 }
 
 void MediaPlayerPanel::updateSize() {
@@ -122,13 +98,6 @@ void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
 
 	path.lineTo(0, borderRadius);
 	path.quadTo(0, 0, borderRadius, 0);
-
-	painter.drawPath(path);
-
-	QTransform mirror(-1, 0, 0, 0, 1, 0, 0, 0, 1);
-
-	painter.setTransform(mirror);
-	painter.translate(-width(), 0);
 
 	painter.drawPath(path);
 }
@@ -160,4 +129,28 @@ void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
 
 	_volumeToggle->move(contentLeft(), contentTop());
 	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
+}
+
+int MediaPlayerPanel::contentLeft() const noexcept {
+	return mediaPlayerPanelMargins.left();
+}
+
+int MediaPlayerPanel::contentTop() const noexcept {
+	return mediaPlayerPanelMargins.top();
+}
+
+int MediaPlayerPanel::contentRight() const noexcept {
+	return mediaPlayerPanelMargins.right();
+}
+
+int MediaPlayerPanel::contentBottom() const noexcept {
+	return mediaPlayerPanelMargins.bottom();
+}
+
+int MediaPlayerPanel::contentWidth() const noexcept {
+	return width() - contentLeft() - contentRight();
+}
+
+int MediaPlayerPanel::contentHeight() const noexcept {
+	return height() - contentTop() - contentBottom();
 }

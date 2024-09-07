@@ -77,10 +77,13 @@ private:
     void FadeInAnimation(QWidget* widget) { // Появление
         QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this);
         widget->setGraphicsEffect(effect);
+
         QPropertyAnimation* fadeInAnimation = new QPropertyAnimation(effect, "opacity");
+
         fadeInAnimation->setDuration(_animationDuration);
         fadeInAnimation->setStartValue(0);
-        fadeInAnimation->setEndValue(1);
+        fadeInAnimation->setEndValue(0.9);
+
         fadeInAnimation->setEasingCurve(QEasingCurve::InBack);
         fadeInAnimation->start(QPropertyAnimation::DeleteWhenStopped);
     }
@@ -88,10 +91,13 @@ private:
     void FadeOutAnimation(QWidget* widget) { // Исчезание
         QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(this);
         widget->setGraphicsEffect(effect);
+
         QPropertyAnimation* fadeOutAnimation = new QPropertyAnimation(effect, "opacity");
+
         fadeOutAnimation->setDuration(_animationDuration);
-        fadeOutAnimation->setStartValue(1);
+        fadeOutAnimation->setStartValue(0.9);
         fadeOutAnimation->setEndValue(0);
+
         fadeOutAnimation->setEasingCurve(QEasingCurve::InBack);
         fadeOutAnimation->start(QPropertyAnimation::DeleteWhenStopped);
 
@@ -110,6 +116,7 @@ private:
             else
                 widget->setVisible(Show);
         }
+
         if (!_fadeInOutAnimation)
             Show ? emit widgetsShowed() : emit widgetsHidden();
     }

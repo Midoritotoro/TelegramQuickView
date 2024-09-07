@@ -21,6 +21,5 @@ int MediaPlayer::getVideoControlsHeight() const noexcept {
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	AbstractMediaPlayer::resizeEvent(event);
 
-	if (_mediaPlayerPanel->pos() != QPoint((width() - _mediaPlayerPanel->width()) / 2, height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent))
-		_mediaPlayerPanel->move((width() - _mediaPlayerPanel->width()) / 2, height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent);
+	_mediaPlayerPanel->move((width() - _mediaPlayerPanel->width()) / 2, height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent);
 }

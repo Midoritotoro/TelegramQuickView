@@ -11,6 +11,7 @@ private:
 	MediaPlayerPanel* _mediaPlayerPanel = nullptr;
 public:
 	MediaPlayer(QWidget* parent = nullptr);
+
 	[[nodiscard]] int getVideoControlsHeight() const noexcept;
 protected:
 	void resizeEvent(QResizeEvent* event) override;

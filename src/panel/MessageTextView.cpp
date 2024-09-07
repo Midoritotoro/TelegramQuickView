@@ -8,6 +8,7 @@
 
 
 namespace {
+	constexpr QMargins textLabelMargins = { 8, 5, 8, 8 };
 	constexpr int messageTextViewBorderRadius = 10;
 }
 
@@ -15,22 +16,15 @@ namespace {
 MessageTextView::MessageTextView(QWidget* parent):
 	QWidget(parent)
 {
-	setStyleSheet("QWidget {\n"
-		//"background-color: rgba(41, 41, 54, 99);\n"
-		"border: none;\n"
-		"font-size: 13px;\n"
-	"}");
-
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setContentsMargins(0, 0, 0, 0);
 
 	_textLabel = new QLabel(this);
 
 	_textLabel->setWordWrap(true);
 	_textLabel->setAlignment(Qt::AlignLeft);
-	_textLabel->setContentsMargins(8, 5, 8, 8);
+	_textLabel->setContentsMargins(textLabelMargins);
 
-	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	_textLabel->setAttribute(Qt::WA_NoSystemBackground);
 	
 	QGridLayout* gridLayout = new QGridLayout(this);
 	gridLayout->setContentsMargins(0, 0, 0, 0);
@@ -89,13 +83,6 @@ void MessageTextView::drawRoundedCorners(QPainter& painter, int borderRadius) {
 
 	path.lineTo(0, borderRadius);
 	path.quadTo(0, 0, borderRadius, 0);
-
-	painter.drawPath(path);
-
-	QTransform mirror(-1, 0, 0, 0, 1, 0, 0, 0, 1);
-
-	painter.setTransform(mirror);
-	painter.translate(-width(), 0);
 
 	painter.drawPath(path);
 }
