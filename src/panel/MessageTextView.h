@@ -10,6 +10,10 @@ private:
 	QLabel* _textLabel = nullptr;
 public:
 	MessageTextView(QWidget* parent = nullptr);
-	void setText(const QString& text);
 
+	void setText(const QString& text);
+protected:
+	void paintEvent(QPaintEvent* event) override;
+private:
+	void drawRoundedCorners(QPainter& painter, int borderRadius);
 };

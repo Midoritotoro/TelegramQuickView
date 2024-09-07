@@ -12,8 +12,11 @@ class MediaPlayerPanel: public QWidget {
 private:
 	VideoStateWidget* _videoStateWidget = nullptr;
 	EnhancedSlider* _playbackSlider = nullptr, *_volumeSlider = nullptr;
+
 	VolumeController* _volumeToggle = nullptr;
 	QPixmap _cache;
+
+	int _previousVolumeSliderValue = 0;
 public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
 

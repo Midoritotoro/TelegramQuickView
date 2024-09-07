@@ -61,6 +61,18 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 
 	hide();
 	updateSize();
+
+	connect(_volumeToggle, &QAbstractButton::clicked, this, [this]() {
+		_volumeToggle->repaint();
+
+		if (_volumeToggle->isSpeakerOn()) {
+			_previousVolumeSliderValue = _volumeSlider->value();
+			_volumeSlider->setSliderValue(0);
+		}
+		else {
+			_volumeSlider->setSliderValue(_previousVolumeSliderValue);
+		}
+		});
 }
 
 int MediaPlayerPanel::contentLeft() const noexcept {	
