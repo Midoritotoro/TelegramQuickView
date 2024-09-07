@@ -3,14 +3,14 @@ QSlider::groove:horizontal {
 }
 
 QSlider::sub-page:horizontal {
-    background: rgb(200, 200, 200); /* Ярко-серый цвет для активной части */
+    background: rgb(200, 200, 200);
     border-radius: 7px;
     margin-top: 8px;
     margin-bottom: 8px;
 }
 
 QSlider::add-page:horizontal {
-    background: rgb(100, 100, 100); /* Темно-серый для "незаполненной" части */
+    background: rgb(100, 100, 100);
     border: 0px solid #777;
     border-radius: 7px;
     margin-top: 8px;
@@ -18,8 +18,8 @@ QSlider::add-page:horizontal {
 }
 
 QSlider::handle:horizontal {
-    background: rgba(200, 200, 200, 0); /* Ярко-серый цвет для ручки */
-    border: none; /* Обводка ручки */
+    background: rgba(200, 200, 200, 0);
+    border: none;
     width: 14px;
     height: 12px;
     border-radius: 7px;
@@ -31,30 +31,30 @@ QSlider::groove:horizontal:hover {
     QSlider:: handle:horizontal
 
 {
-    background: rgba(200, 200, 200, 100); /* Показываем ручку при наведении на слайдер */
-    border: 1px solid rgb(200, 200, 200); /* Обводка ручки */
+    background: rgba(200, 200, 200, 100);
+    border: 1px solid rgb(200, 200, 200);
 }
 
 }
 
 QSlider::handle:horizontal:hover {
-    background: rgb(170, 170, 170); /* Более темный оттенок серого при наведении */
-    border: 1px solid rgba(255, 255, 255, 0.8); /* Обводка при наведении */
+    background: rgb(170, 170, 170);
+    border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 7px;
 }
 
 QSlider::sub-page:horizontal:disabled {
-    background: #bbb; /* Цвет для отключенной части */
+    background: #bbb;
     border-color: #999;
 }
 
 QSlider::add-page:horizontal:disabled {
-    background: rgb(80, 80, 80); /* Цвет для "незаполненной" части отключенного слайдера */
+    background: rgb(80, 80, 80);
     border-color: #999;
 }
 
 QSlider::handle:horizontal:disabled {
-    background: rgb(150, 150, 150); /* Цвет ручки отключенного слайдера */
+    background: rgb(150, 150, 150);
     border: 1px solid #aaa;
     border-radius: 7px;
 }

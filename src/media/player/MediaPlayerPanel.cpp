@@ -26,9 +26,16 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	setContentsMargins(0, 0, 0, 0);
 
 	_videoStateWidget = new VideoStateWidget(this);
+	_volumeToggle = new VolumeController(this);
+
 	_volumeSlider = new EnhancedSlider(this);
 	_playbackSlider = new EnhancedSlider(this);
-	_volumeToggle = new VolumeController(this);
+
+	_timeLabel = new QLabel(this);
+	_remainingTimeLabel = new QLabel(this);
+
+	_timeLabel->setAttribute(Qt::WA_NoSystemBackground);
+	_remainingTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../src/css");
@@ -52,14 +59,15 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_playbackSlider->setFixedHeight(20);
 	_volumeToggle->resize(20, 20);
 
-	resize(width(), height() + _videoStateWidget->height() + _playbackSlider->height());
+	resize(width(), _videoStateWidget->height() + _playbackSlider->height()
+					+ _volumeSlider->height() + _volumeToggle->height()
+					+ contentTop() + contentBottom());
 
 	_volumeSlider->show();
 	_volumeToggle->show();
 	_videoStateWidget->show();
 	_playbackSlider->show();
 
-	hide();
 	updateSize();
 
 	connect(_volumeToggle, &QAbstractButton::clicked, this, [this]() {
@@ -75,9 +83,26 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	});
 }
 
+void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
+	const auto positionSeconds = (mediaPosition / 1000) % 60;
+	const auto positionMinutes = (mediaPosition / 1000) / 60;
+	
+	const auto durationSeconds = (mediaPosition / 1000) % 60;
+	const auto durationMinutes = (mediaDuration / 1000) / 60;
+
+	_timeLabel->setText(QString("%1:%2 / %3:%4")
+				.arg(positionMinutes, 2, 10, QChar('0'))
+				.arg(positionSeconds, 2, 10, QChar('0'))
+				.arg(durationSeconds)
+				.arg(durationMinutes));
+}
+
 void MediaPlayerPanel::updateSize() {
 	const auto width = contentLeft() + mediaPlayerPanelWidth + contentRight();
 	const auto height = contentTop() + contentHeight() + contentBottom();
+
+	_timeLabel->adjustSize();
+	_remainingTimeLabel->adjustSize();
 
 	resize(width, height);
 }
@@ -121,14 +146,18 @@ void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
 
 	updateSize();
 
-	_playbackSlider->resize(width() - contentLeft() - contentRight(), _playbackSlider->height());
+	_playbackSlider->resize(width() - contentLeft() - contentRight() - _timeLabel->width() 
+							- _remainingTimeLabel->width(), _playbackSlider->height());
+
 	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
 
-	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, contentTop());
-	_playbackSlider->move(contentLeft(),  height() - contentBottom() - _playbackSlider->height());
+	_playbackSlider->move(contentLeft() + _timeLabel->width(), height() - contentBottom() - _playbackSlider->height());
+	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
 
 	_volumeToggle->move(contentLeft(), contentTop());
-	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
+	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, contentTop());
+
+	_timeLabel->move(contentLeft(), height() - contentBottom() - _timeLabel->height());
 }
 
 int MediaPlayerPanel::contentLeft() const noexcept {

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QWidget>
+#include <QLabel>
+
 
 class VolumeController;
 class EnhancedSlider;
@@ -12,6 +14,7 @@ class MediaPlayerPanel: public QWidget {
 private:
 	VideoStateWidget* _videoStateWidget = nullptr;
 	EnhancedSlider* _playbackSlider = nullptr, *_volumeSlider = nullptr;
+	QLabel* _timeLabel = nullptr, *_remainingTimeLabel = nullptr;
 
 	VolumeController* _volumeToggle = nullptr;
 	QPixmap _cache;
@@ -19,6 +22,8 @@ private:
 	int _previousVolumeSliderValue = 0;
 public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
+
+	void updateTimeText(int mediaPosition, int mediaDuration);
 
 protected:
 	void updateSize();
