@@ -4,6 +4,7 @@
 #include <QLabel>
 #include "VideoStateWidget.h"
 
+
 class VolumeController;
 class EnhancedSlider;
 
@@ -15,10 +16,11 @@ private:
 	EnhancedSlider* _playbackSlider = nullptr, *_volumeSlider = nullptr;
 	QLabel* _timeLabel = nullptr, *_remainingTimeLabel = nullptr;
 
-	VolumeController* _volumeToggle = nullptr;
-	QPixmap _cache;
+	QPushButton *_fullScreenButton = nullptr;
+	QString _fullScreenToImagePath;
 
-	int _previousVolumeSliderValue = 0;
+	VolumeController* _volumeToggle = nullptr;
+	int _previousVolumeSliderValue = 0, _mediaPlayerPanelWidth = 0;
 public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
 

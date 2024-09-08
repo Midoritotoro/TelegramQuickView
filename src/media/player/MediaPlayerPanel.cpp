@@ -10,6 +10,8 @@
 #include <QDir>
 #include <QFile>
 #include <QPainterPath>
+#include <QApplication>
+#include <QScreen>
 
 
 namespace {
@@ -23,15 +25,53 @@ namespace {
 	}
 
 	constexpr QMargins mediaPlayerPanelMargins = { 10, 5, 10, 5 };
-	constexpr int mediaPlayerPanelWidth = 480; // 344
 	constexpr int mediaPlayerPanelBorderRadius = 10;
 }
 
+
+class FullScreenButton : public QPushButton {
+	Q_OBJECT
+private:
+	QString _fullScreenToImagePath;
+public:
+	FullScreenButton(QWidget* parent = nullptr);
+protected:
+	void paintEvent(QPaintEvent* event) override;
+};
+
+FullScreenButton::FullScreenButton(QWidget* parent):
+	QPushButton(parent)
+{
+	setAttribute(Qt::WA_NoSystemBackground);
+
+	QString currentPath = QCoreApplication::applicationDirPath();
+	QDir assetsDir(currentPath + "/../../assets/images");
+
+	_fullScreenToImagePath = assetsDir.absolutePath() + "/media_fullscreen_to.png";
+
+	//_fullScreenFromImagePath = assetsDir.absolutePath() + "/media_fullscreen_to.png";
+}
+
+void FullScreenButton::paintEvent(QPaintEvent* event) {
+	QPainter painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	painter.setBrush(Qt::NoBrush);
+	painter.setPen(Qt::NoPen);
+
+	QPixmap pixmap(_fullScreenToImagePath);
+	pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+	painter.drawPixmap(0, 0, pixmap);
+}
 
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	QWidget(parent) 
 {
 	setContentsMargins(0, 0, 0, 0);
+
+	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+	_mediaPlayerPanelWidth = screenWidth / 4;
 
 	_videoStateWidget = new VideoStateWidget(this);
 	_volumeToggle = new VolumeController(this);
@@ -42,6 +82,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_timeLabel = new QLabel(this);
 	_remainingTimeLabel = new QLabel(this);
 
+	_fullScreenButton = new FullScreenButton(this);
+
 	_timeLabel->setAttribute(Qt::WA_NoSystemBackground);
 	_remainingTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
 
@@ -49,6 +91,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	QDir cssDir(currentPath + "/../../src/css");
 
 	QString sliderStylePath = cssDir.absolutePath() + "/SliderStyle.css";
+
 
 	QFile sliderStyleFile(sliderStylePath);
 	if (sliderStyleFile.open(QFile::ReadOnly)) {
@@ -61,16 +104,12 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		sliderStyleFile.close();
 	}
 
-	_videoStateWidget->resize(30, 30);
+	_fullScreenButton->setFixedSize(20, 20);
+	_videoStateWidget->setFixedSize(30, 30);
+	_volumeToggle->setFixedSize(20, 20);
 
 	_volumeSlider->setFixedHeight(20);
 	_playbackSlider->setFixedHeight(20);
-	_volumeToggle->resize(20, 20);
-
-	resize(width(), _videoStateWidget->height() / 1.5 + _playbackSlider->height()
-					+ _volumeToggle->height()
-					+ contentTop() + contentBottom());
-
 
 	connect(_volumeToggle, &QPushButton::clicked, this, [this]() {
 		_volumeToggle->repaint();
@@ -83,6 +122,10 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 			_volumeSlider->setSliderValue(_previousVolumeSliderValue);
 		}
 	});
+
+	connect(_fullScreenButton, &QPushButton::clicked, this, [this]() {
+		isFullScreen() ? showNormal() : showFullScreen();
+		});
 
 	//connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
 	//	switch (_videoStateWidget->state()) {
@@ -122,7 +165,7 @@ void MediaPlayerPanel::setVideoSliderMaximum(int value) {
 }
 
 void MediaPlayerPanel::updateSize() {
-	const auto width = contentLeft() + mediaPlayerPanelWidth + contentRight();
+	const auto width = contentLeft() + _mediaPlayerPanelWidth + contentRight();
 	const auto height = contentTop() + contentHeight() + contentBottom();
 
 	resize(width, height);
@@ -132,24 +175,17 @@ void MediaPlayerPanel::updateTimeSize() {
 	const auto timeLabelSize = textSize(_timeLabel->text(), _timeLabel->font());
 	const auto remainingTimeLabelSize = textSize(_remainingTimeLabel->text(), _remainingTimeLabel->font());
 
-
 	if (timeLabelSize.isNull() || remainingTimeLabelSize.isNull())
 		return;
 
 	_timeLabel->resize(timeLabelSize);
 	_remainingTimeLabel->resize(remainingTimeLabelSize);
-
-	/*qDebug() << "textSize: " << _timeLabel->size();
-	qDebug() << "textSize: " << _remainingTimeLabel->size();*/
 }
 
 void MediaPlayerPanel::updateControlsGeometry() {
-	const auto playbackSliderWidth = width() - _timeLabel->width() / 2 - _remainingTimeLabel->width() / 2;
+	_playbackSlider->resize(width() - _remainingTimeLabel->width() / 2 
+					- _timeLabel->width() / 2, _playbackSlider->height());
 
-	qDebug() << "playbackSliderWidth: " << playbackSliderWidth;
-	qDebug() << "ffff: " << (contentLeft() * 2 + contentRight() * 2 + _timeLabel->width() / 2);
-
-	_playbackSlider->resize(playbackSliderWidth, _playbackSlider->height());
 	_playbackSlider->move(_timeLabel->width() / 2,
 			height() - contentBottom() - _playbackSlider->height());
 
@@ -162,11 +198,7 @@ void MediaPlayerPanel::updateControlsGeometry() {
 	_timeLabel->move(contentLeft(), height() + contentBottom() - _timeLabel->height());
 	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2, height() + contentBottom() - _remainingTimeLabel->height());
 
-	/*qDebug() << _playbackSlider->pos();
-	qDebug() << _playbackSlider->size();
-
-	qDebug() << _timeLabel->pos();
-	qDebug() << _timeLabel->size();*/
+	_fullScreenButton->move(width() + contentRight() - _fullScreenButton->width() / 2, contentTop());
 }
 
 void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
@@ -190,10 +222,6 @@ void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
 }
 
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
-	QWidget::paintEvent(event);
-
-	//qDebug() << "MediaPlayerPanel::paintEvent";
-
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setOpacity(0.8);
@@ -230,5 +258,7 @@ int MediaPlayerPanel::contentWidth() const noexcept {
 }
 
 int MediaPlayerPanel::contentHeight() const noexcept {
-	return height() - contentTop() - contentBottom();
+	return _videoStateWidget->height() / 1.5 + _playbackSlider->height()
+		+ _volumeToggle->height()
+		+ contentTop() + contentBottom(); - contentTop() - contentBottom();
 }
