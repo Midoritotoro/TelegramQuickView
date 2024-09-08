@@ -34,6 +34,8 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 
 	_videoItem = new QGraphicsVideoItem();
 
+	_videoItem->setCursor(Qt::PointingHandCursor);
+
 	_videoView->setScene(videoScene);
 
 	_videoItem->setSize(size());
@@ -161,27 +163,28 @@ void AbstractMediaPlayer::videoClicked() {
 void AbstractMediaPlayer::adjustVideoSize() {
 	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
 		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
+		
+		_videoView->scene()->setSceneRect(QRectF(QPointF((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2), videoSize));
 
-		if (_currentImageItem == nullptr && _videoItem != nullptr)
+		if (_currentImageItem == nullptr && _videoItem != nullptr) {
 			_videoItem->setSize(videoSize);
-
-		_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), videoSize));
+			_videoItem->moveBy((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2);
+		}
 	}
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
-	if (event->button() == Qt::LeftButton)
+	qDebug() << _videoItem->sceneBoundingRect().contains(event->pos());
+
+	if (event->button() == Qt::LeftButton && _videoItem->sceneBoundingRect().contains(event->pos().toPointF())) {
 		videoClicked();
-	event->accept();
+	}
 }
 
 void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 	adjustVideoSize();
 
-	if (event->size() == size())
-		return;
-
-	if (!_currentImageItem && _videoItem != nullptr) {
+	if (_currentImageItem == nullptr && _videoItem != nullptr) {
 		_currentMediaSize = _videoItem->boundingRect().size().toSize();
 		_currentMediaPosition = _videoItem->pos().toPoint();
 
