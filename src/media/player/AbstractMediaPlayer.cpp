@@ -156,8 +156,6 @@ void AbstractMediaPlayer::videoClicked() {
 void AbstractMediaPlayer::adjustVideoSize() {
 	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
 		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
-		auto videoThumbnail = QImage(_mediaPlayer->metaData().value(QMediaMetaData::ThumbnailImage).toByteArray());
-		videoThumbnail.save("D:/thumb.jpg");
 
 		if (_currentImageItem == nullptr && _videoItem != nullptr)
 			_videoItem->setSize(videoSize);
