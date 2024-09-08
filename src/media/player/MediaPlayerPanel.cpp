@@ -144,13 +144,13 @@ void MediaPlayerPanel::updateTimeSize() {
 }
 
 void MediaPlayerPanel::updateControlsGeometry() {
-	const auto playbackSliderWidth = width() - (contentLeft() * 2 + contentRight() * 2)
-									- _timeLabel->width() / 2 - _remainingTimeLabel->width() / 2;
+	const auto playbackSliderWidth = width() - _timeLabel->width() / 2 - _remainingTimeLabel->width() / 2;
 
 	qDebug() << "playbackSliderWidth: " << playbackSliderWidth;
+	qDebug() << "ffff: " << (contentLeft() * 2 + contentRight() * 2 + _timeLabel->width() / 2);
 
 	_playbackSlider->resize(playbackSliderWidth, _playbackSlider->height());
-	_playbackSlider->move(contentLeft() * 2 + _timeLabel->width() / 2,
+	_playbackSlider->move(_timeLabel->width() / 2,
 			height() - contentBottom() - _playbackSlider->height());
 
 	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
