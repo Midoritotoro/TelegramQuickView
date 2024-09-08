@@ -1,6 +1,5 @@
 #include "MediaPlayerPanel.h"
 
-#include "VideoStateWidget.h"
 #include "VolumeController.h"
 #include "EnhancedSlider.h"
 
@@ -84,6 +83,16 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 			_volumeSlider->setSliderValue(_previousVolumeSliderValue);
 		}
 	});
+
+	//connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
+	//	switch (_videoStateWidget->state()) {
+
+	//	case VideoStateWidget::State::Play:
+	//	case VideoStateWidget::State::Pause:
+	//	case VideoStateWidget::State::Repeat:
+	//		break;
+	//	}
+	//	});
 }
 
 void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
@@ -98,10 +107,14 @@ void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
 		.arg(positionSeconds, 2, 10, QChar('0')));
 
 	_remainingTimeLabel->setText(QString("-%1:%2")
-		.arg(durationSeconds - positionSeconds)
-		.arg(durationMinutes - positionMinutes));
+		.arg(durationSeconds - positionSeconds, 2, 10, QChar('0'))
+		.arg(durationMinutes - positionMinutes, 2, 10, QChar('0')));
 
 	updateTimeSize();
+}
+
+void MediaPlayerPanel::updateStateWidget(VideoStateWidget::State state) {
+	_videoStateWidget->setState(state);
 }
 
 void MediaPlayerPanel::setVideoSliderMaximum(int value) {
@@ -131,19 +144,23 @@ void MediaPlayerPanel::updateTimeSize() {
 }
 
 void MediaPlayerPanel::updateControlsGeometry() {
-	_playbackSlider->resize(width() - (contentLeft() * 1.5) - contentRight() - _timeLabel->width()
-					- _remainingTimeLabel->width(), _playbackSlider->height());
-	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
+	const auto playbackSliderWidth = width() - (contentLeft() * 2 + contentRight() * 2)
+									- _timeLabel->width() / 2 - _remainingTimeLabel->width() / 2;
 
-	_playbackSlider->move(contentLeft() * 1.5 + _timeLabel->width(),
-					height() - contentBottom() - _playbackSlider->height());
+	qDebug() << "playbackSliderWidth: " << playbackSliderWidth;
+
+	_playbackSlider->resize(playbackSliderWidth, _playbackSlider->height());
+	_playbackSlider->move(contentLeft() * 2 + _timeLabel->width() / 2,
+			height() - contentBottom() - _playbackSlider->height());
+
+	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
 	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
 
 	_volumeToggle->move(contentLeft(), contentTop());
 	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, contentTop());
 
-	_timeLabel->move(contentLeft(), height() - contentBottom() - _timeLabel->height());
-	_remainingTimeLabel->move(width() - contentRight(), height() - contentBottom() - _remainingTimeLabel->height());
+	_timeLabel->move(contentLeft(), height() + contentBottom() - _timeLabel->height());
+	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2, height() + contentBottom() - _remainingTimeLabel->height());
 
 	/*qDebug() << _playbackSlider->pos();
 	qDebug() << _playbackSlider->size();

@@ -19,6 +19,8 @@ public:
     VideoStateWidget(QWidget* parent = nullptr);
 
     void setState(State state);
+
+    [[nodiscard]] State state() const noexcept;
 protected:
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;

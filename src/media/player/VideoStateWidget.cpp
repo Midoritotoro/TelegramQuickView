@@ -28,6 +28,10 @@ void VideoStateWidget::setState(State state) {
     repaint();
 }
 
+VideoStateWidget::State VideoStateWidget::state() const noexcept {
+    return _state;
+}
+
 void VideoStateWidget::paintEvent(QPaintEvent* event) {
     QWidget::paintEvent(event);
 

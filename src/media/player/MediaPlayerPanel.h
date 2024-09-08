@@ -2,11 +2,10 @@
 
 #include <QWidget>
 #include <QLabel>
-
+#include "VideoStateWidget.h"
 
 class VolumeController;
 class EnhancedSlider;
-class VideoStateWidget;
 
 
 class MediaPlayerPanel: public QWidget {
@@ -24,6 +23,7 @@ public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
 
 	void updateTimeText(int mediaPosition, int mediaDuration);
+	void updateStateWidget(VideoStateWidget::State state);
 	void setVideoSliderMaximum(int value);
 protected:
 	void drawRoundedCorners(QPainter& painter, int borderRadius);

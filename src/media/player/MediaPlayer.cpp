@@ -20,6 +20,31 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 		_mediaPlayerPanel->updateTimeText(position, duration);
 	});
+
+	//connect(mediaPlayer(), &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
+	//	adjustVideoSize();
+
+	//	switch (state) {
+
+	//	case QMediaPlayer::PlaybackState::PlayingState: 
+	//		mediaPlayer()->pause();
+	//		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
+	//		break;
+
+	//	case QMediaPlayer::PlaybackState::PausedState:
+	//		const auto duration = mediaPlayer()->duration();
+	//		const auto position = mediaPlayer()->duration();
+
+	//		if ((duration - position) <= 100) {
+	//			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
+	//		}
+
+	//		mediaPlayer()->play();
+	//		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
+	//		break;
+	//		
+	//	}
+	//	});
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {

@@ -51,6 +51,7 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	_mediaPlayer->setVideoOutput(_videoItem);
 
 	connect(_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+		qDebug() << status;
 		adjustVideoSize();
 
 		if (status == QMediaPlayer::MediaStatus::EndOfMedia) {
@@ -174,8 +175,6 @@ void AbstractMediaPlayer::adjustVideoSize() {
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
-	qDebug() << _videoItem->sceneBoundingRect().contains(event->pos());
-
 	if (event->button() == Qt::LeftButton && _videoItem->sceneBoundingRect().contains(event->pos().toPointF())) {
 		videoClicked();
 	}
