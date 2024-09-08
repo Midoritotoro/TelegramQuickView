@@ -68,7 +68,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		sliderStyleFile.close();
 	}
 
-	_fullScreenButton->setFixedSize(20, 20);
+	_fullScreenButton->setFixedSize(15, 15);
 	_videoStateWidget->setFixedSize(30, 30);
 	_volumeToggle->setFixedSize(20, 20);
 
@@ -162,7 +162,7 @@ void MediaPlayerPanel::updateControlsGeometry() {
 	_timeLabel->move(contentLeft(), height() + contentBottom() - _timeLabel->height());
 	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2, height() + contentBottom() - _remainingTimeLabel->height());
 
-	_fullScreenButton->move(width() + contentRight() - _fullScreenButton->width() / 2, contentTop());
+	_fullScreenButton->move(width() - contentRight() - _fullScreenButton->width(), contentTop());
 }
 
 void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {

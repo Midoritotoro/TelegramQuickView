@@ -20,8 +20,6 @@ FullScreenButton::FullScreenButton(QWidget* parent) :
 }
 
 void FullScreenButton::paintEvent(QPaintEvent* event) {
-    QPushButton::paintEvent(event);
-
 	qDebug() << "repaint()";
 
 	QPainter painter(this);
@@ -34,9 +32,8 @@ void FullScreenButton::paintEvent(QPaintEvent* event) {
 	pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
 	painter.drawPixmap(0, 0, pixmap);
-	painter.end();
 }
 
 void FullScreenButton::resizeEvent(QResizeEvent* event) {
-    QWidget::resizeEvent(event);
+	QPushButton::resizeEvent(event);
 }

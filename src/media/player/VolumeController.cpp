@@ -22,13 +22,10 @@ void VolumeController::paintSpeakerOff(QPainter& painter) {
 
 	QPixmap pixmap(speakerImagePath);
 
-	painter.setRenderHint(QPainter::Antialiasing);
 
 	if (pixmap.size() != size())
 		pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::NoBrush);
 	painter.drawPixmap(0, 0, pixmap);
 }
 
@@ -40,18 +37,18 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 
 	QPixmap pixmap(speakerImagePath);
 
-	painter.setRenderHint(QPainter::Antialiasing);
-
 	if (pixmap.size() != size())
 		pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::NoBrush);
 	painter.drawPixmap(0, 0, pixmap);
 }
 
 void VolumeController::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	painter.setPen(Qt::NoPen);
+	painter.setBrush(Qt::NoBrush);
 
 	if (isSpeakerOn()) {
 		paintSpeakerOff(painter);

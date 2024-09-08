@@ -33,8 +33,6 @@ VideoStateWidget::State VideoStateWidget::state() const noexcept {
 }
 
 void VideoStateWidget::paintEvent(QPaintEvent* event) {
-    QPushButton::paintEvent(event);
-
     if (_pauseImagePath.isEmpty() || _playImagePath.isEmpty() || _repeatImagePath.isEmpty())
         return;
 
@@ -65,5 +63,4 @@ void VideoStateWidget::paintEvent(QPaintEvent* event) {
 
 void VideoStateWidget::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
-
 }
