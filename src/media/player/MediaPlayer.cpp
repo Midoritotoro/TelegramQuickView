@@ -31,3 +31,14 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 
 	_mediaPlayerPanel->move((width() - _mediaPlayerPanel->width()) / 2, height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent);
 }
+
+void MediaPlayer::paintEvent(QPaintEvent* event) {
+	QPainter painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setOpacity(0.3);
+
+	painter.setBrush(Qt::black);
+	painter.setPen(Qt::NoPen);
+
+	painter.drawRect(rect());
+}

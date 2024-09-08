@@ -15,4 +15,5 @@ public:
 	[[nodiscard]] int getVideoControlsHeight() const noexcept;
 protected:
 	void resizeEvent(QResizeEvent* event) override;
+	void paintEvent(QPaintEvent* event) override;
 }; 

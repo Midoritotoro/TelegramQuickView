@@ -17,7 +17,12 @@
 AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	QWidget(parent)
 {
+	setContentsMargins(0, 0, 0, 0);
+
 	QGridLayout* grid = new QGridLayout(this);
+
+	grid->setContentsMargins(0, 0, 0, 0);
+	grid->setSpacing(0);
 
 	_mediaPlayer = new QMediaPlayer();
 	QAudioOutput* audioOutput = new QAudioOutput();
