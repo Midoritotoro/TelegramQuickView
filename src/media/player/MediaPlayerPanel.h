@@ -7,6 +7,7 @@
 
 class VolumeController;
 class EnhancedSlider;
+class FullScreenButton;
 
 
 class MediaPlayerPanel: public QWidget {
@@ -16,7 +17,7 @@ private:
 	EnhancedSlider* _playbackSlider = nullptr, *_volumeSlider = nullptr;
 	QLabel* _timeLabel = nullptr, *_remainingTimeLabel = nullptr;
 
-	QPushButton *_fullScreenButton = nullptr;
+	FullScreenButton *_fullScreenButton = nullptr;
 	QString _fullScreenToImagePath;
 
 	VolumeController* _volumeToggle = nullptr;
@@ -26,6 +27,7 @@ public:
 
 	void updateTimeText(int mediaPosition, int mediaDuration);
 	void updateStateWidget(VideoStateWidget::State state);
+
 	void setVideoSliderMaximum(int value);
 protected:
 	void drawRoundedCorners(QPainter& painter, int borderRadius);
@@ -35,13 +37,14 @@ protected:
 private:
 	void updateSize();
 	void updateTimeSize();
+
 	void updateControlsGeometry();
 
 	int contentLeft() const noexcept;
 	int contentTop() const noexcept;
+
 	int contentRight() const noexcept;
 	int contentBottom() const noexcept;
 
-	int contentWidth() const noexcept;
 	int contentHeight() const noexcept;
 };

@@ -42,6 +42,7 @@ void MessageTextView::setText(const QString& text) {
 
 	_textLabel->adjustSize();
 	adjustSize();
+	_textLabel->resize(size());
 
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
@@ -57,6 +58,7 @@ void MessageTextView::setText(const QString& text) {
 
 	_textLabel->adjustSize();
 	adjustSize();
+	_textLabel->resize(size());
 }
 
 void MessageTextView::paintEvent(QPaintEvent* event) {

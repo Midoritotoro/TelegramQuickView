@@ -2,6 +2,7 @@
 
 #include "VolumeController.h"
 #include "EnhancedSlider.h"
+#include "FullScreenButton.h"
 
 #include <QPaintEvent>
 #include <QMargins>
@@ -29,42 +30,6 @@ namespace {
 }
 
 
-class FullScreenButton : public QPushButton {
-	Q_OBJECT
-private:
-	QString _fullScreenToImagePath;
-public:
-	FullScreenButton(QWidget* parent = nullptr);
-protected:
-	void paintEvent(QPaintEvent* event) override;
-};
-
-FullScreenButton::FullScreenButton(QWidget* parent):
-	QPushButton(parent)
-{
-	setAttribute(Qt::WA_NoSystemBackground);
-
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir assetsDir(currentPath + "/../../assets/images");
-
-	_fullScreenToImagePath = assetsDir.absolutePath() + "/media_fullscreen_to.png";
-
-	//_fullScreenFromImagePath = assetsDir.absolutePath() + "/media_fullscreen_to.png";
-}
-
-void FullScreenButton::paintEvent(QPaintEvent* event) {
-	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
-
-	painter.setBrush(Qt::NoBrush);
-	painter.setPen(Qt::NoPen);
-
-	QPixmap pixmap(_fullScreenToImagePath);
-	pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-	painter.drawPixmap(0, 0, pixmap);
-}
-
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	QWidget(parent) 
 {
@@ -91,7 +56,6 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	QDir cssDir(currentPath + "/../../src/css");
 
 	QString sliderStylePath = cssDir.absolutePath() + "/SliderStyle.css";
-
 
 	QFile sliderStyleFile(sliderStylePath);
 	if (sliderStyleFile.open(QFile::ReadOnly)) {
@@ -123,7 +87,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		}
 	});
 
-	connect(_fullScreenButton, &QPushButton::clicked, this, [this]() {
+	connect(_fullScreenButton, &QAbstractButton::clicked, this, [this]() {
 		isFullScreen() ? showNormal() : showFullScreen();
 		});
 
@@ -251,10 +215,6 @@ int MediaPlayerPanel::contentRight() const noexcept {
 
 int MediaPlayerPanel::contentBottom() const noexcept {
 	return mediaPlayerPanelMargins.bottom();
-}
-
-int MediaPlayerPanel::contentWidth() const noexcept {
-	return width() - contentLeft() - contentRight();
 }
 
 int MediaPlayerPanel::contentHeight() const noexcept {

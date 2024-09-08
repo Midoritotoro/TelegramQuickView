@@ -55,6 +55,8 @@ SET(MAIN_SOURCES main.cpp
 	src/media/player/MediaPlayer.h
 	src/media/player/VideoStateWidget.cpp
 	src/media/player/VideoStateWidget.h
+	src/media/player/FullScreenButton.cpp
+	src/media/player/FullScreenButton.h
 
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h
