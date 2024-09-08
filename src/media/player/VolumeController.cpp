@@ -6,7 +6,7 @@
 
 
 VolumeController::VolumeController(QWidget* parent) :
-	QAbstractButton(parent)
+	QPushButton(parent)
 	, _isSpeakerOn(true)
 {
 	setAttribute(Qt::WA_NoSystemBackground);

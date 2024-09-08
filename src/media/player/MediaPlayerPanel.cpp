@@ -14,6 +14,15 @@
 
 
 namespace {
+
+	QSize textSize(const QString& text, const QFontMetrics& metrics) {
+		return metrics.size(0, text);
+	}
+
+	QSize textSize(const QString& text, const QFont& font) {
+		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
+	}
+
 	constexpr QMargins mediaPlayerPanelMargins = { 10, 5, 10, 5 };
 	constexpr int mediaPlayerPanelWidth = 344;
 	constexpr int mediaPlayerPanelBorderRadius = 10;
@@ -68,9 +77,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_videoStateWidget->show();
 	_playbackSlider->show();
 
-	updateSize();
-
-	connect(_volumeToggle, &QAbstractButton::clicked, this, [this]() {
+	connect(_volumeToggle, &QPushButton::clicked, this, [this]() {
 		_volumeToggle->repaint();
 
 		if (_volumeToggle->isSpeakerOn()) {
@@ -86,25 +93,53 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
 	const auto positionSeconds = (mediaPosition / 1000) % 60;
 	const auto positionMinutes = (mediaPosition / 1000) / 60;
-	
+
 	const auto durationSeconds = (mediaPosition / 1000) % 60;
 	const auto durationMinutes = (mediaDuration / 1000) / 60;
 
-	_timeLabel->setText(QString("%1:%2 / %3:%4")
-				.arg(positionMinutes, 2, 10, QChar('0'))
-				.arg(positionSeconds, 2, 10, QChar('0'))
-				.arg(durationSeconds)
-				.arg(durationMinutes));
+	_timeLabel->setText(QString("%1:%2")
+		.arg(positionMinutes, 2, 10, QChar('0'))
+		.arg(positionSeconds, 2, 10, QChar('0')));
+
+	_remainingTimeLabel->setText(QString("%1:%2")
+		.arg(durationSeconds - positionSeconds)
+		.arg(durationMinutes - positionMinutes));
+
+	updateTimeSize();
+}
+
+void MediaPlayerPanel::setVideoSliderMaximum(int value) {
+	_playbackSlider->setMaximum(value);
 }
 
 void MediaPlayerPanel::updateSize() {
 	const auto width = contentLeft() + mediaPlayerPanelWidth + contentRight();
 	const auto height = contentTop() + contentHeight() + contentBottom();
 
-	_timeLabel->adjustSize();
-	_remainingTimeLabel->adjustSize();
+	updateTimeSize();
 
 	resize(width, height);
+}
+
+void MediaPlayerPanel::updateTimeSize() {
+	_timeLabel->resize(textSize(_timeLabel->text(), _timeLabel->font()));
+	_remainingTimeLabel->resize(textSize(_remainingTimeLabel->text(), _remainingTimeLabel->font()));
+}
+
+void MediaPlayerPanel::updateControlsGeometry() {
+	_playbackSlider->resize(width() - contentLeft() - contentRight() - _timeLabel->width()
+					- _remainingTimeLabel->width(), _playbackSlider->height());
+	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
+
+	_playbackSlider->move(contentLeft() * 1.5 + _timeLabel->width(),
+					height() - contentBottom() - _playbackSlider->height());
+	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
+
+	_volumeToggle->move(contentLeft(), contentTop());
+	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, contentTop());
+
+	_timeLabel->move(contentLeft(), height() - contentBottom() - _timeLabel->height());
+	_remainingTimeLabel->move(width() - contentRight(), height() - contentBottom() - _remainingTimeLabel->height());
 }
 
 void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
@@ -130,7 +165,7 @@ void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	QWidget::paintEvent(event);
 
-	updateSize();
+	qDebug() << "MediaPlayerPanel::paintEvent";
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -142,22 +177,8 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 }
 
 void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
-	QWidget::resizeEvent(event);
-
 	updateSize();
-
-	_playbackSlider->resize(width() - contentLeft() - contentRight() - _timeLabel->width() 
-							- _remainingTimeLabel->width(), _playbackSlider->height());
-
-	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
-
-	_playbackSlider->move(contentLeft() + _timeLabel->width(), height() - contentBottom() - _playbackSlider->height());
-	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
-
-	_volumeToggle->move(contentLeft(), contentTop());
-	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, contentTop());
-
-	_timeLabel->move(contentLeft(), height() - contentBottom() - _timeLabel->height());
+	updateControlsGeometry();
 }
 
 int MediaPlayerPanel::contentLeft() const noexcept {

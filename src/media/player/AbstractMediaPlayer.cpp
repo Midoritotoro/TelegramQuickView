@@ -2,7 +2,6 @@
 
 
 #include <QMimeDatabase>
-#include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QGraphicsScene>
 #include <QGraphicsWidget>

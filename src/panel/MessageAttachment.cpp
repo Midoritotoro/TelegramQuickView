@@ -64,6 +64,8 @@ QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QLabel::paintEvent(event);
 
+	qDebug() << "MessageAttachment::paintEvent";
+
 	QPixmap preview;
 
 	if (_attachmentType.contains("image")) {
@@ -85,7 +87,6 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
-
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 

@@ -12,6 +12,14 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 {
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
 	_mediaPlayerPanel->show();
+
+	connect(mediaPlayer(), &QMediaPlayer::durationChanged, _mediaPlayerPanel, &MediaPlayerPanel::setVideoSliderMaximum);
+	connect(mediaPlayer(), &QMediaPlayer::positionChanged, this, [this]() {
+		const auto position = mediaPlayer()->position();
+		const auto duration = mediaPlayer()->position();
+
+		_mediaPlayerPanel->updateTimeText(position, duration);
+	});
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {

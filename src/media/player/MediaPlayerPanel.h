@@ -24,15 +24,17 @@ public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
 
 	void updateTimeText(int mediaPosition, int mediaDuration);
-
+	void setVideoSliderMaximum(int value);
 protected:
-	void updateSize();
-	
 	void drawRoundedCorners(QPainter& painter, int borderRadius);
 
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 private:
+	void updateSize();
+	void updateTimeSize();
+	void updateControlsGeometry();
+
 	int contentLeft() const noexcept;
 	int contentTop() const noexcept;
 	int contentRight() const noexcept;

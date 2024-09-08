@@ -4,9 +4,9 @@
 
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
+#include <QMediaPlayer>
 
 class QGraphicsVideoItem;
-class QMediaPlayer;
 
 
 class AbstractMediaPlayer: public QWidget {

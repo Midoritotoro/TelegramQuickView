@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QAbstractButton>
+#include <QPushButton>
 
 
-class VolumeController: public QAbstractButton
+class VolumeController: public QPushButton
 {
 	Q_OBJECT
 private:
