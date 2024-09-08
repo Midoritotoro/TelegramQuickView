@@ -61,13 +61,13 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		sliderStyleFile.close();
 	}
 
-	_videoStateWidget->resize(20, 20);
+	_videoStateWidget->resize(30, 30);
 
 	_volumeSlider->setFixedHeight(20);
 	_playbackSlider->setFixedHeight(20);
 	_volumeToggle->resize(20, 20);
 
-	resize(width(), _videoStateWidget->height() + _playbackSlider->height()
+	resize(width(), _videoStateWidget->height() / 1.5 + _playbackSlider->height()
 					+ _volumeToggle->height()
 					+ contentTop() + contentBottom());
 
@@ -196,6 +196,7 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setOpacity(0.8);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);

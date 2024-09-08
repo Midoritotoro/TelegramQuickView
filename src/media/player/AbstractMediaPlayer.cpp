@@ -184,8 +184,8 @@ void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 	adjustVideoSize();
 
 	if (_currentImageItem == nullptr && _videoItem != nullptr) {
-		_currentMediaSize = _videoItem->boundingRect().size().toSize();
-		_currentMediaPosition = _videoItem->pos().toPoint();
+		_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
+		_currentMediaPosition = _videoItem->scenePos().toPoint();
 
 		return;
 	}
