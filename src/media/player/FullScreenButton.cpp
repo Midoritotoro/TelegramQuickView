@@ -11,11 +11,11 @@ FullScreenButton::FullScreenButton(QWidget* parent) :
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir assetsDir(currentPath + "/../../assets/images");
 
-	_fullScreenToImagePath = assetsDir.absolutePath() + "/media_fullscreen_to.png";
+	_fullScreenToImagePath = assetsDir.absolutePath() + "/player_fullscreen.png";
 
 	//_fullScreenFromImagePath = assetsDir.absolutePath() + "/media_fullscreen_to.png";
 
-//	setAttribute(Qt::WA_NoSystemBackground);
+	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
 }
 

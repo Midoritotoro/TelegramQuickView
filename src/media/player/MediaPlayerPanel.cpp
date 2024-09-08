@@ -68,7 +68,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		sliderStyleFile.close();
 	}
 
-	_fullScreenButton->setFixedSize(15, 15);
+	_fullScreenButton->setFixedSize(25, 25);
 	_videoStateWidget->setFixedSize(30, 30);
 	_volumeToggle->setFixedSize(20, 20);
 
