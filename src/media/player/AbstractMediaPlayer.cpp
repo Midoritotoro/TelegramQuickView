@@ -43,8 +43,6 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	_mediaPlayer->setAudioOutput(audioOutput);
 	_mediaPlayer->setVideoOutput(_videoItem);
 
-
-
 	connect(_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
 		adjustVideoSize();
 
@@ -71,14 +69,13 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 
 	QString mediaType = detectMediaType(sourcePath);
 
-	if (mediaType.contains("video")) {
-		clearScene();
+	clearScene();
 
+	if (mediaType.contains("video")) {
 		_mediaPlayer->setSource(source);
 		_mediaPlayer->play();
 	}
 	else if (mediaType.contains("image")) {
-		clearScene();
 		QPixmap pixmap(sourcePath);
 
 		_currentImageItem = new QGraphicsPixmapItem();
@@ -116,13 +113,13 @@ void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight
 		// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
 
 		const auto scale = qMin(_videoView->width() / imageWidth,
-			_videoView->height() / imageHeight);
+						   _videoView->height() / imageHeight);
 
 		_currentImageItem->setScale(scale);
 	}
 
 	_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2,
-		(_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
+					   (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
 
 	_videoView->scene()->addItem(_currentImageItem);
 
@@ -158,14 +155,14 @@ void AbstractMediaPlayer::videoClicked() {
 
 void AbstractMediaPlayer::adjustVideoSize() {
 	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
-		const auto size = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
-
-		qDebug() << "size: " << size;
+		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
+		auto videoThumbnail = QImage(_mediaPlayer->metaData().value(QMediaMetaData::ThumbnailImage).toByteArray());
+		videoThumbnail.save("D:/thumb.jpg");
 
 		if (_currentImageItem == nullptr && _videoItem != nullptr)
-			_videoItem->setSize(size);
+			_videoItem->setSize(videoSize);
 
-		_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), size));
+		_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), videoSize));
 	}
 }
 
