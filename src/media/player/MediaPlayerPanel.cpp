@@ -24,7 +24,7 @@ namespace {
 	}
 
 	constexpr QMargins mediaPlayerPanelMargins = { 10, 5, 10, 5 };
-	constexpr int mediaPlayerPanelWidth = 344;
+	constexpr int mediaPlayerPanelWidth = 480; // 344
 	constexpr int mediaPlayerPanelBorderRadius = 10;
 }
 
@@ -69,13 +69,9 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_volumeToggle->resize(20, 20);
 
 	resize(width(), _videoStateWidget->height() + _playbackSlider->height()
-					+ _volumeSlider->height() + _volumeToggle->height()
+					+ _volumeToggle->height()
 					+ contentTop() + contentBottom());
 
-	_volumeSlider->show();
-	_volumeToggle->show();
-	_videoStateWidget->show();
-	_playbackSlider->show();
 
 	connect(_volumeToggle, &QPushButton::clicked, this, [this]() {
 		_volumeToggle->repaint();
@@ -101,7 +97,7 @@ void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
 		.arg(positionMinutes, 2, 10, QChar('0'))
 		.arg(positionSeconds, 2, 10, QChar('0')));
 
-	_remainingTimeLabel->setText(QString("%1:%2")
+	_remainingTimeLabel->setText(QString("-%1:%2")
 		.arg(durationSeconds - positionSeconds)
 		.arg(durationMinutes - positionMinutes));
 
@@ -116,18 +112,26 @@ void MediaPlayerPanel::updateSize() {
 	const auto width = contentLeft() + mediaPlayerPanelWidth + contentRight();
 	const auto height = contentTop() + contentHeight() + contentBottom();
 
-	updateTimeSize();
-
 	resize(width, height);
 }
 
 void MediaPlayerPanel::updateTimeSize() {
-	_timeLabel->resize(textSize(_timeLabel->text(), _timeLabel->font()));
-	_remainingTimeLabel->resize(textSize(_remainingTimeLabel->text(), _remainingTimeLabel->font()));
+	const auto timeLabelSize = textSize(_timeLabel->text(), _timeLabel->font());
+	const auto remainingTimeLabelSize = textSize(_remainingTimeLabel->text(), _remainingTimeLabel->font());
+
+
+	if (timeLabelSize.isNull() || remainingTimeLabelSize.isNull())
+		return;
+
+	_timeLabel->resize(timeLabelSize);
+	_remainingTimeLabel->resize(remainingTimeLabelSize);
+
+	/*qDebug() << "textSize: " << _timeLabel->size();
+	qDebug() << "textSize: " << _remainingTimeLabel->size();*/
 }
 
 void MediaPlayerPanel::updateControlsGeometry() {
-	_playbackSlider->resize(width() - contentLeft() - contentRight() - _timeLabel->width()
+	_playbackSlider->resize(width() - (contentLeft() * 1.5) - contentRight() - _timeLabel->width()
 					- _remainingTimeLabel->width(), _playbackSlider->height());
 	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
 
@@ -140,6 +144,12 @@ void MediaPlayerPanel::updateControlsGeometry() {
 
 	_timeLabel->move(contentLeft(), height() - contentBottom() - _timeLabel->height());
 	_remainingTimeLabel->move(width() - contentRight(), height() - contentBottom() - _remainingTimeLabel->height());
+
+	/*qDebug() << _playbackSlider->pos();
+	qDebug() << _playbackSlider->size();
+
+	qDebug() << _timeLabel->pos();
+	qDebug() << _timeLabel->size();*/
 }
 
 void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
@@ -165,7 +175,7 @@ void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	QWidget::paintEvent(event);
 
-	qDebug() << "MediaPlayerPanel::paintEvent";
+	//qDebug() << "MediaPlayerPanel::paintEvent";
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);

@@ -10,6 +10,8 @@
 #include <QApplication>
 #include <QGridLayout>
 #include <QMouseEvent>
+#include <QVideoSink>
+#include <QMediaMetaData>
 
 
 AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
@@ -41,7 +43,11 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	_mediaPlayer->setAudioOutput(audioOutput);
 	_mediaPlayer->setVideoOutput(_videoItem);
 
+
+
 	connect(_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+		adjustVideoSize();
+
 		if (status == QMediaPlayer::MediaStatus::EndOfMedia) {
 			_mediaPlayer->pause();
 			const auto duration = _mediaPlayer->duration();
@@ -151,12 +157,16 @@ void AbstractMediaPlayer::videoClicked() {
 }
 
 void AbstractMediaPlayer::adjustVideoSize() {
-	if (_currentImageItem == nullptr && _videoItem != nullptr)
-		if (_videoItem->boundingRect().size().toSize() != size())
-			_videoItem->setSize(size());
+	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
+		const auto size = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
 
-	if (_videoView->scene()->sceneRect() != QRectF(QPointF(0, 0), size()))
-		_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), size()));
+		qDebug() << "size: " << size;
+
+		if (_currentImageItem == nullptr && _videoItem != nullptr)
+			_videoItem->setSize(size);
+
+		_videoView->scene()->setSceneRect(QRectF(QPointF(0, 0), size));
+	}
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
