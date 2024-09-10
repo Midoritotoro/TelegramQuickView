@@ -125,39 +125,41 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	if (!_currentMessage->hasText()) {
 		if (!_messageTextView->isHidden())
-			_messageTextView->setVisible(false);
+			_messageTextView->hide();
 		return;
 	}
 
-	int yCoordinate;
-
 	if (_messageTextView->isHidden())
-		_messageTextView->setVisible(true);
-	
-	QSize mediaSize = _mediaPlayer->occupiedMediaSpace().toSize();
-	QPoint mediaPosition = _mediaPlayer->mediaPosition().toPoint();
+		_messageTextView->show();
 
-	const auto freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height());
+	int yCoordinate = 0;
+	
+	const auto mediaSize = _mediaPlayer->occupiedMediaSpace().toSize();
+	const auto mediaPosition = _mediaPlayer->mediaPosition().toPoint();
+
+	const auto videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
+
+	const auto freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height() - videoControlsHeight);
 
 	_messageTextView->setText(_currentMessage->messageText());
 
 	if (freeBottomSpace >= _messageTextView->height() * 1.5) {
 		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))
 			* (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height() * 1.5))) - messageTextViewBottomIndent;
-		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	} 
 	else if ((freeBottomSpace - _messageTextView->height()) >= messageTextViewBottomIndent) {
 		yCoordinate = height() - freeBottomSpace - messageTextViewBottomIndent;
-		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	}
 	else {
 		yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent;
-		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video")) {
-			const auto videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
-			yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent - videoControlsHeight;
-		}
-		_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 	}
+
+	if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
+		yCoordinate -= videoControlsHeight;
+
+	qDebug() << "pos: " << QPoint((width() - _messageTextView->width()) / 2, yCoordinate);
+
+	_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {

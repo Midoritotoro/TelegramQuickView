@@ -40,20 +40,15 @@ void VideoStateWidget::paintEvent(QPaintEvent* event) {
 
     switch (_state) {
         case State::Play:
-            qDebug() << "Play";
             pixmap = QPixmap(_playImagePath);
             break;
         case State::Pause:
-            qDebug() << "Pause";
             pixmap = QPixmap(_pauseImagePath);
             break;
         case State::Repeat:
-            qDebug() << "Repeat";
             pixmap = QPixmap(_repeatImagePath);
             break;
     }
-
-    qDebug() << pixmap.size();
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);

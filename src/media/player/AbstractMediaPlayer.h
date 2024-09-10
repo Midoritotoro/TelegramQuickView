@@ -29,13 +29,14 @@ public:
 	[[nodiscard]] QPointF mediaPosition() const noexcept;
 
 	virtual [[nodiscard]] int getVideoControlsHeight() const noexcept = 0;
+Q_SIGNALS:
+	void videoClicked();
 protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
 
 	void clearScene();
 	void updateCurrentImageRect(int imageWidth, int imageHeight);
 
-	void videoClicked();
 	void adjustVideoSize();
 
 	void mousePressEvent(QMouseEvent* event) override;

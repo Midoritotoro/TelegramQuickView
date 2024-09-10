@@ -38,9 +38,6 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 
 	_videoView->setScene(videoScene);
 
-	_videoItem->setSize(size());
-	videoScene->setSceneRect(QRectF(QPointF(0, 0), size()));
-
 	videoScene->addItem(_videoItem);
 
 	_videoView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -49,19 +46,6 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 
 	_mediaPlayer->setAudioOutput(audioOutput);
 	_mediaPlayer->setVideoOutput(_videoItem);
-
-	connect(_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-		adjustVideoSize();
-
-		if (status == QMediaPlayer::MediaStatus::EndOfMedia) {
-			_mediaPlayer->pause();
-			const auto duration = _mediaPlayer->duration();
-
-			videoRewind(duration - 100);
-			//_allowChangeVideoState = false;
-			//_videoStateWidget->stackedWidget()->setCurrentIndex(2);
-		}
-		});
 }
 
 void AbstractMediaPlayer::setSource(const QUrl& source) {
@@ -98,9 +82,6 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 void AbstractMediaPlayer::clearScene() {
 	QGraphicsScene* scene = _videoView->scene();
 	QList<QGraphicsItem*> items = scene->items();
-
-	if (items.count() < 1)
-		return;
 
 	foreach(QGraphicsItem * item, items) {
 		if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
@@ -150,16 +131,6 @@ QMediaPlayer* AbstractMediaPlayer::mediaPlayer() const noexcept {
 	return _mediaPlayer;
 }
 
-void AbstractMediaPlayer::videoClicked() {
-	if (!_allowChangeVideoState)
-		return;
-
-	if (_mediaPlayer->playbackState() == QMediaPlayer::PlayingState)
-		_mediaPlayer->pause();
-	else if (_mediaPlayer->playbackState() == QMediaPlayer::PausedState)
-		_mediaPlayer->play();
-}
-
 void AbstractMediaPlayer::adjustVideoSize() {
 	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
 		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
@@ -178,7 +149,7 @@ void AbstractMediaPlayer::adjustVideoSize() {
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton && _videoItem->sceneBoundingRect().contains(event->pos().toPointF())) {
-		videoClicked();
+		emit videoClicked();
 	}
 }
 
@@ -192,7 +163,7 @@ void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 		return;
 	}
 
-	_Analysis_assume_(_currentImageItem != NULL) // Отключение предупреждения
+	_Analysis_assume_(_currentImageItem != NULL)
 
 	const auto imageWidth = _currentImageItem->pixmap().width();
 	const auto imageHeight = _currentImageItem->pixmap().height();
