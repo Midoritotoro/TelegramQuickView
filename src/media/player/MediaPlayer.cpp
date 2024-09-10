@@ -11,7 +11,6 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	AbstractMediaPlayer(parent)
 {
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
-	_mediaPlayerPanel->show();
 
 	connect(mediaPlayer(), &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
 		adjustVideoSize();
