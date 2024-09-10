@@ -80,7 +80,7 @@ MessageMediaViewer::MessageMediaViewer(
 	_messageTextView->setVisible(true);
 	_messageTextView->setMaximumWidth(screenWidth / 2);
 
-	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
+	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView, _mediaPlayer->getVideoControls() });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
 	widgetsHider->SetInactivityDuration(3000);
 	widgetsHider->SetAnimationDuration(3000);

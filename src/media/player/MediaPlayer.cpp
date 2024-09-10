@@ -1,6 +1,5 @@
 ﻿#include "MediaPlayer.h"
 
-#include "MediaPlayerPanel.h"
 
 namespace {
 	constexpr int mediaPlayerPanelBottomIndent = 5;
@@ -91,6 +90,10 @@ int MediaPlayer::getVideoControlsHeight() const noexcept {
 	if (!mediaPlayer()->source().isEmpty())
 		return _mediaPlayerPanel->height(); 
 	return 0;
+}
+
+MediaPlayerPanel* MediaPlayer::getVideoControls() const noexcept {
+	return _mediaPlayerPanel;
 }
 
 void MediaPlayer::resizeEvent(QResizeEvent* event) {

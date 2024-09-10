@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "AbstractMediaPlayer.h"
+#include "MediaPlayerPanel.h"
 
-class MediaPlayerPanel;
 
 class MediaPlayer : public AbstractMediaPlayer
 {
@@ -13,6 +13,7 @@ public:
 	MediaPlayer(QWidget* parent = nullptr);
 
 	[[nodiscard]] int getVideoControlsHeight() const noexcept;
+	[[nodiscard]] MediaPlayerPanel* getVideoControls() const noexcept;
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
