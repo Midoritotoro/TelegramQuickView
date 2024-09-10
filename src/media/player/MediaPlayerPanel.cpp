@@ -15,8 +15,7 @@
 #include <QScreen>
 
 
-namespace {
-
+namespace  {
 	QSize textSize(const QString& text, const QFontMetrics& metrics) {
 		return metrics.size(0, text);
 	}

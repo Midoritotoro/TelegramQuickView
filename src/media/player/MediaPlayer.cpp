@@ -1,7 +1,18 @@
 ﻿#include "MediaPlayer.h"
 
+#include <QMediaMetaData>
+#include <QFont>
+
 
 namespace {
+	QSize textSize(const QString& text, const QFontMetrics& metrics) {
+		return metrics.size(0, text);
+	}
+
+	QSize textSize(const QString& text, const QFont& font) {
+		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
+	}
+
 	constexpr int mediaPlayerPanelBottomIndent = 5;
 }
 
@@ -104,6 +115,7 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 
 void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
+
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setOpacity(0.3);
 
@@ -111,4 +123,22 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 
 	painter.drawRect(rect());
+
+	if (mediaPlayer()->mediaStatus() == QMediaPlayer::MediaStatus::BufferedMedia) {
+		QFont font("Arial", 16);
+
+		const auto mediaPath = mediaPlayer()->metaData().value(QMediaMetaData::Date).toString();
+		const auto mediaPathTextSize = textSize(mediaPath, font);
+
+		qDebug() << "mediaPath: " << mediaPath;
+
+		painter.setPen(Qt::white);
+
+		QRect mediaPathTextRect(QPoint(), mediaPathTextSize);
+		mediaPathTextRect.moveBottomLeft(rect().bottomLeft());
+
+		painter.setOpacity(1.0);
+		painter.setFont(font);
+		painter.drawText(mediaPathTextRect, Qt::AlignCenter, mediaPath);
+	}
 }

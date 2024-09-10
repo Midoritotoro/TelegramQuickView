@@ -2,12 +2,14 @@
 
 #include <QWidget>
 #include <QLabel>
+
 #include "VideoStateWidget.h"
 
 
 class VolumeController;
 class EnhancedSlider;
 class FullScreenButton;
+
 
 
 class MediaPlayerPanel: public QWidget {
