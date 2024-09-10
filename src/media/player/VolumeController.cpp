@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QPainter>
+#include <QMouseEvent>
 
 
 VolumeController::VolumeController(QWidget* parent) :
@@ -43,6 +44,11 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 	painter.drawPixmap(0, 0, pixmap);
 }
 
+void VolumeController::mousePressEvent(QMouseEvent* event) {
+	if (event->button() == Qt::LeftButton)
+		_isSpeakerOn = _isSpeakerOn ? false : true;
+}
+
 void VolumeController::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -50,14 +56,10 @@ void VolumeController::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);
 
-	if (isSpeakerOn()) {
-		paintSpeakerOff(painter);
-		_isSpeakerOn = false;
-	}
-	else {
-		paintSpeakerOn(painter);
-		_isSpeakerOn = true;
-	}
+	isSpeakerOn()
+	? paintSpeakerOff(painter)
+	: paintSpeakerOn(painter);
+
 }
 
 bool VolumeController::isSpeakerOn() const noexcept {

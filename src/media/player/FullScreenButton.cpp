@@ -20,8 +20,6 @@ FullScreenButton::FullScreenButton(QWidget* parent) :
 }
 
 void FullScreenButton::paintEvent(QPaintEvent* event) {
-	qDebug() << "repaint()";
-
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 

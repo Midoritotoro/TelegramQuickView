@@ -91,15 +91,20 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		isFullScreen() ? showNormal() : showFullScreen();
 		});
 
-	//connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
-	//	switch (_videoStateWidget->state()) {
+	connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
+		switch (_videoStateWidget->state()) {
 
-	//	case VideoStateWidget::State::Play:
-	//	case VideoStateWidget::State::Pause:
-	//	case VideoStateWidget::State::Repeat:
-	//		break;
-	//	}
-	//	});
+		case VideoStateWidget::State::Play:
+			emit videoPlayClicked();
+			break;
+		case VideoStateWidget::State::Pause:
+			emit videoPauseClicked();
+			break;
+		case VideoStateWidget::State::Repeat:
+			emit videoRepeatClicked();
+			break;
+		}
+		});
 }
 
 void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {

@@ -51,7 +51,6 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	_mediaPlayer->setVideoOutput(_videoItem);
 
 	connect(_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-		qDebug() << status;
 		adjustVideoSize();
 
 		if (status == QMediaPlayer::MediaStatus::EndOfMedia) {
@@ -164,12 +163,15 @@ void AbstractMediaPlayer::videoClicked() {
 void AbstractMediaPlayer::adjustVideoSize() {
 	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
 		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
-		
-		_videoView->scene()->setSceneRect(QRectF(QPointF((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2), videoSize));
+
+		const auto videoPosition = QPointF((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2);
+		const auto videoRect = QRectF(videoPosition, videoSize);
+
+		_videoView->scene()->setSceneRect(videoRect);
 
 		if (_currentImageItem == nullptr && _videoItem != nullptr) {
 			_videoItem->setSize(videoSize);
-			_videoItem->moveBy((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2);
+			_videoItem->setPos((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2);
 		}
 	}
 }

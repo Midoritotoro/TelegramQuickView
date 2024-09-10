@@ -21,30 +21,51 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		_mediaPlayerPanel->updateTimeText(position, duration);
 	});
 
-	//connect(mediaPlayer(), &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
-	//	adjustVideoSize();
+	connect(mediaPlayer(), &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
+		switch (state) {
 
-	//	switch (state) {
+		case QMediaPlayer::PlaybackState::PlayingState: 
+			//mediaPlayer()->pause();
+			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
+			break;
 
-	//	case QMediaPlayer::PlaybackState::PlayingState: 
-	//		mediaPlayer()->pause();
-	//		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
-	//		break;
+		case QMediaPlayer::PlaybackState::PausedState:
+			const auto duration = mediaPlayer()->duration();
+			const auto position = mediaPlayer()->duration();
 
-	//	case QMediaPlayer::PlaybackState::PausedState:
-	//		const auto duration = mediaPlayer()->duration();
-	//		const auto position = mediaPlayer()->duration();
+			if ((duration - position) <= 100) {
+				_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
+			}
+			else {
+				mediaPlayer()->play();
+				_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
+			}
 
-	//		if ((duration - position) <= 100) {
-	//			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
-	//		}
+			break;
+			
+		}
+		});
 
-	//		mediaPlayer()->play();
-	//		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
-	//		break;
-	//		
-	//	}
-	//	});
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoRepeatClicked, this, [this]() {
+		videoRewind(0);
+		mediaPlayer()->play();
+
+		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
+		});
+
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPlayClicked, this, [this]() {
+		videoRewind(0);
+		mediaPlayer()->play();
+
+		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
+		});
+
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPauseClicked, this, [this]() {
+		mediaPlayer()->play();
+
+		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
+		});
+
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {

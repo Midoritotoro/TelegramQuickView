@@ -13,6 +13,7 @@ public:
 
 	[[nodiscard]] bool isSpeakerOn() const noexcept;
 protected:
+	void mousePressEvent(QMouseEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
 private:
 	void paintSpeakerOff(QPainter& painter);

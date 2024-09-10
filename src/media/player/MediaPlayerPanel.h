@@ -29,6 +29,10 @@ public:
 	void updateStateWidget(VideoStateWidget::State state);
 
 	void setVideoSliderMaximum(int value);
+Q_SIGNALS:
+	void videoRepeatClicked();
+	void videoPlayClicked();
+	void videoPauseClicked();
 protected:
 	void drawRoundedCorners(QPainter& painter, int borderRadius);
 
