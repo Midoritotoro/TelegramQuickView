@@ -110,16 +110,17 @@ void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
 	const auto positionSeconds = (mediaPosition / 1000) % 60;
 	const auto positionMinutes = (mediaPosition / 1000) / 60;
 
-	const auto durationSeconds = (mediaPosition / 1000) % 60;
+	const auto durationSeconds = (mediaDuration / 1000) % 60;
 	const auto durationMinutes = (mediaDuration / 1000) / 60;
+
 
 	_timeLabel->setText(QString("%1:%2")
 		.arg(positionMinutes, 2, 10, QChar('0'))
 		.arg(positionSeconds, 2, 10, QChar('0')));
 
 	_remainingTimeLabel->setText(QString("-%1:%2")
-		.arg(durationSeconds - positionSeconds, 2, 10, QChar('0'))
-		.arg(durationMinutes - positionMinutes, 2, 10, QChar('0')));
+		.arg(durationMinutes - positionMinutes, 2, 10, QChar('0'))
+		.arg(durationSeconds - positionSeconds, 2, 10, QChar('0')));
 
 	updateTimeSize();
 }

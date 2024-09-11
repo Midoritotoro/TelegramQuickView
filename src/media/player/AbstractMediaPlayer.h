@@ -41,6 +41,7 @@ protected:
 
 	void mousePressEvent(QMouseEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
 	virtual void paintEvent(QPaintEvent* event) = 0;
 public Q_SLOTS:
 	void videoRewind(int value);

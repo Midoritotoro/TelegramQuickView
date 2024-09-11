@@ -171,6 +171,15 @@ void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 	updateCurrentImageRect(imageWidth, imageHeight);
 }
 
+void AbstractMediaPlayer::closeEvent(QCloseEvent* event) {
+	if (_mediaPlayer->playbackState() == QMediaPlayer::PlaybackState::PlayingState)
+		_mediaPlayer->stop();
+
+	clearScene();
+	QWidget::closeEvent(event);
+
+}
+
 void AbstractMediaPlayer::videoRewind(int value) {
 	if (_allowChangeVideoState)
 		_mediaPlayer->setPosition(value);

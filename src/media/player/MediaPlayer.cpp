@@ -37,7 +37,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	connect(mediaPlayer(), &QMediaPlayer::durationChanged, _mediaPlayerPanel, &MediaPlayerPanel::setVideoSliderMaximum);
 	connect(mediaPlayer(), &QMediaPlayer::positionChanged, this, [this]() {
 		const auto position = mediaPlayer()->position();
-		const auto duration = mediaPlayer()->position();
+		const auto duration = mediaPlayer()->duration();
 
 		_mediaPlayerPanel->updateTimeText(position, duration);
 	});
@@ -123,22 +123,4 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 
 	painter.drawRect(rect());
-
-	if (mediaPlayer()->mediaStatus() == QMediaPlayer::MediaStatus::BufferedMedia) {
-		QFont font("Arial", 16);
-
-		const auto mediaPath = mediaPlayer()->metaData().value(QMediaMetaData::Date).toString();
-		const auto mediaPathTextSize = textSize(mediaPath, font);
-
-		qDebug() << "mediaPath: " << mediaPath;
-
-		painter.setPen(Qt::white);
-
-		QRect mediaPathTextRect(QPoint(), mediaPathTextSize);
-		mediaPathTextRect.moveBottomLeft(rect().bottomLeft());
-
-		painter.setOpacity(1.0);
-		painter.setFont(font);
-		painter.drawText(mediaPathTextRect, Qt::AlignCenter, mediaPath);
-	}
 }
