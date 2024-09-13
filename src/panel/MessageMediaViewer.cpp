@@ -148,15 +148,15 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	if (freeBottomSpace >= _messageTextView->height())
 		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))
-					+ bottomFreeSpaceToTextViewHeightRatio / 2)
-					* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent;
+							   - bottomFreeSpaceToTextViewHeightRatio / 2)
+							   * bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent;
 	else if ((freeBottomSpace - _messageTextView->height()) >= messageTextViewBottomIndent)
 		yCoordinate = height() - freeBottomSpace - messageTextViewBottomIndent;
 	else
 		yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent;
 
 	if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
-		yCoordinate += (videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio);
+		yCoordinate += videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio; // + _messageTextView->height()
 
 	qDebug() << "pos: " << QPoint((width() - _messageTextView->width()) / 2, yCoordinate);
 

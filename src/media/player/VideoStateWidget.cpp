@@ -33,32 +33,29 @@ VideoStateWidget::State VideoStateWidget::state() const noexcept {
 }
 
 void VideoStateWidget::paintEvent(QPaintEvent* event) {
-    if (_pauseImagePath.isEmpty() || _playImagePath.isEmpty() || _repeatImagePath.isEmpty())
-        return;
-
-    QPixmap pixmap;
-
-    switch (_state) {
-        case State::Play:
-            pixmap = QPixmap(_playImagePath);
-            break;
-        case State::Pause:
-            pixmap = QPixmap(_pauseImagePath);
-            break;
-        case State::Repeat:
-            pixmap = QPixmap(_repeatImagePath);
-            break;
-    }
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    if (pixmap.size() != size())
-        pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    switch (_state) {
+        case State::Play:
+            _currentPixmap.load(_playImagePath);
+            break;
+
+        case State::Pause:
+            _currentPixmap.load(_pauseImagePath);
+            break;
+
+        case State::Repeat:
+            _currentPixmap.load(_repeatImagePath);
+            break;
+    }
+
+    if (_currentPixmap.size() != size())
+        _currentPixmap = _currentPixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::NoBrush);
-    painter.drawPixmap(0, 0, pixmap);
+    painter.drawPixmap(0, 0, _currentPixmap);
 }
 
 void VideoStateWidget::resizeEvent(QResizeEvent* event) {

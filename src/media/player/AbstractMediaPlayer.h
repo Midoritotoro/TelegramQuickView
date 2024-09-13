@@ -18,7 +18,7 @@ private:
 	QGraphicsVideoItem* _videoItem = nullptr;
 	QPointF _currentMediaPosition;
 	QSizeF _currentMediaSize;
-	bool _allowChangeVideoState = true;
+	bool _allowChangeVideoState = true, _allowChangeVideoSize = true;
 public:
 	explicit AbstractMediaPlayer(QWidget* parent = nullptr);
 
@@ -33,6 +33,9 @@ Q_SIGNALS:
 	void videoClicked();
 protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
+
+	void mediaPlayerShowNormal();
+	void mediaPlayerShowFullScreen();
 
 	void clearScene();
 	void updateCurrentImageRect(int imageWidth, int imageHeight);

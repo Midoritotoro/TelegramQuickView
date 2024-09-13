@@ -30,6 +30,8 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	QGraphicsScene* videoScene = new QGraphicsScene();
 	_videoView = new QGraphicsView(videoScene);
 
+	_videoView->setContentsMargins(0, 0, 0, 0);
+
 	grid->addWidget(_videoView);
 
 	_videoItem = new QGraphicsVideoItem();
@@ -106,8 +108,8 @@ void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight
 		_currentImageItem->setScale(scale);
 	}
 
-	_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2,
-					   (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2);
+	_currentImageItem->setPos((_videoView->width() - imageWidth * _currentImageItem->scale()) / 2.,
+					   (_videoView->height() - imageHeight * _currentImageItem->scale()) / 2.);
 
 	_videoView->scene()->addItem(_currentImageItem);
 
@@ -115,36 +117,57 @@ void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight
 	_currentMediaPosition = _currentImageItem->pos().toPoint();
 }
 
-QString AbstractMediaPlayer::detectMediaType(const QString& filePath) {
-	return QMimeDatabase().mimeTypeForFile(filePath).name();
+void AbstractMediaPlayer::mediaPlayerShowNormal() {
+	_allowChangeVideoSize = true;
+
+	_videoItem->setScale(1.);
+	adjustVideoSize();
 }
 
-QSizeF AbstractMediaPlayer::occupiedMediaSpace() const noexcept {
-	return _currentMediaSize;
-}
+void AbstractMediaPlayer::mediaPlayerShowFullScreen() {
+	_allowChangeVideoSize = false;
 
-QPointF AbstractMediaPlayer::mediaPosition() const noexcept {
-	return _currentMediaPosition;
-}
+	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
-QMediaPlayer* AbstractMediaPlayer::mediaPlayer() const noexcept {
-	return _mediaPlayer;
+	const auto currentVideoHeight = _videoItem->boundingRect().height();
+	const auto currentVideoWidth = _videoItem->boundingRect().width();
+
+	if (currentVideoWidth < screenWidth &&
+		currentVideoHeight < screenHeight) {
+
+		const auto scale = qMax(screenWidth / currentVideoWidth,
+			screenHeight / currentVideoHeight);
+
+		_videoItem->setScale(scale);
+	}
+
+	_videoItem->setPos((screenWidth - currentVideoWidth * _videoItem->scale()) / 2.,
+		(screenHeight - currentVideoHeight * _videoItem->scale()) / 2.);
+
+	_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
+	_currentMediaSize = _videoItem->boundingRect().size().toSize();
+	_currentMediaPosition = _videoItem->pos().toPoint();
 }
 
 void AbstractMediaPlayer::adjustVideoSize() {
+	if (_allowChangeVideoSize == false)
+		return;
+
 	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
 		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
+		const auto videoPosition = QPointF((width() - videoSize.width()) / 2., (height() - videoSize.height()) / 2.);
 
-		const auto videoPosition = QPointF((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2);
-		const auto videoRect = QRectF(videoPosition, videoSize);
+		_videoView->scene()->setSceneRect(QRectF(videoPosition, videoSize));
 
-		_videoView->scene()->setSceneRect(videoRect);
-
-		if (_currentImageItem == nullptr && _videoItem != nullptr) {
+		if (_videoItem != nullptr) {
 			_videoItem->setSize(videoSize);
-			_videoItem->setPos((width() - videoSize.width()) / 2, (height() - videoSize.height()) / 2);
+			_videoItem->setPos(videoPosition);
 		}
 	}
+
+
+	qDebug() << "videoItem->pos(): " << _videoItem->pos();
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
@@ -156,7 +179,7 @@ void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
 void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 	adjustVideoSize();
 
-	if (_currentImageItem == nullptr && _videoItem != nullptr) {
+	if (_videoItem != nullptr) {
 		_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
 		_currentMediaPosition = _videoItem->scenePos().toPoint();
 
@@ -177,7 +200,6 @@ void AbstractMediaPlayer::closeEvent(QCloseEvent* event) {
 
 	clearScene();
 	QWidget::closeEvent(event);
-
 }
 
 void AbstractMediaPlayer::videoRewind(int value) {
@@ -189,4 +211,20 @@ void AbstractMediaPlayer::changeVolume(int value) {
 	const auto linearVolume = QAudio::convertVolume(value / qreal(100),
 							  QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 	_mediaPlayer->audioOutput()->setVolume(linearVolume);
+}
+
+QString AbstractMediaPlayer::detectMediaType(const QString& filePath) {
+	return QMimeDatabase().mimeTypeForFile(filePath).name();
+}
+
+QSizeF AbstractMediaPlayer::occupiedMediaSpace() const noexcept {
+	return _currentMediaSize;
+}
+
+QPointF AbstractMediaPlayer::mediaPosition() const noexcept {
+	return _currentMediaPosition;
+}
+
+QMediaPlayer* AbstractMediaPlayer::mediaPlayer() const noexcept {
+	return _mediaPlayer;
 }

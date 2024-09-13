@@ -35,6 +35,9 @@ Q_SIGNALS:
 	void videoRepeatClicked();
 	void videoPlayClicked();
 	void videoPauseClicked();
+
+	void mediaPlayerNeedsFullScreen();
+	void mediaPlayerNeedsNormal();
 protected:
 	void drawRoundedCorners(QPainter& painter, int borderRadius);
 

@@ -95,6 +95,15 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		mediaPlayer()->pause();
 		});
 
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsNormal, this, [this]() {
+		qDebug() << "MediaPlayerPanel::mediaPlayerNeedsNormal";
+		mediaPlayerShowNormal();
+		});
+
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, [this]() {
+		qDebug() << "MediaPlayerPanel::mediaPlayerNeedsFullScreen";
+		mediaPlayerShowFullScreen();
+		});
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
@@ -110,7 +119,8 @@ MediaPlayerPanel* MediaPlayer::getVideoControls() const noexcept {
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
 	AbstractMediaPlayer::resizeEvent(event);
 
-	_mediaPlayerPanel->move((width() - _mediaPlayerPanel->width()) / 2, height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent);
+	_mediaPlayerPanel->move((width() - _mediaPlayerPanel->width()) / 2,
+		height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent);
 }
 
 void MediaPlayer::paintEvent(QPaintEvent* event) {

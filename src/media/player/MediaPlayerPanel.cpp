@@ -87,8 +87,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	});
 
 	connect(_fullScreenButton, &QAbstractButton::clicked, this, [this]() {
-		isFullScreen() ? showNormal() : showFullScreen();
-		});
+		_fullScreenButton->state() == FullScreenButton::State::FullScreenTo ? emit mediaPlayerNeedsNormal() : emit mediaPlayerNeedsFullScreen();
+	});
 
 	connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
 		switch (_videoStateWidget->state()) {
@@ -112,7 +112,6 @@ void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
 
 	const auto durationSeconds = (mediaDuration / 1000) % 60;
 	const auto durationMinutes = (mediaDuration / 1000) / 60;
-
 
 	_timeLabel->setText(QString("%1:%2")
 		.arg(positionMinutes, 2, 10, QChar('0'))
@@ -152,20 +151,20 @@ void MediaPlayerPanel::updateTimeSize() {
 }
 
 void MediaPlayerPanel::updateControlsGeometry() {
-	_playbackSlider->resize(width() - _remainingTimeLabel->width() / 2 
-					- _timeLabel->width() / 2, _playbackSlider->height());
+	_playbackSlider->resize(width() - _remainingTimeLabel->width() / 2.
+					- _timeLabel->width() / 2., _playbackSlider->height());
 
-	_playbackSlider->move(_timeLabel->width() / 2,
+	_playbackSlider->move(_timeLabel->width() / 2.,
 			height() - contentBottom() - _playbackSlider->height());
 
-	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5, _volumeSlider->height());
+	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5., _volumeSlider->height());
 	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
 
 	_volumeToggle->move(contentLeft(), contentTop());
-	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2, contentTop());
+	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2., contentTop());
 
 	_timeLabel->move(contentLeft(), height() + contentBottom() - _timeLabel->height());
-	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2, height() + contentBottom() - _remainingTimeLabel->height());
+	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2., height() + contentBottom() - _remainingTimeLabel->height());
 
 	_fullScreenButton->move(width() - contentRight() - _fullScreenButton->width(), contentTop());
 }
@@ -223,7 +222,6 @@ int MediaPlayerPanel::contentBottom() const noexcept {
 }
 
 int MediaPlayerPanel::contentHeight() const noexcept {
-	return _videoStateWidget->height() / 1.5 + _playbackSlider->height()
-		+ _volumeToggle->height()
-		+ contentTop() + contentBottom(); - contentTop() - contentBottom();
+	return _videoStateWidget->height() + _playbackSlider->height()
+		+ contentTop() + contentBottom();
 }

@@ -14,6 +14,7 @@ public:
     };
 private:
     QString _pauseImagePath, _playImagePath, _repeatImagePath;
+    QPixmap _currentPixmap;
     State _state;
 public:
     VideoStateWidget(QWidget* parent = nullptr);
