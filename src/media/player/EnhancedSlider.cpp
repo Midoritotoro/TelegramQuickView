@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QStyleOptionSlider>
+#include <QStylePainter>
 
 
 EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uint16_t handleLen)
@@ -9,7 +10,7 @@ EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uin
 {
     setContentsMargins(0, 0, 0, 0);
     setOrientation(orientation);
-    setTickPosition(QSlider::TicksBelow);
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
 }
@@ -58,13 +59,17 @@ void EnhancedSlider::mouseReleaseEvent(QMouseEvent* event) {
 
 void EnhancedSlider::paintEvent(QPaintEvent* event)  {
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
     QStyleOptionSlider opt;
     opt.initFrom(this);
 
+    QStyle* styl = style();
     opt.state &= ~QStyle::State_HasFocus;
 
-    opt.rect = rect();
+    QRect rectGroove = styl->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
+
+    opt.rect = rectGroove;
     if (isEnabled())
         opt.state |= QStyle::State_Enabled;
     opt.orientation = (orientation() == Qt::Vertical) ? Qt::Vertical : Qt::Horizontal;
@@ -74,12 +79,19 @@ void EnhancedSlider::paintEvent(QPaintEvent* event)  {
     else
         opt.state &= ~QStyle::State_Horizontal;
 
+    opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderHandle;
     opt.sliderValue = value();
     opt.sliderPosition = opt.sliderValue;
     opt.pageStep = pageStep();
     opt.minimum = 0;
     opt.maximum = qMax(0, maximum());
 
+    opt.palette.setBrush(QPalette::ColorGroup::All, QPalette::ColorRole::Base, Qt::black);
+
+    painter.setOpacity(0.);
+    painter.fillRect(rectGroove, Qt::black);
+
+    // Теперь рисуем слайдер
     style()->drawComplexControl(QStyle::CC_Slider, &opt, &painter, this);
 
 }

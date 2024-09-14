@@ -61,8 +61,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 
 		QByteArray sliderStyle = sliderStyleFile.readAll();
 
-		_playbackSlider->setStyleSheet(sliderStyle);
-		_volumeSlider->setStyleSheet(sliderStyle);
+		//_playbackSlider->setStyleSheet(sliderStyle);
+		//_volumeSlider->setStyleSheet(sliderStyle);
 
 		sliderStyleFile.close();
 	}
