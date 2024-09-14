@@ -78,7 +78,7 @@ MessageMediaViewer::MessageMediaViewer(
 	_previousAttachment->setVisible(true);
 	_nextAttachment->setVisible(true);
 	_messageTextView->setVisible(true);
-	_messageTextView->setMaximumWidth(screenWidth / 2);
+	_messageTextView->setMaximumWidth(screenWidth * 0.8);
 
 	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView, _mediaPlayer->getVideoControls() });
 	WidgetsHider* widgetsHider = new WidgetsHider(widgetsList, true);
@@ -143,9 +143,6 @@ void MessageMediaViewer::updateMessageTextView() {
 	const auto freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height() - videoControlsHeight);
 	const auto bottomFreeSpaceToTextViewHeightRatio = static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height());
 
-	qDebug() << "bottomFreeSpaceToTextViewHeightRatio: " << bottomFreeSpaceToTextViewHeightRatio;
-	qDebug() << "mediaSize: " << mediaSize;
-	qDebug() <<  "mediaPosition: " << mediaPosition;
 	_messageTextView->setText(_currentMessage->messageText());
 
 	if (freeBottomSpace >= _messageTextView->height()) {
@@ -153,25 +150,23 @@ void MessageMediaViewer::updateMessageTextView() {
 		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))
 			- bottomFreeSpaceToTextViewHeightRatio / 2.)
 			* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent;
-		qDebug() << "1";
+
 		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
 			yCoordinate += videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio;
 	}
 	else if (freeBottomSpace - _messageTextView->height() >= messageTextViewBottomIndent) {
-		yCoordinate = height() - freeBottomSpace - messageTextViewBottomIndent - _messageTextView->height();
-		qDebug() << "2";
+		yCoordinate = height() - freeBottomSpace - 
+			messageTextViewBottomIndent * 2 - _messageTextView->height();
+
 		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
-			yCoordinate -= videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio;
+			yCoordinate -= videoControlsHeight;
 	}
 	else {
-		yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent;
-		qDebug() << "3";
+		yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent * 2;
+
 		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
-			yCoordinate -= videoControlsHeight * 2;
+			yCoordinate -= videoControlsHeight;
 	}
-
-
-	//qDebug() << "pos: " << QPoint((width() - _messageTextView->width()) / 2, yCoordinate);
 
 	_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
 }

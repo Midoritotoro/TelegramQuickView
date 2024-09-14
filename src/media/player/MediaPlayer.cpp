@@ -105,6 +105,24 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		qDebug() << "MediaPlayerPanel::mediaPlayerNeedsFullScreen";
 		mediaPlayerShowFullScreen();
 		});
+
+	connect(mediaPlayer(), &QMediaPlayer::sourceChanged, this, [this](const QUrl& media) {
+		QString sourcePath;
+
+		media.path().at(0) == "/"[0]
+			? sourcePath = media.path().remove(0, 1)
+			: sourcePath = media.path();
+
+		QString mediaType = detectMediaType(sourcePath);
+		
+		if (mediaType.contains("video")) {
+			_mediaPlayerPanel->show();
+		}
+
+		else if (mediaType.contains("image")) {
+			_mediaPlayerPanel->hide();
+		}
+		});
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
