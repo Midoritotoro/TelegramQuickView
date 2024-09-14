@@ -145,8 +145,8 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 
-	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setOpacity(0.3);
+	painter.setRenderHints(QPainter::Antialiasing);
+	painter.setOpacity(1);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);

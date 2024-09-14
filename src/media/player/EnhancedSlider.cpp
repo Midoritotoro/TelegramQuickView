@@ -1,9 +1,12 @@
 ﻿#include "EnhancedSlider.h"
 
+#include <QPainter>
+
 
 EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uint16_t handleLen)
     : QSlider(parent), m_HandleLen(handleLen) 
 {
+    setContentsMargins(0, 0, 0, 0);
     setOrientation(orientation);
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
@@ -50,6 +53,14 @@ void EnhancedSlider::mouseReleaseEvent(QMouseEvent* event) {
         }
     }
 }
+
+//void EnhancedSlider::paintEvent(QPaintEvent* event)  {
+//    QPainter painter;
+//    painter.setRenderHint(QPainter::Antialiasing);
+//
+//    painter.setBrush(Qt::NoBrush);
+//    painter.setPen(Qt::NoPen);
+//}
 
 int32_t EnhancedSlider::mousePostionToSliderVal(const QPoint& pos) {
     int32_t duration = maximum() - minimum();

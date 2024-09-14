@@ -65,7 +65,7 @@ void MessageTextView::paintEvent(QPaintEvent* event) {
 	QWidget::paintEvent(event);
 
 	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);

@@ -191,8 +191,8 @@ void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
 
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setOpacity(0.8);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+	painter.setOpacity(0);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);

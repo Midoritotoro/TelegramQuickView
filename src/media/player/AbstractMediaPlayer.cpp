@@ -162,10 +162,16 @@ void AbstractMediaPlayer::adjustVideoSize() {
 		const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
 		auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
+		bool isHorizontal = videoSize.width() > videoSize.height();
 
 		if (videoSize.height() > screenHeight || videoSize.width() > screenWidth) {
-			const auto scale = qMin(screenWidth / videoSize.width(),
+			auto scale = qMin(screenWidth / videoSize.width(),
 									screenHeight / videoSize.height());
+
+			if (isHorizontal && videoSize.width() > (screenWidth * 0.6)) {
+				const auto maxWidthScale = (screenWidth * 0.6) / videoSize.width();
+				scale = qMin(scale, maxWidthScale);
+			}
 
 			videoSize = QSizeF(videoSize.width() * scale, videoSize.height() * scale);
 		}

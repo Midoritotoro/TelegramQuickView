@@ -38,8 +38,8 @@ QSlider::groove:horizontal:hover {
 }
 
 QSlider::handle:horizontal:hover {
-    background: rgb(170, 170, 170);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: white;
+    border: 1px solid white;
     border-radius: 7px;
 }
 
