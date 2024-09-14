@@ -17,7 +17,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 	QWidget(parent)
 {
 	setContentsMargins(0, 0, 0, 0);
-
+	setAttribute(Qt::WA_TransparentForMouseEvents);
 	setStyleSheet("QWidget {\n"
 		"font-size: 13px;\n"
 	"}");

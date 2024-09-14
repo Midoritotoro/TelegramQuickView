@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QWidget>
 
@@ -31,6 +31,7 @@ public:
 	virtual [[nodiscard]] int getVideoControlsHeight() const noexcept = 0;
 Q_SIGNALS:
 	void videoClicked();
+	void videoSizeChanged();
 protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
 

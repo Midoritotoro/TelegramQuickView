@@ -1,4 +1,4 @@
-#include "ScrollArea.h"
+п»ї#include "ScrollArea.h"
 #include <QScrollBar>
 
 
@@ -10,7 +10,8 @@ ScrollArea::ScrollArea(QWidget* parent):
 
 void ScrollArea::scrollHandler() {
 	if (verticalScrollBar()->maximum() == verticalScrollBar()->value()) {
-		// if (...) - Нужна проверка на наличие медиа, которые можно подгрузить
+		// if (...) - РќСѓР¶РЅР° РїСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРµ РјРµРґРёР°, РєРѕС‚РѕСЂС‹Рµ РјРѕР¶РЅРѕ РїРѕРґРіСЂСѓР·РёС‚СЊ
 		emit addContentsNeeded();
 	}
 }
+ 

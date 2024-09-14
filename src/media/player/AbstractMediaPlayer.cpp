@@ -1,4 +1,4 @@
-#include "AbstractMediaPlayer.h"
+ï»¿#include "AbstractMediaPlayer.h"
 
 
 #include <QMimeDatabase>
@@ -49,16 +49,6 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 
 	_mediaPlayer->setAudioOutput(audioOutput);
 	_mediaPlayer->setVideoOutput(_videoItem);
-
-	//connect(_mediaPlayer->videoSink(), &QVideoSink::videoFrameChanged, this, [this]() {
-	//	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::BufferedMedia) {
-
-	//		_mediaPlayer->pause();
-	//		auto sink = _mediaPlayer->videoSink()->videoFrame().toImage();
-	//		sink.save("D:/Thumbnail.jpg");
-	//		_mediaPlayer->play();
-	//	};
-	//	});
 }
 
 void AbstractMediaPlayer::setSource(const QUrl& source) {
@@ -108,7 +98,7 @@ void AbstractMediaPlayer::clearScene() {
 void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight) {
 	if (_currentImageItem->pixmap().width() > width() &&
 		_currentImageItem->pixmap().height() > height()) {
-		// Åñëè èçîáðàæåíèå íå ïîìåùàåòñÿ â ýêðàí, èçìåíÿåì åãî ðàçìåð, ñîõðàíÿÿ ñîîòíîøåíèå ñòîðîí
+		// Ð•ÑÐ»Ð¸ Ð¸Ð·Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ Ð½Ðµ Ð¿Ð¾Ð¼ÐµÑ‰Ð°ÐµÑ‚ÑÑ Ð² ÑÐºÑ€Ð°Ð½, Ð¸Ð·Ð¼ÐµÐ½ÑÐµÐ¼ ÐµÐ³Ð¾ Ñ€Ð°Ð·Ð¼ÐµÑ€, ÑÐ¾Ñ…Ñ€Ð°Ð½ÑÑ ÑÐ¾Ð¾Ñ‚Ð½Ð¾ÑˆÐµÐ½Ð¸Ðµ ÑÑ‚Ð¾Ñ€Ð¾Ð½
 
 		const auto scale = qMin(_videoView->width() / imageWidth,
 						   _videoView->height() / imageHeight);
@@ -138,22 +128,25 @@ void AbstractMediaPlayer::mediaPlayerShowFullScreen() {
 	const auto currentVideoHeight = _videoItem->boundingRect().height();
 	const auto currentVideoWidth = _videoItem->boundingRect().width();
 
-	if (currentVideoWidth < width() &&
-		currentVideoHeight < height()) {
+	const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
+	const auto screenWidth = screenSize.width();
+	const auto screenHeight = screenSize.height();
 
-		const auto scale = qMax(width() / currentVideoWidth,
-			height() / currentVideoHeight);
+	const auto widthScale = screenWidth / currentVideoWidth;
+	const auto heightScale = screenHeight / currentVideoHeight;
+	const auto scale = qMin(widthScale, heightScale); 
 
-		_videoItem->setScale(scale);
-	}
+	_videoItem->setScale(scale);
 
-	_videoItem->setPos((width() - currentVideoWidth * _videoItem->scale()) / 2.,
-		(height() - currentVideoHeight * _videoItem->scale()) / 2.);
+	_videoItem->setPos((screenWidth - currentVideoWidth * scale) / 2.,
+		(screenHeight - currentVideoHeight * scale) / 2.);
 
-	_videoView->scene()->setSceneRect(QRectF(0, 0, width(), height()));
+	_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
 
-	_currentMediaSize = _videoItem->boundingRect().size().toSize();
-	_currentMediaPosition = _videoItem->pos().toPoint();
+	_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
+	_currentMediaPosition = _videoItem->scenePos().toPoint();
+
+	emit videoSizeChanged();
 }
 
 void AbstractMediaPlayer::adjustVideoSize() {
@@ -170,6 +163,8 @@ void AbstractMediaPlayer::adjustVideoSize() {
 			_videoItem->setSize(videoSize);
 			_videoItem->setPos(videoPosition);
 		}
+
+		emit videoSizeChanged();
 	}
 }
 

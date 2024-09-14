@@ -76,7 +76,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	}
 	else if (_attachmentType.contains("video")) {
 		if (!QPixmapCache::find(_attachmentPath, &preview)) {
-			preview = QPixmap(_attachmentPreviewSize); 
+			preview = QPixmap(_attachmentPreviewSize);
 			QPixmapCache::insert(_attachmentPath, preview);
 		}
 		preview.fill(Qt::gray);
