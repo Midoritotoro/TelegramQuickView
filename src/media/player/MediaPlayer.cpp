@@ -36,6 +36,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 	connect(mediaPlayer(), &QMediaPlayer::durationChanged, _mediaPlayerPanel, &MediaPlayerPanel::setVideoSliderMaximum);
 	connect(mediaPlayer(), &QMediaPlayer::positionChanged, this, [this]() {
+
 		const auto position = mediaPlayer()->position();
 		const auto duration = mediaPlayer()->duration();
 

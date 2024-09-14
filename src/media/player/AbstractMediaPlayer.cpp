@@ -12,6 +12,7 @@
 #include <QMouseEvent>
 #include <QVideoSink>
 #include <QMediaMetaData>
+#include <QVideoFrame>
 
 
 AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
@@ -48,6 +49,16 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 
 	_mediaPlayer->setAudioOutput(audioOutput);
 	_mediaPlayer->setVideoOutput(_videoItem);
+
+	//connect(_mediaPlayer->videoSink(), &QVideoSink::videoFrameChanged, this, [this]() {
+	//	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::BufferedMedia) {
+
+	//		_mediaPlayer->pause();
+	//		auto sink = _mediaPlayer->videoSink()->videoFrame().toImage();
+	//		sink.save("D:/Thumbnail.jpg");
+	//		_mediaPlayer->play();
+	//	};
+	//	});
 }
 
 void AbstractMediaPlayer::setSource(const QUrl& source) {
@@ -95,11 +106,8 @@ void AbstractMediaPlayer::clearScene() {
 }
 
 void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight) {
-	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
-	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
-
-	if (_currentImageItem->pixmap().width() > screenWidth &&
-		_currentImageItem->pixmap().height() > screenHeight) {
+	if (_currentImageItem->pixmap().width() > width() &&
+		_currentImageItem->pixmap().height() > height()) {
 		// Если изображение не помещается в экран, изменяем его размер, сохраняя соотношение сторон
 
 		const auto scale = qMin(_videoView->width() / imageWidth,
@@ -127,25 +135,23 @@ void AbstractMediaPlayer::mediaPlayerShowNormal() {
 void AbstractMediaPlayer::mediaPlayerShowFullScreen() {
 	_allowChangeVideoSize = false;
 
-	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
-	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
-
 	const auto currentVideoHeight = _videoItem->boundingRect().height();
 	const auto currentVideoWidth = _videoItem->boundingRect().width();
 
-	if (currentVideoWidth < screenWidth &&
-		currentVideoHeight < screenHeight) {
+	if (currentVideoWidth < width() &&
+		currentVideoHeight < height()) {
 
-		const auto scale = qMax(screenWidth / currentVideoWidth,
-			screenHeight / currentVideoHeight);
+		const auto scale = qMax(width() / currentVideoWidth,
+			height() / currentVideoHeight);
 
 		_videoItem->setScale(scale);
 	}
 
-	_videoItem->setPos((screenWidth - currentVideoWidth * _videoItem->scale()) / 2.,
-		(screenHeight - currentVideoHeight * _videoItem->scale()) / 2.);
+	_videoItem->setPos((width() - currentVideoWidth * _videoItem->scale()) / 2.,
+		(height() - currentVideoHeight * _videoItem->scale()) / 2.);
 
-	_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
+	_videoView->scene()->setSceneRect(QRectF(0, 0, width(), height()));
+
 	_currentMediaSize = _videoItem->boundingRect().size().toSize();
 	_currentMediaPosition = _videoItem->pos().toPoint();
 }
@@ -154,7 +160,7 @@ void AbstractMediaPlayer::adjustVideoSize() {
 	if (_allowChangeVideoSize == false)
 		return;
 
-	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::LoadedMedia) {
+	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::BufferedMedia) {
 		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
 		const auto videoPosition = QPointF((width() - videoSize.width()) / 2., (height() - videoSize.height()) / 2.);
 
@@ -165,9 +171,6 @@ void AbstractMediaPlayer::adjustVideoSize() {
 			_videoItem->setPos(videoPosition);
 		}
 	}
-
-
-	qDebug() << "videoItem->pos(): " << _videoItem->pos();
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
