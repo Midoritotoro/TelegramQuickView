@@ -33,7 +33,7 @@ Q_SIGNALS:
 	void videoClicked();
 	void videoSizeChanged();
 	
-	void videoControlss
+	//void videoControls
 protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
 

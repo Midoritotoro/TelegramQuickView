@@ -145,30 +145,20 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	_messageTextView->setText(_currentMessage->messageText());
 
-	if (freeBottomSpace >= _messageTextView->height()) {
+	if (freeBottomSpace >= _messageTextView->height())
 		// Виджет с текстом полностью помещается в свободное простанство по высоте
 		yCoordinate = height() - (freeBottomSpace / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))
 			- bottomFreeSpaceToTextViewHeightRatio / 2.)
-			* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent;
+			* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent
+			+ videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio;
+	else if (freeBottomSpace - _messageTextView->height() >= messageTextViewBottomIndent)
+		yCoordinate = height() - freeBottomSpace - videoControlsHeight 
+			- messageTextViewBottomIndent * 2. - _messageTextView->height();
+	else
+		yCoordinate = height() - _messageTextView->height() 
+			- messageTextViewBottomIndent * 2. - videoControlsHeight;
 
-		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
-			yCoordinate += videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio;
-	}
-	else if (freeBottomSpace - _messageTextView->height() >= messageTextViewBottomIndent) {
-		yCoordinate = height() - freeBottomSpace - 
-			messageTextViewBottomIndent * 2 - _messageTextView->height();
-
-		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
-			yCoordinate -= videoControlsHeight;
-	}
-	else {
-		yCoordinate = height() - _messageTextView->height() - messageTextViewBottomIndent * 2;
-
-		if (_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentType().contains("video"))
-			yCoordinate -= videoControlsHeight;
-	}
-
-	_messageTextView->move((width() - _messageTextView->width()) / 2, yCoordinate);
+	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {

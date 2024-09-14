@@ -136,6 +136,9 @@ void AbstractMediaPlayer::mediaPlayerShowFullScreen() {
 	const auto heightScale = screenHeight / currentVideoHeight;
 	const auto scale = qMin(widthScale, heightScale); 
 
+	if (scale <= 1)
+		return;
+
 	_videoItem->setScale(scale);
 
 	_videoItem->setPos((screenWidth - currentVideoWidth * scale) / 2.,
@@ -154,8 +157,20 @@ void AbstractMediaPlayer::adjustVideoSize() {
 		return;
 
 	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::BufferedMedia) {
-		const auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
-		const auto videoPosition = QPointF((width() - videoSize.width()) / 2., (height() - videoSize.height()) / 2.);
+		const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+		const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
+
+		auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
+
+		if (videoSize.height() > screenHeight || videoSize.width() > screenWidth) {
+			const auto scale = qMin(screenWidth / videoSize.width(),
+									screenHeight / videoSize.height());
+
+			videoSize = QSizeF(videoSize.width() * scale, videoSize.height() * scale);
+		}
+		
+		const auto videoPosition = QPointF((screenWidth - videoSize.width()) / 2., 
+										  (screenHeight - videoSize.height()) / 2.);
 
 		_videoView->scene()->setSceneRect(QRectF(videoPosition, videoSize));
 
@@ -163,6 +178,8 @@ void AbstractMediaPlayer::adjustVideoSize() {
 			_videoItem->setSize(videoSize);
 			_videoItem->setPos(videoPosition);
 		}
+
+		qDebug() << "adjustVideoSize: " << _videoItem->boundingRect();
 
 		emit videoSizeChanged();
 	}
