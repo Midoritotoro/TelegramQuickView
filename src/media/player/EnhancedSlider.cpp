@@ -1,6 +1,7 @@
 ﻿#include "EnhancedSlider.h"
 
 #include <QPainter>
+#include <QStyleOptionSlider>
 
 
 EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uint16_t handleLen)
@@ -8,6 +9,7 @@ EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uin
 {
     setContentsMargins(0, 0, 0, 0);
     setOrientation(orientation);
+    setTickPosition(QSlider::TicksBelow);
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
 }
@@ -54,13 +56,33 @@ void EnhancedSlider::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-//void EnhancedSlider::paintEvent(QPaintEvent* event)  {
-//    QPainter painter;
-//    painter.setRenderHint(QPainter::Antialiasing);
-//
-//    painter.setBrush(Qt::NoBrush);
-//    painter.setPen(Qt::NoPen);
-//}
+void EnhancedSlider::paintEvent(QPaintEvent* event)  {
+    QPainter painter(this);
+
+    QStyleOptionSlider opt;
+    opt.initFrom(this);
+
+    opt.state &= ~QStyle::State_HasFocus;
+
+    opt.rect = rect();
+    if (isEnabled())
+        opt.state |= QStyle::State_Enabled;
+    opt.orientation = (orientation() == Qt::Vertical) ? Qt::Vertical : Qt::Horizontal;
+
+    if (orientation() == Qt::Horizontal)
+        opt.state |= QStyle::State_Horizontal;
+    else
+        opt.state &= ~QStyle::State_Horizontal;
+
+    opt.sliderValue = value();
+    opt.sliderPosition = opt.sliderValue;
+    opt.pageStep = pageStep();
+    opt.minimum = 0;
+    opt.maximum = qMax(0, maximum());
+
+    style()->drawComplexControl(QStyle::CC_Slider, &opt, &painter, this);
+
+}
 
 int32_t EnhancedSlider::mousePostionToSliderVal(const QPoint& pos) {
     int32_t duration = maximum() - minimum();

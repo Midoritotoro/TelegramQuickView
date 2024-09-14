@@ -20,7 +20,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
 
-    //void paintEvent(QPaintEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
 private:
     [[nodiscard]] int32_t mousePostionToSliderVal(const QPoint& pos);
 };
