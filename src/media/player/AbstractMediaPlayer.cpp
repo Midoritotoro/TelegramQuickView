@@ -118,38 +118,41 @@ void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight
 void AbstractMediaPlayer::mediaPlayerShowNormal() {
 	_allowChangeVideoSize = true;
 
-	_videoItem->setScale(1.);
 	adjustVideoSize();
 }
 
 void AbstractMediaPlayer::mediaPlayerShowFullScreen() {
 	_allowChangeVideoSize = false;
 
-	const auto currentVideoHeight = _videoItem->boundingRect().height();
-	const auto currentVideoWidth = _videoItem->boundingRect().width();
+	if (_mediaPlayer->mediaStatus() == QMediaPlayer::MediaStatus::BufferedMedia) {
+		const auto currentVideoHeight = _videoItem->boundingRect().height();
+		const auto currentVideoWidth = _videoItem->boundingRect().width();
 
-	const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
-	const auto screenWidth = screenSize.width();
-	const auto screenHeight = screenSize.height();
+		const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+		const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
-	const auto widthScale = screenWidth / currentVideoWidth;
-	const auto heightScale = screenHeight / currentVideoHeight;
-	const auto scale = qMin(widthScale, heightScale); 
+		//if (currentVideoWidth < screenWidth || currentVideoHeight < screenHeight) {
+		const auto scale = qMin(screenWidth / currentVideoWidth,
+								screenHeight / currentVideoHeight);
 
-	if (scale <= 1)
-		return;
+		if (scale <= 1)
+			return;
 
-	_videoItem->setScale(scale);
+		const auto videoSize = QSizeF(currentVideoWidth * scale, currentVideoHeight * scale);
+		const auto videoPosition = QPointF((screenWidth - videoSize.width()) / 2.,
+			(screenHeight - videoSize.height()) / 2.);
 
-	_videoItem->setPos((screenWidth - currentVideoWidth * scale) / 2.,
-		(screenHeight - currentVideoHeight * scale) / 2.);
+		_videoItem->setSize(videoSize);
+		_videoItem->setPos(videoPosition);
 
-	_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
+		_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
 
-	_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
-	_currentMediaPosition = _videoItem->scenePos().toPoint();
+		_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
+		_currentMediaPosition = _videoItem->scenePos().toPoint();
 
-	emit videoSizeChanged();
+		emit videoSizeChanged();
+		//}
+	}
 }
 
 void AbstractMediaPlayer::adjustVideoSize() {
