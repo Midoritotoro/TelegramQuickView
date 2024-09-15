@@ -68,6 +68,7 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 	if (mediaType.contains("video")) {
 		_mediaPlayer->setSource(source);
 		_mediaPlayer->play();
+		emit sourceChanged(QUrl(source));
 	}
 	else if (mediaType.contains("image")) {
 		QPixmap pixmap(sourcePath);
@@ -79,6 +80,7 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 		const auto imageHeight = pixmap.height();
 
 		updateCurrentImageRect(imageWidth, imageHeight);
+		emit sourceChanged(QUrl(source));
 	}
 }
 
@@ -117,7 +119,6 @@ void AbstractMediaPlayer::updateCurrentImageRect(int imageWidth, int imageHeight
 
 void AbstractMediaPlayer::mediaPlayerShowNormal() {
 	_allowChangeVideoSize = true;
-
 	adjustVideoSize();
 }
 
@@ -130,27 +131,22 @@ void AbstractMediaPlayer::mediaPlayerShowFullScreen() {
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
-	//if (currentVideoWidth < screenWidth || currentVideoHeight < screenHeight) {
 	const auto scale = qMin(screenWidth / currentVideoWidth,
 							screenHeight / currentVideoHeight);
 
-	if (scale <= 1)
-		return;
-
 	const auto videoSize = QSizeF(currentVideoWidth * scale, currentVideoHeight * scale);
 	const auto videoPosition = QPointF((screenWidth - videoSize.width()) / 2.,
-		(screenHeight - videoSize.height()) / 2.);
+									(screenHeight - videoSize.height()) / 2.);
 
 	_videoItem->setSize(videoSize);
 	_videoItem->setPos(videoPosition);
 
-	_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
-
 	_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
 	_currentMediaPosition = _videoItem->scenePos().toPoint();
 
+	_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
+
 	emit videoSizeChanged();
-	//}
 }
 
 void AbstractMediaPlayer::adjustVideoSize() {
@@ -162,33 +158,30 @@ void AbstractMediaPlayer::adjustVideoSize() {
 		const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
 		auto videoSize = _mediaPlayer->metaData().value(QMediaMetaData::Resolution).toSizeF();
-		bool isHorizontal = videoSize.width() > videoSize.height();
 
-		if (videoSize.height() > screenHeight || videoSize.width() > screenWidth) {
-			auto scale = qMin(screenWidth / videoSize.width(),
-									screenHeight / videoSize.height());
+		auto scale = qMin(screenWidth / videoSize.width(),
+						  screenHeight / videoSize.height());
 
-			if (isHorizontal && videoSize.width() > (screenWidth * 0.6)) {
-				const auto maxWidthScale = (screenWidth * 0.6) / videoSize.width();
-				scale = qMin(scale, maxWidthScale);
-			}
-
-			videoSize = QSizeF(videoSize.width() * scale, videoSize.height() * scale);
+		if (videoSize.width() > videoSize.height() && videoSize.width() > (screenWidth * 0.6)) {
+			const auto maximumWidthScale = (screenWidth * 0.6) / videoSize.width();
+			scale = qMin(scale, maximumWidthScale);
 		}
-		
+
+		videoSize = QSizeF(videoSize.width() * scale, videoSize.height() * scale);
 		const auto videoPosition = QPointF((screenWidth - videoSize.width()) / 2., 
 										  (screenHeight - videoSize.height()) / 2.);
-
-		_videoView->scene()->setSceneRect(QRectF(videoPosition, videoSize));
 
 		if (_videoItem != nullptr) {
 			_videoItem->setSize(videoSize);
 			_videoItem->setPos(videoPosition);
+
+			_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
+			_currentMediaPosition = _videoItem->scenePos().toPoint();
+
+			emit videoSizeChanged();
 		}
 
-		qDebug() << "adjustVideoSize: " << _videoItem->boundingRect();
-
-		emit videoSizeChanged();
+		_videoView->scene()->setSceneRect(QRectF(videoPosition, videoSize));
 	}
 }
 
@@ -201,12 +194,8 @@ void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
 void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 	adjustVideoSize();
 
-	if (_videoItem != nullptr) {
-		_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
-		_currentMediaPosition = _videoItem->scenePos().toPoint();
-
+	if (_currentImageItem == nullptr)
 		return;
-	}
 
 	_Analysis_assume_(_currentImageItem != NULL)
 

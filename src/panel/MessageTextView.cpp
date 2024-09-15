@@ -18,6 +18,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 {
 	setContentsMargins(0, 0, 0, 0);
 	setAttribute(Qt::WA_TransparentForMouseEvents);
+	setAttribute(Qt::WA_NoSystemBackground);
 	setStyleSheet("QWidget {\n"
 		"font-size: 13px;\n"
 	"}");
@@ -63,14 +64,12 @@ void MessageTextView::setText(const QString& text) {
 }
 
 void MessageTextView::paintEvent(QPaintEvent* event) {
-	QWidget::paintEvent(event);
-
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);
-	painter.setOpacity(0.6);
+	painter.setOpacity(0.5);
 
 	drawRoundedCorners(painter, messageTextViewBorderRadius);
 }

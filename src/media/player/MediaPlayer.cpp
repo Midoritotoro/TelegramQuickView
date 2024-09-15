@@ -106,7 +106,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		mediaPlayerShowFullScreen();
 		});
 
-	connect(mediaPlayer(), &QMediaPlayer::sourceChanged, this, [this](const QUrl& media) {
+	connect(this, &AbstractMediaPlayer::sourceChanged, this, [this](const QUrl& media) {
 		QString sourcePath;
 
 		media.path().at(0) == "/"[0]
@@ -118,7 +118,6 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		if (mediaType.contains("video")) {
 			_mediaPlayerPanel->show();
 		}
-
 		else if (mediaType.contains("image")) {
 			_mediaPlayerPanel->hide();
 		}
@@ -146,7 +145,7 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 
 	painter.setRenderHints(QPainter::Antialiasing);
-	painter.setOpacity(1);
+	painter.setOpacity(0.1);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);

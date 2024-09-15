@@ -32,8 +32,8 @@ public:
 Q_SIGNALS:
 	void videoClicked();
 	void videoSizeChanged();
-	
-	//void videoControls
+
+	void sourceChanged(const QUrl& media);
 protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
 

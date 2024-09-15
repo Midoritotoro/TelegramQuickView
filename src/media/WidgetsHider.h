@@ -46,6 +46,14 @@ public:
         _animationDuration = msecs;
     }
 
+    inline void removeWidget(QWidget* widget) {
+        _qWidgetList.remove(_qWidgetList.indexOf(widget));
+    }
+
+    inline void addWidget(QWidget* widget) {
+        _qWidgetList.append(widget);
+    }
+
 Q_SIGNALS:
     void widgetsHidden();
     void widgetsShowed();
