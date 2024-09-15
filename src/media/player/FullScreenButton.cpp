@@ -30,7 +30,9 @@ void FullScreenButton::paintEvent(QPaintEvent* event) {
 	painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::NoPen);
 
-	_currentPixmap.load(_state == State::FullScreenTo ? _fullScreenToImagePath : _fullScreenFromImagePath);
+	_currentPixmap.load(_state == State::FullScreenTo 
+								? _fullScreenToImagePath 
+								: _fullScreenFromImagePath);
 
 	if (_currentPixmap.size() != size())
 		_currentPixmap = _currentPixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -47,6 +49,6 @@ void FullScreenButton::mousePressEvent(QMouseEvent* event) {
 
 	if (event->button() == Qt::LeftButton)
 		_state = _state == State::FullScreenTo
-						   ? State::FullScreenFrom
-						   : State::FullScreenTo;
+						 ? State::FullScreenFrom
+						 : State::FullScreenTo;
 }

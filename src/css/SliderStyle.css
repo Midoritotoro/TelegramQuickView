@@ -1,14 +1,14 @@
 QSlider::groove:horizontal {
     border-radius: 1px;
-    height: 7px;
+    height: 5.5px;
     margin: -1px 0;
 }
 
 QSlider::handle:horizontal {
     border: none;
     background: none;
-    height: 14px;
-    width: 12px;
+    height: 12px;
+    width: 10px;
     margin: -4px 0;
     border-radius: 7px;
     padding: -4px 0px;
@@ -24,12 +24,11 @@ QSlider::sub-page:horizontal {
 }
 
 QSlider::groove:horizontal:hover {
-    QSlider:: handle:horizontal
+    QSlider::handle:horizontal
 
 {
     background: rgba(200, 200, 200, 100);
     border: 2px solid white;
-    background: white;
 }
 
 }
