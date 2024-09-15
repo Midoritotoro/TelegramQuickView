@@ -1,7 +1,11 @@
+QSlider {
+    background: transparent;
+}
 QSlider::groove:horizontal {
     border-radius: 1px;
     height: 5.5px;
     margin: -1px 0;
+    background: transparent;
 }
 
 QSlider::handle:horizontal {
