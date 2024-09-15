@@ -16,7 +16,7 @@ class WidgetsHider : public QObject
 public:
     using DurationT = int;
 
-    explicit inline WidgetsHider(QWidgetList& qWidgetList, bool fadeInOutAnimation)
+    explicit inline WidgetsHider(bool fadeInOutAnimation, const QWidgetList& qWidgetList = QWidgetList{})
         : _inactivityDuration{ DurationT{4000} }
         , _qWidgetList(qWidgetList)
         , _fadeInOutAnimation(fadeInOutAnimation)
@@ -47,11 +47,15 @@ public:
     }
 
     inline void removeWidget(QWidget* widget) {
-        _qWidgetList.remove(_qWidgetList.indexOf(widget));
+        const auto index = _qWidgetList.indexOf(widget);
+        if (index != -1)
+            _qWidgetList.remove(index);
     }
 
     inline void addWidget(QWidget* widget) {
-        _qWidgetList.append(widget);
+        const auto index = _qWidgetList.indexOf(widget);
+        if (index == -1)
+            _qWidgetList.append(widget);
     }
 
 Q_SIGNALS:

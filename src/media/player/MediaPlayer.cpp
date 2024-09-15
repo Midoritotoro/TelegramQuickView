@@ -2,6 +2,7 @@
 
 #include <QMediaMetaData>
 #include <QFont>
+#include "../WidgetsHider.h"
 
 
 namespace {
@@ -21,6 +22,11 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	AbstractMediaPlayer(parent)
 {
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
+
+	_widgetsHider = new WidgetsHider(true);
+
+	_widgetsHider->SetInactivityDuration(3000);
+	_widgetsHider->SetAnimationDuration(3000);
 
 	connect(mediaPlayer(), &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
 		adjustVideoSize();
@@ -97,13 +103,37 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		});
 
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsNormal, this, [this]() {
-		qDebug() << "MediaPlayerPanel::mediaPlayerNeedsNormal";
 		mediaPlayerShowNormal();
+
+		QString sourcePath;
+
+		mediaPlayer()->source().path().at(0) == "/"[0]
+			? sourcePath = mediaPlayer()->source().path().remove(0, 1)
+			: sourcePath = mediaPlayer()->source().path();
+
+		QString mediaType = detectMediaType(sourcePath);
+
+		if (mediaType.contains("video")) {
+			_widgetsHider->removeWidget(_mediaPlayerPanel);
+			_mediaPlayerPanel->hide();
+		}
 		});
 
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, [this]() {
-		qDebug() << "MediaPlayerPanel::mediaPlayerNeedsFullScreen";
 		mediaPlayerShowFullScreen();
+
+		QString sourcePath;
+
+		mediaPlayer()->source().path().at(0) == "/"[0]
+			? sourcePath = mediaPlayer()->source().path().remove(0, 1)
+			: sourcePath = mediaPlayer()->source().path();
+
+		QString mediaType = detectMediaType(sourcePath);
+
+		if (mediaType.contains("video")) {
+			_widgetsHider->addWidget(_mediaPlayerPanel);
+			_mediaPlayerPanel->show();
+		}
 		});
 
 	connect(this, &AbstractMediaPlayer::sourceChanged, this, [this](const QUrl& media) {
@@ -115,10 +145,8 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 		QString mediaType = detectMediaType(sourcePath);
 		
-		if (mediaType.contains("video")) {
-			_mediaPlayerPanel->show();
-		}
-		else if (mediaType.contains("image")) {
+		if (mediaType.contains("image")) {
+			_widgetsHider->removeWidget(_mediaPlayerPanel);
 			_mediaPlayerPanel->hide();
 		}
 		});
@@ -128,10 +156,6 @@ int MediaPlayer::getVideoControlsHeight() const noexcept {
 	if (!mediaPlayer()->source().isEmpty())
 		return _mediaPlayerPanel->height(); 
 	return 0;
-}
-
-MediaPlayerPanel* MediaPlayer::getVideoControls() const noexcept {
-	return _mediaPlayerPanel;
 }
 
 void MediaPlayer::resizeEvent(QResizeEvent* event) {

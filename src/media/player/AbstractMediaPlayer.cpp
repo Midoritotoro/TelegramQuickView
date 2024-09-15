@@ -206,8 +206,10 @@ void AbstractMediaPlayer::resizeEvent(QResizeEvent* event) {
 }
 
 void AbstractMediaPlayer::closeEvent(QCloseEvent* event) {
-	if (_mediaPlayer->playbackState() == QMediaPlayer::PlaybackState::PlayingState)
+	if (_mediaPlayer->playbackState() == QMediaPlayer::PlaybackState::PlayingState) {
+		_mediaPlayer->setSource(QUrl());
 		_mediaPlayer->stop();
+	}
 
 	clearScene();
 	QWidget::closeEvent(event);
