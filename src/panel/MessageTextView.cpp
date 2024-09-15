@@ -29,6 +29,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 	_textLabel->setContentsMargins(textLabelMargins);
 
 	_textLabel->setAttribute(Qt::WA_NoSystemBackground);
+	_textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 	
 	QGridLayout* gridLayout = new QGridLayout(this);
 	gridLayout->setContentsMargins(0, 0, 0, 0);

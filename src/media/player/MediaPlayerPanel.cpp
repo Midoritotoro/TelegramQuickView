@@ -61,8 +61,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 
 		QByteArray sliderStyle = sliderStyleFile.readAll();
 
-		//_playbackSlider->setStyleSheet(sliderStyle);
-		//_volumeSlider->setStyleSheet(sliderStyle);
+		_playbackSlider->setStyleSheet(sliderStyle);
+		_volumeSlider->setStyleSheet(sliderStyle);
 
 		sliderStyleFile.close();
 	}
@@ -192,7 +192,7 @@ void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-	painter.setOpacity(0.8);
+	painter.setOpacity(1.);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);
@@ -203,6 +203,10 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
 	updateSize();
 	updateControlsGeometry();
+}
+
+void MediaPlayerPanel::mousePressEvent(QMouseEvent* event) {
+	event->accept();
 }
 
 int MediaPlayerPanel::contentLeft() const noexcept {

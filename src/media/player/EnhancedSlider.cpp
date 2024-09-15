@@ -10,9 +10,10 @@ EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uin
 {
     setContentsMargins(0, 0, 0, 0);
     setOrientation(orientation);
-    setAttribute(Qt::WA_OpaquePaintEvent, true);
-    setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
+    setWindowFlags(Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_NoSystemBackground);
+    setAttribute(Qt::WA_TranslucentBackground);
 }
 
 void EnhancedSlider::setSliderValue(int val, bool bNotify) {
@@ -61,38 +62,42 @@ void EnhancedSlider::paintEvent(QPaintEvent* event)  {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    QStyleOptionSlider opt;
-    opt.initFrom(this);
+    //QStyleOptionSlider opt;
+    //opt.initFrom(this);
 
-    QStyle* styl = style();
-    opt.state &= ~QStyle::State_HasFocus;
+    //QStyle* styl = style();
+    //opt.state &= ~QStyle::State_HasFocus;
 
-    QRect rectGroove = styl->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
+    //QRect rectGroove = styl->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
+    //QRect rectHandle = styl->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
 
-    opt.rect = rectGroove;
-    if (isEnabled())
-        opt.state |= QStyle::State_Enabled;
-    opt.orientation = (orientation() == Qt::Vertical) ? Qt::Vertical : Qt::Horizontal;
+    //opt.rect = rect();
+    //if (isEnabled())
+    //    opt.state |= QStyle::State_Enabled;
+    //opt.orientation = (orientation() == Qt::Vertical) ? Qt::Vertical : Qt::Horizontal;
 
-    if (orientation() == Qt::Horizontal)
-        opt.state |= QStyle::State_Horizontal;
-    else
-        opt.state &= ~QStyle::State_Horizontal;
+    //if (orientation() == Qt::Horizontal)
+    //    opt.state |= QStyle::State_Horizontal;
+    //else
+    //    opt.state &= ~QStyle::State_Horizontal;
 
-    opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderHandle;
-    opt.sliderValue = value();
-    opt.sliderPosition = opt.sliderValue;
-    opt.pageStep = pageStep();
-    opt.minimum = 0;
-    opt.maximum = qMax(0, maximum());
+    //opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderHandle;
+    //opt.sliderValue = value();
+    //opt.sliderPosition = opt.sliderValue;
+    //opt.pageStep = pageStep();
+    //opt.minimum = 0;
+    //opt.maximum = qMax(0, maximum());
 
-    opt.palette.setBrush(QPalette::ColorGroup::All, QPalette::ColorRole::Base, Qt::black);
+   // opt.palette.setBrush(QPalette::ColorGroup::All, QPalette::ColorRole::Base, QColor(Qt::black));
 
-    painter.setOpacity(0.);
-    painter.fillRect(rectGroove, Qt::black);
+   // QSlider::paintEvent(event);
 
-    // Теперь рисуем слайдер
-    style()->drawComplexControl(QStyle::CC_Slider, &opt, &painter, this);
+
+    //setAttribute(Qt::WA_OpaquePaintEvent, true);
+    painter.fillRect(rect(), Qt::black);
+
+  //  styl->drawComplexControl(QStyle::CC_Slider, &opt, &painter, this);
+    QSlider::paintEvent(event);
 
 }
 
