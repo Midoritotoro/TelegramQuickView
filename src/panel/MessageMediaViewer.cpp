@@ -142,16 +142,18 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	const auto videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
 
-	const auto freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height() - videoControlsHeight - messageTextViewBottomIndent);
+	const auto freeBottomSpace = std::max(0, mediaPosition.y() > 0 ?
+					height() - mediaPosition.y() - mediaSize.height()
+					- videoControlsHeight - messageTextViewBottomIndent
+					- _messageTextView->height() : 0);
+
 	const auto bottomFreeSpaceToTextViewHeightRatio = static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height());
 
+	qDebug() << "mediaPosition.y(): " << mediaPosition.y();
+	qDebug() << "mediaSize.height(): " << mediaSize.height();
+	qDebug() << "videoControlsHeight: " << videoControlsHeight;
 	qDebug() << "freeBottomSpace: " << freeBottomSpace;
 	qDebug() << "_messageTextView: " << _messageTextView->height();
-	//1080
-	//141
-	//136
-	//70
-	//1.02
 
 	qDebug() << height() - (freeBottomSpace / bottomFreeSpaceToTextViewHeightRatio)
 		* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent

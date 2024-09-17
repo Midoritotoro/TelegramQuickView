@@ -181,9 +181,9 @@ void AbstractMediaPlayer::adjustVideoSize() {
 			_currentMediaSize = _videoItem->boundingRect().size().toSize();
 			_currentMediaPosition = _videoItem->pos().toPoint();
 		}
-
-		emit videoSizeChanged();
 	}
+
+	emit videoSizeChanged();
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
