@@ -58,6 +58,19 @@ public:
             _qWidgetList.append(widget);
     }
 
+    inline void resetTimer() {
+        ControlVisibility(true);
+
+        if (_inactivityDuration != DurationT{})
+            _timer.start(_inactivityDuration);
+
+        if (_fadeInOutAnimation) {
+            ControlAnimationVisibility(true);
+            if (_inactivityDuration != DurationT{})
+                _animationTimer.start(_animationDuration);
+        }
+    }
+
 Q_SIGNALS:
     void widgetsHidden();
     void widgetsShowed();
@@ -71,16 +84,7 @@ private:
         if (pEvent->type() == QEvent::MouseMove
             || pEvent->type() == QEvent::MouseButtonPress) {
 
-            ControlVisibility(true);
-
-            if (_inactivityDuration != DurationT{})
-                _timer.start(_inactivityDuration);
-
-            if (_fadeInOutAnimation) {
-                ControlAnimationVisibility(true);
-                if (_inactivityDuration != DurationT{})
-                    _animationTimer.start(_animationDuration);
-            }
+            resetTimer();
         }
 
         return QObject::eventFilter(pWatched, pEvent);

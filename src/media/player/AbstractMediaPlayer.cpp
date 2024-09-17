@@ -68,7 +68,7 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 	if (mediaType.contains("video")) {
 		_mediaPlayer->setSource(source);
 		_mediaPlayer->play();
-		adjustVideoSize();
+
 		emit sourceChanged(QUrl(source));
 	}
 	else if (mediaType.contains("image")) {
@@ -80,12 +80,16 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 		const auto imageWidth = pixmap.width();
 		const auto imageHeight = pixmap.height();
 
-		updateCurrentImageRect(imageWidth, imageHeight);
 		emit sourceChanged(QUrl(source));
+
+		updateCurrentImageRect(imageWidth, imageHeight);
 	}
 }
 
 void AbstractMediaPlayer::clearScene() {
+	if (_mediaPlayer->source().isEmpty() == false)
+		_mediaPlayer->setSource(QUrl());
+
 	QGraphicsScene* scene = _videoView->scene();
 	QList<QGraphicsItem*> items = scene->items();
 

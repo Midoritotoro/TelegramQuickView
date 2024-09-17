@@ -149,31 +149,18 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	const auto bottomFreeSpaceToTextViewHeightRatio = static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height());
 
-	qDebug() << "mediaPosition.y(): " << mediaPosition.y();
-	qDebug() << "mediaSize.height(): " << mediaSize.height();
-	qDebug() << "videoControlsHeight: " << videoControlsHeight;
-	qDebug() << "freeBottomSpace: " << freeBottomSpace;
-	qDebug() << "_messageTextView: " << _messageTextView->height();
-
-	qDebug() << height() - (freeBottomSpace / bottomFreeSpaceToTextViewHeightRatio)
-		* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent
-		- videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio;
-
 	if (freeBottomSpace > _messageTextView->height()) {
-		qDebug() << "1";
 		// Виджет с текстом полностью помещается в свободное простанство по высоте
 		yCoordinate = height() - (freeBottomSpace / bottomFreeSpaceToTextViewHeightRatio)
 			* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent
 			- (videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio);
 	} 
 	else {
-		qDebug() << "2";
 		yCoordinate = height() - _messageTextView->height() 
 			- messageTextViewBottomIndent * 2. - videoControlsHeight;
 	}
 
 	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);
-	qDebug() << (width() - _messageTextView->width()) / 2. << yCoordinate;
 }
 
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
