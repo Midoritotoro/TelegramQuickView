@@ -142,29 +142,32 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	const auto videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
 
-	const auto freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height() - videoControlsHeight - messageTextViewBottomIndent * 2);
+	const auto freeBottomSpace = std::max(0, height() - mediaPosition.y() - mediaSize.height() - videoControlsHeight - messageTextViewBottomIndent);
 	const auto bottomFreeSpaceToTextViewHeightRatio = static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height());
 
 	qDebug() << "freeBottomSpace: " << freeBottomSpace;
 	qDebug() << "_messageTextView: " << _messageTextView->height();
+	//1080
+	//141
+	//136
+	//70
+	//1.02
+
+	qDebug() << height() - (freeBottomSpace / bottomFreeSpaceToTextViewHeightRatio)
+		* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent
+		- videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio;
 
 	if (freeBottomSpace > _messageTextView->height()) {
 		qDebug() << "1";
 		// Виджет с текстом полностью помещается в свободное простанство по высоте
-		yCoordinate = height() - (static_cast<double>(freeBottomSpace) / (static_cast<double>(freeBottomSpace) / static_cast<double>(_messageTextView->height()))
-			- bottomFreeSpaceToTextViewHeightRatio / 2.)
+		yCoordinate = height() - (freeBottomSpace / bottomFreeSpaceToTextViewHeightRatio)
 			* bottomFreeSpaceToTextViewHeightRatio - messageTextViewBottomIndent
-			+ videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio;
+			- (videoControlsHeight * bottomFreeSpaceToTextViewHeightRatio);
 	} 
-	else if (freeBottomSpace - _messageTextView->height() >= messageTextViewBottomIndent) {
-		qDebug() << "2";
-		yCoordinate = height() - freeBottomSpace - videoControlsHeight
-			- messageTextViewBottomIndent - _messageTextView->height();
-	}
 	else {
-		qDebug() << "3";
-		yCoordinate = height() - freeBottomSpace - _messageTextView->height()
-			- messageTextViewBottomIndent - videoControlsHeight;
+		qDebug() << "2";
+		yCoordinate = height() - _messageTextView->height() 
+			- messageTextViewBottomIndent * 2. - videoControlsHeight;
 	}
 
 	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);

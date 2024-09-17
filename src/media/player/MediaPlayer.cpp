@@ -113,10 +113,10 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 		QString mediaType = detectMediaType(sourcePath);
 
-		if (mediaType.contains("video")) {
+		/*if (mediaType.contains("video")) {
 			_widgetsHider->removeWidget(_mediaPlayerPanel);
-			_mediaPlayerPanel->hide();
-		}
+			_mediaPlayerPanel->show();
+		}*/
 		});
 
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, [this]() {
@@ -130,10 +130,10 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 		QString mediaType = detectMediaType(sourcePath);
 
-		if (mediaType.contains("video")) {
+		/*if (mediaType.contains("video")) {
 			_widgetsHider->addWidget(_mediaPlayerPanel);
 			_mediaPlayerPanel->show();
-		}
+		}*/
 		});
 
 	connect(this, &AbstractMediaPlayer::sourceChanged, this, [this](const QUrl& media) {
@@ -145,10 +145,10 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 
 		QString mediaType = detectMediaType(sourcePath);
 		
-		if (mediaType.contains("image")) {
+	/*	if (mediaType.contains("image")) {
 			_widgetsHider->removeWidget(_mediaPlayerPanel);
 			_mediaPlayerPanel->hide();
-		}
+		}*/
 		});
 }
 

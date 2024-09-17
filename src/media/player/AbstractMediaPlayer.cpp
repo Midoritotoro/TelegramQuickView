@@ -68,6 +68,7 @@ void AbstractMediaPlayer::setSource(const QUrl& source) {
 	if (mediaType.contains("video")) {
 		_mediaPlayer->setSource(source);
 		_mediaPlayer->play();
+		adjustVideoSize();
 		emit sourceChanged(QUrl(source));
 	}
 	else if (mediaType.contains("image")) {
@@ -141,10 +142,10 @@ void AbstractMediaPlayer::mediaPlayerShowFullScreen() {
 	_videoItem->setSize(videoSize);
 	_videoItem->setPos(videoPosition);
 
-	_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
-	_currentMediaPosition = _videoItem->scenePos().toPoint();
-
 	_videoView->scene()->setSceneRect(QRectF(0, 0, screenWidth, screenHeight));
+
+	_currentMediaSize = _videoItem->boundingRect().size().toSize();
+	_currentMediaPosition = _videoItem->pos().toPoint();
 
 	emit videoSizeChanged();
 }
@@ -171,22 +172,22 @@ void AbstractMediaPlayer::adjustVideoSize() {
 		const auto videoPosition = QPointF((screenWidth - videoSize.width()) / 2., 
 										  (screenHeight - videoSize.height()) / 2.);
 
+		_videoView->scene()->setSceneRect(QRectF(videoPosition, videoSize));
+
 		if (_videoItem != nullptr) {
 			_videoItem->setSize(videoSize);
 			_videoItem->setPos(videoPosition);
 
-			_currentMediaSize = _videoItem->sceneBoundingRect().size().toSize();
-			_currentMediaPosition = _videoItem->scenePos().toPoint();
-
-			emit videoSizeChanged();
+			_currentMediaSize = _videoItem->boundingRect().size().toSize();
+			_currentMediaPosition = _videoItem->pos().toPoint();
 		}
 
-		_videoView->scene()->setSceneRect(QRectF(videoPosition, videoSize));
+		emit videoSizeChanged();
 	}
 }
 
 void AbstractMediaPlayer::mousePressEvent(QMouseEvent* event) {
-	if (event->button() == Qt::LeftButton && _videoItem->sceneBoundingRect().contains(event->pos().toPointF())) {
+	if (event->button() == Qt::LeftButton && _videoItem->boundingRect().contains(event->pos().toPointF())) {
 		emit videoClicked();
 	}
 }
