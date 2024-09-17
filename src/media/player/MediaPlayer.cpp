@@ -94,42 +94,13 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		mediaPlayer()->play();
 		});
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPlayClicked, this, [this]() {
-		mediaPlayer()->play();
-		});
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPlayClicked, mediaPlayer(), &QMediaPlayer::play);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPauseClicked, mediaPlayer(), &QMediaPlayer::pause);
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPauseClicked, this, [this]() {
-		mediaPlayer()->pause();
-		});
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsNormal, this, &AbstractMediaPlayer::mediaPlayerShowNormal);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, &AbstractMediaPlayer::mediaPlayerShowFullScreen);
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsNormal, this, [this]() {
-		mediaPlayerShowNormal();
-		});
-
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, [this]() {
-		mediaPlayerShowFullScreen();
-		});
-
-	connect(this, &AbstractMediaPlayer::sourceChanged, this, [this](const QUrl& media) {
-		QString sourcePath;
-
-		media.path().at(0) == "/"[0]
-			? sourcePath = media.path().remove(0, 1)
-			: sourcePath = media.path();
-
-		QString mediaType = detectMediaType(sourcePath);
-		
-		if (mediaType.contains("image")) {
-			_widgetsHider->removeWidget(_mediaPlayerPanel);
-			_widgetsHider->resetTimer();
-			_mediaPlayerPanel->hide();
-		}
-		else if (mediaType.contains("video")) {
-			_widgetsHider->addWidget(_mediaPlayerPanel);
-			_widgetsHider->resetTimer();
-			_mediaPlayerPanel->show();
-		}
-		});
+	connect(this, &AbstractMediaPlayer::sourceChanged, this, &MediaPlayer::updateMediaPlayerPanelVisibility);
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
@@ -155,4 +126,25 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 
 	painter.drawRect(rect());
+}
+
+void MediaPlayer::updateMediaPlayerPanelVisibility(const QUrl& media) {
+	QString sourcePath;
+
+	media.path().at(0) == "/"[0]
+		? sourcePath = media.path().remove(0, 1)
+		: sourcePath = media.path();
+
+	QString mediaType = detectMediaType(sourcePath);
+
+	if (mediaType.contains("image")) {
+		_widgetsHider->removeWidget(_mediaPlayerPanel);
+		_widgetsHider->resetTimer();
+		_mediaPlayerPanel->hide();
+	}
+	else if (mediaType.contains("video")) {
+		_widgetsHider->addWidget(_mediaPlayerPanel);
+		_widgetsHider->resetTimer();
+		_mediaPlayerPanel->show();
+	}
 }
