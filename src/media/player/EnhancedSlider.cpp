@@ -10,6 +10,7 @@ EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uin
 {
     setContentsMargins(0, 0, 0, 0);
     setOrientation(orientation);
+    setTickPosition(QSlider::TicksBelow);
     setCursor(Qt::PointingHandCursor);
     setAttribute(Qt::WA_NoSystemBackground);
 }

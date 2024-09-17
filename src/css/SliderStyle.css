@@ -1,6 +1,7 @@
 QSlider {
     background: transparent;
 }
+
 QSlider::groove:horizontal {
     border-radius: 1px;
     height: 5.5px;
@@ -11,11 +12,8 @@ QSlider::groove:horizontal {
 QSlider::handle:horizontal {
     border: none;
     background: none;
-    height: 12px;
-    width: 10px;
-    margin: -4px 0;
-    border-radius: 7px;
-    padding: -4px 0px;
+    height: 0px;
+    width: 0px;
 }
 
 QSlider::add-page:horizontal {
@@ -31,8 +29,13 @@ QSlider::groove:horizontal:hover {
     QSlider::handle:horizontal
 
 {
+    height: 12px;
+    width: 10px;
     background: rgba(200, 200, 200, 100);
     border: 2px solid white;
+    margin: -4px 0;
+    border-radius: 7px;
+    padding: -4px 0px;
 }
 
 }

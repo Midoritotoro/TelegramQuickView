@@ -38,9 +38,6 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 	_videoItem = new QGraphicsVideoItem();
 
 	_videoItem->setCursor(Qt::PointingHandCursor);
-
-	_videoView->setScene(videoScene);
-
 	videoScene->addItem(_videoItem);
 
 	_videoView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -49,40 +46,46 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 
 	_mediaPlayer->setAudioOutput(audioOutput);
 	_mediaPlayer->setVideoOutput(_videoItem);
+
+	changeVolume(50);
 }
 
 void AbstractMediaPlayer::setSource(const QUrl& source) {
-	if (_mediaPlayer->playbackState() == QMediaPlayer::PlaybackState::PlayingState)
-		_mediaPlayer->stop();
-
 	QString sourcePath;
 
 	source.path().at(0) == "/"[0] 
 	? sourcePath = source.path().remove(0, 1)
 	: sourcePath = source.path();
 
-	QString mediaType = detectMediaType(sourcePath);
+	MediaType mediaType = detectMediaType(sourcePath);
 
 	clearScene();
 
-	if (mediaType.contains("video")) {
-		_mediaPlayer->setSource(source);
-		_mediaPlayer->play();
+	switch (mediaType) {
+		case MediaType::Video:
+			_mediaPlayer->setSource(source);
+			_mediaPlayer->play();
 
-		emit sourceChanged(QUrl(source));
-	}
-	else if (mediaType.contains("image")) {
-		QPixmap pixmap(sourcePath);
+			emit sourceChanged(source);
+			break;
 
-		_currentImageItem = new QGraphicsPixmapItem();
-		_currentImageItem->setPixmap(pixmap);
+		case MediaType::Image: {
+			QPixmap pixmap(sourcePath);
 
-		const auto imageWidth = pixmap.width();
-		const auto imageHeight = pixmap.height();
+			_currentImageItem = new QGraphicsPixmapItem(pixmap);
 
-		emit sourceChanged(QUrl(source));
+			const auto imageWidth = pixmap.width();
+			const auto imageHeight = pixmap.height();
 
-		updateCurrentImageRect(imageWidth, imageHeight);
+			updateCurrentImageRect(imageWidth, imageHeight);
+
+			emit sourceChanged(source);
+
+			break;
+		}
+
+		case MediaType::Audio:
+			break;
 	}
 }
 
@@ -93,7 +96,7 @@ void AbstractMediaPlayer::clearScene() {
 	QGraphicsScene* scene = _videoView->scene();
 	QList<QGraphicsItem*> items = scene->items();
 
-	foreach(QGraphicsItem * item, items) {
+	foreach(auto item, items) {
 		if (qgraphicsitem_cast<QGraphicsPixmapItem*>(item)) {
 			scene->removeItem(item);
 			delete item;
@@ -231,8 +234,17 @@ void AbstractMediaPlayer::changeVolume(int value) {
 	_mediaPlayer->audioOutput()->setVolume(linearVolume);
 }
 
-QString AbstractMediaPlayer::detectMediaType(const QString& filePath) {
-	return QMimeDatabase().mimeTypeForFile(filePath).name();
+AbstractMediaPlayer::MediaType AbstractMediaPlayer::detectMediaType(const QString& filePath) {
+	const auto mimeType = QMimeDatabase().mimeTypeForFile(filePath).name();
+
+	if (mimeType.contains("video"))
+		return MediaType::Video;
+	else if (mimeType.contains("image"))
+		return MediaType::Image;
+	else if (mimeType.contains("audio"))
+		return MediaType::Audio;
+
+	return MediaType::Unknown;
 }
 
 QSizeF AbstractMediaPlayer::occupiedMediaSpace() const noexcept {

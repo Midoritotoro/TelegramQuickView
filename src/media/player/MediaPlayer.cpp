@@ -1,19 +1,8 @@
 ﻿#include "MediaPlayer.h"
 
-#include <QMediaMetaData>
-#include <QFont>
 #include "../WidgetsHider.h"
 
-
 namespace {
-	QSize textSize(const QString& text, const QFontMetrics& metrics) {
-		return metrics.size(0, text);
-	}
-
-	QSize textSize(const QString& text, const QFont& font) {
-		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
-	}
-
 	constexpr int mediaPlayerPanelBottomIndent = 5;
 }
 
@@ -36,16 +25,22 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 			const auto duration = mediaPlayer()->duration();
 
 			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
-			videoRewind(duration - 100);
+
+			_allowChangePlaybackSliderValue = false;
+			videoRewind(duration - 1);
 		}
 		});
 
 	connect(mediaPlayer(), &QMediaPlayer::durationChanged, _mediaPlayerPanel, &MediaPlayerPanel::setVideoSliderMaximum);
-	connect(mediaPlayer(), &QMediaPlayer::positionChanged, this, [this]() {
-
-		const auto position = mediaPlayer()->position();
+	connect(mediaPlayer(), &QMediaPlayer::positionChanged, this, [this](qint64 position) {
 		const auto duration = mediaPlayer()->duration();
 
+		if (_allowChangePlaybackSliderValue == true)
+			_mediaPlayerPanel->playbackSlider()->setValue(position);
+		/*else
+			_mediaPlayerPanel->playbackSlider()->setValue(duration);*/
+
+		_allowChangePlaybackSliderValue = true;
 		_mediaPlayerPanel->updateTimeText(position, duration);
 	});
 
@@ -64,7 +59,6 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 				_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
 			
 			break;
-			
 		}
 		});
 
@@ -101,10 +95,24 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, &AbstractMediaPlayer::mediaPlayerShowFullScreen);
 
 	connect(this, &AbstractMediaPlayer::sourceChanged, this, &MediaPlayer::updateMediaPlayerPanelVisibility);
+
+	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderPressed, [this]() {
+		disconnect(mediaPlayer(), &QMediaPlayer::positionChanged, _mediaPlayerPanel->playbackSlider(), &QSlider::setValue);
+		mediaPlayer()->pause();
+		});
+
+	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderReleased, [this]() {
+		connect(mediaPlayer(), &QMediaPlayer::positionChanged, _mediaPlayerPanel->playbackSlider(), &QSlider::setValue);
+		_sleep(1);
+		mediaPlayer()->play();
+		});
+
+	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderMoved, this, &MediaPlayer::videoRewind);
+	connect(_mediaPlayerPanel->volumeSlider(), &QSlider::valueChanged, this, &AbstractMediaPlayer::changeVolume);
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
-	if (!mediaPlayer()->source().isEmpty())
+	if (mediaPlayer()->source().isEmpty() == false)
 		return _mediaPlayerPanel->height(); 
 	return 0;
 }
@@ -135,16 +143,25 @@ void MediaPlayer::updateMediaPlayerPanelVisibility(const QUrl& media) {
 		? sourcePath = media.path().remove(0, 1)
 		: sourcePath = media.path();
 
-	QString mediaType = detectMediaType(sourcePath);
+	MediaType mediaType = detectMediaType(sourcePath);
 
-	if (mediaType.contains("image")) {
-		_widgetsHider->removeWidget(_mediaPlayerPanel);
-		_widgetsHider->resetTimer();
-		_mediaPlayerPanel->hide();
+	switch (mediaType) {
+		case MediaType::Video:
+			_widgetsHider->addWidget(_mediaPlayerPanel);
+			_widgetsHider->resetTimer();
+
+			_mediaPlayerPanel->show();
+			break;
+
+		case MediaType::Image:
+			_widgetsHider->removeWidget(_mediaPlayerPanel);
+			_widgetsHider->resetTimer();
+
+			_mediaPlayerPanel->hide();
+			break;
+
+		case MediaType::Audio:
+			break;
 	}
-	else if (mediaType.contains("video")) {
-		_widgetsHider->addWidget(_mediaPlayerPanel);
-		_widgetsHider->resetTimer();
-		_mediaPlayerPanel->show();
-	}
+	
 }

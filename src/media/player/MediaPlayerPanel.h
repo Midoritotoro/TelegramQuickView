@@ -4,12 +4,10 @@
 #include <QLabel>
 
 #include "VideoStateWidget.h"
-
+#include "EnhancedSlider.h"
 
 class VolumeController;
-class EnhancedSlider;
 class FullScreenButton;
-
 
 
 class MediaPlayerPanel: public QWidget {
@@ -29,6 +27,9 @@ public:
 
 	void updateTimeText(int mediaPosition, int mediaDuration);
 	void updateStateWidget(VideoStateWidget::State state);
+
+	[[nodiscard]] EnhancedSlider* volumeSlider() const noexcept;
+	[[nodiscard]] EnhancedSlider* playbackSlider() const noexcept;
 
 	void setVideoSliderMaximum(int value);
 Q_SIGNALS:

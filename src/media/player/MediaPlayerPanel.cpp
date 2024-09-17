@@ -1,7 +1,6 @@
 #include "MediaPlayerPanel.h"
 
 #include "VolumeController.h"
-#include "EnhancedSlider.h"
 #include "FullScreenButton.h"
 
 #include <QPaintEvent>
@@ -126,6 +125,14 @@ void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
 
 void MediaPlayerPanel::updateStateWidget(VideoStateWidget::State state) {
 	_videoStateWidget->setState(state);
+}
+
+EnhancedSlider* MediaPlayerPanel::volumeSlider() const noexcept {
+	return _volumeSlider;
+}
+
+EnhancedSlider* MediaPlayerPanel::playbackSlider() const noexcept {
+	return _playbackSlider;
 }
 
 void MediaPlayerPanel::setVideoSliderMaximum(int value) {

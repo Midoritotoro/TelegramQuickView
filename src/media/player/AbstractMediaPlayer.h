@@ -20,13 +20,23 @@ private:
 	QSizeF _currentMediaSize;
 	bool _allowChangeVideoState = true, _allowChangeVideoSize = true;
 public:
+	enum class MediaType {
+		Image,
+		Video,
+		Audio,
+		Unknown
+	};
+
 	explicit AbstractMediaPlayer(QWidget* parent = nullptr);
 
 	void setSource(const QUrl& source);
 
-	[[nodiscard]] static QString detectMediaType(const QString& filePath);
+	[[nodiscard]] static MediaType detectMediaType(const QString& filePath);
 	[[nodiscard]] QSizeF occupiedMediaSpace() const noexcept;
 	[[nodiscard]] QPointF mediaPosition() const noexcept;
+
+	void mediaPlayerShowNormal();
+	void mediaPlayerShowFullScreen();
 
 	virtual [[nodiscard]] int getVideoControlsHeight() const noexcept = 0;
 Q_SIGNALS:
@@ -36,9 +46,6 @@ Q_SIGNALS:
 	void sourceChanged(const QUrl& media);
 protected:
 	[[nodiscard]] QMediaPlayer* mediaPlayer() const noexcept;
-
-	void mediaPlayerShowNormal();
-	void mediaPlayerShowFullScreen();
 
 	void clearScene();
 	void updateCurrentImageRect(int imageWidth, int imageHeight);
