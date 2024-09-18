@@ -105,7 +105,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderMoved, this, &MediaPlayer::videoRewind);
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsChangeVolume, this, &AbstractMediaPlayer::changeVolume);
 
-	changeVolume(20);
+	_mediaPlayerPanel->setVolume(20);
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {

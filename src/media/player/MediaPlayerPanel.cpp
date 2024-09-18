@@ -172,19 +172,22 @@ void MediaPlayerPanel::updateTimeSize() {
 
 void MediaPlayerPanel::updateControlsGeometry() {
 	_playbackSlider->resize(width() - _remainingTimeLabel->width() / 2.
-					- _timeLabel->width() / 2., _playbackSlider->height());
+			- _timeLabel->width() / 2., _playbackSlider->height());
 
 	_playbackSlider->move(_timeLabel->width() / 2.,
 			height() - contentBottom() - _playbackSlider->height());
 
-	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5., _volumeSlider->height());
-	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), _volumeToggle->height() / 2 - contentTop());
+	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5.,
+			_volumeSlider->height());
+	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(),
+			_volumeToggle->height() / 2 - contentTop());
 
 	_volumeToggle->move(contentLeft(), contentTop());
 	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2., contentTop());
 
 	_timeLabel->move(contentLeft(), height() + contentBottom() - _timeLabel->height());
-	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2., height() + contentBottom() - _remainingTimeLabel->height());
+	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2.,
+			height() + contentBottom() - _remainingTimeLabel->height());
 
 	_fullScreenButton->move(width() - contentRight() - _fullScreenButton->width(), contentTop());
 }
