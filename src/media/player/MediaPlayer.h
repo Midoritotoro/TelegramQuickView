@@ -12,7 +12,7 @@ private:
 	Q_OBJECT
 	MediaPlayerPanel* _mediaPlayerPanel = nullptr;
 	WidgetsHider* _widgetsHider = nullptr;
-	bool _allowChangePlaybackSliderValue = true;
+	int _previousVolume;
 public:
 	MediaPlayer(QWidget* parent = nullptr);
 

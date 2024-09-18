@@ -8,7 +8,7 @@
 
 VolumeController::VolumeController(QWidget* parent) :
 	QPushButton(parent)
-	, _isSpeakerOn(true)
+	, _isSpeakerOn(false)
 {
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
@@ -37,16 +37,11 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 	QString speakerImagePath = cssDir.absolutePath() + "/speaker_white_on.png";
 
 	QPixmap pixmap(speakerImagePath);
-
+	qDebug() << "repainted";
 	if (pixmap.size() != size())
 		pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
 	painter.drawPixmap(0, 0, pixmap);
-}
-
-void VolumeController::mousePressEvent(QMouseEvent* event) {
-	if (event->button() == Qt::LeftButton)
-		_isSpeakerOn = _isSpeakerOn ? false : true;
 }
 
 void VolumeController::paintEvent(QPaintEvent* event) {
@@ -56,12 +51,16 @@ void VolumeController::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);
 
-	isSpeakerOn()
-	? paintSpeakerOff(painter)
-	: paintSpeakerOn(painter);
-
+	_isSpeakerOn
+	? paintSpeakerOn(painter)
+	: paintSpeakerOff(painter);
 }
 
 bool VolumeController::isSpeakerOn() const noexcept {
 	return _isSpeakerOn;
+}
+
+void VolumeController::setSpeakerEnabled(bool enabled) {
+	_isSpeakerOn = enabled;
+	repaint();
 }

@@ -74,16 +74,16 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_playbackSlider->setFixedHeight(20);
 
 	connect(_volumeToggle, &QPushButton::clicked, this, [this]() {
-		_volumeToggle->repaint();
+		_allowChangePreviousSliderValue = true;
 
-		if (_volumeToggle->isSpeakerOn()) {
-			_previousVolumeSliderValue = _volumeSlider->value();
-			_volumeSlider->setSliderValue(0);
-		}
-		else {
-			_volumeSlider->setSliderValue(_previousVolumeSliderValue);
-		}
+		_volumeToggle->isSpeakerOn() 
+		? setVolume(0)
+		: setVolume(_previousVolumeSliderValue);
+
+		_allowChangePreviousSliderValue = false;
 	});
+
+	connect(_volumeSlider, &QSlider::valueChanged, this, &MediaPlayerPanel::setVolume);
 
 	connect(_fullScreenButton, &QAbstractButton::clicked, this, [this]() {
 		_fullScreenButton->state() == FullScreenButton::State::FullScreenTo ? emit mediaPlayerNeedsNormal() : emit mediaPlayerNeedsFullScreen();
@@ -95,9 +95,11 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 		case VideoStateWidget::State::Play:
 			emit videoPlayClicked();
 			break;
+
 		case VideoStateWidget::State::Pause:
 			emit videoPauseClicked();
 			break;
+
 		case VideoStateWidget::State::Repeat:
 			emit videoRepeatClicked();
 			break;
@@ -137,6 +139,24 @@ EnhancedSlider* MediaPlayerPanel::playbackSlider() const noexcept {
 
 void MediaPlayerPanel::setVideoSliderMaximum(int value) {
 	_playbackSlider->setMaximum(value);
+}
+
+void MediaPlayerPanel::setVolume(int value) {
+	qDebug() << "_volumeToggle->isSpeakerOn(): " << _volumeToggle->isSpeakerOn();
+	qDebug() << "value: " << value;
+	qDebug() << "value == 0 && _volumeToggle->isSpeakerOn() == true: " << (bool)(value == 0 && _volumeToggle->isSpeakerOn() == true);
+	qDebug() << "value > 0 && _volumeToggle->isSpeakerOn() == false: " << (bool)(value > 0 && _volumeToggle->isSpeakerOn() == false);
+
+	if (value > 0 && _volumeToggle->isSpeakerOn() == false)
+		_volumeToggle->setSpeakerEnabled(true);
+	else if (value == 0 && _volumeToggle->isSpeakerOn() == true)
+		_volumeToggle->setSpeakerEnabled(false);
+
+	if (value > 0 && _allowChangePreviousSliderValue == true)
+		_previousVolumeSliderValue = value;
+
+	_volumeSlider->setValue(value);
+	emit mediaPlayerNeedsChangeVolume(value);
 }
 
 void MediaPlayerPanel::updateSize() {

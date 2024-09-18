@@ -69,7 +69,7 @@ void MessageTextView::paintEvent(QPaintEvent* event) {
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);
-	painter.setOpacity(0.5);
+	painter.setOpacity(0.65);
 
 	drawRoundedCorners(painter, messageTextViewBorderRadius);
 }

@@ -46,8 +46,6 @@ AbstractMediaPlayer::AbstractMediaPlayer(QWidget* parent):
 
 	_mediaPlayer->setAudioOutput(audioOutput);
 	_mediaPlayer->setVideoOutput(_videoItem);
-
-	changeVolume(50);
 }
 
 void AbstractMediaPlayer::setSource(const QUrl& source) {

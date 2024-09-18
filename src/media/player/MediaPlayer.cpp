@@ -1,6 +1,8 @@
 ﻿#include "MediaPlayer.h"
 
 #include "../WidgetsHider.h"
+#include <QAudioOutput>
+
 
 namespace {
 	constexpr int mediaPlayerPanelBottomIndent = 5;
@@ -25,8 +27,6 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 			const auto duration = mediaPlayer()->duration();
 
 			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
-
-			_allowChangePlaybackSliderValue = false;
 			videoRewind(duration - 1);
 		}
 		});
@@ -35,12 +35,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	connect(mediaPlayer(), &QMediaPlayer::positionChanged, this, [this](qint64 position) {
 		const auto duration = mediaPlayer()->duration();
 
-		if (_allowChangePlaybackSliderValue == true)
-			_mediaPlayerPanel->playbackSlider()->setValue(position);
-		/*else
-			_mediaPlayerPanel->playbackSlider()->setValue(duration);*/
-
-		_allowChangePlaybackSliderValue = true;
+		_mediaPlayerPanel->playbackSlider()->setValue(position);
 		_mediaPlayerPanel->updateTimeText(position, duration);
 	});
 
@@ -108,7 +103,9 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 		});
 
 	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderMoved, this, &MediaPlayer::videoRewind);
-	connect(_mediaPlayerPanel->volumeSlider(), &QSlider::valueChanged, this, &AbstractMediaPlayer::changeVolume);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsChangeVolume, this, &AbstractMediaPlayer::changeVolume);
+
+	changeVolume(20);
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
