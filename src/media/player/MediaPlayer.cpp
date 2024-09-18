@@ -27,7 +27,7 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 			const auto duration = mediaPlayer()->duration();
 
 			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
-			videoRewind(duration - 1);
+			videoRewind(duration - duration / 1000);
 		}
 		});
 

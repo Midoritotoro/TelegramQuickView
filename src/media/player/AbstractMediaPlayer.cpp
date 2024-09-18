@@ -168,7 +168,7 @@ void AbstractMediaPlayer::adjustVideoSize() {
 		auto scale = qMin(screenWidth / videoSize.width(),
 						  screenHeight / videoSize.height());
 
-		if (videoSize.width() > videoSize.height() && videoSize.width() > (screenWidth * 0.6)) {
+		if (videoSize.width() * scale > (screenWidth * 0.6)) {
 			const auto maximumWidthScale = (screenWidth * 0.6) / videoSize.width();
 			scale = qMin(scale, maximumWidthScale);
 		}

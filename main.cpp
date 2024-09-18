@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
    // for (int index = 0; index < 1000; ++index)
-    view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotesthorizontal.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\raid.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotestvertical.mp4"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotestvertical.mp4"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotestvertical.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") }));
+    view->makeMessage(text, QUrlList({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\slipknot-the-blister-exists-official-music-video_(videomega.ru).mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotesthorizontal.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\raid.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotestvertical.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") }));
 
     view->show();
     return app.exec();
