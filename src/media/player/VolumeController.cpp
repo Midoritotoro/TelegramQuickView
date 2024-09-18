@@ -9,6 +9,7 @@
 VolumeController::VolumeController(QWidget* parent) :
 	QPushButton(parent)
 	, _isSpeakerOn(false)
+	, _isVolumeValueSmall(true)
 {
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
@@ -31,13 +32,17 @@ void VolumeController::paintSpeakerOff(QPainter& painter) {
 }
 
 void VolumeController::paintSpeakerOn(QPainter& painter) {
+	QString speakerImagePath;
+
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../assets/images");
 
-	QString speakerImagePath = cssDir.absolutePath() + "/speaker_white_on.png";
+	_isVolumeValueSmall
+	? speakerImagePath = cssDir.absolutePath() + "/speaker_white_on.png"
+	: speakerImagePath = cssDir.absolutePath() + "/speaker_white_small_on.png";
 
 	QPixmap pixmap(speakerImagePath);
-	qDebug() << "repainted";
+
 	if (pixmap.size() != size())
 		pixmap = pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
@@ -63,4 +68,10 @@ bool VolumeController::isSpeakerOn() const noexcept {
 void VolumeController::setSpeakerEnabled(bool enabled) {
 	_isSpeakerOn = enabled;
 	repaint();
+}
+
+void VolumeController::setVolume(int volume) {
+	volume > 50
+	? _isVolumeValueSmall = false
+	: _isVolumeValueSmall = true;
 }

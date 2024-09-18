@@ -68,19 +68,15 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 
 	_fullScreenButton->setFixedSize(25, 25);
 	_videoStateWidget->setFixedSize(30, 30);
-	_volumeToggle->setFixedSize(20, 20);
+	_volumeToggle->setFixedSize(25, 25);
 
 	_volumeSlider->setFixedHeight(20);
 	_playbackSlider->setFixedHeight(20);
 
 	connect(_volumeToggle, &QPushButton::clicked, this, [this]() {
-		_allowChangePreviousSliderValue = true;
-
 		_volumeToggle->isSpeakerOn() 
 		? setVolume(0)
 		: setVolume(_previousVolumeSliderValue);
-
-		_allowChangePreviousSliderValue = false;
 	});
 
 	connect(_volumeSlider, &QSlider::valueChanged, this, &MediaPlayerPanel::setVolume);
@@ -142,17 +138,14 @@ void MediaPlayerPanel::setVideoSliderMaximum(int value) {
 }
 
 void MediaPlayerPanel::setVolume(int value) {
-	qDebug() << "_volumeToggle->isSpeakerOn(): " << _volumeToggle->isSpeakerOn();
-	qDebug() << "value: " << value;
-	qDebug() << "value == 0 && _volumeToggle->isSpeakerOn() == true: " << (bool)(value == 0 && _volumeToggle->isSpeakerOn() == true);
-	qDebug() << "value > 0 && _volumeToggle->isSpeakerOn() == false: " << (bool)(value > 0 && _volumeToggle->isSpeakerOn() == false);
+	_volumeToggle->setVolume(value);
 
 	if (value > 0 && _volumeToggle->isSpeakerOn() == false)
 		_volumeToggle->setSpeakerEnabled(true);
 	else if (value == 0 && _volumeToggle->isSpeakerOn() == true)
 		_volumeToggle->setSpeakerEnabled(false);
 
-	if (value > 0 && _allowChangePreviousSliderValue == true)
+	if (value > 0)
 		_previousVolumeSliderValue = value;
 
 	_volumeSlider->setValue(value);
@@ -185,7 +178,7 @@ void MediaPlayerPanel::updateControlsGeometry() {
 			height() - contentBottom() - _playbackSlider->height());
 
 	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5., _volumeSlider->height());
-	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), contentTop());
+	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(), _volumeToggle->height() / 2 - contentTop());
 
 	_volumeToggle->move(contentLeft(), contentTop());
 	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2., contentTop());

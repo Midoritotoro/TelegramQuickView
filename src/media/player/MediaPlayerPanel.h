@@ -22,7 +22,6 @@ private:
 
 	VolumeController* _volumeToggle = nullptr;
 	int _previousVolumeSliderValue = 0, _mediaPlayerPanelWidth = 0;
-	bool _allowChangePreviousSliderValue = false;
 public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
 
