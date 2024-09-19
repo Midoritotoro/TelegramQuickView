@@ -2,8 +2,10 @@
 
 TdExample::TdExample() {
     td::ClientManager::execute(td_api::make_object<td_api::setLogVerbosityLevel>(1));
+
     client_manager_ = std::make_unique<td::ClientManager>();
     client_id_ = client_manager_->create_client_id();
+
     send_query(td_api::make_object<td_api::getOption>("version"), {});
 }
 
@@ -12,9 +14,11 @@ void TdExample::loop() {
         if (need_restart_) {
             restart();
         }
+
         else if (!are_authorized_) {
             process_response(client_manager_->receive(10));
         }
+
         else {
             std::cout << "Enter action [q] quit [u] check for updates and request results [c] show chats [m <chat_id> "
                 "<text>] send message [me] show self [l] logout: "
@@ -23,12 +27,15 @@ void TdExample::loop() {
             std::getline(std::cin, line);
             std::istringstream ss(line);
             std::string action;
+
             if (!(ss >> action)) {
                 continue;
             }
+
             if (action == "q") {
                 return;
             }
+
             if (action == "u") {
                 std::cout << "Checking for updates..." << std::endl;
                 while (true) {
@@ -41,6 +48,7 @@ void TdExample::loop() {
                     }
                 }
             }
+
             else if (action == "close") {
                 std::cout << "Closing..." << std::endl;
                 send_query(td_api::make_object<td_api::close>(), {});
@@ -103,7 +111,7 @@ void TdExample::process_response(td::ClientManager::Response response) {
     if (!response.object) {
         return;
     }
-    //std::cout << response.request_id << " " << to_string(response.object) << std::endl;
+
     if (response.request_id == 0) {
         return process_update(std::move(response.object));
     }
@@ -148,8 +156,11 @@ void TdExample::process_update(td_api::object_ptr<td_api::Object> update) {
                 users_[user_id] = std::move(update_user.user_);
             },
             [this](td_api::updateNewMessage& update_new_message) {
-                auto chat_id = update_new_message.message_->chat_id_;
                 std::string sender_name;
+                std::string text;
+
+                const auto chat_id = update_new_message.message_->chat_id_;
+
                 td_api::downcast_call(*update_new_message.message_->sender_id_,
                     overloaded(
                         [this, &sender_name](td_api::messageSenderUser& user) {
@@ -158,10 +169,11 @@ void TdExample::process_update(td_api::object_ptr<td_api::Object> update) {
                         [this, &sender_name](td_api::messageSenderChat& chat) {
                             sender_name = get_chat_title(chat.chat_id_);
                         }));
-                std::string text;
+
                 if (update_new_message.message_->content_->get_id() == td_api::messageText::ID) {
                     text = static_cast<td_api::messageText&>(*update_new_message.message_->content_).text_->text_;
                 }
+
                 std::cout << "Receive message: [chat_id:" << chat_id << "] [from:" << sender_name << "] ["
                     << text << "]" << std::endl;
             },
@@ -222,16 +234,6 @@ void TdExample::on_authorization_state_update() {
                 std::string code;
                 std::cin >> code;
                 send_query(td_api::make_object<td_api::checkAuthenticationCode>(code),
-                    create_authentication_query_handler());
-            },
-            [this](td_api::authorizationStateWaitRegistration&) {
-                std::string first_name;
-                std::string last_name;
-                std::cout << "Enter your first name: " << std::flush;
-                std::cin >> first_name;
-                std::cout << "Enter your last name: " << std::flush;
-                std::cin >> last_name;
-                send_query(td_api::make_object<td_api::registerUser>(first_name, last_name, false),
                     create_authentication_query_handler());
             },
             [this](td_api::authorizationStateWaitPassword&) {

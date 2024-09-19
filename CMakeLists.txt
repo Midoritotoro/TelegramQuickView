@@ -108,7 +108,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
 
-# target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Core OpenSSL::Crypto)
 target_link_libraries(${PROJECT_NAME} PRIVATE Td::TdJson)
 target_link_libraries(${PROJECT_NAME} PRIVATE Td::TdStatic)
 
