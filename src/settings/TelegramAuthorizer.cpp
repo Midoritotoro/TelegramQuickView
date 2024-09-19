@@ -1,24 +1,48 @@
-﻿#include "TelegramParser.h"
+﻿#include "TelegramAuthorizer.h"
 
-TdExample::TdExample() {
+namespace detail {
+    template <class... Fs>
+    struct overload;
+
+    template <class F>
+    struct overload<F> : public F {
+        explicit overload(F f) : F(f) {
+        }
+    };
+    template <class F, class... Fs>
+    struct overload<F, Fs...>
+        : public overload<F>
+        , public overload<Fs...> {
+        overload(F f, Fs... fs) : overload<F>(f), overload<Fs...>(fs...) {
+        }
+        using overload<F>::operator();
+        using overload<Fs...>::operator();
+    };
+}  // namespace detail
+
+template <class... F>
+auto overloaded(F... f) {
+    return detail::overload<F...>(f...);
+}
+
+namespace td_api = td::td_api;
+
+
+TelegramAuthorizer::TelegramAuthorizer() {
     td::ClientManager::execute(td_api::make_object<td_api::setLogVerbosityLevel>(1));
-
     client_manager_ = std::make_unique<td::ClientManager>();
     client_id_ = client_manager_->create_client_id();
-
     send_query(td_api::make_object<td_api::getOption>("version"), {});
 }
 
-void TdExample::loop() {
+void TelegramAuthorizer::loop() {
     while (true) {
         if (need_restart_) {
             restart();
         }
-
         else if (!are_authorized_) {
             process_response(client_manager_->receive(10));
         }
-
         else {
             std::cout << "Enter action [q] quit [u] check for updates and request results [c] show chats [m <chat_id> "
                 "<text>] send message [me] show self [l] logout: "
@@ -27,15 +51,12 @@ void TdExample::loop() {
             std::getline(std::cin, line);
             std::istringstream ss(line);
             std::string action;
-
             if (!(ss >> action)) {
                 continue;
             }
-
             if (action == "q") {
                 return;
             }
-
             if (action == "u") {
                 std::cout << "Checking for updates..." << std::endl;
                 while (true) {
@@ -48,7 +69,6 @@ void TdExample::loop() {
                     }
                 }
             }
-
             else if (action == "close") {
                 std::cout << "Closing..." << std::endl;
                 send_query(td_api::make_object<td_api::close>(), {});
@@ -94,12 +114,12 @@ void TdExample::loop() {
     }
 }
 
-void TdExample::restart() {
+void TelegramAuthorizer::restart() {
     client_manager_.reset();
-    *this = TdExample();
+    *this = TelegramAuthorizer();
 }
 
-void TdExample::send_query(td_api::object_ptr<td_api::Function> f, std::function<void(Object)> handler) {
+void TelegramAuthorizer::send_query(td_api::object_ptr<td_api::Function> f, std::function<void(Object)> handler) {
     auto query_id = next_query_id();
     if (handler) {
         handlers_.emplace(query_id, std::move(handler));
@@ -107,11 +127,11 @@ void TdExample::send_query(td_api::object_ptr<td_api::Function> f, std::function
     client_manager_->send(client_id_, query_id, std::move(f));
 }
 
-void TdExample::process_response(td::ClientManager::Response response) {
+void TelegramAuthorizer::process_response(td::ClientManager::Response response) {
     if (!response.object) {
         return;
     }
-
+    //std::cout << response.request_id << " " << to_string(response.object) << std::endl;
     if (response.request_id == 0) {
         return process_update(std::move(response.object));
     }
@@ -122,7 +142,7 @@ void TdExample::process_response(td::ClientManager::Response response) {
     }
 }
 
-std::string TdExample::get_user_name(std::int64_t user_id) const {
+std::string TelegramAuthorizer::get_user_name(std::int64_t user_id) const {
     auto it = users_.find(user_id);
     if (it == users_.end()) {
         return "unknown user";
@@ -130,7 +150,7 @@ std::string TdExample::get_user_name(std::int64_t user_id) const {
     return it->second->first_name_ + " " + it->second->last_name_;
 }
 
-std::string TdExample::get_chat_title(std::int64_t chat_id) const {
+std::string TelegramAuthorizer::get_chat_title(std::int64_t chat_id) const {
     auto it = chat_title_.find(chat_id);
     if (it == chat_title_.end()) {
         return "unknown chat";
@@ -138,7 +158,7 @@ std::string TdExample::get_chat_title(std::int64_t chat_id) const {
     return it->second;
 }
 
-void TdExample::process_update(td_api::object_ptr<td_api::Object> update) {
+void TelegramAuthorizer::process_update(td_api::object_ptr<td_api::Object> update) {
     td_api::downcast_call(
         *update, overloaded(
             [this](td_api::updateAuthorizationState& update_authorization_state) {
@@ -156,11 +176,8 @@ void TdExample::process_update(td_api::object_ptr<td_api::Object> update) {
                 users_[user_id] = std::move(update_user.user_);
             },
             [this](td_api::updateNewMessage& update_new_message) {
+                auto chat_id = update_new_message.message_->chat_id_;
                 std::string sender_name;
-                std::string text;
-
-                const auto chat_id = update_new_message.message_->chat_id_;
-
                 td_api::downcast_call(*update_new_message.message_->sender_id_,
                     overloaded(
                         [this, &sender_name](td_api::messageSenderUser& user) {
@@ -169,18 +186,17 @@ void TdExample::process_update(td_api::object_ptr<td_api::Object> update) {
                         [this, &sender_name](td_api::messageSenderChat& chat) {
                             sender_name = get_chat_title(chat.chat_id_);
                         }));
-
+                std::string text;
                 if (update_new_message.message_->content_->get_id() == td_api::messageText::ID) {
                     text = static_cast<td_api::messageText&>(*update_new_message.message_->content_).text_->text_;
                 }
-
                 std::cout << "Receive message: [chat_id:" << chat_id << "] [from:" << sender_name << "] ["
                     << text << "]" << std::endl;
             },
             [](auto& update) {}));
 }
 
-auto TdExample::create_authentication_query_handler() {
+auto TelegramAuthorizer::create_authentication_query_handler() {
     return [this, id = authentication_query_id_](Object object) {
         if (id == authentication_query_id_) {
             check_authentication_error(std::move(object));
@@ -188,7 +204,7 @@ auto TdExample::create_authentication_query_handler() {
         };
 }
 
-void TdExample::on_authorization_state_update() {
+void TelegramAuthorizer::on_authorization_state_update() {
     authentication_query_id_++;
     td_api::downcast_call(*authorization_state_,
         overloaded(
@@ -236,6 +252,16 @@ void TdExample::on_authorization_state_update() {
                 send_query(td_api::make_object<td_api::checkAuthenticationCode>(code),
                     create_authentication_query_handler());
             },
+            [this](td_api::authorizationStateWaitRegistration&) {
+                std::string first_name;
+                std::string last_name;
+                std::cout << "Enter your first name: " << std::flush;
+                std::cin >> first_name;
+                std::cout << "Enter your last name: " << std::flush;
+                std::cin >> last_name;
+                send_query(td_api::make_object<td_api::registerUser>(first_name, last_name, false),
+                    create_authentication_query_handler());
+            },
             [this](td_api::authorizationStateWaitPassword&) {
                 std::cout << "Enter authentication password: " << std::flush;
                 std::string password;
@@ -260,7 +286,7 @@ void TdExample::on_authorization_state_update() {
             }));
 }
 
-void TdExample::check_authentication_error(Object object) {
+void TelegramAuthorizer::check_authentication_error(Object object) {
     if (object->get_id() == td_api::error::ID) {
         auto error = td::move_tl_object_as<td_api::error>(object);
         std::cout << "Error: " << to_string(error) << std::flush;
@@ -268,6 +294,6 @@ void TdExample::check_authentication_error(Object object) {
     }
 }
 
-std::uint64_t TdExample::next_query_id() {
+std::uint64_t TelegramAuthorizer::next_query_id() {
     return ++current_query_id_;
 }

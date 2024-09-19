@@ -18,36 +18,12 @@
 #include <string>
 #include <vector>
 
-namespace detail {
-    template <class... Fs>
-    struct overload;
-
-    template <class F>
-    struct overload<F> : public F {
-        explicit overload(F f) : F(f) {
-        }
-    };
-    template <class F, class... Fs>
-    struct overload<F, Fs...>
-        : public overload<F>
-        , public overload<Fs...> {
-        overload(F f, Fs... fs) : overload<F>(f), overload<Fs...>(fs...) {
-        }
-        using overload<F>::operator();
-        using overload<Fs...>::operator();
-    };
-}  // namespace detail
-
-template <class... F>
-auto overloaded(F... f) {
-    return detail::overload<F...>(f...);
-}
-
 namespace td_api = td::td_api;
 
-class TdExample {
+class TelegramAuthorizer {
 public:
-    TdExample();
+    TelegramAuthorizer();
+
     void loop();
 
 private:
@@ -70,21 +46,17 @@ private:
     void restart();
 
     void send_query(td_api::object_ptr<td_api::Function> f, std::function<void(Object)> handler);
-
     void process_response(td::ClientManager::Response response);
 
     std::string get_user_name(std::int64_t user_id) const;
-
     std::string get_chat_title(std::int64_t chat_id) const;
 
     void process_update(td_api::object_ptr<td_api::Object> update);
 
     auto create_authentication_query_handler();
-
     void on_authorization_state_update();
 
     void check_authentication_error(Object object);
 
     std::uint64_t next_query_id();
 };
-

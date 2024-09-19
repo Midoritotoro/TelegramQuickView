@@ -19,12 +19,16 @@
 #include "src/settings/MainWindow.h"
 #include "src/media/player/MediaPlayer.h"
 #include "src/media/player/MediaPlayerPanel.h"
-#include "src/settings/TelegramParser.h"
+#include "src/settings/TelegramAuthorizer.h"
 
-int main() {
-    TdExample tdEx;
-    tdEx.loop();
-    return 0;
+int main(int argc, char* argv[]) {
+    TelegramAuthorizer tg;
+    tg.loop();
+    /*QApplication app(argc, argv);
+    MainWindow window;
+
+    window.show();
+    return app.exec();*/
 }
 
 //int main(int argc, char* argv[])

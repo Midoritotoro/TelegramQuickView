@@ -14,6 +14,7 @@
 #include <QCloseEvent>
 
 #include "UserDataManager.h"
+#include "TelegramAuthorizer.h"
 
 
 class AuthenticationDialog : public QDialog
@@ -29,6 +30,7 @@ private:
     UserDataManager* _userDataManager = nullptr;
     QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr, * _incorrectTelegramCodeLabel = nullptr;
     LPTelegramCredentials _telegramCredentials = nullptr;
+    TelegramAuthorizer _telegramAuthorizer;
     QTimer* timer = nullptr;
     int timeRemaining = 0;
 public:
