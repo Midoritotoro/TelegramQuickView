@@ -7,12 +7,8 @@
 #include <QFile>
 #include <QJsonDocument>
 #include "TelegramAuthorizationChecker.h"
+#include "TelegramAuthorizer.h"
 
-typedef struct _TelegramCredentials {
-	QString apiId;
-	QString apiHash;
-	QString phoneNumber;
-} TelegramCredentials, * LPTelegramCredentials;
 
 class UserDataManager
 {

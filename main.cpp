@@ -13,6 +13,7 @@
 #endif // __linux__
 
 #include "src/core/AutoRunUtils.h"
+#include <iostream>
 
 #include <QApplication>
 #include "src/panel/TelegramPostQuickView.h"
@@ -22,13 +23,17 @@
 #include "src/settings/TelegramAuthorizer.h"
 
 int main(int argc, char* argv[]) {
-    TelegramAuthorizer tg;
-    tg.loop();
     /*QApplication app(argc, argv);
     MainWindow window;
 
     window.show();
     return app.exec();*/
+    TelegramAuthorizer auth;
+    auth.setTelegramCredentials(TelegramCredentials());
+    auth.loop();
+    while (true)
+        std::cout << "test" << std::endl;
+    return 0;
 }
 
 //int main(int argc, char* argv[])

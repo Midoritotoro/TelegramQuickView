@@ -13,6 +13,8 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     _telegramCredentials = new TelegramCredentials();
     timer = new QTimer();
 
+    _telegramAuthorizer = TelegramAuthorizer();
+
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
         "font-size: 24px;\n"
@@ -188,9 +190,19 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 
     connect(loginButton, &QPushButton::clicked, this, &AuthenticationDialog::logInButton_clicked);
     connect(backButton, &QPushButton::clicked, this, &AuthenticationDialog::backButton_clicked);
+
     connect(confirmCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::confirmMobilePhoneCodeButton_clicked);
     connect(sendCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::sendCodeAgainButton_clicked);
+
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
+    
+    connect(&_telegramAuthorizer, &TelegramAuthorizer::telegramCredentialsNeeded, [this]() {
+        _telegramAuthorizer.setTelegramCredentials(*_telegramCredentials);
+        });
+
+    connect(&_telegramAuthorizer, &TelegramAuthorizer::authorizationCodeNeeded, [this]() {
+        _telegramAuthorizer.setAuthorizationCode(_authorizationCode.toStdString());
+        });
 }
 
 void AuthenticationDialog::skipFirstAuthorizationStage() {
@@ -229,15 +241,13 @@ void AuthenticationDialog::shake()
 }
 
 void AuthenticationDialog::logInButton_clicked() {
-    QString apiHash, apiId, phoneNumber;
-
     _incorrectTelegramCredentialsLabel->hide();
     _incorrectMobilePhoneLabel->hide();
     _incorrectTelegramCodeLabel->hide();
 
-    apiHash = apiHashLineEdit->text();
-    apiId = apiIdLineEdit->text();
-    phoneNumber = phoneNumberLineEdit->text();
+    const auto apiHash = apiHashLineEdit->text().toStdString();
+    const auto apiId = apiIdLineEdit->text().toInt();
+    const auto phoneNumber = phoneNumberLineEdit->text().toStdString();
 
     if (!_skipFirstAuthenticationStage) {
         _telegramCredentials->apiHash = apiHash;
@@ -265,14 +275,7 @@ void AuthenticationDialog::logInButton_clicked() {
         }
     }
 
-    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(apiHash.toStdString().c_str(), phoneNumber.toStdString().c_str(), apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
-
-    if (!isCodeSended) {
-        _incorrectMobilePhoneLabel->show();
-        shake();
-        return;
-    }
+    //
 
     timeRemaining = 180;
     timer->start(1000);
@@ -293,6 +296,7 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         return;
     }
 
+    _authorizationCode = mobilePhoneCode;
     _userDataManager->setPhoneNumberCode(mobilePhoneCode);
 
     if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
@@ -308,9 +312,9 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
 void AuthenticationDialog::backButton_clicked() {
     
     _telegramCredentials = _userDataManager->getTelegramCredentials();
-    apiHashLineEdit->setText(_telegramCredentials->apiHash);
-    apiIdLineEdit->setText(_telegramCredentials->apiId);
-    phoneNumberLineEdit->setText(_telegramCredentials->phoneNumber);
+    apiHashLineEdit->setText(QString(_telegramCredentials->apiHash.c_str()));
+    apiIdLineEdit->setText(QString::number(_telegramCredentials->apiId));
+    phoneNumberLineEdit->setText(QString(_telegramCredentials->phoneNumber.c_str()));
     _stackedWidget->setCurrentIndex(0);
 }
 
@@ -319,12 +323,6 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
     file.remove();
     _telegramCredentials = _userDataManager->getTelegramCredentials();
 
-    TelegramAuthorizationChecker* telegramAuthorizationChecker = new TelegramAuthorizationChecker();
-    bool isCodeSended = telegramAuthorizationChecker->sendTelegramCode(_telegramCredentials->apiHash.toStdString().c_str(), _telegramCredentials->phoneNumber.toStdString().c_str(), _telegramCredentials->apiId.toInt(), _userDataManager->getUserSettingsPath().toStdString().c_str());
-    if (!isCodeSended) {
-        shake();
-        return;
-    }
     timeRemaining = 180;
     timer->start(1000);
     sendCodeButton->setEnabled(false);
