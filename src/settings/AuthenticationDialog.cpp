@@ -10,7 +10,6 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 
     _stackedWidget = new QStackedWidget(this);
     _userDataManager = new UserDataManager();
-    _telegramCredentials = new TelegramCredentials();
     timer = new QTimer();
 
     _telegramAuthorizer = TelegramAuthorizer();
@@ -197,7 +196,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
     
     connect(&_telegramAuthorizer, &TelegramAuthorizer::telegramCredentialsNeeded, [this]() {
-        _telegramAuthorizer.setTelegramCredentials(*_telegramCredentials);
+        _telegramAuthorizer.setTelegramCredentials(_telegramCredentials);
         });
 
     connect(&_telegramAuthorizer, &TelegramAuthorizer::authorizationCodeNeeded, [this]() {
@@ -250,11 +249,11 @@ void AuthenticationDialog::logInButton_clicked() {
     const auto phoneNumber = phoneNumberLineEdit->text().toStdString();
 
     if (!_skipFirstAuthenticationStage) {
-        _telegramCredentials->apiHash = apiHash;
-        _telegramCredentials->apiId = apiId;
-        _telegramCredentials->phoneNumber = phoneNumber;
+        _telegramCredentials.apiHash = apiHash;
+        _telegramCredentials.apiId = apiId;
+        _telegramCredentials.phoneNumber = phoneNumber;
 
-        if (!_userDataManager->setTelegramCredentials(_telegramCredentials)) {
+        if (_telegramAuthorizer.setTelegramCredentials(_telegramCredentials) == false) {
             _incorrectTelegramCredentialsLabel->show();
             _userDataManager->clearTelegramCredentials();
             apiHashLineEdit->clear();
@@ -264,7 +263,17 @@ void AuthenticationDialog::logInButton_clicked() {
             return;
         }
 
-        if (!_userDataManager->isTelegramCredentialsValid()) {
+        if (_userDataManager->setTelegramCredentials(_telegramCredentials) == false) {
+            _incorrectTelegramCredentialsLabel->show();
+            _userDataManager->clearTelegramCredentials();
+            apiHashLineEdit->clear();
+            apiIdLineEdit->clear();
+            phoneNumberLineEdit->clear();
+            shake();
+            return;
+        }
+
+        if (_userDataManager->isTelegramCredentialsValid() == false) {
             _incorrectTelegramCredentialsLabel->show();
             _userDataManager->clearTelegramCredentials();
             apiHashLineEdit->clear();
@@ -312,9 +321,9 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
 void AuthenticationDialog::backButton_clicked() {
     
     _telegramCredentials = _userDataManager->getTelegramCredentials();
-    apiHashLineEdit->setText(QString(_telegramCredentials->apiHash.c_str()));
-    apiIdLineEdit->setText(QString::number(_telegramCredentials->apiId));
-    phoneNumberLineEdit->setText(QString(_telegramCredentials->phoneNumber.c_str()));
+    apiHashLineEdit->setText(QString(_telegramCredentials.apiHash.c_str()));
+    apiIdLineEdit->setText(QString::number(_telegramCredentials.apiId));
+    phoneNumberLineEdit->setText(QString(_telegramCredentials.phoneNumber.c_str()));
     _stackedWidget->setCurrentIndex(0);
 }
 

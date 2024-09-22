@@ -28,7 +28,7 @@ private:
     QStackedWidget* _stackedWidget = nullptr;
     UserDataManager* _userDataManager = nullptr;
     QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr, * _incorrectTelegramCodeLabel = nullptr;
-    LPTelegramCredentials _telegramCredentials = nullptr;
+    TelegramCredentials _telegramCredentials;
     TelegramAuthorizer _telegramAuthorizer;
     QTimer* timer = nullptr;
     QString _authorizationCode = "";

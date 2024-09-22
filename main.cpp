@@ -23,17 +23,17 @@
 #include "src/settings/TelegramAuthorizer.h"
 
 int main(int argc, char* argv[]) {
-    /*QApplication app(argc, argv);
+    QApplication app(argc, argv);
     MainWindow window;
 
     window.show();
-    return app.exec();*/
-    TelegramAuthorizer auth;
-    auth.setTelegramCredentials(TelegramCredentials());
-    auth.loop();
-    while (true)
-        std::cout << "test" << std::endl;
-    return 0;
+    return app.exec();
+    //TelegramAuthorizer auth;
+    //auth.setTelegramCredentials(TelegramCredentials());
+    //auth.loop();
+    //while (true)
+    //    std::cout << "test" << std::endl;
+    //return 0;
 }
 
 //int main(int argc, char* argv[])

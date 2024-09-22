@@ -18,10 +18,14 @@
 #include <functional>
 
 typedef struct _TelegramCredentials {
-    int apiId;
-    std::string apiHash;
-    std::string phoneNumber;
-} TelegramCredentials, *LPTelegramCredentials;
+    int apiId = 0;
+    std::string apiHash = "";
+    std::string phoneNumber = "";
+
+    [[nodiscard]] bool isEmpty() {
+        return apiId == 0 && apiHash.empty() && phoneNumber.empty();
+    }
+} TelegramCredentials;
 
 namespace detail {
     template <class... Fs>
@@ -62,6 +66,8 @@ private:
 
     bool are_authorized_{ false };
     bool need_restart_{ false };
+    bool _isCredentialsAccepted{ false };
+    bool _isAuthCodeAccepted{ false };
 
     std::uint64_t current_query_id_{ 0 };
     std::uint64_t authentication_query_id_{ 0 };
@@ -79,10 +85,11 @@ private:
 public:
     TelegramAuthorizer(QObject* parent = nullptr);
 
-    void setTelegramCredentials(const TelegramCredentials& credentials);
-    void setAuthorizationCode(std::string code);
+    [[nodiscard]] bool setTelegramCredentials(const TelegramCredentials& credentials);
+    [[nodiscard]] bool setAuthorizationCode(std::string code);
 
     void loop();
+    [[nodiscard]] bool auth();
 
     [[nodiscard]] bool isCredentialsAccepted() const;
 

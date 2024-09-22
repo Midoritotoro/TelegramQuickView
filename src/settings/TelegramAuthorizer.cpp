@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
-#include <future>
 
+// Ввести функции auth, которая будет заодно и проверять успешность авторизации ->
 
 TelegramAuthorizer::TelegramAuthorizer(QObject* parent):
     QObject(parent)
@@ -19,51 +19,68 @@ TelegramAuthorizer::TelegramAuthorizer(QObject* parent):
 
 
 void TelegramAuthorizer::loop() {
-   // auto future = std::async(std::launch::async, [this]() {
-        while (true) {
-            if (need_restart_) {
-                restart();
-            }
-            else if (!are_authorized_) {
-                process_response(client_manager_->receive(10));
-            }
-            else {
-                break;
-            }
-        }
-    //});
+    while (true) {
+        if (are_authorized_)
+            break;
+        else
+            process_response(client_manager_->receive(10));
+    }
+}
+
+bool TelegramAuthorizer::auth() {
+    int count = 0;
+
+    while (true) {
+        if (are_authorized_)
+            return true;
+        else 
+            process_response(client_manager_->receive(10));
+        if (count > 5)
+            break;
+        ++count;
+        _sleep(100);
+    }
+    return false;
 }
 
 bool TelegramAuthorizer::isCredentialsAccepted() const {
-    switch (authorization_state_->get_id()) {
+    return _isCredentialsAccepted;
+}
 
-    case td::td_api::authorizationStateWaitTdlibParameters::ID:
-        return false;
-        break;
+bool TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
+    _telegramCredentials = credentials;
 
-    case td::td_api::authorizationStateReady::ID:
-        return true;
-        break;
+    int count = 0;
 
-    case td::td_api::authorizationStateWaitCode::ID:
-        return true;
-        break;
-
-    case td::td_api::checkAuthenticationCode::ID:
-        return true;
-        break;
-
+    while (true) {
+        if (_isCredentialsAccepted)
+            return true;
+        else
+            process_response(client_manager_->receive(10));
+        if (count > 5)
+            break;
+        ++count;
+        _sleep(100);
     }
     return false;
-
 }
 
-void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
-    _telegramCredentials = credentials;
-}
-
-void TelegramAuthorizer::setAuthorizationCode(std::string code) {
+bool TelegramAuthorizer::setAuthorizationCode(std::string code) {
     _authorizationCode = code;
+
+    int count = 0;
+
+    while (true) {
+        if (_isAuthCodeAccepted)
+            return true;
+        else
+            process_response(client_manager_->receive(10));
+        if (count > 5)
+            break;
+        ++count;
+        _sleep(100);
+    }
+    return false;
 }
 
 void TelegramAuthorizer::restart() {
@@ -160,23 +177,46 @@ void TelegramAuthorizer::on_authorization_state_update() {
     td::td_api::downcast_call(*authorization_state_,
         overloaded(
             [this](td::td_api::authorizationStateReady&) {
+                _isAuthCodeAccepted = true;
                 are_authorized_ = true;
+                _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateLoggingOut&) {
+                _isAuthCodeAccepted = false;
                 are_authorized_ = false;
+                _isCredentialsAccepted = false;
             },
-            [this](td::td_api::authorizationStateClosing&) { std::cout << "Closing" << std::endl; },
+            [this](td::td_api::authorizationStateClosing&) {
+
+            },
             [this](td::td_api::authorizationStateClosed&) {
+                _isAuthCodeAccepted = false;
                 are_authorized_ = false;
-                need_restart_ = true;
+                _isCredentialsAccepted = false;
+            },
+            [this](td::td_api::authorizationStateWaitEmailAddress&) {
+          
+            },
+            [this](td::td_api::authorizationStateWaitEmailCode&) {
+                
+            },
+            [this](td::td_api::authorizationStateWaitRegistration&) {
+                
+            },
+            [this](td::td_api::authorizationStateWaitPassword&) {
+                _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateWaitPhoneNumber&) {
+                _isCredentialsAccepted = false;
+
                 send_query(
                     td::td_api::make_object<td::td_api::setAuthenticationPhoneNumber>(_telegramCredentials.phoneNumber, nullptr),
                     create_authentication_query_handler()
                 );
             },
             [this](td::td_api::authorizationStateWaitCode&) {
+                _isAuthCodeAccepted = false;
+                _isCredentialsAccepted = true;
                 emit authorizationCodeNeeded();
 
                 send_query(
@@ -185,9 +225,12 @@ void TelegramAuthorizer::on_authorization_state_update() {
                 );
             },
             [this](td::td_api::authorizationStateWaitOtherDeviceConfirmation& state) {
+                _isCredentialsAccepted = true;
                 std::cout << "Confirm this login link on another device: " << state.link_ << std::endl;
             },
             [this](td::td_api::authorizationStateWaitTdlibParameters&) {
+                _isCredentialsAccepted = false;
+
                 if (_telegramCredentials.apiId == 0 || _telegramCredentials.apiHash.length() == 0)
                     return;
 

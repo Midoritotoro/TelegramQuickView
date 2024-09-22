@@ -1,5 +1,7 @@
 ﻿#include "UserDataManager.h"
 
+#include <future>
+
 
 UserDataManager::UserDataManager() {
 	const auto fileName = getUserSettingsPath();
@@ -46,27 +48,25 @@ bool UserDataManager::isTelegramCredentialsValid() {
 	if (apiHash.toString().length() < 32 || apiId.toString().length() < 5)
 		return false;
 
-	//
-	bool isTelegramCredentialsValid = true;
-
 	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
-		!phoneNumber.isUndefined() == true && isTelegramCredentialsValid == true;
+		!phoneNumber.isUndefined() == true;
 }
-LPTelegramCredentials UserDataManager::getTelegramCredentials() {
-	const auto jsonDocument = getJsonDocument();
-	const auto jsonObject = jsonDocument.object();
-	LPTelegramCredentials telegramCredentials = new TelegramCredentials();
 
+TelegramCredentials UserDataManager::getTelegramCredentials() {
+	if (_telegramCredentials.isEmpty()) {
+		const auto jsonDocument = getJsonDocument();
+		const auto jsonObject = jsonDocument.object();
 
-	const auto apiHash = jsonObject.value("apiHash");
-	const auto apiId = jsonObject.value("apiId");
-	const auto phoneNumber = jsonObject.value("phoneNumber");
+		const auto apiHash = jsonObject.value("apiHash");
+		const auto apiId = jsonObject.value("apiId");
+		const auto phoneNumber = jsonObject.value("phoneNumber");
 
-	telegramCredentials->apiHash = apiHash.toString().toStdString();
-	telegramCredentials->apiId = apiId.toInt();
-	telegramCredentials->phoneNumber = phoneNumber.toString().toStdString();
+		_telegramCredentials.apiHash = apiHash.toString().toStdString();
+		_telegramCredentials.apiId = apiId.toInt();
+		_telegramCredentials.phoneNumber = phoneNumber.toString().toStdString();
+	}
 
-	return telegramCredentials;
+	return _telegramCredentials;
 }
 
 bool UserDataManager::isTelegramPhoneNumberCodeValid() {
@@ -76,12 +76,12 @@ bool UserDataManager::isTelegramPhoneNumberCodeValid() {
 	const auto apiHash = jsonObject.value("apiHash");
 	const auto apiId = jsonObject.value("apiId");
 	const auto phoneNumber = jsonObject.value("phoneNumber");
+
 	const auto code = jsonObject.value("code");
 	const auto codeHash = jsonObject.value("codeHash");
 
 	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
 		return false;
-
 
 	if (apiHash.toString().length() < 32 || apiId.toString().length() < 5)
 		return false;

@@ -14,12 +14,13 @@ class UserDataManager
 {
 private:
 	QFile _jsonFile;
+	TelegramCredentials _telegramCredentials;
 public:
 	UserDataManager();
 
 	[[nodiscard]] QJsonDocument getJsonDocument();
 	[[nodiscard]] static const QString getUserSettingsPath();
-	[[nodiscard]] LPTelegramCredentials getTelegramCredentials();
+	[[nodiscard]] TelegramCredentials getTelegramCredentials();
 	[[nodiscard]] bool isTelegramCredentialsValid();
 	[[nodiscard]] bool isTelegramPhoneNumberCodeValid();
 
@@ -31,3 +32,12 @@ public:
 	void setLastPostsCountForChannels(int count);
 	void setPhoneNumberCode(QString& code);
 };
+
+//TelegramAuthorizer telegramAuthorizer;
+//TelegramCredentials telegramCredentials;
+//
+//telegramCredentials.apiId = apiId.toInt();
+//telegramCredentials.apiHash = apiHash.toString().toStdString();
+//telegramCredentials.phoneNumber = phoneNumber.toString().toStdString();
+//
+//bool isTelegramCredentialsValid = telegramAuthorizer.setTelegramCredentials(telegramCredentials);
