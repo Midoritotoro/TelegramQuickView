@@ -131,16 +131,16 @@ void UserDataManager::clearTelegramCredentials() {
 	_jsonFile.close();
 }
 
-bool UserDataManager::setTelegramCredentials(LPTelegramCredentials telegramCredentials) {
+bool UserDataManager::setTelegramCredentials(const TelegramCredentials& telegramCredentials) {
 	auto jsonDocument = getJsonDocument();
 	auto jsonObject = jsonDocument.object();
 
-	if (telegramCredentials->apiHash.length() < 32 || QString::number(telegramCredentials->apiId).length() < 5)
+	if (telegramCredentials.apiHash.length() < 32 || QString::number(telegramCredentials.apiId).length() < 5)
 		return false;
 
-	jsonObject.insert("apiHash", telegramCredentials->apiHash.c_str());
-	jsonObject.insert("phoneNumber", telegramCredentials->phoneNumber.c_str());
-	jsonObject.insert("apiId", telegramCredentials->apiId);
+	jsonObject.insert("apiHash", telegramCredentials.apiHash.c_str());
+	jsonObject.insert("phoneNumber", telegramCredentials.phoneNumber.c_str());
+	jsonObject.insert("apiId", telegramCredentials.apiId);
 
 	jsonDocument.setObject(jsonObject);
 

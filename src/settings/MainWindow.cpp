@@ -26,12 +26,15 @@ MainWindow::MainWindow(QWidget* parent) :
 {
 	userDataManager = new UserDataManager();
 	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
+	
+	qDebug() << "userAuthenticationDialog->isTelegramCredentialsValid(): " << userAuthenticationDialog->isTelegramCredentialsValid();
+	qDebug() << "userAuthenticationDialog->isAuthCodeAccepted(): " << userAuthenticationDialog->isAuthCodeAccepted();
 
-	if (userDataManager->isTelegramCredentialsValid() == true && userDataManager->isTelegramPhoneNumberCodeValid() == false) {
+	if (userAuthenticationDialog->isTelegramCredentialsValid() == true && userAuthenticationDialog->isAuthCodeAccepted() == false) {
 		userAuthenticationDialog->skipFirstAuthorizationStage();
 		userAuthenticationDialog->exec();
 	}
-	else if (userDataManager->isTelegramCredentialsValid() == false) {
+	else if (userAuthenticationDialog->isTelegramCredentialsValid() == false) {
 		userAuthenticationDialog->exec();
 	}
 

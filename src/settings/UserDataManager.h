@@ -27,7 +27,7 @@ public:
 	void clearChannelsJsonArray();
 	void clearTelegramCredentials();
 
-	[[nodiscard]] bool setTelegramCredentials(LPTelegramCredentials telegramCredentials);
+	[[nodiscard]] bool setTelegramCredentials(const TelegramCredentials& telegramCredentials);
 	void setTargetChannels(QStringList channels);
 	void setLastPostsCountForChannels(int count);
 	void setPhoneNumberCode(QString& code);

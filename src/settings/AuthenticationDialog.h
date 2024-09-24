@@ -33,11 +33,15 @@ private:
     QTimer* timer = nullptr;
     QString _authorizationCode = "";
     int timeRemaining = 0;
+    bool _isAuthCodeAccepted = false;
+    bool _isTelegramCredentialsValid = false;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
 
     void skipFirstAuthorizationStage();
-public slots:
+    [[nodiscard]] bool isTelegramCredentialsValid();
+    [[nodiscard]] bool isAuthCodeAccepted();
+public Q_SLOTS:
     void shake();
     void logInButton_clicked();
     void confirmMobilePhoneCodeButton_clicked();
@@ -46,6 +50,7 @@ public slots:
     void updateSendCodeButtonText();
 private:
     void vacillate();
+    void updateAuthState();
 protected:
     void closeEvent(QCloseEvent* event) override;
 };

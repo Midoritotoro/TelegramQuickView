@@ -91,7 +91,8 @@ public:
     void loop();
     [[nodiscard]] bool auth();
 
-    [[nodiscard]] bool isCredentialsAccepted() const;
+    [[nodiscard]] bool isCredentialsAccepted();
+    [[nodiscard]] bool isAuthorized();
 
     TelegramAuthorizer& operator=(const TelegramAuthorizer& instance) {
         return *this;

@@ -196,11 +196,11 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
     
     connect(&_telegramAuthorizer, &TelegramAuthorizer::telegramCredentialsNeeded, [this]() {
-        _telegramAuthorizer.setTelegramCredentials(_telegramCredentials);
+        /*_telegramAuthorizer.setTelegramCredentials(_telegramCredentials);*/
         });
 
     connect(&_telegramAuthorizer, &TelegramAuthorizer::authorizationCodeNeeded, [this]() {
-        _telegramAuthorizer.setAuthorizationCode(_authorizationCode.toStdString());
+        bool _ = _telegramAuthorizer.setAuthorizationCode(_authorizationCode.toStdString());
         });
 }
 
@@ -208,6 +208,18 @@ void AuthenticationDialog::skipFirstAuthorizationStage() {
     _skipFirstAuthenticationStage = true;
     backButton_clicked();
     logInButton_clicked();
+}
+
+bool AuthenticationDialog::isTelegramCredentialsValid() {
+    if (_userDataManager->isTelegramCredentialsValid() == false)
+        return false;
+    return _telegramAuthorizer.isCredentialsAccepted() == true;
+}
+
+bool AuthenticationDialog::isAuthCodeAccepted() {
+    if (_userDataManager->isTelegramPhoneNumberCodeValid() == false)
+        return false;
+    return _telegramAuthorizer.isAuthorized() == true;
 }
 
 void AuthenticationDialog::updateSendCodeButtonText() {
@@ -260,6 +272,7 @@ void AuthenticationDialog::logInButton_clicked() {
             apiIdLineEdit->clear();
             phoneNumberLineEdit->clear();
             shake();
+            updateAuthState();
             return;
         }
 
@@ -270,6 +283,7 @@ void AuthenticationDialog::logInButton_clicked() {
             apiIdLineEdit->clear();
             phoneNumberLineEdit->clear();
             shake();
+            updateAuthState();
             return;
         }
 
@@ -280,12 +294,13 @@ void AuthenticationDialog::logInButton_clicked() {
             apiIdLineEdit->clear();
             phoneNumberLineEdit->clear();
             shake();
+            updateAuthState();
             return;
         }
     }
 
-    //
 
+    updateAuthState();
     timeRemaining = 180;
     timer->start(1000);
     sendCodeButton->setEnabled(false);
@@ -305,6 +320,12 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         return;
     }
 
+    if (_telegramAuthorizer.setAuthorizationCode(mobilePhoneCode.toStdString()) == false) {
+        _incorrectTelegramCodeLabel->show();
+        telegramCodeLineEdit->clear();
+        shake();
+    }
+
     _authorizationCode = mobilePhoneCode;
     _userDataManager->setPhoneNumberCode(mobilePhoneCode);
 
@@ -321,6 +342,7 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
 void AuthenticationDialog::backButton_clicked() {
     
     _telegramCredentials = _userDataManager->getTelegramCredentials();
+    qDebug() << _telegramCredentials.apiHash << _telegramCredentials.apiId << _telegramCredentials.phoneNumber;
     apiHashLineEdit->setText(QString(_telegramCredentials.apiHash.c_str()));
     apiIdLineEdit->setText(QString::number(_telegramCredentials.apiId));
     phoneNumberLineEdit->setText(QString(_telegramCredentials.phoneNumber.c_str()));
@@ -340,7 +362,7 @@ void AuthenticationDialog::sendCodeAgainButton_clicked() {
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
-    if (_userDataManager->isTelegramPhoneNumberCodeValid() == false || _userDataManager->isTelegramCredentialsValid() == false) {
+    if (_isAuthCodeAccepted == false || _isTelegramCredentialsValid == false) {
         event->ignore();
         shake();
     }
@@ -354,4 +376,9 @@ void AuthenticationDialog::vacillate()
     QPoint offset(5, 10);
     move(((shakeSwitch) ? pos() + offset : pos() - offset));
     shakeSwitch = !shakeSwitch;
+}
+
+void AuthenticationDialog::updateAuthState() {
+    _isAuthCodeAccepted = isAuthCodeAccepted();
+    _isTelegramCredentialsValid = isTelegramCredentialsValid();
 }
