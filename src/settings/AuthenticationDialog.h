@@ -1,10 +1,9 @@
 ﻿#pragma once
 
-#include <QVariant>
-#include <QIcon>
-#include <QApplication>
+
+
 #include <QDialog>
-#include <QFrame>
+
 #include <QLineEdit>
 #include <QPushButton>
 #include <QToolButton>

@@ -1,14 +1,7 @@
 ﻿#pragma once
 
-//
-// Copyright Aliaksei Levin (levlam@telegram.org), Arseny Smirnov (arseny30@gmail.com) 2014-2024
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
 #include <td/telegram/Client.h>
 #include <td/telegram/td_api.h>
-#include <QObject>
 
 #include <map>
 #include <memory>
@@ -54,9 +47,8 @@ auto overloaded(F... f) {
     return detail::overload<F...>(f...);
 }
 
-class TelegramAuthorizer: public QObject
+class TelegramAuthorizer
 {
-    Q_OBJECT
 private:
     using Object = td::td_api::object_ptr<td::td_api::Object>;
     std::unique_ptr<td::ClientManager> client_manager_;
@@ -74,22 +66,14 @@ private:
 
     std::map<std::uint64_t, std::function<void(Object)>> handlers_;
 
-    std::map<std::int64_t, td::td_api::object_ptr<td::td_api::user>> users_;
-
-    std::map<std::int64_t, std::string> chat_title_;
-
-
     TelegramCredentials _telegramCredentials;
     std::string _authorizationCode;
 
 public:
-    TelegramAuthorizer(QObject* parent = nullptr);
+    TelegramAuthorizer();
 
     void setTelegramCredentials(const TelegramCredentials& credentials);
     void setAuthorizationCode(std::string code);
-
-    void loop();
-    [[nodiscard]] bool auth();
 
     [[nodiscard]] bool isCredentialsAccepted();
     [[nodiscard]] bool isAuthorized();
@@ -97,17 +81,11 @@ public:
     TelegramAuthorizer& operator=(const TelegramAuthorizer& instance) {
         return *this;
     }
-Q_SIGNALS:
-    void authorizationCodeNeeded();
-    void telegramCredentialsNeeded();
 private:
     void restart();
 
     void send_query(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler);
     void process_response(td::ClientManager::Response response);
-
-    std::string get_user_name(std::int64_t user_id) const;
-    std::string get_chat_title(std::int64_t chat_id) const;
 
     void process_update(td::td_api::object_ptr<td::td_api::Object> update);
 

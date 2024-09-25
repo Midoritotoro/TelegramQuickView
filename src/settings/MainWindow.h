@@ -9,7 +9,7 @@ class MainWindow : public QWidget
 {
 private:
 	Q_OBJECT
-		QLineEdit* TelegramParserTargetLineEdit = nullptr;
+	QLineEdit* TelegramParserTargetLineEdit = nullptr;
 	UserDataManager* userDataManager = nullptr;
 public:
 	MainWindow(QWidget* parent = nullptr);

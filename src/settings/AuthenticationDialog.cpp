@@ -199,14 +199,6 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     connect(sendCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::sendCodeAgainButton_clicked);
 
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
-
-    connect(&_telegramAuthorizer, &TelegramAuthorizer::authorizationCodeNeeded, [this]() {
-       
-        });
-
-    apiHashLineEdit->setText("019edf3f20c8460b741fb94114e6fec0");
-    apiIdLineEdit->setText("13711370");
-    phoneNumberLineEdit->setText("+375292384917");
 }
 
 void AuthenticationDialog::skipFirstAuthorizationStage() {
@@ -272,11 +264,9 @@ void AuthenticationDialog::logInButton_clicked() {
                                            phoneNumber.at(0) == '+' ?
                                            phoneNumber : "+" + phoneNumber : "";
 
-        qDebug() << _telegramCredentials.phoneNumber;
         _telegramAuthorizer.setTelegramCredentials(_telegramCredentials);
 
         if (_userDataManager->setTelegramCredentials(_telegramCredentials) == false) {
-            qDebug() << "_userDataManager->setTelegramCredentials(_telegramCredentials) == false";
             _incorrectTelegramCredentialsLabel->show();
             _userDataManager->clearTelegramCredentials();
             apiHashLineEdit->clear();
@@ -288,7 +278,6 @@ void AuthenticationDialog::logInButton_clicked() {
         }
 
         if (_userDataManager->isTelegramCredentialsValid() == false) {
-            qDebug() << "_userDataManager->isTelegramCredentialsValid() == false";
             _incorrectTelegramCredentialsLabel->show();
             _userDataManager->clearTelegramCredentials();
             apiHashLineEdit->clear();
@@ -302,13 +291,15 @@ void AuthenticationDialog::logInButton_clicked() {
 
 
     updateAuthState();
+
     timeRemaining = 180;
     timer->start(1000);
+
     sendCodeButton->setEnabled(false);
     sendCodeButton->setToolTip("Кнопка неактивна в течение 180 секунд по причине ограничений Telegram. ");
     sendCodeButton->setText(QString("Осталось: %1 с").arg(timeRemaining));
+
     _stackedWidget->setCurrentIndex(1);
-    qDebug() << "skipped";
     _skipFirstAuthenticationStage = false;
 }
 
@@ -322,7 +313,6 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         return;
     }
 
-    qDebug() << "code: " << mobilePhoneCode;
     _telegramAuthorizer.setAuthorizationCode(mobilePhoneCode.toStdString());
 
     if (_telegramAuthorizer.isAuthorized() == false) {
