@@ -19,15 +19,19 @@ public:
 	UserDataManager();
 
 	[[nodiscard]] QJsonDocument getJsonDocument();
+
 	[[nodiscard]] static const QString getUserSettingsPath();
 	[[nodiscard]] TelegramCredentials getTelegramCredentials();
+	[[nodiscard]] std::string getTelegramAuthCode();
+
 	[[nodiscard]] bool isTelegramCredentialsValid();
-	[[nodiscard]] bool isTelegramPhoneNumberCodeValid();
+	[[nodiscard]] bool isTelegramAuthCodeValid();
 
 	void clearChannelsJsonArray();
 	void clearTelegramCredentials();
 
 	[[nodiscard]] bool setTelegramCredentials(const TelegramCredentials& telegramCredentials);
+
 	void setTargetChannels(QStringList channels);
 	void setLastPostsCountForChannels(int count);
 	void setPhoneNumberCode(QString& code);

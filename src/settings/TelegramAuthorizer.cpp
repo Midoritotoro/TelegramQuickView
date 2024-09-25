@@ -52,7 +52,7 @@ bool TelegramAuthorizer::isAuthorized() {
     return _isAuthCodeAccepted;
 }
 
-bool TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
+void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
     _telegramCredentials = credentials;
 
     while (true) {
@@ -64,27 +64,28 @@ bool TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& crede
 
         qDebug() << "auth state:" << (authorization_state_.get()->get_id() == td::td_api::authorizationStateWaitCode::ID);
 
-        if (authorization_state_.get()->get_id() == td::td_api::authorizationStateWaitCode::ID)
-            return _isCredentialsAccepted;
+        if (authorization_state_.get()->get_id() == td::td_api::authorizationStateWaitCode::ID
+            || authorization_state_.get()->get_id() == td::td_api::authorizationStateReady::ID) {
+            return;
+        }
     }
-
-    return _isCredentialsAccepted;
 }
 
-bool TelegramAuthorizer::setAuthorizationCode(std::string code) {
+void TelegramAuthorizer::setAuthorizationCode(std::string code) {
     _authorizationCode = code;
 
     while (true) {
+        qDebug() << "authCodeSet in process...";
         process_response(client_manager_->receive(10));
 
         if (authorization_state_.get() == nullptr)
             continue;
 
-        if (authorization_state_.get()->get_id() == td::td_api::authorizationStateReady::ID)
-            break;
-    }
+        qDebug() << "auth state ready:" << (authorization_state_.get()->get_id() == td::td_api::authorizationStateReady::ID);
 
-    return _isAuthCodeAccepted;
+        if (authorization_state_.get()->get_id() == td::td_api::authorizationStateReady::ID)
+            return;
+    }
 }
 
 void TelegramAuthorizer::restart() {
@@ -227,7 +228,8 @@ void TelegramAuthorizer::on_authorization_state_update() {
                 qDebug() << "td::td_api::authorizationStateWaitCode&";
                 _isAuthCodeAccepted = false;
                 _isCredentialsAccepted = true;
-               // emit authorizationCodeNeeded();
+
+                qDebug() << "td::td_api::authorizationStateWaitCode&: " << _authorizationCode;
 
                 if (_authorizationCode.empty() == true) {
                     qDebug() << "_authorizationCode is Empty";

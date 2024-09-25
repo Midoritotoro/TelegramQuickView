@@ -85,8 +85,8 @@ private:
 public:
     TelegramAuthorizer(QObject* parent = nullptr);
 
-    [[nodiscard]] bool setTelegramCredentials(const TelegramCredentials& credentials);
-    [[nodiscard]] bool setAuthorizationCode(std::string code);
+    void setTelegramCredentials(const TelegramCredentials& credentials);
+    void setAuthorizationCode(std::string code);
 
     void loop();
     [[nodiscard]] bool auth();

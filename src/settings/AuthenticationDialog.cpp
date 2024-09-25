@@ -14,6 +14,11 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 
     _telegramAuthorizer = TelegramAuthorizer();
 
+    if (_userDataManager->isTelegramCredentialsValid())
+        _telegramAuthorizer.setTelegramCredentials(_userDataManager->getTelegramCredentials());
+    if (_userDataManager->isTelegramAuthCodeValid())
+        _telegramAuthorizer.setAuthorizationCode(_userDataManager->getTelegramAuthCode());
+
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
         "font-size: 24px;\n"
@@ -194,13 +199,9 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     connect(sendCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::sendCodeAgainButton_clicked);
 
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
-    
-    connect(&_telegramAuthorizer, &TelegramAuthorizer::telegramCredentialsNeeded, [this]() {
-        /*_telegramAuthorizer.setTelegramCredentials(_telegramCredentials);*/
-        });
 
     connect(&_telegramAuthorizer, &TelegramAuthorizer::authorizationCodeNeeded, [this]() {
-        bool _ = _telegramAuthorizer.setAuthorizationCode(_authorizationCode.toStdString());
+       
         });
 
     apiHashLineEdit->setText("019edf3f20c8460b741fb94114e6fec0");
@@ -221,7 +222,7 @@ bool AuthenticationDialog::isTelegramCredentialsValid() {
 }
 
 bool AuthenticationDialog::isAuthCodeAccepted() {
-    if (_userDataManager->isTelegramPhoneNumberCodeValid() == false)
+    if (_userDataManager->isTelegramAuthCodeValid() == false)
         return false;
     return _telegramAuthorizer.isAuthorized() == true;
 }
@@ -272,17 +273,7 @@ void AuthenticationDialog::logInButton_clicked() {
                                            phoneNumber : "+" + phoneNumber : "";
 
         qDebug() << _telegramCredentials.phoneNumber;
-        if (_telegramAuthorizer.setTelegramCredentials(_telegramCredentials) == false) {
-            qDebug() << "_telegramAuthorizer.setTelegramCredentials(_telegramCredentials) == false";
-            _incorrectTelegramCredentialsLabel->show();
-            _userDataManager->clearTelegramCredentials();
-            apiHashLineEdit->clear();
-            apiIdLineEdit->clear();
-            phoneNumberLineEdit->clear();
-            shake();
-            updateAuthState();
-            return;
-        }
+        _telegramAuthorizer.setTelegramCredentials(_telegramCredentials);
 
         if (_userDataManager->setTelegramCredentials(_telegramCredentials) == false) {
             qDebug() << "_userDataManager->setTelegramCredentials(_telegramCredentials) == false";
@@ -331,7 +322,10 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         return;
     }
 
-    if (_telegramAuthorizer.setAuthorizationCode(mobilePhoneCode.toStdString()) == false) {
+    qDebug() << "code: " << mobilePhoneCode;
+    _telegramAuthorizer.setAuthorizationCode(mobilePhoneCode.toStdString());
+
+    if (_telegramAuthorizer.isAuthorized() == false) {
         _incorrectTelegramCodeLabel->show();
         telegramCodeLineEdit->clear();
         shake();
@@ -340,23 +334,25 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
     _authorizationCode = mobilePhoneCode;
     _userDataManager->setPhoneNumberCode(mobilePhoneCode);
 
-    if (!_userDataManager->isTelegramPhoneNumberCodeValid()) {
+    if (!_userDataManager->isTelegramAuthCodeValid()) {
         _incorrectTelegramCodeLabel->show();
         telegramCodeLineEdit->clear();
         shake();
         return;
     }
 
+    updateAuthState();
+
     close();
 }
 
 void AuthenticationDialog::backButton_clicked() {
-    
     _telegramCredentials = _userDataManager->getTelegramCredentials();
-    qDebug() << _telegramCredentials.apiHash << _telegramCredentials.apiId << _telegramCredentials.phoneNumber;
+
     apiHashLineEdit->setText(QString(_telegramCredentials.apiHash.c_str()));
     apiIdLineEdit->setText(QString::number(_telegramCredentials.apiId));
     phoneNumberLineEdit->setText(QString(_telegramCredentials.phoneNumber.c_str()));
+
     _stackedWidget->setCurrentIndex(0);
 }
 

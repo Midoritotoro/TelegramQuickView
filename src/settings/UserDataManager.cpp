@@ -57,15 +57,19 @@ TelegramCredentials UserDataManager::getTelegramCredentials() {
 	return _telegramCredentials;
 }
 
-bool UserDataManager::isTelegramPhoneNumberCodeValid() {
+std::string UserDataManager::getTelegramAuthCode() {
 	const auto jsonDocument = getJsonDocument();
 	const auto jsonObject = jsonDocument.object();
 
 	const auto code = jsonObject.value("code");
-	const auto codeHash = jsonObject.value("codeHash");
 
-	return code.toString().length() >= 5 == true 
-		&& codeHash.isUndefined() == false
+	return code.toString().toStdString();
+}
+
+bool UserDataManager::isTelegramAuthCodeValid() {
+	const auto code = getTelegramAuthCode();
+
+	return code.length() >= 5 == true 
 		&& isTelegramCredentialsValid() == true;
 }
 
