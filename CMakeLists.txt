@@ -61,8 +61,6 @@ SET(MAIN_SOURCES main.cpp
 	src/settings/MainWindow.h
 	src/settings/UserDataManager.cpp
 	src/settings/UserDataManager.h
-	src/settings/TelegramAuthorizationChecker.cpp
-	src/settings/TelegramAuthorizationChecker.h
 	src/settings/AuthenticationDialog.cpp
 	src/settings/AuthenticationDialog.h
 	src/settings/TelegramAuthorizer.cpp
