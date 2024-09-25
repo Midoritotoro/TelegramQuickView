@@ -5,7 +5,7 @@
 #include <vector>
 #include <QString>
 #include <QDebug>
-// Ввести функции auth, которая будет заодно и проверять успешность авторизации ->
+
 
 TelegramAuthorizer::TelegramAuthorizer(QObject* parent):
     QObject(parent)
@@ -45,45 +45,50 @@ bool TelegramAuthorizer::auth() {
 }
 
 bool TelegramAuthorizer::isCredentialsAccepted() {
-    process_response(client_manager_->receive(10));
     return _isCredentialsAccepted;
 }
 
 bool TelegramAuthorizer::isAuthorized() {
-    process_response(client_manager_->receive(10));
     return _isAuthCodeAccepted;
 }
 
 bool TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
     _telegramCredentials = credentials;
 
-    process_response(client_manager_->receive(10));
+    while (true) {
+        qDebug() << "credentialsSet in process...";
+        process_response(client_manager_->receive(10));
+
+        if (authorization_state_.get() == nullptr)
+            continue;
+
+        qDebug() << "auth state:" << (authorization_state_.get()->get_id() == td::td_api::authorizationStateWaitCode::ID);
+
+        if (authorization_state_.get()->get_id() == td::td_api::authorizationStateWaitCode::ID)
+            return _isCredentialsAccepted;
+    }
+
     return _isCredentialsAccepted;
 }
 
 bool TelegramAuthorizer::setAuthorizationCode(std::string code) {
     _authorizationCode = code;
 
-    int count = 0;
-
     while (true) {
-        std::cout << "COOOOOOOOOODE";
-        if (_isAuthCodeAccepted)
-            return true;
-        else
-            process_response(client_manager_->receive(10));
-        if (count > 5)
+        process_response(client_manager_->receive(10));
+
+        if (authorization_state_.get() == nullptr)
+            continue;
+
+        if (authorization_state_.get()->get_id() == td::td_api::authorizationStateReady::ID)
             break;
-        ++count;
-        _sleep(100);
     }
-    std::cout << "Code: " << false << std::endl;
-    return false;
+
+    return _isAuthCodeAccepted;
 }
 
 void TelegramAuthorizer::restart() {
     client_manager_.reset();
-   // *this = TelegramAuthorizer();
 }
 
 void TelegramAuthorizer::send_query(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler) {
@@ -128,6 +133,7 @@ void TelegramAuthorizer::process_update(td::td_api::object_ptr<td::td_api::Objec
     td::td_api::downcast_call(
         *update, overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {
+                qDebug() << "td::td_api::updateAuthorizationState&";
                 authorization_state_ = std::move(update_authorization_state.authorization_state_);
                 on_authorization_state_update();
             },
@@ -221,11 +227,13 @@ void TelegramAuthorizer::on_authorization_state_update() {
                 qDebug() << "td::td_api::authorizationStateWaitCode&";
                 _isAuthCodeAccepted = false;
                 _isCredentialsAccepted = true;
-                emit authorizationCodeNeeded();
+               // emit authorizationCodeNeeded();
 
-                if (_authorizationCode.empty() == false)
+                if (_authorizationCode.empty() == true) {
+                    qDebug() << "_authorizationCode is Empty";
                     return;
-
+                }
+                qDebug() << "td::td_api::authorizationStateWaitCode& sended";
                 send_query(
                     td::td_api::make_object<td::td_api::checkAuthenticationCode>(_authorizationCode),
                     create_authentication_query_handler()

@@ -35,21 +35,9 @@ QJsonDocument UserDataManager::getJsonDocument() {
 }
 
 bool UserDataManager::isTelegramCredentialsValid() {
-	const auto jsonDocument = getJsonDocument();
-	const auto jsonObject = jsonDocument.object();
-
-	const auto apiHash = jsonObject.value("apiHash");
-	const auto apiId = jsonObject.value("apiId");
-	const auto phoneNumber = jsonObject.value("phoneNumber");
-
-	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
-		return false;
-
-	if (apiHash.toString().length() < 32 || apiId.toString().length() < 5)
-		return false;
-
-	return !apiHash.isUndefined() == true && !apiId.isUndefined() == true &&
-		!phoneNumber.isUndefined() == true;
+	const auto credentials = getTelegramCredentials();
+	return QString::number(credentials.apiId).length() >= 5 == true
+			&& credentials.apiHash.length() >= 32 == true;
 }
 
 TelegramCredentials UserDataManager::getTelegramCredentials() {
@@ -73,26 +61,12 @@ bool UserDataManager::isTelegramPhoneNumberCodeValid() {
 	const auto jsonDocument = getJsonDocument();
 	const auto jsonObject = jsonDocument.object();
 
-	const auto apiHash = jsonObject.value("apiHash");
-	const auto apiId = jsonObject.value("apiId");
-	const auto phoneNumber = jsonObject.value("phoneNumber");
-
 	const auto code = jsonObject.value("code");
 	const auto codeHash = jsonObject.value("codeHash");
 
-	if (apiHash.isUndefined() == true || apiId.isUndefined() == true || phoneNumber.isUndefined() == true)
-		return false;
-
-	if (apiHash.toString().length() < 32 || apiId.toString().length() < 5)
-		return false;
-
-	
-	bool isTelegramCodeValid = true;
-
-	if (code.toString().length() < 5)
-		return false;
-
-	return !code.isUndefined() == true && !codeHash.isUndefined() == true && isTelegramCodeValid == true;
+	return code.toString().length() >= 5 == true 
+		&& codeHash.isUndefined() == false
+		&& isTelegramCredentialsValid() == true;
 }
 
 
@@ -115,13 +89,13 @@ void UserDataManager::clearTelegramCredentials() {
 	auto jsonDocument = getJsonDocument();
 	auto jsonObject = jsonDocument.object();
 
-	if (!jsonObject.value("apiId").isNull())
+	if (jsonObject.value("apiId").isNull() == false)
 		jsonObject.remove("apiId");
 
-	if (!jsonObject.value("apiHash").isNull())
+	if (jsonObject.value("apiHash").isNull() == false)
 		jsonObject.remove("apiHash");
 
-	if (!jsonObject.value("phoneNumber").isNull())
+	if (jsonObject.value("phoneNumber").isNull() == false)
 		jsonObject.remove("phoneNumber");
 
 	jsonDocument.setObject(jsonObject);
@@ -132,11 +106,11 @@ void UserDataManager::clearTelegramCredentials() {
 }
 
 bool UserDataManager::setTelegramCredentials(const TelegramCredentials& telegramCredentials) {
-	auto jsonDocument = getJsonDocument();
-	auto jsonObject = jsonDocument.object();
-
 	if (telegramCredentials.apiHash.length() < 32 || QString::number(telegramCredentials.apiId).length() < 5)
 		return false;
+
+	auto jsonDocument = getJsonDocument();
+	auto jsonObject = jsonDocument.object();
 
 	jsonObject.insert("apiHash", telegramCredentials.apiHash.c_str());
 	jsonObject.insert("phoneNumber", telegramCredentials.phoneNumber.c_str());
@@ -153,6 +127,7 @@ bool UserDataManager::setTelegramCredentials(const TelegramCredentials& telegram
 
 void UserDataManager::setTargetChannels(QStringList channels) {
 	QJsonArray jsonArray;
+
 	auto jsonDocument = getJsonDocument();
 	auto currentDocumentObject = jsonDocument.object();
 

@@ -18,9 +18,6 @@
 #include <QApplication>
 #include "src/panel/TelegramPostQuickView.h"
 #include "src/settings/MainWindow.h"
-#include "src/media/player/MediaPlayer.h"
-#include "src/media/player/MediaPlayerPanel.h"
-#include "src/settings/TelegramAuthorizer.h"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);

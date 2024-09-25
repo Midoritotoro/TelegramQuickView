@@ -108,8 +108,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Td::TdJson)
-target_link_libraries(${PROJECT_NAME} PRIVATE Td::TdStatic)
+target_link_libraries(${PROJECT_NAME} PUBLIC Td::TdJson)
+target_link_libraries(${PROJECT_NAME} PUBLIC Td::TdStatic)
 
 execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED
                RESULT_VARIABLE result
