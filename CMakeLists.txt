@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.15)
+﻿cmake_minimum_required (VERSION 3.24)
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -6,13 +6,13 @@ if (POLICY CMP0141)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 project("TelegramQuickView" LANGUAGES CXX)
 
 set(Td_DIR "D:/Packages/td/tdlib/lib/cmake/Td")
 
 
 find_package(Td 1.8.36 REQUIRED)
-find_package(Python3 COMPONENTS Development REQUIRED)
 
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
@@ -24,11 +24,16 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-SET(PARSER_SOURCES 	src/parser/main.cpp
+SET(PARSER_SOURCES src/parser/main.cpp
 
-	src/parser/TelegramRobber.cpp
-	src/parser/TelegramRobber.py 
-	src/parser/SqlParserContentManager.py
+	src/parser/UserDataManager.cpp
+	src/parser/UserDataManager.h
+	src/parser/AuthenticationDialog.cpp
+	src/parser/AuthenticationDialog.h
+	src/parser/TelegramAuthorizer.cpp
+	src/parser/TelegramAuthorizer.h
+	src/parser/TelegramParser.cpp
+	src/parser/TelegramParser.h
 )
 
 SET(MAIN_SOURCES main.cpp
@@ -59,12 +64,6 @@ SET(MAIN_SOURCES main.cpp
 
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h
-	src/settings/UserDataManager.cpp
-	src/settings/UserDataManager.h
-	src/settings/AuthenticationDialog.cpp
-	src/settings/AuthenticationDialog.h
-	src/settings/TelegramAuthorizer.cpp
-	src/settings/TelegramAuthorizer.h
 
 	src/panel/MessageWidget.cpp
 	src/panel/MessageWidget.h
@@ -88,13 +87,18 @@ SET(MAIN_SOURCES main.cpp
 )
 
 add_executable(TelegramParser ${PARSER_SOURCES})
-target_include_directories(TelegramParser PUBLIC ${Python3_INCLUDE_DIRS})
-target_link_libraries(TelegramParser PRIVATE ${Python3_LIBRARIES})
-
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
 set_property(TARGET TelegramParser PROPERTY CXX_STANDARD 20)
 set_property(TARGET TelegramQuickView PROPERTY CXX_STANDARD 20)
+
+target_link_libraries(TelegramParser PRIVATE
+					Qt6::Core
+					Qt6::Widgets
+					Td::TdJson
+					Td::TdStatic
+)
+
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 					Qt6::Core
@@ -104,15 +108,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 					Qt6::Sql
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Python3::Python)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC Td::TdJson)
-target_link_libraries(${PROJECT_NAME} PUBLIC Td::TdStatic)
-
-execute_process(COMMAND python -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt REQUIRED
-               RESULT_VARIABLE result
-               OUTPUT_VARIABLE output
-               ERROR_VARIABLE error)
 
 SET_SOURCE_FILES_PROPERTIES(
   ${OBJS}
@@ -121,6 +116,10 @@ SET_SOURCE_FILES_PROPERTIES(
   GENERATED true
 )
 
-set(CMAKE_INSTALL_PREFIX "D:/TelegramQuickView/")
+set(CMAKE_INSTALL_PREFIX "D:/${PROJECT_NAME}/")
+
+target_compile_definitions(TelegramParser PRIVATE PROJECT_NAME="${PROJECT_NAME}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}")
+
 install(TARGETS TelegramParser DESTINATION out/build)
 install(TARGETS TelegramQuickView DESTINATION out/build)

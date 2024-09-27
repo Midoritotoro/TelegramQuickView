@@ -14,11 +14,6 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 
     _telegramAuthorizer = TelegramAuthorizer();
 
-    if (_userDataManager->isTelegramCredentialsValid())
-        _telegramAuthorizer.setTelegramCredentials(_userDataManager->getTelegramCredentials());
-    if (_userDataManager->isTelegramAuthCodeValid())
-        _telegramAuthorizer.setAuthorizationCode(_userDataManager->getTelegramAuthCode());
-
     setStyleSheet(QString::fromUtf8("*{\n"
         "font-family: centry gothic;\n"
         "font-size: 24px;\n"
@@ -199,6 +194,10 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     connect(sendCodeButton, &QPushButton::clicked, this, &AuthenticationDialog::sendCodeAgainButton_clicked);
 
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
+
+
+    if (_userDataManager->isTelegramCredentialsValid())
+        _telegramAuthorizer.setTelegramCredentials(_userDataManager->getTelegramCredentials());
 }
 
 void AuthenticationDialog::skipFirstAuthorizationStage() {
@@ -319,6 +318,7 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
         _incorrectTelegramCodeLabel->show();
         telegramCodeLineEdit->clear();
         shake();
+        return;
     }
 
     _authorizationCode = mobilePhoneCode;

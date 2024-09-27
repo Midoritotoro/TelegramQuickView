@@ -1,11 +1,20 @@
-#include "TelegramRobber.h"
-#include <Windows.h>
+#include <QApplication>
+#include "AuthenticationDialog.h"
 
-//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
-int main() {
-	const char* PyModuleName = "TelegramRobber";
-	TelegramRobber* telegramRobber = new TelegramRobber("D:\\TelegramQuickView\\src\\parser\\");
-	telegramRobber->CallTelegramParseFunction(PyModuleName, "C:/Users/danya/AppData/Roaming/TelegramQuickView/userData.json", "D:/Media");
-	PyErr_Print();
-	return 0;
+
+int main(int argc, char* argv[]) {
+	QApplication app(argc, argv);
+	AuthenticationDialog* dialog = new AuthenticationDialog();
+
+	if (dialog->isTelegramCredentialsValid() == true && dialog->isAuthCodeAccepted() == false) {
+		dialog->skipFirstAuthorizationStage();
+		dialog->exec();
+		dialog->show();
+	}
+	else if (dialog->isTelegramCredentialsValid() == false) {
+		dialog->exec();
+		dialog->show();
+	}
+
+	return app.exec();
 }

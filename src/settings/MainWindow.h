@@ -3,14 +3,14 @@
 #include <QWidget>
 #include <QLineEdit>
 
-#include "UserDataManager.h"
+//#include "../parser/UserDataManager.h"
 
 class MainWindow : public QWidget
 {
 private:
 	Q_OBJECT
 	QLineEdit* TelegramParserTargetLineEdit = nullptr;
-	UserDataManager* userDataManager = nullptr;
+	//UserDataManager* userDataManager = nullptr;
 public:
 	MainWindow(QWidget* parent = nullptr);
 public Q_SLOTS:

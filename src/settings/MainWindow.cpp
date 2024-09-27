@@ -11,7 +11,6 @@
 #include <QRegularExpression>
 #include <QTextEdit>
 
-#include "AuthenticationDialog.h"
 
 // Добавление | Замена | Просмотр каналов, новости из которых будут парситься
 // Сторона появления панели с контентом каналов
@@ -24,21 +23,7 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
-	userDataManager = new UserDataManager();
-	AuthenticationDialog* userAuthenticationDialog = new AuthenticationDialog();
-	
-	qDebug() << "userAuthenticationDialog->isTelegramCredentialsValid(): " << userAuthenticationDialog->isTelegramCredentialsValid();
-	qDebug() << "userAuthenticationDialog->isAuthCodeAccepted(): " << userAuthenticationDialog->isAuthCodeAccepted();
-
-	if (userAuthenticationDialog->isTelegramCredentialsValid() == true && userAuthenticationDialog->isAuthCodeAccepted() == false) {
-		userAuthenticationDialog->skipFirstAuthorizationStage();
-		userAuthenticationDialog->exec();
-	}
-	else if (userAuthenticationDialog->isTelegramCredentialsValid() == false) {
-		userAuthenticationDialog->exec();
-	}
-
-	userDataManager->setLastPostsCountForChannels(3);
+	//userDataManager = new UserDataManager();
 
 	QGridLayout* GridLayout = new QGridLayout(this);
 	TelegramParserTargetLineEdit = new QLineEdit(this);
@@ -79,7 +64,7 @@ void MainWindow::on_AddChannelsButton_click() {
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
-	userDataManager->setTargetChannels(TelegramChannelsList);
+	//userDataManager->setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }
@@ -89,17 +74,17 @@ void MainWindow::on_ReplaceChannelsButton_click() {
 	QString TelegramChannels = TelegramParserTargetLineEdit->text();
 	QStringList TelegramChannelsList = TelegramChannels.split(channelsSplitRegularExpression);
 
-	userDataManager->clearChannelsJsonArray();
-	userDataManager->setTargetChannels(TelegramChannelsList);
+	//userDataManager->clearChannelsJsonArray();
+	//userDataManager->setTargetChannels(TelegramChannelsList);
 
 	TelegramParserTargetLineEdit->clear();
 }
 
 void MainWindow::on_GetChannelsFromFileButton_click() {
-	QJsonDocument jsonDocument = userDataManager->getJsonDocument();
-	QJsonObject jsonObject = jsonDocument.object();
+	//QJsonDocument jsonDocument = userDataManager->getJsonDocument();
+	//QJsonObject jsonObject = jsonDocument.object();
 
-	if (!jsonObject.value("channels").toArray().isEmpty()) {
+	/*if (!jsonObject.value("channels").toArray().isEmpty()) {
 		QTextEdit* ReadedChannelsTextEdit = new QTextEdit();
 		ReadedChannelsTextEdit->setReadOnly(true);
 		QString channels = QString::fromUtf8(QJsonDocument(jsonObject.value("channels").toArray()).toJson());
@@ -108,5 +93,5 @@ void MainWindow::on_GetChannelsFromFileButton_click() {
 		DialogWindow->setLayout(new QVBoxLayout);
 		DialogWindow->layout()->addWidget(ReadedChannelsTextEdit);
 		DialogWindow->exec();
-	}
+	}*/
 }

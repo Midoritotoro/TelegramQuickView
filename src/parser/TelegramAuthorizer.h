@@ -20,6 +20,7 @@ typedef struct _TelegramCredentials {
     }
 } TelegramCredentials;
 
+
 namespace detail {
     template <class... Fs>
     struct overload;
@@ -29,12 +30,15 @@ namespace detail {
         explicit overload(F f) : F(f) {
         }
     };
+
     template <class F, class... Fs>
+
     struct overload<F, Fs...>
         : public overload<F>
         , public overload<Fs...> {
         overload(F f, Fs... fs) : overload<F>(f), overload<Fs...>(fs...) {
         }
+
         using overload<F>::operator();
         using overload<Fs...>::operator();
     };
@@ -47,52 +51,47 @@ auto overloaded(F... f) {
     return detail::overload<F...>(f...);
 }
 
+
 class TelegramAuthorizer
 {
-private:
+protected:
     using Object = td::td_api::object_ptr<td::td_api::Object>;
-    std::unique_ptr<td::ClientManager> client_manager_;
-    std::int32_t client_id_{ 0 };
 
-    td::td_api::object_ptr<td::td_api::AuthorizationState> authorization_state_;
+    std::unique_ptr<td::ClientManager> _clientManager;
+    std::int32_t _clientId;
 
-    bool are_authorized_{ false };
-    bool need_restart_{ false };
-    bool _isCredentialsAccepted{ false };
-    bool _isAuthCodeAccepted{ false };
+    td::td_api::object_ptr<td::td_api::AuthorizationState> _authorizationState;
+private:
+    bool _isCredentialsAccepted, _isAuthCodeAccepted;
 
-    std::uint64_t current_query_id_{ 0 };
-    std::uint64_t authentication_query_id_{ 0 };
+    std::uint64_t _currentQueryId, _authenticationQueryId;
 
-    std::map<std::uint64_t, std::function<void(Object)>> handlers_;
+    std::map<std::uint64_t, std::function<void(Object)>> _handlers;
 
     TelegramCredentials _telegramCredentials;
     std::string _authorizationCode;
-
 public:
     TelegramAuthorizer();
 
     void setTelegramCredentials(const TelegramCredentials& credentials);
     void setAuthorizationCode(std::string code);
 
-    [[nodiscard]] bool isCredentialsAccepted();
-    [[nodiscard]] bool isAuthorized();
+    [[nodiscard]] bool isCredentialsAccepted() const noexcept;
+    [[nodiscard]] bool isAuthorized() const noexcept;
 
-    TelegramAuthorizer& operator=(const TelegramAuthorizer& instance) {
+    inline TelegramAuthorizer& operator=(const TelegramAuthorizer&) {
         return *this;
     }
 private:
-    void restart();
+    void sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler);
+    void processResponse(td::ClientManager::Response response);
 
-    void send_query(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler);
-    void process_response(td::ClientManager::Response response);
+    void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
 
-    void process_update(td::td_api::object_ptr<td::td_api::Object> update);
+    auto createAuthenticationQueryHandler();
+    void on_authorizationStateUpdate();
 
-    auto create_authentication_query_handler();
-    void on_authorization_state_update();
+    void checkAuthenticationError(Object object);
 
-    void check_authentication_error(Object object);
-
-    std::uint64_t next_query_id();
+    std::uint64_t nextQueryId();
 };

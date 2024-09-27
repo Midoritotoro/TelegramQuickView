@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-#include <QDir>
-#include <QStandardPaths>
-#include <QJsonObject>
-#include <QJsonArray>
 #include <QFile>
 #include <QJsonDocument>
 
@@ -20,7 +16,7 @@ public:
 
 	[[nodiscard]] QJsonDocument getJsonDocument();
 
-	[[nodiscard]] static const QString getUserSettingsPath();
+	[[nodiscard]] static QString getUserSettingsPath();
 	[[nodiscard]] TelegramCredentials getTelegramCredentials();
 	[[nodiscard]] std::string getTelegramAuthCode();
 
@@ -30,7 +26,7 @@ public:
 	void clearChannelsJsonArray();
 	void clearTelegramCredentials();
 
-	[[nodiscard]] bool setTelegramCredentials(const TelegramCredentials& telegramCredentials);
+	bool setTelegramCredentials(const TelegramCredentials& telegramCredentials);
 
 	void setTargetChannels(QStringList channels);
 	void setLastPostsCountForChannels(int count);

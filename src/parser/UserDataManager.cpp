@@ -1,6 +1,10 @@
 ﻿#include "UserDataManager.h"
 
-#include <future>
+#include <QDir>
+#include <QStandardPaths>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QCoreApplication>
 
 
 UserDataManager::UserDataManager() {
@@ -10,15 +14,18 @@ UserDataManager::UserDataManager() {
 	_jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 }
 
-const QString UserDataManager::getUserSettingsPath()
+QString UserDataManager::getUserSettingsPath()
 {
-	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+#ifdef PROJECT_NAME
+	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).replace(QCoreApplication::applicationName(), PROJECT_NAME);
 
 	if (!writeDir.mkpath("."))
 		return "";
 
-	const auto fileName = writeDir.absolutePath() + "\\userData.json";
+	const auto fileName = writeDir.absolutePath() + "/userData.json";
 	return fileName;
+#endif
+	return "";
 }
 
 QJsonDocument UserDataManager::getJsonDocument() {
@@ -28,9 +35,10 @@ QJsonDocument UserDataManager::getJsonDocument() {
 		return jsonDocument;
 
 	const auto jsonData = _jsonFile.readAll();
-	_jsonFile.close();
 
 	jsonDocument = QJsonDocument::fromJson(jsonData);
+	_jsonFile.close();
+
 	return jsonDocument;
 }
 
