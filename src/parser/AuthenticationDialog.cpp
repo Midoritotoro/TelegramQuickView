@@ -195,7 +195,6 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 
     connect(timer, &QTimer::timeout, this, &AuthenticationDialog::updateSendCodeButtonText);
 
-
     if (_userDataManager->isTelegramCredentialsValid())
         _telegramAuthorizer.setTelegramCredentials(_userDataManager->getTelegramCredentials());
 }

@@ -5,6 +5,7 @@
 #include <QStandardPaths>
 #include <QDir>
 
+
 TelegramMessagesList SqlContentManager::getLastMessages() {
 	TelegramMessagesList telegramMessagesList;
 
@@ -32,6 +33,7 @@ TelegramMessagesList SqlContentManager::getLastMessages() {
 	}
 	return telegramMessagesList;
 }
+
 TelegramMessage SqlContentManager::getLastMessage() {
 	TelegramMessage telegramMessage;
 

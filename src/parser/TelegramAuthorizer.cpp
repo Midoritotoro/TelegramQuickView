@@ -17,7 +17,7 @@ TelegramAuthorizer::TelegramAuthorizer() :
     , _authenticationQueryId(0)
     
 {
-    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(1));
+    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(3));
 
     _clientManager = std::make_unique<td::ClientManager>();
     _clientId = _clientManager->create_client_id();
@@ -159,14 +159,12 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
 
                 request->api_id_ = _telegramCredentials.apiId;
                 request->api_hash_ = _telegramCredentials.apiHash;
-
+                
                 request->database_directory_ = "tdlib";
                 request->use_message_database_ = true;
                 request->use_secret_chats_ = true;
                 request->use_file_database_ = true;
-                request->database_encryption_key_ = td::td_api::make_object<td::td_api::setDatabaseEncryptionKey>().get()->new_encryption_key_;
                 request->files_directory_ = "tdlib/files";
-                request->use_test_dc_ = true;
 
                 request->system_language_code_ = "en";
                 request->device_model_ = "Desktop";

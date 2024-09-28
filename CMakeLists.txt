@@ -34,6 +34,8 @@ SET(PARSER_SOURCES src/parser/main.cpp
 	src/parser/TelegramAuthorizer.h
 	src/parser/TelegramParser.cpp
 	src/parser/TelegramParser.h
+	src/parser/PostSqlManager.cpp
+	src/parser/PostSqlManager.h
 )
 
 SET(MAIN_SOURCES main.cpp
@@ -95,6 +97,7 @@ set_property(TARGET TelegramQuickView PROPERTY CXX_STANDARD 20)
 target_link_libraries(TelegramParser PRIVATE
 					Qt6::Core
 					Qt6::Widgets
+					Qt6::Sql
 					Td::TdJson
 					Td::TdStatic
 )
