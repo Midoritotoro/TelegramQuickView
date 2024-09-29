@@ -70,8 +70,7 @@ private:
     std::map<std::uint64_t, std::function<void(Object)>> _handlers;
 
     TelegramCredentials _telegramCredentials;
-    std::string _authorizationCode;
-    bool _t;
+    std::string _authorizationCode, _databaseDirectory, _filesDirectory;
 public:
     TelegramAuthorizer();
 
@@ -79,6 +78,9 @@ public:
     void setAuthorizationCode(std::string code);
 
     void sendTelegramAuthCode();
+
+    void setDatabaseDirectory(std::string path);
+    void setFilesDirectory(std::string path);
 
     [[nodiscard]] bool isCredentialsAccepted() const noexcept;
     [[nodiscard]] bool isAuthorized() const noexcept;

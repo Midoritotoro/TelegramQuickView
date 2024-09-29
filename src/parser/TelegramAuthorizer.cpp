@@ -30,17 +30,14 @@ void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& crede
 
     while (true) {
         processResponse(_clientManager->receive(10));
-        qDebug() << "setCred";
 
         if (_authorizationState == nullptr)
             continue;
    
         if (_authorizationState->get_id() == td::td_api::authorizationStateWaitCode::ID
             || _authorizationState->get_id() == td::td_api::authorizationStateReady::ID
-        ) {
-            qDebug() << "cred returned";
+        )
             return;
-        }
     }
 }
 
@@ -48,16 +45,13 @@ void TelegramAuthorizer::setAuthorizationCode(std::string code) {
     _authorizationCode = code;
 
     while (true) {
-        qDebug() << "setCode";
         processResponse(_clientManager->receive(10));
 
         if (_authorizationState == nullptr)
             continue;
 
-        if (_authorizationState->get_id() == td::td_api::authorizationStateReady::ID) {
-            qDebug() << "setCode Returned";
-            return;
-        }
+        if (_authorizationState->get_id() == td::td_api::authorizationStateReady::ID) 
+            return;    
     }
 }
 
@@ -75,6 +69,14 @@ void TelegramAuthorizer::sendTelegramAuthCode() {
             createAuthenticationQueryHandler()
         );
     }
+}
+
+void TelegramAuthorizer::setDatabaseDirectory(std::string path) {
+    _databaseDirectory = path;
+}
+
+void TelegramAuthorizer::setFilesDirectory(std::string path) {
+    _filesDirectory = path;
 }
 
 void TelegramAuthorizer::sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler) {
@@ -103,17 +105,14 @@ void TelegramAuthorizer::processResponse(td::ClientManager::Response response) {
 }
 
 void TelegramAuthorizer::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
-    _t = false;
     td::td_api::downcast_call(
         *update, overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {
                 _authorizationState = std::move(update_authorization_state.authorization_state_);
                 on_authorizationStateUpdate();
-                _t = true;
             },
             [this](td::td_api::updateConnectionState&) {
-                if (!_t)
-                    on_authorizationStateUpdate();
+                on_authorizationStateUpdate();
             },
             [this](auto& update) {
 
@@ -159,8 +158,6 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 if (_authorizationCode.empty())
                     return;
 
-                qDebug() << "sended";
-
                 sendQuery(
                     td::td_api::make_object<td::td_api::checkAuthenticationCode>(_authorizationCode),
                     createAuthenticationQueryHandler()
@@ -178,17 +175,20 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 request->api_id_ = _telegramCredentials.apiId;
                 request->api_hash_ = _telegramCredentials.apiHash;
                 
-                request->database_directory_ = "tdlib";
+                if (_databaseDirectory.empty() == false)
+                    request->database_directory_ = _databaseDirectory;
+
+                if (_filesDirectory.empty() == false)
+                    request->files_directory_ = _filesDirectory;
+
                 request->use_message_database_ = true;
                 request->use_secret_chats_ = true;
                 request->use_file_database_ = true;
-                request->files_directory_ = "tdlib";
 
                 request->system_language_code_ = "en";
                 request->device_model_ = "Desktop";
                 request->application_version_ = "1.0";
 
-                qDebug() << "parameters sended";
                 sendQuery(std::move(request), createAuthenticationQueryHandler());
             },
             [](auto& update) {}
@@ -198,7 +198,8 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
 
 void TelegramAuthorizer::checkAuthenticationError(Object object) {
     if (object->get_id() == td::td_api::error::ID) {
-        // auto error = td::move_tl_object_as<td::td_api::error>(object);
+        auto error = td::move_tl_object_as<td::td_api::error>(object);
+        std::cout << "Error: " << to_string(error) << std::flush;
         on_authorizationStateUpdate();
     }
 }
