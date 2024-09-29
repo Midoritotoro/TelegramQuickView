@@ -17,7 +17,7 @@ TelegramAuthorizer::TelegramAuthorizer() :
     , _authenticationQueryId(0)
     
 {
-    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(1));
+    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(3));
 
     _clientManager = std::make_unique<td::ClientManager>();
     _clientId = _clientManager->create_client_id();
@@ -103,14 +103,17 @@ void TelegramAuthorizer::processResponse(td::ClientManager::Response response) {
 }
 
 void TelegramAuthorizer::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
+    _t = false;
     td::td_api::downcast_call(
         *update, overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {
                 _authorizationState = std::move(update_authorization_state.authorization_state_);
                 on_authorizationStateUpdate();
+                _t = true;
             },
             [this](td::td_api::updateConnectionState&) {
-                on_authorizationStateUpdate();
+                if (!_t)
+                    on_authorizationStateUpdate();
             },
             [this](auto& update) {
 
@@ -127,21 +130,21 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
             [this](td::td_api::authorizationStateReady&) {
                 qDebug() << "td::td_api::authorizationStateReady&";
                 _isAuthCodeAccepted = true;
-                _isCredentialsAccepted = true;
+                _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateLoggingOut&) {
                 qDebug() << "td::td_api::authorizationStateLoggingOut&";
                 _isAuthCodeAccepted = false;
-                _isCredentialsAccepted = false;
+                _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateClosed&) {
                 qDebug() << "td::td_api::authorizationStateClosed&";
                 _isAuthCodeAccepted = false;
-                _isCredentialsAccepted = false;
+                _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateWaitPhoneNumber&) {
                 qDebug() << "td::td_api::authorizationStateWaitPhoneNumber&";
-                _isCredentialsAccepted = false;
+                _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 sendQuery(
                     td::td_api::make_object<td::td_api::setAuthenticationPhoneNumber>(_telegramCredentials.phoneNumber, nullptr),
@@ -151,7 +154,7 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
             [this](td::td_api::authorizationStateWaitCode&) {
                 qDebug() << "td::td_api::authorizationStateWaitCode&";
                 _isAuthCodeAccepted = false;
-                _isCredentialsAccepted = true;
+                _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 if (_authorizationCode.empty())
                     return;
@@ -165,7 +168,7 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
             },
             [this](td::td_api::authorizationStateWaitTdlibParameters&) {
                 qDebug() << "td::td_api::authorizationStateWaitTdlibParameters&";
-                _isCredentialsAccepted = false;
+                _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 if (_telegramCredentials.isEmpty())
                     return;
@@ -180,7 +183,6 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 request->use_secret_chats_ = true;
                 request->use_file_database_ = true;
                 request->files_directory_ = "tdlib";
-                request->use_test_dc_ = true;
 
                 request->system_language_code_ = "en";
                 request->device_model_ = "Desktop";

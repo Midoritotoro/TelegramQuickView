@@ -1,6 +1,7 @@
 #include <QApplication>
 #include "AuthenticationDialog.h"
-#include "PostSqlManager.h"
+
+#include "TelegramParser.h"
 
 
 int main(int argc, char* argv[]) {
@@ -17,6 +18,7 @@ int main(int argc, char* argv[]) {
 		dialog->exec();
 		dialog->show();
 	}
+	
 
 	return app.exec();
 }

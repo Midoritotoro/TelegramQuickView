@@ -332,6 +332,8 @@ void AuthenticationDialog::confirmMobilePhoneCodeButton_clicked() {
 
     updateAuthState();
 
+    qDebug() << "AuthDialog _isAuthCodeAccepted: " << _isAuthCodeAccepted;
+    qDebug() << "AuthDialog _isTelegramCredentialsValid: " << _isTelegramCredentialsValid;
     close();
 }
 

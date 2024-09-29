@@ -67,8 +67,8 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                     mediaId = static_cast<td::td_api::messageAudio&>(*update_new_message.message_->content_).audio_->audio_->id_;
                 }
 
-                if (mediaId != 0)
-                    td::td_api::downloadFile::downloadFile(mediaId, 32, 0, 0, false);
+            /*    if (mediaId != 0)
+                    td::td_api::downloadFile::downloadFile(mediaId, 32, 0, 0, false);*/
 
                 std::cout << "Receive message: [chat_id:" << chat_id << "] [from:" << sender_name << "] ["
                     << text << "]" << std::endl;

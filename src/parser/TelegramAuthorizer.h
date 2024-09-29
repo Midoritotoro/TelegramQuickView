@@ -71,6 +71,7 @@ private:
 
     TelegramCredentials _telegramCredentials;
     std::string _authorizationCode;
+    bool _t;
 public:
     TelegramAuthorizer();
 
