@@ -17,12 +17,32 @@ TelegramAuthorizer::TelegramAuthorizer() :
     , _authenticationQueryId(0)
     
 {
-    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(3));
+    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(0));
 
     _clientManager = std::make_unique<td::ClientManager>();
     _clientId = _clientManager->create_client_id();
 
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
+
+    _userDataManager = std::make_unique<UserDataManager>();
+
+    if (_userDataManager->isTelegramCredentialsValid())
+        setTelegramCredentials(_userDataManager->getTelegramCredentials());
+
+    if (isCredentialsAccepted() && isAuthorized())
+        return;
+
+    _authDialog = std::make_unique<AuthenticationDialog>();
+
+    if (isCredentialsAccepted() && isAuthorized() == false)
+        _authDialog->skipFirstAuthorizationStage();
+
+    _authDialog->exec();
+    _authDialog->show();
+
+    connect(_authDialog.get(), &AuthenticationDialog::telegramCredentialsAccepted, [this](const TelegramCredentials& credentials) {
+        qDebug() << "func, connected on signal" << credentials.phoneNumber;
+    });
 }
 
 void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
@@ -114,9 +134,7 @@ void TelegramAuthorizer::processUpdate(td::td_api::object_ptr<td::td_api::Object
             [this](td::td_api::updateConnectionState&) {
                 on_authorizationStateUpdate();
             },
-            [this](auto& update) {
-
-            }
+            [](auto& update) {}
         )
     );
 }
@@ -184,6 +202,7 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 request->use_message_database_ = true;
                 request->use_secret_chats_ = true;
                 request->use_file_database_ = true;
+                request->use_test_dc_ = true;
 
                 request->system_language_code_ = "en";
                 request->device_model_ = "Desktop";
@@ -209,9 +228,13 @@ std::uint64_t TelegramAuthorizer::nextQueryId() {
 }
 
 bool TelegramAuthorizer::isCredentialsAccepted() const noexcept {
-    return _isCredentialsAccepted;
+    if (_isCredentialsAccepted == false)
+        return _isAuthCodeAccepted;
+    return _userDataManager->isTelegramCredentialsValid();
 }
 
 bool TelegramAuthorizer::isAuthorized() const noexcept {
-    return _isAuthCodeAccepted;
+    if (_isAuthCodeAccepted == false)
+        return _isAuthCodeAccepted;
+    return _userDataManager->isTelegramAuthCodeValid();
 }

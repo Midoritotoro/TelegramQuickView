@@ -25,10 +25,8 @@ private:
     QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr, * telegramCodeLineEdit = nullptr;
     QToolButton* logInButton = nullptr;
     QStackedWidget* _stackedWidget = nullptr;
-    UserDataManager* _userDataManager = nullptr;
     QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr, * _incorrectTelegramCodeLabel = nullptr;
     TelegramCredentials _telegramCredentials;
-    TelegramAuthorizer _telegramAuthorizer;
     QTimer* timer = nullptr;
     QString _authorizationCode = "";
     int timeRemaining = 0;
@@ -38,10 +36,11 @@ public:
     AuthenticationDialog(QWidget* parent = nullptr);
 
     void skipFirstAuthorizationStage();
-    [[nodiscard]] bool isTelegramCredentialsValid();
-    [[nodiscard]] bool isAuthCodeAccepted();
-public Q_SLOTS:
     void shake();
+Q_SIGNALS:
+    void authCodeAccepted(const QString& code);
+    void telegramCredentialsAccepted(const TelegramCredentials& credentials);
+private:
     void logInButton_clicked();
     void confirmMobilePhoneCodeButton_clicked();
     void backButton_clicked();
@@ -49,7 +48,6 @@ public Q_SLOTS:
     void updateSendCodeButtonText();
 private:
     void vacillate();
-    void updateAuthState();
 protected:
     void closeEvent(QCloseEvent* event) override;
 };

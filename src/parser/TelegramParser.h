@@ -1,16 +1,15 @@
 #pragma once
 
 #include "TelegramAuthorizer.h"
+#include "PostSqlManager.h"
 
-class PostSqlManager;
 
-
-class TelegramParser : public TelegramAuthorizer {
+class TelegramParser: public TelegramAuthorizer {
 private:
 	std::map<std::int64_t, td::td_api::object_ptr<td::td_api::user>> users_;
 	std::map<std::int64_t, std::string> chat_title_;
 
-	std::unique_ptr<PostSqlManager> _sqlManager;
+	std::unique_ptr<PostSqlManager> _sqlManager = nullptr;
 public:
 	TelegramParser();
 private:

@@ -11,15 +11,8 @@
 
 #include <functional>
 
-typedef struct _TelegramCredentials {
-    int apiId = 0;
-    std::string apiHash = "";
-    std::string phoneNumber = "";
-
-    [[nodiscard]] bool isEmpty() {
-        return apiId == 0 && apiHash.empty() && phoneNumber.empty();
-    }
-} TelegramCredentials;
+#include "AuthenticationDialog.h"
+#include "UserDataManager.h"
 
 
 namespace detail {
@@ -53,8 +46,9 @@ auto overloaded(F... f) {
 }
 
 
-class TelegramAuthorizer
+class TelegramAuthorizer: public QObject
 {
+    Q_OBJECT
 protected:
     using Object = td::td_api::object_ptr<td::td_api::Object>;
 
@@ -71,6 +65,9 @@ private:
 
     TelegramCredentials _telegramCredentials;
     std::string _authorizationCode, _databaseDirectory, _filesDirectory;
+
+    std::unique_ptr<AuthenticationDialog> _authDialog = nullptr;
+    std::unique_ptr<UserDataManager> _userDataManager = nullptr;
 public:
     TelegramAuthorizer();
 

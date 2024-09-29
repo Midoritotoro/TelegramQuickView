@@ -3,7 +3,16 @@
 #include <QFile>
 #include <QJsonDocument>
 
-#include "TelegramAuthorizer.h"
+
+typedef struct _TelegramCredentials {
+	int apiId = 0;
+	std::string apiHash = "";
+	std::string phoneNumber = "";
+
+	[[nodiscard]] bool isEmpty() {
+		return apiId == 0 && apiHash.empty() && phoneNumber.empty();
+	}
+} TelegramCredentials;
 
 
 class UserDataManager

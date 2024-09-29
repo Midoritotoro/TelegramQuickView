@@ -1,7 +1,7 @@
 #include "TelegramParser.h"
-#include "PostSqlManager.h"
 
 #include <iostream>
+
 
 TelegramParser::TelegramParser() :
 	TelegramAuthorizer()
