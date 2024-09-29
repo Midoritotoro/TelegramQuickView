@@ -60,8 +60,6 @@ void PostSqlManager::saveMessageInfo(const TelegramMessage& message) {
 	query.bindValue(":date", message.date);
 	query.bindValue(":text", message.text);
 
-	qDebug() << query.exec();
-
 	dataBase.commit();
 	dataBase.close();
 }

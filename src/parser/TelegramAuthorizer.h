@@ -7,6 +7,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <future>
 
 #include <functional>
 
@@ -75,6 +76,8 @@ public:
 
     void setTelegramCredentials(const TelegramCredentials& credentials);
     void setAuthorizationCode(std::string code);
+
+    void sendTelegramAuthCode();
 
     [[nodiscard]] bool isCredentialsAccepted() const noexcept;
     [[nodiscard]] bool isAuthorized() const noexcept;

@@ -3,10 +3,10 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
-#include <future>
 
 #include <QString>
 #include <QDebug>
+#include <chrono>
 
 
 TelegramAuthorizer::TelegramAuthorizer() :
@@ -17,7 +17,7 @@ TelegramAuthorizer::TelegramAuthorizer() :
     , _authenticationQueryId(0)
     
 {
-    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(3));
+    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(1));
 
     _clientManager = std::make_unique<td::ClientManager>();
     _clientId = _clientManager->create_client_id();
@@ -29,15 +29,15 @@ void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& crede
     _telegramCredentials = credentials;
 
     while (true) {
-        processResponse(_clientManager->receive(100));
+        processResponse(_clientManager->receive(10));
         qDebug() << "setCred";
 
-        if (_authorizationState.get() == nullptr)
+        if (_authorizationState == nullptr)
             continue;
    
-        if (_authorizationState.get()->get_id() == td::td_api::authorizationStateWaitCode::ID
-            || _authorizationState.get()->get_id() == td::td_api::authorizationStateReady::ID
-            ) {
+        if (_authorizationState->get_id() == td::td_api::authorizationStateWaitCode::ID
+            || _authorizationState->get_id() == td::td_api::authorizationStateReady::ID
+        ) {
             qDebug() << "cred returned";
             return;
         }
@@ -48,14 +48,32 @@ void TelegramAuthorizer::setAuthorizationCode(std::string code) {
     _authorizationCode = code;
 
     while (true) {
-        processResponse(_clientManager->receive(100));
+        qDebug() << "setCode";
+        processResponse(_clientManager->receive(10));
 
-        if (_authorizationState.get() == nullptr)
+        if (_authorizationState == nullptr)
             continue;
 
-        if (_authorizationState.get()->get_id() == td::td_api::authorizationStateReady::ID
-            || _authorizationCode.empty())
+        if (_authorizationState->get_id() == td::td_api::authorizationStateReady::ID) {
+            qDebug() << "setCode Returned";
             return;
+        }
+    }
+}
+
+auto TelegramAuthorizer::createAuthenticationQueryHandler() {
+    return [this, id = _authenticationQueryId](Object object) {
+        if (id == _authenticationQueryId)
+            checkAuthenticationError(std::move(object));
+        };
+}
+
+void TelegramAuthorizer::sendTelegramAuthCode() {
+    if (_authorizationState->get_id() == td::td_api::authorizationStateWaitCode::ID) {
+        sendQuery(
+            td::td_api::make_object<td::td_api::resendAuthenticationCode>(),
+            createAuthenticationQueryHandler()
+        );
     }
 }
 
@@ -72,6 +90,7 @@ void TelegramAuthorizer::processResponse(td::ClientManager::Response response) {
     if (!response.object)
         return;
 
+
     if (response.request_id == 0)
         return processUpdate(std::move(response.object));
 
@@ -84,24 +103,20 @@ void TelegramAuthorizer::processResponse(td::ClientManager::Response response) {
 }
 
 void TelegramAuthorizer::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
-    auto future = std::async(std::launch::async, [this, _update = update.get()]() {
-        td::td_api::downcast_call(
-            *_update, overloaded(
-                [this](td::td_api::updateAuthorizationState& update_authorization_state) {
-                    _authorizationState = std::move(update_authorization_state.authorization_state_);
-                },
-                [](auto& update) {}
-            )
-        );
-        }
-    );
-}
+    td::td_api::downcast_call(
+        *update, overloaded(
+            [this](td::td_api::updateAuthorizationState& update_authorization_state) {
+                _authorizationState = std::move(update_authorization_state.authorization_state_);
+                on_authorizationStateUpdate();
+            },
+            [this](td::td_api::updateConnectionState&) {
+                on_authorizationStateUpdate();
+            },
+            [this](auto& update) {
 
-auto TelegramAuthorizer::createAuthenticationQueryHandler() {
-    return [this, id = _authenticationQueryId](Object object) {
-        if (id == _authenticationQueryId)
-            checkAuthenticationError(std::move(object));
-    };
+            }
+        )
+    );
 }
 
 void TelegramAuthorizer::on_authorizationStateUpdate() {
@@ -110,18 +125,22 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
     td::td_api::downcast_call(*_authorizationState,
         overloaded(
             [this](td::td_api::authorizationStateReady&) {
+                qDebug() << "td::td_api::authorizationStateReady&";
                 _isAuthCodeAccepted = true;
                 _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateLoggingOut&) {
+                qDebug() << "td::td_api::authorizationStateLoggingOut&";
                 _isAuthCodeAccepted = false;
                 _isCredentialsAccepted = false;
             },
             [this](td::td_api::authorizationStateClosed&) {
+                qDebug() << "td::td_api::authorizationStateClosed&";
                 _isAuthCodeAccepted = false;
                 _isCredentialsAccepted = false;
             },
             [this](td::td_api::authorizationStateWaitPhoneNumber&) {
+                qDebug() << "td::td_api::authorizationStateWaitPhoneNumber&";
                 _isCredentialsAccepted = false;
 
                 sendQuery(
@@ -130,26 +149,22 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 );
             },
             [this](td::td_api::authorizationStateWaitCode&) {
+                qDebug() << "td::td_api::authorizationStateWaitCode&";
                 _isAuthCodeAccepted = false;
                 _isCredentialsAccepted = true;
-                qDebug() << "waitCodeState" << _authorizationCode;
 
-              /*  while (_authorizationCode.empty()) {
-                    qDebug() << "wait";
-                    _sleep(100);
-                }*/
                 if (_authorizationCode.empty())
                     return;
+
                 qDebug() << "sended";
 
                 sendQuery(
                     td::td_api::make_object<td::td_api::checkAuthenticationCode>(_authorizationCode),
                     createAuthenticationQueryHandler()
                 );
-
-                _authorizationCode.erase();
             },
             [this](td::td_api::authorizationStateWaitTdlibParameters&) {
+                qDebug() << "td::td_api::authorizationStateWaitTdlibParameters&";
                 _isCredentialsAccepted = false;
 
                 if (_telegramCredentials.isEmpty())
@@ -164,12 +179,14 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 request->use_message_database_ = true;
                 request->use_secret_chats_ = true;
                 request->use_file_database_ = true;
-                request->files_directory_ = "tdlib/files";
+                request->files_directory_ = "tdlib";
+                request->use_test_dc_ = true;
 
                 request->system_language_code_ = "en";
                 request->device_model_ = "Desktop";
                 request->application_version_ = "1.0";
 
+                qDebug() << "parameters sended";
                 sendQuery(std::move(request), createAuthenticationQueryHandler());
             },
             [](auto& update) {}
