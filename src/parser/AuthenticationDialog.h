@@ -15,39 +15,30 @@
 #include "UserDataManager.h"
 
 
-class AuthenticationDialog : public QDialog
+class AuthenticationDialog: public QWidget
 {
-private:
     Q_OBJECT
-    bool shakeSwitch = true, _skipFirstAuthenticationStage = false;
-    QFrame* firstAuthenticationStageFrame = nullptr, * secondAuthenticationStageFrame = nullptr;
-    QPushButton* loginButton = nullptr, * confirmCodeButton = nullptr, * sendCodeButton = nullptr;
-    QLineEdit* apiHashLineEdit = nullptr, * apiIdLineEdit = nullptr, * phoneNumberLineEdit = nullptr, * telegramCodeLineEdit = nullptr;
-    QToolButton* logInButton = nullptr;
-    QStackedWidget* _stackedWidget = nullptr;
-    QLabel* _incorrectTelegramCredentialsLabel = nullptr, * _incorrectMobilePhoneLabel = nullptr, * _incorrectTelegramCodeLabel = nullptr;
-    TelegramCredentials _telegramCredentials;
-    QTimer* timer = nullptr;
-    QString _authorizationCode = "";
-    int timeRemaining = 0;
-    bool _isAuthCodeAccepted = false;
-    bool _isTelegramCredentialsValid = false;
+private:
+    bool _shakeSwitch = true, _skipFirstAuthenticationStage = false, _canClose = false;
+    QPushButton* _confirmCredentialsButton = nullptr, * _confirmAuthCodeButton = nullptr, * _backToFirstFrameButton = nullptr, *_sendCodeAgainButton = nullptr;
+    QLineEdit* _apiHashLineEdit = nullptr, *_apiIdLineEdit = nullptr, *_phoneNumberLineEdit = nullptr, *_telegramCodeLineEdit = nullptr;
+    QFrame* _firstAuthStageFrame = nullptr;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
 
-    void skipFirstAuthorizationStage();
     void shake();
+    void setCloseAbility(bool close);
+    void toSecondFrame();
+    void toFirstFrame();
 Q_SIGNALS:
-    void authCodeAccepted(const QString& code);
-    void telegramCredentialsAccepted(const TelegramCredentials& credentials);
-private:
-    void logInButton_clicked();
-    void confirmMobilePhoneCodeButton_clicked();
-    void backButton_clicked();
-    void sendCodeAgainButton_clicked();
-    void updateSendCodeButtonText();
+    void credentialsAccepted(const TelegramCredentials& credentials);
+    void authCodeAccepted(const QString code);
 private:
     void vacillate();
+    void hideWidgets();
+    void showWidgets();
+    void updateFrameGeometry();
 protected:
+    void resizeEvent(QResizeEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
 };

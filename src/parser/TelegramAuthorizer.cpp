@@ -37,7 +37,6 @@ TelegramAuthorizer::TelegramAuthorizer() :
     if (isCredentialsAccepted() && isAuthorized() == false)
         _authDialog->skipFirstAuthorizationStage();
 
-    _authDialog->exec();
     _authDialog->show();
 
     connect(_authDialog.get(), &AuthenticationDialog::telegramCredentialsAccepted, [this](const TelegramCredentials& credentials) {
