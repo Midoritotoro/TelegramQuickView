@@ -11,22 +11,6 @@
 #include <QPixmapCache>
 
 
-//void AlbumThumbnail::paintPlayVideo(QPainter& p, QRect geometry) {
-//	const auto innerSize = st::msgFileLayout.thumbSize;
-//	const auto inner = QRect(
-//		geometry.x() + (geometry.width() - innerSize) / 2,
-//		geometry.y() + (geometry.height() - innerSize) / 2,
-//		innerSize,
-//		innerSize);
-//	{
-//		PainterHighQualityEnabler hq(p);
-//		p.setPen(Qt::NoPen);
-//		p.setBrush(st::msgDateImgBg);
-//		p.drawEllipse(inner);
-//	}
-//	st::historyFileThumbPlay.paintInCenter(p, inner);
-//}
-
 namespace {
 	QSize textSize(const QString& text, const QFontMetrics& metrics) {
 		return metrics.size(0, text);
@@ -84,7 +68,8 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 		return;
 
 	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 

@@ -20,16 +20,23 @@ find_package(Qt6 REQUIRED COMPONENTS
 			Multimedia
 			MultimediaWidgets
 			Sql
+			OpenGL
 )
 
 qt_standard_project_setup()
 
 SET(PARSER_SOURCES src/parser/main.cpp
+	src/parser/shaders/dual_kawase_down.frag
+	src/parser/shaders/dual_kawase_up.frag
+	src/parser/shaders/simple.vert
 
 	src/parser/UserDataManager.cpp
 	src/parser/UserDataManager.h
 	src/parser/AuthenticationDialog.cpp
 	src/parser/AuthenticationDialog.h
+	src/parser/vertex.h
+	src/parser/OpenGLBlur.cpp
+	src/parser/OpenGLBlur.h
 	#src/parser/TelegramAuthorizer.cpp
 	#src/parser/TelegramAuthorizer.h
 	#src/parser/TelegramParser.cpp
@@ -98,6 +105,7 @@ target_link_libraries(TelegramParser PRIVATE
 					Qt6::Core
 					Qt6::Widgets
 					Qt6::Sql
+					Qt::OpenGL
 					Td::TdJson
 					Td::TdStatic
 )

@@ -4,6 +4,10 @@
 #include <QFontMetrics>
 #include <QApplication>
 #include <QScreen>
+#include <QCoreApplication>
+#include <QDir>
+#include <QPainter>
+#include <QGraphicsBlurEffect>
 
 
 namespace {
@@ -21,11 +25,18 @@ namespace {
 
     const QString buttonStyle = "QPushButton{\n"
             "background: Wheat;\n"
-            "border-radius: 15px;\n"
             "color: black;\n"
         "}\n"
         "QPushButton::hover { \n"
             "background: NavajoWhite;\n"
+        "}";
+
+    const QString backButtonStyle = "QPushButton{\n"
+            "background: rgb(128, 128, 128);\n"
+            "color: black;\n"
+        "}\n"
+        "QPushButton::hover { \n"
+            "background: rgb(148, 148, 148);\n"
         "}";
 
     const QString lineEditStyle = "QLineEdit{\n"
@@ -40,21 +51,33 @@ namespace {
 AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     QWidget(parent)
 {
-    resize(720, 720);
-
     setWindowTitle(PROJECT_NAME);
+
+    _blurredFrame = new QFrame(this);
+
+    _blurredFrame->setFrameShape(QFrame::Shape::StyledPanel);
+    _blurredFrame->setFrameShadow(QFrame::Shadow::Raised);
+    _blurredFrame->setAttribute(Qt::WA_NoSystemBackground);
+    _blurredFrame->setAttribute(Qt::WA_TranslucentBackground);
+    _blurredFrame->setAttribute(Qt::WA_TransparentForMouseEvents);
+    _blurredFrame->setStyleSheet("background: rgba(0, 0, 0, 90)");
+        
+    QString currentPath = QCoreApplication::applicationDirPath();
+    QDir assetsDir(currentPath + "/../../assets/images");
+
+    QPalette _palette = _blurredFrame->palette();
+    _palette.setBrush(QPalette::ColorRole::Base, QBrush(QImage(assetsDir.absolutePath() + "/frameBackground.png")));
+    _blurredFrame->setPalette(_palette);
+
+    _pathToBackgroundImage = assetsDir.absolutePath() + "/main_screen.jpg";
+    _background = QPixmap(_pathToBackgroundImage);
 
     setStyleSheet(
         "*{\n"
         "font-family: centry gothic;\n"
-        "font-size: 24px;\n"
+        "font-size: 16px;\n"
         "}"
     );
-
-    _firstAuthStageFrame = new QFrame(this);
-
-    _firstAuthStageFrame->setFrameShape(QFrame::Shape::StyledPanel);
-    _firstAuthStageFrame->setFrameShadow(QFrame::Shadow::Raised);
 
     _confirmCredentialsButton = new QPushButton(this);
     _confirmAuthCodeButton = new QPushButton(this);
@@ -63,13 +86,13 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 
     _confirmCredentialsButton->setStyleSheet(buttonStyle);
     _confirmAuthCodeButton->setStyleSheet(buttonStyle);
-    _backToFirstFrameButton->setStyleSheet(buttonStyle);
+    _backToFirstFrameButton->setStyleSheet(backButtonStyle);
     _sendCodeAgainButton->setStyleSheet(buttonStyle);
 
     _confirmCredentialsButton->setText("Войти");
     _confirmAuthCodeButton->setText("Подтвердить");
     _backToFirstFrameButton->setText("Назад");
-    _sendCodeAgainButton->setText("Отправить ещё раз");
+    _sendCodeAgainButton->setText("Отправить");
 
     _apiHashLineEdit = new QLineEdit(this);
     _apiHashLineEdit->setStyleSheet(lineEditStyle);
@@ -87,7 +110,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     _apiHashLineEdit->setPlaceholderText("Api Hash");
     _apiIdLineEdit->setPlaceholderText("Api Id");
     _phoneNumberLineEdit->setPlaceholderText("Телефонный номер");
-
+    
     _apiHashLineEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     _phoneNumberLineEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     _apiIdLineEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
@@ -99,7 +122,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     _telegramCodeLineEdit->setTextMargins(0, 0, 0, 5);
 
     connect(_confirmCredentialsButton, &QPushButton::clicked, [this]() {
-        _firstAuthStageFrame->isVisible() ? toSecondFrame() : toFirstFrame();
+        toSecondFrame();
         
         const auto apiHash = _apiHashLineEdit->text().toStdString();
         const auto apiId = _apiIdLineEdit->text().toInt();
@@ -119,7 +142,6 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     });
 
     connect(_confirmAuthCodeButton, &QPushButton::clicked, [this]() {
-        _firstAuthStageFrame->isVisible() ? toSecondFrame() : toFirstFrame();
 
         QString mobilePhoneCode = _telegramCodeLineEdit->text();
 
@@ -144,16 +166,16 @@ void AuthenticationDialog::setCloseAbility(bool close) {
 
 void AuthenticationDialog::toSecondFrame() {
     hideWidgets();
-    _firstAuthStageFrame->show();
+    _blurredFrame->show();
     _confirmAuthCodeButton->show();
-   // _backToFirstFrameButton->show();
+    _backToFirstFrameButton->show();
     _telegramCodeLineEdit->show();
     _sendCodeAgainButton->show();
 }
 
 void AuthenticationDialog::toFirstFrame() {
     hideWidgets();
-    _firstAuthStageFrame->show();
+    _blurredFrame->show();
     _confirmCredentialsButton->show();
     _apiHashLineEdit->show();
     _apiIdLineEdit->show();
@@ -175,7 +197,42 @@ void AuthenticationDialog::shake()
 }
 
 void AuthenticationDialog::resizeEvent(QResizeEvent* event) {
+    if (_background.size() == size())
+        return;
+
+    _background = _background.scaled(getMinimumSizeWithAspectRatio(_background.size(), _background.size().width() / 4.), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    setFixedSize(_background.size());
+
     updateFrameGeometry();
+}
+
+void AuthenticationDialog::paintEvent(QPaintEvent* event) {
+    QPainter painter(this);
+
+    if (_background.isNull())
+        return;
+
+
+    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    painter.drawPixmap(0, 0, _background);
+
+    QPalette _palette = _blurredFrame->palette();
+    const QBrush& brush = _palette.brush(QPalette::ColorRole::Base);
+
+    QImage blurredImage = _GLBlurDualKawase.blurImage_DualKawase(brush.texture().scaled(_blurredFrame->size(),
+        Qt::IgnoreAspectRatio, Qt::SmoothTransformation).toImage(), 1, 2);
+
+    QBrush blurredBrush = brush;
+    blurredBrush.setTextureImage(blurredImage);
+    QColor blurredBrushColor = blurredBrush.color();
+    blurredBrushColor.setAlpha(0);
+    blurredBrush.setColor(blurredBrushColor);
+
+    _palette.setBrush(QPalette::ColorRole::Base, blurredBrush);
+
+    _blurredFrame->setPalette(_palette);
+   // painter.drawPixmap(_blurredFrame->rect(), QPixmap::fromImage(blurredImage));
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
@@ -213,7 +270,7 @@ void AuthenticationDialog::showWidgets() {
 
 void AuthenticationDialog::updateFrameGeometry() {
     const auto widgetsWidth = width() / 4.;
-    const auto widgetsHeight = height() / 12.;
+    const auto widgetsHeight = height() / 14.;
 
     const auto centerX = (width() - widgetsWidth) / 2.;
 
@@ -221,29 +278,27 @@ void AuthenticationDialog::updateFrameGeometry() {
     const auto authFrameHeight = widgetsHeight * 5.;
 
     _confirmCredentialsButton->resize(widgetsWidth, widgetsHeight);
-    _confirmAuthCodeButton->resize(widgetsWidth / 2., widgetsHeight);
-    _backToFirstFrameButton->resize(widgetsWidth / 2., widgetsHeight);
-    _sendCodeAgainButton->resize(widgetsWidth / 2., widgetsHeight);
+    _confirmAuthCodeButton->resize(widgetsWidth, widgetsHeight);
+    _backToFirstFrameButton->resize(widgetsWidth / 3., widgetsHeight / 1.5);
+    _sendCodeAgainButton->resize(widgetsWidth / 3., widgetsHeight / 1.5);
 
     _apiHashLineEdit->resize(widgetsWidth, widgetsHeight);
     _apiIdLineEdit->resize(widgetsWidth, widgetsHeight);
     _phoneNumberLineEdit->resize(widgetsWidth, widgetsHeight);
     _telegramCodeLineEdit->resize(widgetsWidth, widgetsHeight);
     
-    _confirmCredentialsButton->move(centerX, height() - widgetsHeight * 1.5);
+    _confirmCredentialsButton->move(centerX, (height() + widgetsHeight * 3.) / 2.);
+    _confirmAuthCodeButton->move(centerX, (height() - widgetsHeight / 1.5) / 2.);
  
-    _sendCodeAgainButton->move(centerX - _sendCodeAgainButton->width(), height() - widgetsHeight * 1.5);
-    _confirmAuthCodeButton->move(centerX + _confirmAuthCodeButton->width(), height() - widgetsHeight * 3.);
+    _phoneNumberLineEdit->move(centerX, (height() - widgetsHeight * 0.5) / 2. - widgetsHeight * 1.5);
+    _apiIdLineEdit->move(centerX, (height() - widgetsHeight) / 2. - widgetsHeight * 0.5);
+    _apiHashLineEdit->move(centerX, (height() - widgetsHeight * 0.5) / 2.);
 
-    _backToFirstFrameButton->move((width() - widgetsWidth / 2.) / 2., height() - widgetsHeight * 1.5);
-    _apiHashLineEdit->move(centerX, height() - widgetsHeight * 3.5);
+    _sendCodeAgainButton->move((centerX), (height() + widgetsHeight * 1.5) / 2.);
+    _backToFirstFrameButton->move((centerX + widgetsWidth / 1.5), (height() + widgetsHeight * 1.5) / 2.);
 
-    _telegramCodeLineEdit->move(centerX, height() - widgetsHeight * 5.5);
-    _apiIdLineEdit->move(centerX, height() - widgetsHeight * 4.5);
+    _telegramCodeLineEdit->move(centerX, (height() - widgetsHeight * 0.5) / 2. - widgetsHeight * 1.5);
 
-    _phoneNumberLineEdit->move(centerX, height() - widgetsHeight * 5.5);
-
-    _firstAuthStageFrame->move((width() - authFrameWidth) / 2., (height() - authFrameHeight) / 2.);
-    _firstAuthStageFrame->resize(authFrameWidth,
-        authFrameHeight);
+    _blurredFrame->resize(authFrameWidth, authFrameHeight);
+    _blurredFrame->move((width() - authFrameWidth) / 2., (height() - authFrameHeight) / 2.);
 }
