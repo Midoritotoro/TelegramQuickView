@@ -1,11 +1,14 @@
 #include <QApplication>
-#include "AuthenticationDialog.h"
+#include "TelegramParser.h"
 
 
 int main(int argc, char* argv[]) {
 	QApplication app(argc, argv);
-	AuthenticationDialog dialog;
+	TelegramParser parser;
 
-	dialog.show();
+	/*AuthenticationDialog dialog;
+
+	dialog.show();*/
+
 	return app.exec();
 }

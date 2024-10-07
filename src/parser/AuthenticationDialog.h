@@ -13,20 +13,16 @@
 #include <QCloseEvent>
 
 #include "UserDataManager.h"
-#include "OpenGLBlur.h"
 
-
-class AuthenticationDialog: public QWidget
+class AuthenticationDialog: public QDialog
 {
     Q_OBJECT
 private:
     bool _shakeSwitch = true, _skipFirstAuthenticationStage = false, _canClose = false;
     QPushButton* _confirmCredentialsButton = nullptr, * _confirmAuthCodeButton = nullptr, * _backToFirstFrameButton = nullptr, *_sendCodeAgainButton = nullptr;
     QLineEdit* _apiHashLineEdit = nullptr, *_apiIdLineEdit = nullptr, *_phoneNumberLineEdit = nullptr, *_telegramCodeLineEdit = nullptr;
-    QFrame* _blurredFrame = nullptr;
     QPixmap _background;
     QString _pathToBackgroundImage;
-    GLBlurFunctions _GLBlurDualKawase;
 public:
     AuthenticationDialog(QWidget* parent = nullptr);
 
@@ -40,12 +36,15 @@ public:
     }
 Q_SIGNALS:
     void credentialsAccepted(const TelegramCredentials& credentials);
-    void authCodeAccepted(const QString code);
+    void authCodeAccepted(const QString& code);
+    void needSendCodeAgain();
 private:
+    void drawRoundedCorners(QPainter& painter, QRect rect, int borderRadius);
+
     void vacillate();
     void hideWidgets();
     void showWidgets();
-    void updateFrameGeometry();
+    void updateWidgetsGeometry();
 protected:
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;

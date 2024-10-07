@@ -7,7 +7,28 @@ TelegramParser::TelegramParser() :
 	TelegramAuthorizer()
 {
     _sqlManager = std::make_unique<PostSqlManager>();
+
+    for (;;) {
+        processResponse(_clientManager->receive(10));
+    }
 }
+
+
+void TelegramParser::processResponse(td::ClientManager::Response response) {
+    if (!response.object)
+        return;
+
+    if (response.request_id == 0)
+        return on_NewMessageUpdate(std::move(response.object));
+
+    auto iterator = _handlers.find(response.request_id);
+
+    if (iterator != _handlers.end()) {
+        iterator->second(std::move(response.object));
+        _handlers.erase(iterator);
+    }
+}
+
 
 std::string TelegramParser::getUserName(std::int64_t user_id) const {
     auto it = users_.find(user_id);
@@ -28,6 +49,8 @@ std::string TelegramParser::getChatTitle(std::int64_t chat_id) const {
 }
 
 void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
+    processUpdate(std::move(update));
+
     td::td_api::downcast_call(
         *update, overloaded(
             [this](td::td_api::updateNewChat& update_new_chat) {

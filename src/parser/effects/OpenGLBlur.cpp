@@ -11,7 +11,7 @@ static const Vertex sg_vertexes[] =
   Vertex(QVector3D(1.0f, -1.0f, 1.0f))
 };
 
-GLBlurFunctions::GLBlurFunctions()
+OpenGLBlur::OpenGLBlur()
 {
     m_Context = new QOpenGLContext();
     m_Context->setFormat(QSurfaceFormat::defaultFormat());
@@ -21,6 +21,7 @@ GLBlurFunctions::GLBlurFunctions()
     m_Surface->create();
 
     QSurfaceFormat surfaceFormat;
+
     surfaceFormat.setVersion(3, 3);
     surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
     m_Surface->setFormat(surfaceFormat);
@@ -33,11 +34,13 @@ GLBlurFunctions::GLBlurFunctions()
     QDir shadersDir(currentPath + "../../../src/parser/shaders");
 
     m_ShaderProgram_kawase_up = new QOpenGLShaderProgram();
+
     m_ShaderProgram_kawase_up->addShaderFromSourceFile(QOpenGLShader::Vertex, shadersDir.absolutePath() + "/simple.vert");
     m_ShaderProgram_kawase_up->addShaderFromSourceFile(QOpenGLShader::Fragment, shadersDir.absolutePath() + "/dual_kawase_up.frag");
     m_ShaderProgram_kawase_up->link();
 
     m_ShaderProgram_kawase_down = new QOpenGLShaderProgram();
+
     m_ShaderProgram_kawase_down->addShaderFromSourceFile(QOpenGLShader::Vertex, shadersDir.absolutePath() + "/simple.vert");
     m_ShaderProgram_kawase_down->addShaderFromSourceFile(QOpenGLShader::Fragment, shadersDir.absolutePath() + "/dual_kawase_down.frag");
     m_ShaderProgram_kawase_down->link();
@@ -64,21 +67,19 @@ GLBlurFunctions::GLBlurFunctions()
     m_imageToBlur = QImage();
 }
 
-GLBlurFunctions::~GLBlurFunctions()
+OpenGLBlur::~OpenGLBlur()
 {
     delete m_ShaderProgram_kawase_up;
     delete m_ShaderProgram_kawase_down;
 
-    for (int i = 0; i < m_FBO_vector.size(); i++) {
+    for (int i = 0; i < m_FBO_vector.size(); i++)
         delete m_FBO_vector[i];
-    }
 
     delete m_textureToBlur;
 }
 
-QImage GLBlurFunctions::blurImage_DualKawase(QImage imageToBlur, int offset, int iterations)
+QImage OpenGLBlur::blurImage_DualKawase(QImage imageToBlur, int offset, int iterations)
 {
-    // Check to avoid unnecessary texture reallocation
     if (iterations != m_iterations || imageToBlur != m_imageToBlur) {
         m_iterations = iterations;
         m_imageToBlur = imageToBlur;
@@ -86,59 +87,40 @@ QImage GLBlurFunctions::blurImage_DualKawase(QImage imageToBlur, int offset, int
         initFBOTextures();
     }
 
-
-    //Don't record the texture and FBO allocation time
-
-
-    //Start the GPU timer
     glGenQueries(1, GPUTimerQueries);
     glBeginQuery(GL_TIME_ELAPSED, GPUTimerQueries[0]);
 
-    //Start the CPU timer
     CPUTimer.start();
-
-    // --------------- blur start ---------------
 
     m_ShaderProgram_kawase_down->setUniformValue("offset", QVector2D(offset, offset));
     m_ShaderProgram_kawase_up->setUniformValue("offset", QVector2D(offset, offset));
 
-    //Initial downsample
-    //We only need this helper texture because we can't put a QImage into the texture of a QOpenGLFramebufferObject
-    //Otherwise we would skip this and start the downsampling from m_FBO_vector[0] instead of m_FBO_vector[1]
     renderToFBO(m_FBO_vector[1], m_textureToBlur->textureId(), m_ShaderProgram_kawase_down);
 
-    //Downsample
-    for (int i = 1; i < iterations; i++) {
+    for (int i = 1; i < iterations; i++)
         renderToFBO(m_FBO_vector[i + 1], m_FBO_vector[i]->texture(), m_ShaderProgram_kawase_down);
-    }
 
-    //Upsample
-    for (int i = iterations; i > 0; i--) {
+    for (int i = iterations; i > 0; i--)
         renderToFBO(m_FBO_vector[i - 1], m_FBO_vector[i]->texture(), m_ShaderProgram_kawase_up);
-    }
-
-    // --------------- blur end ---------------
-
-    //Get the CPU timer result
+    
     CPUTimerElapsedTime = CPUTimer.nsecsElapsed();
 
-    //Get the GPU timer result
     glEndQuery(GL_TIME_ELAPSED);
     GPUTimerAvailable = 0;
 
-    while (!GPUTimerAvailable) {
+    while (!GPUTimerAvailable)
         glGetQueryObjectiv(GPUTimerQueries[0], GL_QUERY_RESULT_AVAILABLE, &GPUTimerAvailable);
-    }
-
+    
     glGetQueryObjectui64v(GPUTimerQueries[0], GL_QUERY_RESULT, &GPUtimerElapsedTime);
     glDeleteQueries(1, GPUTimerQueries);
 
     return m_FBO_vector[0]->toImage();
 }
 
-void GLBlurFunctions::renderToFBO(QOpenGLFramebufferObject* targetFBO, GLuint sourceTexture, QOpenGLShaderProgram* shader)
+void OpenGLBlur::renderToFBO(QOpenGLFramebufferObject* targetFBO, GLuint sourceTexture, QOpenGLShaderProgram* shader)
 {
     targetFBO->bind();
+
     glBindTexture(GL_TEXTURE_2D, sourceTexture);
     shader->bind();
 
@@ -149,7 +131,7 @@ void GLBlurFunctions::renderToFBO(QOpenGLFramebufferObject* targetFBO, GLuint so
     glDrawArrays(GL_TRIANGLE_FAN, 0, sizeof(sg_vertexes) / sizeof(sg_vertexes[0]));
 }
 
-void GLBlurFunctions::initFBOTextures()
+void OpenGLBlur::initFBOTextures()
 {
     for (int i = 0; i < m_FBO_vector.size(); i++) {
         delete m_FBO_vector[i];
@@ -169,17 +151,18 @@ void GLBlurFunctions::initFBOTextures()
     delete m_textureToBlur;
 
     m_textureToBlur = new QOpenGLTexture(m_imageToBlur.mirrored(), QOpenGLTexture::DontGenerateMipMaps);
+
     m_textureToBlur->setWrapMode(QOpenGLTexture::ClampToEdge);
     m_textureToBlur->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
 }
 
-float GLBlurFunctions::getGPUTime()
+float OpenGLBlur::getGPUTime() const
 {
     float gpuTime = GPUtimerElapsedTime / 1000000.;
     return roundf(gpuTime * 1000) / 1000;
 }
 
-float GLBlurFunctions::getCPUTime()
+float OpenGLBlur::getCPUTime() const
 {
     float cpuTime = CPUTimerElapsedTime / 1000000.;
     return roundf(cpuTime * 1000) / 1000;

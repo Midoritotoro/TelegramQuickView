@@ -29,18 +29,19 @@ public:
 
 	void addMessageText(const QString& text);
 	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
+
 	inline void setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) { _mediaDisplayMode = displayMode; }
 
 	[[nodiscard]] inline MessageMediaDisplayMode messsageMediaDisplayMode() const noexcept { return _mediaDisplayMode; }
-	[[nodiscard]] inline QString messageText() const noexcept { return _telegramMessage->text; }
-	[[nodiscard]] inline const MessageAttachmentsList& messageAttachments() const noexcept { return _telegramMessage->attachments; }
+	[[nodiscard]] inline QString messageText() const { return _telegramMessage->text; }
+	[[nodiscard]] inline const MessageAttachmentsList& messageAttachments() const { return _telegramMessage->attachments; }
 
-	[[nodiscard]] inline int indexOfAttachment(MessageAttachment* messageAttachment) const noexcept { return _telegramMessage->attachments.indexOf(messageAttachment); }
+	[[nodiscard]] inline int indexOfAttachment(MessageAttachment* messageAttachment) const { return _telegramMessage->attachments.indexOf(messageAttachment); }
 	[[nodiscard]] MessageAttachment* attachmentAt(int index) const noexcept;
-	[[nodiscard]] inline int attachmentsLength() const noexcept { return _telegramMessage->attachments.length(); }
+	[[nodiscard]] inline int attachmentsLength() const { return _telegramMessage->attachments.length(); }
 
-	[[nodiscard]] inline bool hasAttachments() const noexcept { return !_telegramMessage->attachments.isEmpty(); }
-	[[nodiscard]] inline bool hasText() const noexcept { return !_telegramMessage->text.isEmpty(); }
+	[[nodiscard]] inline bool hasAttachments() const { return !_telegramMessage->attachments.isEmpty(); }
+	[[nodiscard]] inline bool hasText() const { return !_telegramMessage->text.isEmpty(); }
 private:
 	std::unique_ptr<TelegramMessage> _telegramMessage = nullptr;
 	QGridLayout* _messageLayout = nullptr;

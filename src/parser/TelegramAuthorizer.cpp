@@ -35,13 +35,23 @@ TelegramAuthorizer::TelegramAuthorizer() :
     _authDialog = std::make_unique<AuthenticationDialog>();
 
     if (isCredentialsAccepted() && isAuthorized() == false)
-        _authDialog->skipFirstAuthorizationStage();
+        _authDialog->toSecondFrame();
 
     _authDialog->show();
 
-    connect(_authDialog.get(), &AuthenticationDialog::telegramCredentialsAccepted, [this](const TelegramCredentials& credentials) {
-        qDebug() << "func, connected on signal" << credentials.phoneNumber;
+    connect(_authDialog.get(), &AuthenticationDialog::credentialsAccepted, [this](const TelegramCredentials& credentials) {
+        setTelegramCredentials(credentials);
     });
+
+    connect(_authDialog.get(), &AuthenticationDialog::authCodeAccepted, [this](const QString& code) {
+        qDebug() << "AuthCode: " << code;
+        setAuthorizationCode(code.toStdString());
+       });
+
+    connect(_authDialog.get(), &AuthenticationDialog::needSendCodeAgain, [this]() {
+        if (sendTelegramAuthCode() == false)
+            _authDialog->shake();
+        });
 }
 
 void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
@@ -81,13 +91,16 @@ auto TelegramAuthorizer::createAuthenticationQueryHandler() {
         };
 }
 
-void TelegramAuthorizer::sendTelegramAuthCode() {
-    if (_authorizationState->get_id() == td::td_api::authorizationStateWaitCode::ID) {
-        sendQuery(
-            td::td_api::make_object<td::td_api::resendAuthenticationCode>(),
-            createAuthenticationQueryHandler()
-        );
-    }
+bool TelegramAuthorizer::sendTelegramAuthCode() {
+    if (_authorizationState->get_id() != td::td_api::authorizationStateWaitCode::ID)
+        return false;
+
+    sendQuery(
+        td::td_api::make_object<td::td_api::resendAuthenticationCode>(),
+        createAuthenticationQueryHandler()
+    );
+
+    return true;
 }
 
 void TelegramAuthorizer::setDatabaseDirectory(std::string path) {
@@ -110,7 +123,6 @@ void TelegramAuthorizer::sendQuery(td::td_api::object_ptr<td::td_api::Function> 
 void TelegramAuthorizer::processResponse(td::ClientManager::Response response) {
     if (!response.object)
         return;
-
 
     if (response.request_id == 0)
         return processUpdate(std::move(response.object));
@@ -175,6 +187,7 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 if (_authorizationCode.empty())
                     return;
 
+                qDebug() << "codeSended: " << _authorizationCode;
                 sendQuery(
                     td::td_api::make_object<td::td_api::checkAuthenticationCode>(_authorizationCode),
                     createAuthenticationQueryHandler()
@@ -201,7 +214,7 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 request->use_message_database_ = true;
                 request->use_secret_chats_ = true;
                 request->use_file_database_ = true;
-                request->use_test_dc_ = true;
+                request->use_test_dc_ = false;
 
                 request->system_language_code_ = "en";
                 request->device_model_ = "Desktop";

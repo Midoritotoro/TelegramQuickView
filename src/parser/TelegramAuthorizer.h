@@ -56,12 +56,11 @@ protected:
     std::int32_t _clientId;
 
     td::td_api::object_ptr<td::td_api::AuthorizationState> _authorizationState;
+    std::map<std::uint64_t, std::function<void(Object)>> _handlers;
 private:
     bool _isCredentialsAccepted, _isAuthCodeAccepted;
 
     std::uint64_t _currentQueryId, _authenticationQueryId;
-
-    std::map<std::uint64_t, std::function<void(Object)>> _handlers;
 
     TelegramCredentials _telegramCredentials;
     std::string _authorizationCode, _databaseDirectory, _filesDirectory;
@@ -74,7 +73,7 @@ public:
     void setTelegramCredentials(const TelegramCredentials& credentials);
     void setAuthorizationCode(std::string code);
 
-    void sendTelegramAuthCode();
+    bool sendTelegramAuthCode();
 
     void setDatabaseDirectory(std::string path);
     void setFilesDirectory(std::string path);
@@ -85,11 +84,11 @@ public:
     inline TelegramAuthorizer& operator=(const TelegramAuthorizer&) {
         return *this;
     }
+protected:
+    virtual void processResponse(td::ClientManager::Response response);
+    void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
 private:
     void sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler);
-    void processResponse(td::ClientManager::Response response);
-
-    void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
 
     auto createAuthenticationQueryHandler();
     void on_authorizationStateUpdate();

@@ -26,21 +26,21 @@ find_package(Qt6 REQUIRED COMPONENTS
 qt_standard_project_setup()
 
 SET(PARSER_SOURCES src/parser/main.cpp
-	src/parser/shaders/dual_kawase_down.frag
-	src/parser/shaders/dual_kawase_up.frag
-	src/parser/shaders/simple.vert
+	src/parser/effects/shaders/dual_kawase_down.frag
+	src/parser/effects/shaders/dual_kawase_up.frag
+	src/parser/effects/shaders/simple.vert
 
 	src/parser/UserDataManager.cpp
 	src/parser/UserDataManager.h
 	src/parser/AuthenticationDialog.cpp
 	src/parser/AuthenticationDialog.h
-	src/parser/vertex.h
-	src/parser/OpenGLBlur.cpp
-	src/parser/OpenGLBlur.h
-	#src/parser/TelegramAuthorizer.cpp
-	#src/parser/TelegramAuthorizer.h
-	#src/parser/TelegramParser.cpp
-	#src/parser/TelegramParser.h
+	src/parser/effects/vertex.h
+	src/parser/effects/OpenGLBlur.cpp
+	src/parser/effects/OpenGLBlur.h
+	src/parser/TelegramAuthorizer.cpp
+	src/parser/TelegramAuthorizer.h
+	src/parser/TelegramParser.cpp
+	src/parser/TelegramParser.h
 	src/parser/PostSqlManager.cpp
 	src/parser/PostSqlManager.h
 )

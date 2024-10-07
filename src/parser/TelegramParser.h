@@ -12,9 +12,11 @@ private:
 	std::unique_ptr<PostSqlManager> _sqlManager = nullptr;
 public:
 	TelegramParser();
+protected:
+	void processResponse(td::ClientManager::Response response) override;
 private:
 	std::string getUserName(std::int64_t user_id) const;
     std::string getChatTitle(std::int64_t chat_id) const;
 
-	void on_NewMessageUpdate(td::td_api::object_ptr <td::td_api::Object > update);
+	void on_NewMessageUpdate(td::td_api::object_ptr <td::td_api::Object> update);
 };
