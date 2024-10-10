@@ -57,7 +57,7 @@ TelegramAuthorizer::TelegramAuthorizer() :
 void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
     _telegramCredentials = credentials;
 
-    while (true) {
+    for (;;) {
         processResponse(_clientManager->receive(10));
 
         if (_authorizationState == nullptr)
@@ -73,7 +73,7 @@ void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& crede
 void TelegramAuthorizer::setAuthorizationCode(std::string code) {
     _authorizationCode = code;
 
-    while (true) {
+    for (;;) {
         processResponse(_clientManager->receive(10));
 
         if (_authorizationState == nullptr)
@@ -240,13 +240,13 @@ std::uint64_t TelegramAuthorizer::nextQueryId() {
 }
 
 bool TelegramAuthorizer::isCredentialsAccepted() const noexcept {
-    if (_isCredentialsAccepted == false)
-        return _isAuthCodeAccepted;
-    return _userDataManager->isTelegramCredentialsValid();
+    return _isCredentialsAccepted 
+        ? _userDataManager->isTelegramCredentialsValid() 
+        : _isAuthCodeAccepted;
 }
 
 bool TelegramAuthorizer::isAuthorized() const noexcept {
-    if (_isAuthCodeAccepted == false)
-        return _isAuthCodeAccepted;
-    return _userDataManager->isTelegramAuthCodeValid();
+    return _isAuthCodeAccepted 
+        ? _userDataManager->isTelegramAuthCodeValid() 
+        : _isAuthCodeAccepted;
 }

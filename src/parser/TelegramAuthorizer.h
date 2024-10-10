@@ -86,8 +86,8 @@ public:
     }
 protected:
     virtual void processResponse(td::ClientManager::Response response);
-    void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
-private:
+    virtual void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
+
     void sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler);
 
     auto createAuthenticationQueryHandler();
