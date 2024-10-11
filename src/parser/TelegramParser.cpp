@@ -23,7 +23,8 @@ void TelegramParser::startChatsChecking() {
 
 auto TelegramParser::createFileDownloadQueryHandler() {
     return [this](Object object) {
-        ;
+        if (object)
+            checkFileDownloadError(std::move(object));
         };
 }
 
@@ -31,7 +32,7 @@ void TelegramParser::checkFileDownloadError(Object object) {
     if (object->get_id() == td::td_api::error::ID) {
         auto error = td::move_tl_object_as<td::td_api::error>(object);
         std::cout << "Error: " << to_string(error) << std::flush;
-        on_downloadedFilesUpdate(object);
+        on_NewMessageUpdate(std::move(object));
     }
 }
 
