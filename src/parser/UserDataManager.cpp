@@ -82,6 +82,16 @@ bool UserDataManager::isTelegramAuthCodeValid() {
 }
 
 
+QVariantList UserDataManager::getTargetChannels() {
+	const auto jsonDocument = getJsonDocument();
+	const auto jsonObject = jsonDocument.object();
+
+	const auto channelsArray = jsonObject.value("channels").toArray();
+
+	return channelsArray.toVariantList();
+}
+
+
 void UserDataManager::clearChannelsJsonArray() {
 	auto jsonDocument = getJsonDocument();
 	auto jsonObject = jsonDocument.object();

@@ -5,7 +5,8 @@
 #include <vector>
 
 #include <QString>
-#include <QDebug>
+#include <QStorageInfo>
+
 #include <chrono>
 
 
@@ -23,6 +24,9 @@ TelegramAuthorizer::TelegramAuthorizer() :
     _clientId = _clientManager->create_client_id();
 
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
+
+    std::string path = findLargestNonSystemDisk();
+    // ...
 
     _userDataManager = std::make_unique<UserDataManager>();
 
@@ -234,6 +238,23 @@ void TelegramAuthorizer::checkAuthenticationError(Object object) {
         on_authorizationStateUpdate();
     }
 }
+
+std::string TelegramAuthorizer::findLargestNonSystemDisk() const {
+    qint64 maximumSize = 0;
+    QString driverName = "";
+
+    foreach(const auto& storage, QStorageInfo::mountedVolumes()) {
+        if (storage.isValid() && storage.isReady())
+            if (storage.isReadOnly() == false)
+                if (storage.bytesFree() > maximumSize) {
+                    maximumSize = storage.bytesFree();
+                    driverName = storage.rootPath();
+        }
+    }
+
+    return driverName.toStdString();
+}
+
 
 std::uint64_t TelegramAuthorizer::nextQueryId() {
     return ++_currentQueryId;

@@ -57,6 +57,8 @@ protected:
 
     td::td_api::object_ptr<td::td_api::AuthorizationState> _authorizationState;
     std::map<std::uint64_t, std::function<void(Object)>> _handlers;
+
+    std::unique_ptr<UserDataManager> _userDataManager = nullptr;
 private:
     bool _isCredentialsAccepted, _isAuthCodeAccepted;
 
@@ -66,7 +68,6 @@ private:
     std::string _authorizationCode, _databaseDirectory, _filesDirectory;
 
     std::unique_ptr<AuthenticationDialog> _authDialog = nullptr;
-    std::unique_ptr<UserDataManager> _userDataManager = nullptr;
 public:
     TelegramAuthorizer();
 
@@ -96,4 +97,6 @@ protected:
     void checkAuthenticationError(Object object);
 
     std::uint64_t nextQueryId();
+
+    std::string findLargestNonSystemDisk() const;
 };

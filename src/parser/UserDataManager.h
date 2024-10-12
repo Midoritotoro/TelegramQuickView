@@ -32,6 +32,8 @@ public:
 	[[nodiscard]] bool isTelegramCredentialsValid();
 	[[nodiscard]] bool isTelegramAuthCodeValid();
 
+	[[nodiscard]] QVariantList getTargetChannels();
+
 	void clearChannelsJsonArray();
 	void clearTelegramCredentials();
 
