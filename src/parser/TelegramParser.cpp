@@ -23,6 +23,7 @@ void TelegramParser::startChatsChecking() {
     }
 }
 
+
 auto TelegramParser::createFileDownloadQueryHandler() {
     return [this](Object object) {
         if (object)
@@ -88,8 +89,22 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 const auto chat_id = update_new_message.message_->chat_id_;
 
                 bool isTarget = false;
+
                 foreach(const auto& channel, _targetChannelsList) {
-                   
+                    sendQuery(
+                        td::td_api::make_object<td::td_api::searchPublicChat>(channel.toStdString()),
+                        [this, &chat_id, &isTarget](Object object) {
+                            if (object->get_id() == td::td_api::error::ID)
+                                return;
+
+                            const auto chat = td::move_tl_object_as<td::td_api::chat>(object);
+                            if (chat->id_ == chat_id)
+                                isTarget = true;
+                        }
+                    );
+
+                    if (isTarget)
+                        break;
                 }
                 // Если chat_id не находится в тех чатах, что указал пользователь, то return
 
@@ -124,15 +139,13 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                     case td::td_api::messageDocument::ID:
                         mediaId = static_cast<td::td_api::messageDocument&>(*update_new_message.message_->content_).document_->document_->id_;
                         break;
-
-                    default:
-                        return;
                 }
 
-                sendQuery(
-                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
-                    createFileDownloadQueryHandler()
-                );
+                if (mediaId > 0)
+                    sendQuery(
+                        td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
+                        createFileDownloadQueryHandler()
+                    );
             },
             [](auto& update) {}));
 
