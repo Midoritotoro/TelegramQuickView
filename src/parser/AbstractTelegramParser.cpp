@@ -9,8 +9,11 @@
 
 #include <chrono>
 
+#include <QFile>
+#include <QDir>
 
-TelegramAuthorizer::TelegramAuthorizer() :
+
+AbstractTelegramParser::AbstractTelegramParser() :
       _clientId(0)
     , _isCredentialsAccepted(false)
     , _isAuthCodeAccepted(false)
@@ -25,9 +28,19 @@ TelegramAuthorizer::TelegramAuthorizer() :
 
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
 
-    std::string path = findLargestNonSystemDisk();
-    // ...
+    const auto& largestDiskPath = findLargestNonSystemDisk();
+    const auto tempDirectoryPath = largestDiskPath + PROJECT_NAME + "_temp";
+    
+    QDir dir(tempDirectoryPath);
 
+    if (dir.exists(tempDirectoryPath) == false)
+        dir.mkdir(tempDirectoryPath);
+
+    dir.mkdir(tempDirectoryPath + "\\test");
+
+    _databaseDirectory = dir.absolutePath().toStdString();
+    _filesDirectory = dir.absolutePath().toStdString() + "\\test";
+   
     _userDataManager = std::make_unique<UserDataManager>();
 
     if (_userDataManager->isTelegramCredentialsValid())
@@ -48,7 +61,6 @@ TelegramAuthorizer::TelegramAuthorizer() :
     });
 
     connect(_authDialog.get(), &AuthenticationDialog::authCodeAccepted, [this](const QString& code) {
-        qDebug() << "AuthCode: " << code;
         setAuthorizationCode(code.toStdString());
        });
 
@@ -58,7 +70,7 @@ TelegramAuthorizer::TelegramAuthorizer() :
         });
 }
 
-void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& credentials) {
+void AbstractTelegramParser::setTelegramCredentials(const TelegramCredentials& credentials) {
     _telegramCredentials = credentials;
 
     for (;;) {
@@ -74,7 +86,7 @@ void TelegramAuthorizer::setTelegramCredentials(const TelegramCredentials& crede
     }
 }
 
-void TelegramAuthorizer::setAuthorizationCode(std::string code) {
+void AbstractTelegramParser::setAuthorizationCode(std::string code) {
     _authorizationCode = code;
 
     for (;;) {
@@ -88,14 +100,14 @@ void TelegramAuthorizer::setAuthorizationCode(std::string code) {
     }
 }
 
-auto TelegramAuthorizer::createAuthenticationQueryHandler() {
+auto AbstractTelegramParser::createAuthenticationQueryHandler() {
     return [this, id = _authenticationQueryId](Object object) {
         if (id == _authenticationQueryId)
             checkAuthenticationError(std::move(object));
         };
 }
 
-bool TelegramAuthorizer::sendTelegramAuthCode() {
+bool AbstractTelegramParser::sendTelegramAuthCode() {
     if (_authorizationState->get_id() != td::td_api::authorizationStateWaitCode::ID)
         return false;
 
@@ -107,15 +119,7 @@ bool TelegramAuthorizer::sendTelegramAuthCode() {
     return true;
 }
 
-void TelegramAuthorizer::setDatabaseDirectory(std::string path) {
-    _databaseDirectory = path;
-}
-
-void TelegramAuthorizer::setFilesDirectory(std::string path) {
-    _filesDirectory = path;
-}
-
-void TelegramAuthorizer::sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler) {
+void AbstractTelegramParser::sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler) {
     const auto queryId = nextQueryId();
 
     if (handler)
@@ -124,7 +128,7 @@ void TelegramAuthorizer::sendQuery(td::td_api::object_ptr<td::td_api::Function> 
     _clientManager->send(_clientId, queryId, std::move(f));
 }
 
-void TelegramAuthorizer::processResponse(td::ClientManager::Response response) {
+void AbstractTelegramParser::processResponse(td::ClientManager::Response response) {
     if (!response.object)
         return;
 
@@ -139,7 +143,7 @@ void TelegramAuthorizer::processResponse(td::ClientManager::Response response) {
     }
 }
 
-void TelegramAuthorizer::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
+void AbstractTelegramParser::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
     td::td_api::downcast_call(
         *update, overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {
@@ -154,28 +158,27 @@ void TelegramAuthorizer::processUpdate(td::td_api::object_ptr<td::td_api::Object
     );
 }
 
-void TelegramAuthorizer::on_authorizationStateUpdate() {
+void AbstractTelegramParser::on_authorizationStateUpdate() {
     _authenticationQueryId++;
 
     td::td_api::downcast_call(*_authorizationState,
         overloaded(
             [this](td::td_api::authorizationStateReady&) {
-                qDebug() << "td::td_api::authorizationStateReady&";
+                emit userAuthorized();
                 _isAuthCodeAccepted = true;
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
+                if (_authDialog)
+                    _authDialog->close();
             },
             [this](td::td_api::authorizationStateLoggingOut&) {
-                qDebug() << "td::td_api::authorizationStateLoggingOut&";
                 _isAuthCodeAccepted = false;
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateClosed&) {
-                qDebug() << "td::td_api::authorizationStateClosed&";
                 _isAuthCodeAccepted = false;
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateWaitPhoneNumber&) {
-                qDebug() << "td::td_api::authorizationStateWaitPhoneNumber&";
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 sendQuery(
@@ -184,21 +187,18 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 );
             },
             [this](td::td_api::authorizationStateWaitCode&) {
-                qDebug() << "td::td_api::authorizationStateWaitCode&";
                 _isAuthCodeAccepted = false;
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 if (_authorizationCode.empty())
                     return;
 
-                qDebug() << "codeSended: " << _authorizationCode;
                 sendQuery(
                     td::td_api::make_object<td::td_api::checkAuthenticationCode>(_authorizationCode),
                     createAuthenticationQueryHandler()
                 );
             },
             [this](td::td_api::authorizationStateWaitTdlibParameters&) {
-                qDebug() << "td::td_api::authorizationStateWaitTdlibParameters&";
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 if (_telegramCredentials.isEmpty())
@@ -224,14 +224,17 @@ void TelegramAuthorizer::on_authorizationStateUpdate() {
                 request->device_model_ = "Desktop";
                 request->application_version_ = "1.0";
 
-                sendQuery(std::move(request), createAuthenticationQueryHandler());
+                sendQuery(
+                    std::move(request),
+                    createAuthenticationQueryHandler()
+                );
             },
             [](auto& update) {}
         )
     );
 }
 
-void TelegramAuthorizer::checkAuthenticationError(Object object) {
+void AbstractTelegramParser::checkAuthenticationError(Object object) {
     if (object->get_id() == td::td_api::error::ID) {
         auto error = td::move_tl_object_as<td::td_api::error>(object);
         std::cout << "Error: " << to_string(error) << std::flush;
@@ -239,34 +242,33 @@ void TelegramAuthorizer::checkAuthenticationError(Object object) {
     }
 }
 
-std::string TelegramAuthorizer::findLargestNonSystemDisk() const {
+QString AbstractTelegramParser::findLargestNonSystemDisk() const {
     qint64 maximumSize = 0;
     QString driverName = "";
 
-    foreach(const auto& storage, QStorageInfo::mountedVolumes()) {
+    foreach(const auto& storage, QStorageInfo::mountedVolumes())
         if (storage.isValid() && storage.isReady())
             if (storage.isReadOnly() == false)
                 if (storage.bytesFree() > maximumSize) {
                     maximumSize = storage.bytesFree();
                     driverName = storage.rootPath();
-        }
-    }
+                }
 
-    return driverName.toStdString();
+    return driverName;
 }
 
 
-std::uint64_t TelegramAuthorizer::nextQueryId() {
+std::uint64_t AbstractTelegramParser::nextQueryId() {
     return ++_currentQueryId;
 }
 
-bool TelegramAuthorizer::isCredentialsAccepted() const noexcept {
+bool AbstractTelegramParser::isCredentialsAccepted() const noexcept {
     return _isCredentialsAccepted 
         ? _userDataManager->isTelegramCredentialsValid() 
         : _isAuthCodeAccepted;
 }
 
-bool TelegramAuthorizer::isAuthorized() const noexcept {
+bool AbstractTelegramParser::isAuthorized() const noexcept {
     return _isAuthCodeAccepted 
         ? _userDataManager->isTelegramAuthCodeValid() 
         : _isAuthCodeAccepted;

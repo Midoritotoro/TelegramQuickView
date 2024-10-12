@@ -46,7 +46,7 @@ auto overloaded(F... f) {
 }
 
 
-class TelegramAuthorizer: public QObject
+class AbstractTelegramParser: public QObject
 {
     Q_OBJECT
 protected:
@@ -69,22 +69,21 @@ private:
 
     std::unique_ptr<AuthenticationDialog> _authDialog = nullptr;
 public:
-    TelegramAuthorizer();
+    AbstractTelegramParser();
 
     void setTelegramCredentials(const TelegramCredentials& credentials);
     void setAuthorizationCode(std::string code);
 
     bool sendTelegramAuthCode();
 
-    void setDatabaseDirectory(std::string path);
-    void setFilesDirectory(std::string path);
-
     [[nodiscard]] bool isCredentialsAccepted() const noexcept;
     [[nodiscard]] bool isAuthorized() const noexcept;
 
-    inline TelegramAuthorizer& operator=(const TelegramAuthorizer&) {
+    inline AbstractTelegramParser& operator=(const AbstractTelegramParser&) {
         return *this;
     }
+Q_SIGNALS:
+    void userAuthorized();
 protected:
     virtual void processResponse(td::ClientManager::Response response);
     virtual void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
@@ -98,5 +97,5 @@ protected:
 
     std::uint64_t nextQueryId();
 
-    std::string findLargestNonSystemDisk() const;
+    [[nodiscard]] QString findLargestNonSystemDisk() const;
 };
