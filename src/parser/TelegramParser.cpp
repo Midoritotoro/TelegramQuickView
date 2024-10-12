@@ -7,16 +7,22 @@
 #include <QDebug>
 
 TelegramParser::TelegramParser() :
-	TelegramAuthorizer()
+    AbstractTelegramParser()
     , _sqlManager(std::make_unique<PostSqlManager>())
 {
+    setlocale(LC_ALL, "");
+
     foreach(const auto& element, _userDataManager->getTargetChannels())
         _targetChannelsList.append(element.toString());
-    
-    connect(this, &TelegramAuthorizer::userAuthorized, [this]() {
+
+    connect(this, &AbstractTelegramParser::userAuthorized, [this]() {
         _Future = std::async(std::launch::async,
             &TelegramParser::startChatsChecking, this);
-    });
+        });
+
+    if (isAuthorized())
+        _Future = std::async(std::launch::async,
+            &TelegramParser::startChatsChecking, this);
 }
 
 void TelegramParser::startChatsChecking() {
@@ -75,8 +81,6 @@ std::string TelegramParser::getChatTitle(std::int64_t chat_id) const {
 }
 
 void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
-    setlocale(LC_ALL, "Rus");
-
     td::td_api::downcast_call(
         *update, overloaded(
             [this](td::td_api::updateNewChat& update_new_chat) {  
@@ -97,24 +101,25 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 foreach(const auto& channel, _targetChannelsList) {
                     sendQuery(
                         td::td_api::make_object<td::td_api::searchPublicChat>(channel.toStdString()),
-                        [this, chat_id, &isTarget](Object object) {
+                        [&, isTarget, chat_id](Object object) mutable {
                             if (object->get_id() == td::td_api::error::ID)
                                 return;
 
                             const auto chat = td::move_tl_object_as<td::td_api::chat>(object);
-                            
-                            std::cout << chat->id_ << chat_id;
-                            if (chat->id_ == chat_id)
+
+                            qDebug() << "Чат из списка целей: " << chat->id_;
+                            qDebug() << "Чат, в котором появилось новое сообщение: " << chat_id;
+
+                            if (chat->id_ == chat_id) {
                                 isTarget = true;
+                                qDebug() << isTarget;
+                            }
                         }
                     );
-
-                    if (isTarget)
-                        break;
                 }
 
                 if (isTarget == false) {
-                    std::cout << "Канал не находится в списке целей для парсера" << "Returned";
+                    qDebug() << QString::fromUtf8("Канал не находится в списке целей для парсера");
                     return;
                 }
 
@@ -150,13 +155,13 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                         break;
                 }
 
-                if (mediaId > 0)
+                if (mediaId > 0) {
                     sendQuery(
                         td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
                         createFileDownloadQueryHandler()
                     );
+                    qDebug() << "Downloaded!";
+                }
             },
             [](auto& update) {}));
-
-    processUpdate(std::move(update));
 }

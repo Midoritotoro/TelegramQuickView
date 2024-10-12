@@ -40,10 +40,10 @@ SET(PARSER_SOURCES src/parser/main.cpp
 	src/parser/AuthenticationDialog.cpp
 	src/parser/AuthenticationDialog.h
 
-	src/parser/TelegramAuthorizer.cpp
-	src/parser/TelegramAuthorizer.h
 	src/parser/AbstractTelegramParser.cpp
 	src/parser/AbstractTelegramParser.h
+	src/parser/TelegramParser.cpp
+	src/parser/TelegramParser.h
 	src/parser/PostSqlManager.cpp
 	src/parser/PostSqlManager.h
 )

@@ -12,8 +12,6 @@ private:
 	std::unique_ptr<PostSqlManager> _sqlManager = nullptr;
 
 	QStringList _targetChannelsList;
-
-	std::future<void> _Future;
 public:
 	TelegramParser();
 protected:

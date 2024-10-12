@@ -1,4 +1,4 @@
-﻿#include "TelegramAuthorizer.h"
+﻿#include "AbstractTelegramParser.h"
 
 #include <cstdint>
 #include <iostream>
@@ -13,18 +13,17 @@
 #include <QDir>
 
 
-AbstractTelegramParser::AbstractTelegramParser() :
-      _clientId(0)
+AbstractTelegramParser::AbstractTelegramParser():
+      _clientId(_clientManager->create_client_id())
     , _isCredentialsAccepted(false)
     , _isAuthCodeAccepted(false)
     , _currentQueryId(0)
     , _authenticationQueryId(0)
-    
+    , _userDataManager(std::make_unique<UserDataManager>())
+    , _authDialog(std::make_unique<AuthenticationDialog>())
+    , _clientManager(std::make_unique<td::ClientManager>())
 {
     td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(0));
-
-    _clientManager = std::make_unique<td::ClientManager>();
-    _clientId = _clientManager->create_client_id();
 
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
 
@@ -40,34 +39,34 @@ AbstractTelegramParser::AbstractTelegramParser() :
 
     _databaseDirectory = dir.absolutePath().toStdString();
     _filesDirectory = dir.absolutePath().toStdString() + "\\test";
-   
-    _userDataManager = std::make_unique<UserDataManager>();
 
+    authorizationCheck();
+
+    connect(_authDialog.get(), &AuthenticationDialog::credentialsAccepted, [this](const TelegramCredentials& credentials) {
+        setTelegramCredentials(credentials);
+        });
+
+    connect(_authDialog.get(), &AuthenticationDialog::authCodeAccepted, [this](const QString& code) {
+        setAuthorizationCode(code.toStdString());
+        });
+
+    connect(_authDialog.get(), &AuthenticationDialog::needSendCodeAgain, [this]() {
+        if (sendTelegramAuthCode() == false)
+            _authDialog->shake();
+        });
+}
+
+void AbstractTelegramParser::authorizationCheck() {
     if (_userDataManager->isTelegramCredentialsValid())
         setTelegramCredentials(_userDataManager->getTelegramCredentials());
 
     if (isCredentialsAccepted() && isAuthorized())
         return;
 
-    _authDialog = std::make_unique<AuthenticationDialog>();
-
     if (isCredentialsAccepted() && isAuthorized() == false)
         _authDialog->toSecondFrame();
 
     _authDialog->show();
-
-    connect(_authDialog.get(), &AuthenticationDialog::credentialsAccepted, [this](const TelegramCredentials& credentials) {
-        setTelegramCredentials(credentials);
-    });
-
-    connect(_authDialog.get(), &AuthenticationDialog::authCodeAccepted, [this](const QString& code) {
-        setAuthorizationCode(code.toStdString());
-       });
-
-    connect(_authDialog.get(), &AuthenticationDialog::needSendCodeAgain, [this]() {
-        if (sendTelegramAuthCode() == false)
-            _authDialog->shake();
-        });
 }
 
 void AbstractTelegramParser::setTelegramCredentials(const TelegramCredentials& credentials) {
@@ -165,6 +164,7 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
         overloaded(
             [this](td::td_api::authorizationStateReady&) {
                 emit userAuthorized();
+                qDebug() << "emited";
                 _isAuthCodeAccepted = true;
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
                 if (_authDialog)

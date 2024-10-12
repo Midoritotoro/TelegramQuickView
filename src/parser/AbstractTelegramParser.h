@@ -59,6 +59,8 @@ protected:
     std::map<std::uint64_t, std::function<void(Object)>> _handlers;
 
     std::unique_ptr<UserDataManager> _userDataManager = nullptr;
+
+    std::future<void> _Future;
 private:
     bool _isCredentialsAccepted, _isAuthCodeAccepted;
 
@@ -85,6 +87,8 @@ public:
 Q_SIGNALS:
     void userAuthorized();
 protected:
+    void authorizationCheck();
+
     virtual void processResponse(td::ClientManager::Response response);
     virtual void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
 
