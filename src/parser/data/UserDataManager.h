@@ -15,7 +15,7 @@ typedef struct _TelegramCredentials {
 } TelegramCredentials;
 
 
-class UserDataManager
+class UserDataManager final
 {
 private:
 	QFile _jsonFile;
@@ -32,23 +32,19 @@ public:
 	[[nodiscard]] bool isTelegramCredentialsValid();
 	[[nodiscard]] bool isTelegramAuthCodeValid();
 
-	[[nodiscard]] QVariantList getTargetChannels();
-
-	void clearChannelsJsonArray();
-	void clearTelegramCredentials();
+	[[nodiscard]] QVariantList getUsernamesOfTargetChannels();
+	[[nodiscard]] QVariantList getIdsOfTargetChannels();
 
 	bool setTelegramCredentials(const TelegramCredentials& telegramCredentials);
 
-	void setTargetChannels(QStringList channels);
-	void setLastPostsCountForChannels(int count);
-	void setPhoneNumberCode(QString& code);
-};
+	void setTargetChannels(QStringList usernameList);
+	void setTargetChannelsChatIds(QList<qint64> idsList);
 
-//TelegramAuthorizer telegramAuthorizer;
-//TelegramCredentials telegramCredentials;
-//
-//telegramCredentials.apiId = apiId.toInt();
-//telegramCredentials.apiHash = apiHash.toString().toStdString();
-//telegramCredentials.phoneNumber = phoneNumber.toString().toStdString();
-//
-//bool isTelegramCredentialsValid = telegramAuthorizer.setTelegramCredentials(telegramCredentials);
+	void setLastPostsCountForChannels(int count);
+	void setPhoneNumberCode(const QString& code);
+private:
+	void clearUsernamesOfChannels();
+	void clearChatIdsOfChannels();
+
+	void clearTelegramCredentials();
+};

@@ -12,12 +12,16 @@
 #include <QTimer>
 #include <QCloseEvent>
 
-#include "UserDataManager.h"
+#include "data/UserDataManager.h"
+#include "utils.h"
+
 
 class AuthenticationDialog: public QDialog
 {
     Q_OBJECT
 private:
+    ErrorCodes _currentErrorCode;
+    int _sleepSeconds = 0;
     bool _shakeSwitch = true, _skipFirstAuthenticationStage = false, _canClose = false;
     QPushButton* _confirmCredentialsButton = nullptr, * _confirmAuthCodeButton = nullptr, * _backToFirstFrameButton = nullptr, *_sendCodeAgainButton = nullptr;
     QLineEdit* _apiHashLineEdit = nullptr, *_apiIdLineEdit = nullptr, *_phoneNumberLineEdit = nullptr, *_telegramCodeLineEdit = nullptr;
@@ -27,7 +31,11 @@ public:
     AuthenticationDialog(QWidget* parent = nullptr);
 
     void shake();
+
+    void setSleepSeconds(int seconds);
+    void setErrorCode(ErrorCodes code);
     void setCloseAbility(bool close);
+
     void toSecondFrame();
     void toFirstFrame();
 
@@ -43,8 +51,11 @@ private:
 
     void vacillate();
     void hideWidgets();
+
     void showWidgets();
     void updateWidgetsGeometry();
+
+    void paintErrorMessage(QPainter& painter);
 protected:
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;

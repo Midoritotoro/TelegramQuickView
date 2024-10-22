@@ -22,8 +22,7 @@ QString UserDataManager::getUserSettingsPath()
 	if (!writeDir.mkpath("."))
 		return "";
 
-	const auto fileName = writeDir.absolutePath() + "/userData.json";
-	return fileName;
+	return writeDir.absolutePath() + "/userData.json";
 #endif
 	return "";
 }
@@ -31,9 +30,9 @@ QString UserDataManager::getUserSettingsPath()
 QJsonDocument UserDataManager::getJsonDocument() {
 	QJsonDocument jsonDocument;
 
-	if (!_jsonFile.open(QIODevice::ReadOnly | QIODevice::Text))
+	if (!_jsonFile.open(QIODevice::ReadOnly | QIODevice::Text | QIODevice::ReadWrite))
 		return jsonDocument;
-
+	
 	const auto jsonData = _jsonFile.readAll();
 
 	jsonDocument = QJsonDocument::fromJson(jsonData);
@@ -44,8 +43,8 @@ QJsonDocument UserDataManager::getJsonDocument() {
 
 bool UserDataManager::isTelegramCredentialsValid() {
 	const auto credentials = getTelegramCredentials();
-	return QString::number(credentials.apiId).length() >= 5 == true
-			&& credentials.apiHash.length() >= 32 == true;
+	return QString::number(credentials.apiId).length() >= 5
+			&& credentials.apiHash.length() >= 32;
 }
 
 TelegramCredentials UserDataManager::getTelegramCredentials() {
@@ -82,17 +81,26 @@ bool UserDataManager::isTelegramAuthCodeValid() {
 }
 
 
-QVariantList UserDataManager::getTargetChannels() {
+QVariantList UserDataManager::getUsernamesOfTargetChannels() {
 	const auto jsonDocument = getJsonDocument();
 	const auto jsonObject = jsonDocument.object();
 
-	const auto channelsArray = jsonObject.value("channels").toArray();
+	return jsonObject.value("channels").
+		toObject().value("usernames").
+		toArray().toVariantList();
+}
 
-	return channelsArray.toVariantList();
+QVariantList UserDataManager::getIdsOfTargetChannels() {
+	const auto jsonDocument = getJsonDocument();
+	const auto jsonObject = jsonDocument.object();
+
+	return jsonObject.value("channels").
+		toObject().value("chat_ids").
+		toArray().toVariantList();
 }
 
 
-void UserDataManager::clearChannelsJsonArray() {
+void UserDataManager::clearUsernamesOfChannels() {
 	auto jsonDocument = getJsonDocument();
 	auto jsonObject = jsonDocument.object();
 
@@ -101,6 +109,23 @@ void UserDataManager::clearChannelsJsonArray() {
 
 	jsonObject.remove("channels");
 	jsonDocument.setObject(jsonObject);
+
+	_jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
+	_jsonFile.write(jsonDocument.toJson());
+	_jsonFile.close();
+}
+
+void UserDataManager::clearChatIdsOfChannels() {
+	auto jsonDocument = getJsonDocument();
+	auto jsonObject = jsonDocument.object();
+
+	auto channelsArray = jsonObject.value("channels").toObject();
+
+	if (channelsArray.value("chat_ids").isNull())
+		return;
+
+	channelsArray.remove("chat_ids");
+	jsonDocument.setObject(channelsArray);
 
 	_jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	_jsonFile.write(jsonDocument.toJson());
@@ -147,22 +172,48 @@ bool UserDataManager::setTelegramCredentials(const TelegramCredentials& telegram
 	return true;
 }
 
-void UserDataManager::setTargetChannels(QStringList channels) {
+void UserDataManager::setTargetChannels(QStringList usernameList) {
 	QJsonArray jsonArray;
 
 	auto jsonDocument = getJsonDocument();
 	auto currentDocumentObject = jsonDocument.object();
 
-	if (!currentDocumentObject.value("channels").toArray().isEmpty())
-		jsonArray = currentDocumentObject.value("channels").toArray();
+	auto channelsObject = currentDocumentObject.value("channels").toObject();
 
-	clearChannelsJsonArray();
+	if (!channelsObject.value("usernames").toArray().isEmpty())
+		jsonArray = channelsObject.value("usernames").toArray();
 
-	foreach(const QString & channel, channels)
+	clearUsernamesOfChannels();
+
+	foreach(const auto& channel, usernameList)
 		jsonArray.append(channel);
 
-	currentDocumentObject.insert("channels", jsonArray);
-	jsonDocument.setObject(currentDocumentObject);
+	channelsObject.insert("usernames", jsonArray);
+	jsonDocument.setObject(channelsObject);
+
+	_jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
+	_jsonFile.write(jsonDocument.toJson());
+	_jsonFile.close();
+}
+
+void UserDataManager::setTargetChannelsChatIds(QList<qint64> idsList) {
+	QJsonArray jsonArray;
+
+	auto jsonDocument = getJsonDocument();
+	auto currentDocumentObject = jsonDocument.object();
+
+	auto channelsObject = currentDocumentObject.value("channels").toObject();
+
+	if (!channelsObject.value("chat_ids").toArray().isEmpty())
+		jsonArray = channelsObject.value("chat_ids").toArray();
+
+	clearChatIdsOfChannels();
+
+	foreach(const auto channel, idsList)
+		jsonArray.append(channel);
+
+	channelsObject.insert("chat_ids", jsonArray);
+	jsonDocument.setObject(channelsObject);
 
 	_jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 	_jsonFile.write(jsonDocument.toJson());
@@ -182,7 +233,7 @@ void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
 	_jsonFile.close();
 }
 
-void UserDataManager::setPhoneNumberCode(QString& code) {
+void UserDataManager::setPhoneNumberCode(const QString& code) {
 	auto jsonDocument = getJsonDocument();
 	auto jsonObject = jsonDocument.object();
 

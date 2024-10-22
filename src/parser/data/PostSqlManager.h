@@ -15,6 +15,7 @@ typedef struct _TelegramMessage {
 	QStringList attachments;
 } TelegramMessage;
 
+
 class PostSqlManager {
 private:
 public:

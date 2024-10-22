@@ -8,6 +8,7 @@
 #include <QStorageInfo>
 
 #include <chrono>
+#include <regex>
 
 #include <QFile>
 #include <QDir>
@@ -17,10 +18,10 @@ AbstractTelegramParser::AbstractTelegramParser():
       _clientId(_clientManager->create_client_id())
     , _isCredentialsAccepted(false)
     , _isAuthCodeAccepted(false)
+    , _isWaiting(false)
     , _currentQueryId(0)
     , _authenticationQueryId(0)
     , _userDataManager(std::make_unique<UserDataManager>())
-    , _authDialog(std::make_unique<AuthenticationDialog>())
     , _clientManager(std::make_unique<td::ClientManager>())
 {
     td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(0));
@@ -41,32 +42,27 @@ AbstractTelegramParser::AbstractTelegramParser():
     _filesDirectory = dir.absolutePath().toStdString() + "\\test";
 
     authorizationCheck();
-
-    connect(_authDialog.get(), &AuthenticationDialog::credentialsAccepted, [this](const TelegramCredentials& credentials) {
-        setTelegramCredentials(credentials);
-        });
-
-    connect(_authDialog.get(), &AuthenticationDialog::authCodeAccepted, [this](const QString& code) {
-        setAuthorizationCode(code.toStdString());
-        });
-
-    connect(_authDialog.get(), &AuthenticationDialog::needSendCodeAgain, [this]() {
-        if (sendTelegramAuthCode() == false)
-            _authDialog->shake();
-        });
 }
 
 void AbstractTelegramParser::authorizationCheck() {
     if (_userDataManager->isTelegramCredentialsValid())
         setTelegramCredentials(_userDataManager->getTelegramCredentials());
 
+    qDebug() << isCredentialsAccepted() << isAuthorized();
     if (isCredentialsAccepted() && isAuthorized())
         return;
 
-    if (isCredentialsAccepted() && isAuthorized() == false)
-        _authDialog->toSecondFrame();
+    if (_authDialog == nullptr)
+        _authDialog = std::make_unique<AuthenticationDialog>();
 
-    _authDialog->show();
+    if (isCredentialsAccepted() && isAuthorized() == false) {
+        _authDialog->toSecondFrame();
+        _authDialog->show();
+
+        connect(_authDialog.get(), &AuthenticationDialog::credentialsAccepted, this, &AbstractTelegramParser::setTelegramCredentials);
+        connect(_authDialog.get(), &AuthenticationDialog::authCodeAccepted, this, &AbstractTelegramParser::setAuthorizationCode);
+        connect(_authDialog.get(), &AuthenticationDialog::needSendCodeAgain, this, &AbstractTelegramParser::sendTelegramAuthCode);
+    }
 }
 
 void AbstractTelegramParser::setTelegramCredentials(const TelegramCredentials& credentials) {
@@ -85,8 +81,8 @@ void AbstractTelegramParser::setTelegramCredentials(const TelegramCredentials& c
     }
 }
 
-void AbstractTelegramParser::setAuthorizationCode(std::string code) {
-    _authorizationCode = code;
+void AbstractTelegramParser::setAuthorizationCode(const QString& code) {
+    _authorizationCode = code.toStdString();
 
     for (;;) {
         processResponse(_clientManager->receive(10));
@@ -107,8 +103,10 @@ auto AbstractTelegramParser::createAuthenticationQueryHandler() {
 }
 
 bool AbstractTelegramParser::sendTelegramAuthCode() {
-    if (_authorizationState->get_id() != td::td_api::authorizationStateWaitCode::ID)
+    if (_authorizationState->get_id() != td::td_api::authorizationStateWaitCode::ID) {
+        _authDialog->shake();
         return false;
+    }
 
     sendQuery(
         td::td_api::make_object<td::td_api::resendAuthenticationCode>(),
@@ -128,6 +126,9 @@ void AbstractTelegramParser::sendQuery(td::td_api::object_ptr<td::td_api::Functi
 }
 
 void AbstractTelegramParser::processResponse(td::ClientManager::Response response) {
+    if (_isWaiting)
+        return;
+
     if (!response.object)
         return;
 
@@ -143,6 +144,9 @@ void AbstractTelegramParser::processResponse(td::ClientManager::Response respons
 }
 
 void AbstractTelegramParser::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
+    if (_isWaiting)
+        return;
+
     td::td_api::downcast_call(
         *update, overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {
@@ -152,7 +156,9 @@ void AbstractTelegramParser::processUpdate(td::td_api::object_ptr<td::td_api::Ob
             [this](td::td_api::updateConnectionState&) {
                 on_authorizationStateUpdate();
             },
-            [](auto& update) {}
+            [](auto& update) {
+
+            }
         )
     );
 }
@@ -163,12 +169,22 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
     td::td_api::downcast_call(*_authorizationState,
         overloaded(
             [this](td::td_api::authorizationStateReady&) {
+                qDebug() << "authorizationStateReady";
                 emit userAuthorized();
-                qDebug() << "emited";
+
                 _isAuthCodeAccepted = true;
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
-                if (_authDialog)
+
+                if (_authDialog) {
+                    disconnect(_authDialog.get(), &AuthenticationDialog::credentialsAccepted, this, &AbstractTelegramParser::setTelegramCredentials);
+                    disconnect(_authDialog.get(), &AuthenticationDialog::authCodeAccepted, this, &AbstractTelegramParser::setAuthorizationCode);
+                    disconnect(_authDialog.get(), &AuthenticationDialog::needSendCodeAgain, this, &AbstractTelegramParser::sendTelegramAuthCode);
+
+                    qDebug() << "close";
                     _authDialog->close();
+                    _authDialog.reset();
+                    _authDialog = nullptr;
+                }
             },
             [this](td::td_api::authorizationStateLoggingOut&) {
                 _isAuthCodeAccepted = false;
@@ -179,6 +195,7 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
             },
             [this](td::td_api::authorizationStateWaitPhoneNumber&) {
+                qDebug() << "authorizationStateWaitPhoneNumber";
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 sendQuery(
@@ -187,6 +204,7 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
                 );
             },
             [this](td::td_api::authorizationStateWaitCode&) {
+                qDebug() << "authorizationStateWaitCode";
                 _isAuthCodeAccepted = false;
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
@@ -197,8 +215,11 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
                     td::td_api::make_object<td::td_api::checkAuthenticationCode>(_authorizationCode),
                     createAuthenticationQueryHandler()
                 );
+
+                _userDataManager->setPhoneNumberCode(QString::fromStdString(_authorizationCode));
             },
             [this](td::td_api::authorizationStateWaitTdlibParameters&) {
+                qDebug() << "authorizationStateWaitTdlibParameters";
                 _telegramCredentials.isEmpty() ? _isCredentialsAccepted = false : _isCredentialsAccepted = true;
 
                 if (_telegramCredentials.isEmpty())
@@ -237,8 +258,63 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
 void AbstractTelegramParser::checkAuthenticationError(Object object) {
     if (object->get_id() == td::td_api::error::ID) {
         auto error = td::move_tl_object_as<td::td_api::error>(object);
-        std::cout << "Error: " << to_string(error) << std::flush;
+        std::cout << to_string(error) << error->code_ << std::endl;
+
+        handleError(error);
         on_authorizationStateUpdate();
+    }
+}
+
+void AbstractTelegramParser::handleTooManyRequestsError(const td::td_api::object_ptr<td::td_api::error>& error) {
+    std::smatch match;
+    int seconds = 0;
+
+    if (std::regex_search(error->message_, match, std::regex("retry after (\\d+)")))
+        seconds = std::stoi(match[1]);
+
+    if (seconds != 0) {
+        _isWaiting = true;
+
+        _authDialog->setSleepSeconds(seconds);
+        _authDialog->shake();
+
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    }
+
+    _isWaiting = false;
+}
+
+void AbstractTelegramParser::handleError(const td::td_api::object_ptr<td::td_api::error>& error) {
+    switch (error->code_) {
+        case ErrorCodes::TooManyRequests:
+            _authDialog->setErrorCode(ErrorCodes::TooManyRequests);
+            handleTooManyRequestsError(error);
+
+            _authDialog->repaint();
+            break;
+
+        case ErrorCodes::IncorrectApiHashOrId:
+            _authDialog->setErrorCode(ErrorCodes::IncorrectApiHashOrId);
+            _authDialog->shake();
+
+            _authDialog->repaint();
+            break;
+
+        case ErrorCodes::IncorrectAuthCode:
+            _authDialog->setErrorCode(ErrorCodes::IncorrectAuthCode);
+            _authDialog->shake();
+
+            _authDialog->repaint();
+
+            _authorizationCode.erase(_authorizationCode.begin(), _authorizationCode.end());
+            break;
+
+        case ErrorCodes::IncorrectPhoneNumber:
+            _authDialog->setErrorCode(ErrorCodes::IncorrectPhoneNumber);
+            _authDialog->shake();
+
+            _authDialog->repaint();
+            break;
     }
 }
 

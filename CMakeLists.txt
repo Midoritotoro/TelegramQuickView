@@ -35,17 +35,19 @@ SET(PARSER_SOURCES src/parser/main.cpp
 	src/parser/effects/OpenGLBlur.cpp
 	src/parser/effects/OpenGLBlur.h
 
-	src/parser/UserDataManager.cpp
-	src/parser/UserDataManager.h
+	src/parser/data/UserDataManager.cpp
+	src/parser/data/UserDataManager.h
 	src/parser/AuthenticationDialog.cpp
 	src/parser/AuthenticationDialog.h
 
+	src/parser/utils.h
 	src/parser/AbstractTelegramParser.cpp
 	src/parser/AbstractTelegramParser.h
 	src/parser/TelegramParser.cpp
 	src/parser/TelegramParser.h
-	src/parser/PostSqlManager.cpp
-	src/parser/PostSqlManager.h
+
+	src/parser/data/PostSqlManager.cpp
+	src/parser/data/PostSqlManager.h
 )
 
 SET(MAIN_SOURCES main.cpp

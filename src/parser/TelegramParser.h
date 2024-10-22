@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "AbstractTelegramParser.h"
-#include "PostSqlManager.h"
+#include "data/PostSqlManager.h"
 
 
 class TelegramParser: public AbstractTelegramParser {
@@ -12,6 +12,7 @@ private:
 	std::unique_ptr<PostSqlManager> _sqlManager = nullptr;
 
 	QStringList _targetChannelsList;
+	std::future<void> _Future;
 public:
 	TelegramParser();
 protected:

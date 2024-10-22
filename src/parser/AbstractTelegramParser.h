@@ -9,41 +9,8 @@
 #include <string>
 #include <future>
 
-#include <functional>
 
 #include "AuthenticationDialog.h"
-#include "UserDataManager.h"
-
-
-namespace detail {
-    template <class... Fs>
-    struct overload;
-
-    template <class F>
-    struct overload<F> : public F {
-        explicit overload(F f) : F(f) {
-        }
-    };
-
-    template <class F, class... Fs>
-
-    struct overload<F, Fs...>
-        : public overload<F>
-        , public overload<Fs...> {
-        overload(F f, Fs... fs) : overload<F>(f), overload<Fs...>(fs...) {
-        }
-
-        using overload<F>::operator();
-        using overload<Fs...>::operator();
-    };
-}  // namespace detail
-
-
-template <class... F>
-
-auto overloaded(F... f) {
-    return detail::overload<F...>(f...);
-}
 
 
 class AbstractTelegramParser: public QObject
@@ -52,7 +19,7 @@ class AbstractTelegramParser: public QObject
 protected:
     using Object = td::td_api::object_ptr<td::td_api::Object>;
 
-    std::unique_ptr<td::ClientManager> _clientManager;
+    std::unique_ptr<td::ClientManager> _clientManager = nullptr;
     std::int32_t _clientId;
 
     td::td_api::object_ptr<td::td_api::AuthorizationState> _authorizationState;
@@ -60,7 +27,7 @@ protected:
 
     std::unique_ptr<UserDataManager> _userDataManager = nullptr;
 
-    std::future<void> _Future;
+    bool _isWaiting;
 private:
     bool _isCredentialsAccepted, _isAuthCodeAccepted;
 
@@ -74,7 +41,7 @@ public:
     AbstractTelegramParser();
 
     void setTelegramCredentials(const TelegramCredentials& credentials);
-    void setAuthorizationCode(std::string code);
+    void setAuthorizationCode(const QString& code);
 
     bool sendTelegramAuthCode();
 
@@ -90,7 +57,7 @@ protected:
     void authorizationCheck();
 
     virtual void processResponse(td::ClientManager::Response response);
-    virtual void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
+    void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
 
     void sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler);
 
@@ -102,4 +69,7 @@ protected:
     std::uint64_t nextQueryId();
 
     [[nodiscard]] QString findLargestNonSystemDisk() const;
+
+    void handleTooManyRequestsError(const td::td_api::object_ptr<td::td_api::error>& error);
+    void handleError(const td::td_api::object_ptr<td::td_api::error>& error);
 };

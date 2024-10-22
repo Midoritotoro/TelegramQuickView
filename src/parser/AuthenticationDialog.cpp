@@ -23,6 +23,7 @@ namespace {
     const QString incorrectCredentialsMessage = "Введены неверные данные Telegram. Проверьте их корректность.";
     const QString incorrectPhoneMessage = "Ошибка при отправке кода Telegram. Проверьте корректность номера телефона.";
     const QString incorrectCodeMessage = "Ошибка при входе в аккаунт Telegram. Проверьте корректность введённого кода.";
+    const QString tooManyRequestsMessage = "Слишком много запросов, повторите через %1 секунд";
 
     const QString buttonStyle = "QPushButton{\n"
             "background: Wheat;\n"
@@ -55,6 +56,7 @@ namespace {
 
 AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     QDialog(parent)
+    , _currentErrorCode(ErrorCodes::OK)
 {
     setWindowTitle(PROJECT_NAME);
         
@@ -114,30 +116,34 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     _telegramCodeLineEdit->setTextMargins(0, 0, 0, 5);
 
     connect(_confirmCredentialsButton, &QPushButton::clicked, [this]() {
-        toSecondFrame();
+        if (_skipFirstAuthenticationStage) {
+            toSecondFrame();
+            return;
+        }
         
         const auto apiHash = _apiHashLineEdit->text().toStdString();
         const auto apiId = _apiIdLineEdit->text().toInt();
         const auto phoneNumber = _phoneNumberLineEdit->text().toStdString();
 
-        if (_skipFirstAuthenticationStage == false) {
-            TelegramCredentials credentials;
+        TelegramCredentials credentials;
 
-            credentials.apiHash = apiHash;
-            credentials.apiId = apiId;
-            credentials.phoneNumber = phoneNumber.length() != 0 ?
-                phoneNumber.at(0) == '+' ?
-                phoneNumber : "+" + phoneNumber : "";
+        credentials.apiHash = apiHash;
+        credentials.apiId = apiId;
+        credentials.phoneNumber = phoneNumber.length() != 0 ?
+            phoneNumber.at(0) == '+' ?
+            phoneNumber : "+" + phoneNumber : "";
 
-            emit credentialsAccepted(credentials);
-        }
+        if (credentials.isEmpty())
+            return;
+
+        emit credentialsAccepted(credentials);
+        toSecondFrame();
     });
 
     connect(_confirmAuthCodeButton, &QPushButton::clicked, [this]() {
         const QString& mobilePhoneCode = _telegramCodeLineEdit->text();
 
         if (mobilePhoneCode.length() < 5) {
-            //_incorrectTelegramCodeLabel->show();
             _telegramCodeLineEdit->clear();
             shake();
             return;
@@ -155,6 +161,14 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     });
         
     toFirstFrame();
+}
+
+void AuthenticationDialog::setSleepSeconds(int seconds) {
+    _sleepSeconds = seconds;
+}
+
+void AuthenticationDialog::setErrorCode(ErrorCodes code) {
+    _currentErrorCode = code;
 }
 
 void AuthenticationDialog::setCloseAbility(bool close) {
@@ -224,15 +238,14 @@ void AuthenticationDialog::paintEvent(QPaintEvent* event) {
     QRect rect((width() - authFrameWidth) / 2., (height() - authFrameHeight) / 2., authFrameWidth, authFrameHeight);
 
     drawRoundedCorners(painter, rect, 10);
+    paintErrorMessage(painter);
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
-    if (_canClose) {
+    if (_canClose) 
         QWidget::closeEvent(event);
-    }
-    else {
+    else
         shake();
-    }
 }
 
 void AuthenticationDialog::vacillate()
@@ -244,19 +257,51 @@ void AuthenticationDialog::vacillate()
 }
 
 void AuthenticationDialog::hideWidgets() {
-    foreach(auto item, children()) {
-        if (qobject_cast<QWidget*>(item)) {
+    foreach(auto item, children())
+        if (qobject_cast<QWidget*>(item))
             qobject_cast<QWidget*>(item)->hide();
-        }
-    }
 }
 
 void AuthenticationDialog::showWidgets() {
-    foreach(auto item, children()) {
-        if (qobject_cast<QWidget*>(item)) {
-            qobject_cast<QWidget*>(item)->show();
-        }
+    foreach(auto item, children())
+        if (qobject_cast<QWidget*>(item))
+            qobject_cast<QWidget*>(item)->show(); 
+}
+
+void AuthenticationDialog::paintErrorMessage(QPainter& painter) {
+    QString text;
+
+    switch (_currentErrorCode) {
+        case ErrorCodes::OK:
+            break;
+
+        case ErrorCodes::IncorrectApiHashOrId:
+            text = incorrectCredentialsMessage;
+            break;
+
+        case ErrorCodes::IncorrectAuthCode:
+            text = incorrectCodeMessage;
+            break;
+
+        case ErrorCodes::IncorrectPhoneNumber:
+            text = incorrectPhoneMessage;
+            break;
+
+        case ErrorCodes::TooManyRequests:
+            text = tooManyRequestsMessage.arg(_sleepSeconds);
+            break;
     }
+
+    QFont font("Arial", 16);
+
+    const auto errorTextSize = textSize(text, font);
+
+    QRect attachmentsCountTextRect(QPoint(), errorTextSize);
+    attachmentsCountTextRect.moveCenter(rect().center());
+
+    painter.setOpacity(1.0);
+    painter.setFont(font);
+    painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, text);
 }
 
 void AuthenticationDialog::drawRoundedCorners(QPainter& painter, QRect rect, int borderRadius) {
