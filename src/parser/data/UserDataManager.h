@@ -30,7 +30,6 @@ public:
 	[[nodiscard]] std::string getTelegramAuthCode();
 
 	[[nodiscard]] bool isTelegramCredentialsValid();
-	[[nodiscard]] bool isTelegramAuthCodeValid();
 
 	[[nodiscard]] QVariantList getUsernamesOfTargetChannels();
 	[[nodiscard]] QVariantList getIdsOfTargetChannels();
@@ -41,7 +40,6 @@ public:
 	void setTargetChannelsChatIds(QList<qint64> idsList);
 
 	void setLastPostsCountForChannels(int count);
-	void setPhoneNumberCode(const QString& code);
 private:
 	void clearUsernamesOfChannels();
 	void clearChatIdsOfChannels();

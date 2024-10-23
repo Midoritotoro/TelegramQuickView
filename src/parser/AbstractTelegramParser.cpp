@@ -48,7 +48,8 @@ AbstractTelegramParser::AbstractTelegramParser() :
 void AbstractTelegramParser::authorizationCheck() {
     if (_userDataManager->isTelegramCredentialsValid())
         setTelegramCredentials(_userDataManager->getTelegramCredentials());
-
+    
+    qDebug() << isCredentialsAccepted() << isAuthorized();
     if (isCredentialsAccepted() && isAuthorized())
         return;
 
@@ -179,7 +180,6 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
 
                 if (_authDialog) {
                     _authDialog->setCloseAbility(true);
-                    _authDialog->close();
                 }
 
                 _userDataManager->setTelegramCredentials(_telegramCredentials);
@@ -200,8 +200,6 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
                     td::td_api::make_object<td::td_api::setAuthenticationPhoneNumber>(_telegramCredentials.phoneNumber, nullptr),
                     createAuthenticationQueryHandler()
                 );
-
-                _userDataManager->setTelegramCredentials(_telegramCredentials);
             },
             [this](td::td_api::authorizationStateWaitCode&) {
                 qDebug() << "authorizationStateWaitCode";
@@ -217,7 +215,6 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
                 );
 
                 _userDataManager->setTelegramCredentials(_telegramCredentials);
-                _userDataManager->setPhoneNumberCode(QString::fromStdString(_authorizationCode));
             },
             [this](td::td_api::authorizationStateWaitTdlibParameters&) {
                 qDebug() << "authorizationStateWaitTdlibParameters";
@@ -346,7 +343,5 @@ bool AbstractTelegramParser::isCredentialsAccepted() const noexcept {
 }
 
 bool AbstractTelegramParser::isAuthorized() const noexcept {
-    return _isAuthCodeAccepted
-        ? _userDataManager->isTelegramAuthCodeValid()
-        : _isAuthCodeAccepted;
+    return _isAuthCodeAccepted;
 }

@@ -34,7 +34,7 @@ public:
 
     void setSleepSeconds(int seconds);
     void setErrorCode(ErrorCodes code);
-    void setCloseAbility(bool close);
+    void setCloseAbility(bool closeAbility);
 
     void toSecondFrame();
     void toFirstFrame();

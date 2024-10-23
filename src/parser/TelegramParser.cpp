@@ -117,6 +117,7 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 QVariantList chatIdsList = _userDataManager->getIdsOfTargetChannels();
 
                 foreach(const auto& chat_id, chatIdsList) {
+                    qDebug() << "Chat id: " << chat_id;
                     if (chat_id.toLongLong() == chat_id) {
                         isTarget = true;
                         break;

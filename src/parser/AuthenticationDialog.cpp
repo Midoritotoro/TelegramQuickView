@@ -26,21 +26,21 @@ namespace {
     const QString tooManyRequestsMessage = "Слишком много запросов, повторите через %1 секунд";
 
     const QString buttonStyle = "QPushButton{\n"
-            "background: Wheat;\n"
-            "color: black;\n"
-            "border-radius: 10px;\n"
+        "background: Wheat;\n"
+        "color: black;\n"
+        "border-radius: 10px;\n"
         "}\n"
         "QPushButton::hover { \n"
-            "background: NavajoWhite;\n"
+        "background: NavajoWhite;\n"
         "}";
 
     const QString backButtonStyle = "QPushButton{\n"
-            "background: rgb(128, 128, 128);\n"
-            "color: black;\n"
-            "border-radius: 10px;\n"
+        "background: rgb(128, 128, 128);\n"
+        "color: black;\n"
+        "border-radius: 10px;\n"
         "}\n"
         "QPushButton::hover { \n"
-            "background: rgb(148, 148, 148);\n"
+        "background: rgb(148, 148, 148);\n"
         "}";
 
     const QString lineEditStyle = "QLineEdit{\n"
@@ -60,11 +60,6 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 {
     setWindowTitle(PROJECT_NAME);
 
-    setAttribute(Qt::WA_DeleteOnClose, true);
-
-    foreach(const auto & child, children()) 
-        qobject_cast<QWidget*>(child)->setAttribute(Qt::WA_DeleteOnClose, true);
-        
     QString currentPath = QCoreApplication::applicationDirPath();
     QDir assetsDir(currentPath + "/../../assets/images");
 
@@ -109,7 +104,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     _apiHashLineEdit->setPlaceholderText("Api Hash");
     _apiIdLineEdit->setPlaceholderText("Api Id");
     _phoneNumberLineEdit->setPlaceholderText("Телефонный номер");
-    
+
     _apiHashLineEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     _phoneNumberLineEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     _apiIdLineEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
@@ -125,7 +120,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
             toSecondFrame();
             return;
         }
-        
+
         const auto apiHash = _apiHashLineEdit->text().toStdString();
         const auto apiId = _apiIdLineEdit->text().toInt();
         const auto phoneNumber = _phoneNumberLineEdit->text().toStdString();
@@ -143,7 +138,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 
         emit credentialsAccepted(credentials);
         toSecondFrame();
-    });
+        });
 
     connect(_confirmAuthCodeButton, &QPushButton::clicked, [this]() {
         const QString& mobilePhoneCode = _telegramCodeLineEdit->text();
@@ -155,16 +150,16 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
         }
 
         emit authCodeAccepted(mobilePhoneCode);
-    });
+        });
 
     connect(_backToFirstFrameButton, &QPushButton::clicked, [this]() {
         toFirstFrame();
-    });
+        });
 
     connect(_sendCodeAgainButton, &QPushButton::clicked, [this]() {
         emit needSendCodeAgain();
-    });
-        
+        });
+
     toFirstFrame();
 }
 
@@ -176,8 +171,10 @@ void AuthenticationDialog::setErrorCode(ErrorCodes code) {
     _currentErrorCode = code;
 }
 
-void AuthenticationDialog::setCloseAbility(bool close) {
-    _canClose = close;
+void AuthenticationDialog::setCloseAbility(bool closeAbility) {
+    _canClose = closeAbility;
+    if (_canClose)
+        close();
 }
 
 void AuthenticationDialog::toSecondFrame() {
@@ -247,7 +244,7 @@ void AuthenticationDialog::paintEvent(QPaintEvent* event) {
 }
 
 void AuthenticationDialog::closeEvent(QCloseEvent* event) {
-    if (_canClose) 
+    if (_canClose)
         QWidget::closeEvent(event);
     else
         shake();
@@ -267,28 +264,29 @@ void AuthenticationDialog::hideWidgets() {
             qobject_cast<QWidget*>(item)->hide();
 }
 
+
 void AuthenticationDialog::paintErrorMessage(QPainter& painter) {
     QString text;
 
     switch (_currentErrorCode) {
-        case ErrorCodes::OK:
-            break;
+    case ErrorCodes::OK:
+        break;
 
-        case ErrorCodes::IncorrectApiHashOrId:
-            text = incorrectCredentialsMessage;
-            break;
+    case ErrorCodes::IncorrectApiHashOrId:
+        text = incorrectCredentialsMessage;
+        break;
 
-        case ErrorCodes::IncorrectAuthCode:
-            text = incorrectCodeMessage;
-            break;
+    case ErrorCodes::IncorrectAuthCode:
+        text = incorrectCodeMessage;
+        break;
 
-        case ErrorCodes::IncorrectPhoneNumber:
-            text = incorrectPhoneMessage;
-            break;
+    case ErrorCodes::IncorrectPhoneNumber:
+        text = incorrectPhoneMessage;
+        break;
 
-        case ErrorCodes::TooManyRequests:
-            text = tooManyRequestsMessage.arg(_sleepSeconds);
-            break;
+    case ErrorCodes::TooManyRequests:
+        text = tooManyRequestsMessage.arg(_sleepSeconds);
+        break;
     }
 
     QFont font("Arial", 16);
@@ -338,15 +336,15 @@ void AuthenticationDialog::updateWidgetsGeometry() {
     _apiIdLineEdit->resize(widgetsWidth, widgetsHeight);
     _phoneNumberLineEdit->resize(widgetsWidth, widgetsHeight);
     _telegramCodeLineEdit->resize(widgetsWidth, widgetsHeight);
-    
+
     _confirmCredentialsButton->move((width() - widgetsWidth / 2.) / 2., (height() + widgetsHeight * 2.5) / 2.);
     _confirmAuthCodeButton->move((width() - widgetsWidth / 2.) / 2., (height() - widgetsHeight / 1.5) / 2.);
- 
+
     _phoneNumberLineEdit->move(centerX, (height() - widgetsHeight * 0.5) / 2. - widgetsHeight * 2);
     _apiIdLineEdit->move(centerX, (height() - widgetsHeight * 0.5) / 2. - widgetsHeight);
     _apiHashLineEdit->move(centerX, (height() - widgetsHeight * 0.5) / 2.);
 
-    _sendCodeAgainButton->move((centerX) - authButtonsMargins.left(), (height() + widgetsHeight * 2.) / 2.);
+    _sendCodeAgainButton->move((centerX)-authButtonsMargins.left(), (height() + widgetsHeight * 2.) / 2.);
     _backToFirstFrameButton->move((centerX + widgetsWidth / 2.) + authButtonsMargins.right(), (height() + widgetsHeight * 2.) / 2.);
 
     _telegramCodeLineEdit->move(centerX, (height() - widgetsHeight * 0.5) / 2. - widgetsHeight * 2);

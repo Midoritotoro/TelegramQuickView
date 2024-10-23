@@ -77,14 +77,6 @@ std::string UserDataManager::getTelegramAuthCode() {
 	return code.toString().toStdString();
 }
 
-bool UserDataManager::isTelegramAuthCodeValid() {
-	const auto code = getTelegramAuthCode();
-
-	return code.length() >= 5 == true 
-		&& isTelegramCredentialsValid() == true;
-}
-
-
 QVariantList UserDataManager::getUsernamesOfTargetChannels() {
 	const auto jsonDocument = getJsonDocument();
 	const auto jsonObject = jsonDocument.object();
@@ -99,7 +91,7 @@ QVariantList UserDataManager::getIdsOfTargetChannels() {
 	const auto jsonObject = jsonDocument.object();
 
 	return jsonObject.value("channels").
-		toObject().value("chat_ids").
+		toObject().value("ids").
 		toArray().toVariantList();
 }
 
@@ -108,10 +100,17 @@ void UserDataManager::clearUsernamesOfChannels() {
 	auto jsonDocument = getJsonDocument();
 	auto jsonObject = jsonDocument.object();
 
-	if (jsonObject.value("channels").isNull())
+	auto channelsObject = jsonObject.value("channels").toObject();
+
+	if (channelsObject.isEmpty())
 		return;
 
-	jsonObject.remove("channels");
+	if (channelsObject.value("usernames").isNull())
+		return;
+
+	channelsObject.remove("usernames");
+	jsonObject.insert("channels", channelsObject);
+
 	jsonDocument.setObject(jsonObject);
 
 	write(jsonDocument.toJson());
@@ -121,13 +120,18 @@ void UserDataManager::clearChatIdsOfChannels() {
 	auto jsonDocument = getJsonDocument();
 	auto jsonObject = jsonDocument.object();
 
-	auto channelsArray = jsonObject.value("channels").toObject();
+	auto channelsObject = jsonObject.value("channels").toObject();
 
-	if (channelsArray.value("chat_ids").isNull())
+	if (channelsObject.isEmpty())
 		return;
 
-	channelsArray.remove("chat_ids");
-	jsonDocument.setObject(channelsArray);
+	if (channelsObject.value("ids").isNull())
+		return;
+
+	channelsObject.remove("ids");
+
+	jsonObject.insert("channels", channelsObject);
+	jsonDocument.setObject(channelsObject);
 
 	write(jsonDocument.toJson());
 }
@@ -201,22 +205,29 @@ void UserDataManager::setTargetChannels(QStringList usernameList) {
 
 void UserDataManager::setTargetChannelsChatIds(QList<qint64> idsList) {
 	QJsonArray jsonArray;
+	QJsonObject channelsObject;
 
 	auto jsonDocument = getJsonDocument();
 	auto currentDocumentObject = jsonDocument.object();
 
-	auto channelsObject = currentDocumentObject.value("channels").toObject();
+	if (currentDocumentObject.contains("channels"))
+		channelsObject = currentDocumentObject.value("channels").toObject();
+	else
+		channelsObject = QJsonObject();
 
-	if (!channelsObject.value("chat_ids").toArray().isEmpty())
-		jsonArray = channelsObject.value("chat_ids").toArray();
+
+	if (channelsObject.contains("ids"))
+		jsonArray = channelsObject.value("ids").toArray();
 
 	clearChatIdsOfChannels();
 
-	foreach(const auto channel, idsList)
-		jsonArray.append(channel);
+	foreach(const auto& id, idsList)
+		jsonArray.append(id);
 
-	channelsObject.insert("chat_ids", jsonArray);
-	jsonDocument.setObject(channelsObject);
+	channelsObject.insert("ids", jsonArray);
+	currentDocumentObject.insert("channels", channelsObject);
+
+	jsonDocument.setObject(currentDocumentObject);
 
 	write(jsonDocument.toJson());
 }
@@ -227,16 +238,6 @@ void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
 	auto jsonObject = jsonDocument.object();
 
 	jsonObject.insert("lastPostsCount", lastPostsCount);
-	jsonDocument.setObject(jsonObject);
-
-	write(jsonDocument.toJson());
-}
-
-void UserDataManager::setPhoneNumberCode(const QString& code) {
-	auto jsonDocument = getJsonDocument();
-	auto jsonObject = jsonDocument.object();
-
-	jsonObject.insert("code", code);
 	jsonDocument.setObject(jsonObject);
 
 	write(jsonDocument.toJson());
