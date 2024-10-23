@@ -20,8 +20,15 @@ TelegramParser::TelegramParser():
     foreach(const auto& channel, _targetChannelsList) {
         sendQuery(td::td_api::make_object<td::td_api::searchPublicChat>(channel.toStdString()),
             [this](Object object) {
-                if (object->get_id() == td::td_api::error::ID)
+                if (object == nullptr)
                     return;
+
+                if (object->get_id() == td::td_api::error::ID) {
+                    auto error = td::move_tl_object_as<td::td_api::error>(object);
+                    std::cout << "Error: " << to_string(error) << std::flush;
+
+                    handleError(error);
+                }
 
                 const auto chat = td::move_tl_object_as<td::td_api::chat>(object);
                 if (chat)
@@ -44,16 +51,27 @@ TelegramParser::TelegramParser():
 }
 
 void TelegramParser::startChatsChecking() {
-    for (;;) {
+    for (;;)
         processResponse(_clientManager->receive(10));
-    }
 }
 
 
 auto TelegramParser::createFileDownloadQueryHandler() {
     return [this](Object object) {
-        if (object)
-            checkFileDownloadError(std::move(object));
+        if (object == nullptr)
+            return;
+
+        auto file = move_tl_object_as<td::td_api::file>(object);
+        auto it = _downloadingMessages.find(file->id_);
+
+        if (it != _downloadingMessages.end()) {
+            it->second.attachment = file->local_->path_.c_str();
+
+            _sqlManager->writeMessageInfo(it->second);
+            _downloadingMessages.erase(it);
+        }
+
+       checkFileDownloadError(std::move(object));
     };
 }
 
@@ -71,9 +89,8 @@ void TelegramParser::processResponse(td::ClientManager::Response response) {
     if (!response.object)
         return;
 
-    if (response.request_id == 0) {
+    if (response.request_id == 0) 
         return on_NewMessageUpdate(std::move(response.object));
-    }
     
     auto iterator = _handlers.find(response.request_id);
 
@@ -137,8 +154,10 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                             senderName = getChatTitle(chat.chat_id_);
                         }));
 
+                qDebug() << "Получено сообщение от: " << senderName;
+
                 std::string text;
-                td::td_api::int32 mediaId = 0;
+                int32_t mediaId = 0;
 
                 switch (update_new_message.message_->content_->get_id()) {
                     case td::td_api::messageText::ID:
@@ -158,21 +177,26 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                         break;
                 }
 
-                if (mediaId > 0)
-                    sendQuery(
-                        td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false), 
-                        createFileDownloadQueryHandler()
-                    );
-
                 TelegramMessage message;
 
                 message.date = convertTdMessageTimestamp(update_new_message.message_->date_).c_str();
                 message.sender = senderName.c_str();
                 message.text = text.c_str();
                 message.mediaAlbumId = update_new_message.message_->media_album_id_;
-                message.attachment = "";
-                
+
+                if (mediaId <= 0) {
+                    _sqlManager->writeMessageInfo(message);
+                    return;
+                }
+
+                _downloadingMessages[mediaId] = message;
+
+                sendQuery(
+                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
+                    createFileDownloadQueryHandler()
+                );      
             },
+
             [](auto& update) {
 
             }
@@ -185,13 +209,11 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
 std::string TelegramParser::convertTdMessageTimestamp(int64_t time) {
     char buffer[20];
 
-    time_t time = static_cast<time_t>(time);
-    tm* localTime = localtime(&time);
+    time_t _time = static_cast<time_t>(time);
+    tm* localTime = localtime(&_time);
 
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localTime);
     std::string formattedDate = buffer;
-
-    delete localTime;
 
     return formattedDate;
 }

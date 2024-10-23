@@ -6,15 +6,8 @@
 #include <QUrl>
 #include <QString>
 
+#include "../utils.h"
 #define DataBaseTableName "PostsInfo"
-
-typedef struct _TelegramMessage {
-	QString sender = "";
-	QString text = "";
-	QString date = "";
-	QString attachment = "";
-	int64_t mediaAlbumId = 0;
-} TelegramMessage;
 
 
 class PostSqlManager {

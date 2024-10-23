@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+#include <QString>
+
 
 enum ErrorCodes {
     OK = 200,
@@ -9,6 +11,14 @@ enum ErrorCodes {
     IncorrectApiHashOrId = 1,
     IncorrectPhoneNumber = 2
 };
+
+typedef struct _TelegramMessage {
+    QString sender = "";
+    QString text = "";
+    QString date = "";
+    QString attachment = "";
+    int64_t mediaAlbumId = 0;
+} TelegramMessage;
 
 namespace detail {
     template <class... Fs>

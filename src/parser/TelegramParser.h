@@ -6,8 +6,9 @@
 
 class TelegramParser: public AbstractTelegramParser {
 private:
-	std::map<std::int64_t, td::td_api::object_ptr<td::td_api::user>> users_;
-	std::map<std::int64_t, std::string> chat_title_;
+	std::map<int64_t, td::td_api::object_ptr<td::td_api::user>> users_;
+	std::map<int64_t, std::string> chat_title_;
+	std::map<int32_t, TelegramMessage> _downloadingMessages;
 
 	std::unique_ptr<PostSqlManager> _sqlManager = nullptr;
 
