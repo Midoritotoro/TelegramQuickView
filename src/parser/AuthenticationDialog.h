@@ -52,7 +52,6 @@ private:
     void vacillate();
     void hideWidgets();
 
-    void showWidgets();
     void updateWidgetsGeometry();
 
     void paintErrorMessage(QPainter& painter);

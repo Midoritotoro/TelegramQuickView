@@ -59,6 +59,11 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     , _currentErrorCode(ErrorCodes::OK)
 {
     setWindowTitle(PROJECT_NAME);
+
+    setAttribute(Qt::WA_DeleteOnClose, true);
+
+    foreach(const auto & child, children()) 
+        qobject_cast<QWidget*>(child)->setAttribute(Qt::WA_DeleteOnClose, true);
         
     QString currentPath = QCoreApplication::applicationDirPath();
     QDir assetsDir(currentPath + "/../../assets/images");
@@ -260,12 +265,6 @@ void AuthenticationDialog::hideWidgets() {
     foreach(auto item, children())
         if (qobject_cast<QWidget*>(item))
             qobject_cast<QWidget*>(item)->hide();
-}
-
-void AuthenticationDialog::showWidgets() {
-    foreach(auto item, children())
-        if (qobject_cast<QWidget*>(item))
-            qobject_cast<QWidget*>(item)->show(); 
 }
 
 void AuthenticationDialog::paintErrorMessage(QPainter& painter) {

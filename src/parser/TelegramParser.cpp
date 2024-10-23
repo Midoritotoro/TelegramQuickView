@@ -9,7 +9,7 @@
 
 TelegramParser::TelegramParser():
     AbstractTelegramParser()
-   // , _sqlManager(std::make_unique<PostSqlManager>())
+    , _sqlManager(std::make_unique<PostSqlManager>())
 {
     setlocale(LC_ALL, "");
 
@@ -31,14 +31,13 @@ TelegramParser::TelegramParser():
     }
 
     connect(this, &AbstractTelegramParser::userAuthorized, [this]() {
-        _Future = std::async(std::launch::async,
-            &TelegramParser::startChatsChecking, this);
-        });
+      /*  if (_Future.valid())
+            _Future.get();
+        _Future = std::async(&TelegramParser::startChatsChecking, this);*/
+    });
 
     if (isAuthorized())
-        _Future = std::async(std::launch::async,
-            &TelegramParser::startChatsChecking, this);
-
+        _Future = std::async(&TelegramParser::startChatsChecking, this);
 }
 
 void TelegramParser::startChatsChecking() {

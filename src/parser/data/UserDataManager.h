@@ -47,4 +47,6 @@ private:
 	void clearChatIdsOfChannels();
 
 	void clearTelegramCredentials();
+
+	void write(const QByteArray& data);
 };
