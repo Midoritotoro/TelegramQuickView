@@ -13,6 +13,8 @@ private:
 
 	QStringList _targetChannelsList;
 	std::future<void> _Future;
+
+	std::vector<long long> _chatIdsVector;
 public:
 	TelegramParser();
 protected:
@@ -29,4 +31,6 @@ private:
 	void on_NewMessageUpdate(td::td_api::object_ptr <td::td_api::Object> update);
 
 	std::uint64_t nextDownloadQueryId();
+
+	std::string convertTdMessageTimestamp(int64_t time);
 };

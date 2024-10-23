@@ -15,54 +15,90 @@ PostSqlManager::PostSqlManager() {
 			"attachments TEXT,\n"
 			"date DATETIME,\n"
 			"text TEXT\n"
+			"mediaAlbumId INTEGER\n"
 		");"
 	);
 
-	QSqlDatabase dataBase = QSqlDatabase::addDatabase("QSQLITE");
-	dataBase.setDatabaseName(dataBasePath);
+	_dataBase = QSqlDatabase::addDatabase("QSQLITE");
+	_dataBase.setDatabaseName(dataBasePath);
 
-	if (dataBase.open()) {
-		QSqlQuery query(dataBase);
+	if (_dataBase.open()) {
+		QSqlQuery query(_dataBase);
 		query.exec(sqlQuery);
 
-		dataBase.commit();
-		dataBase.close();
+		_dataBase.commit();
+		_dataBase.close();
 	}
 }
 
-void PostSqlManager::saveMessageInfo(const TelegramMessage& message) {
-	const auto dataBasePath = getDatabasePath();
-
-	QSqlDatabase dataBase = QSqlDatabase::addDatabase("QSQLITE");
-	dataBase.setDatabaseName(dataBasePath);
-
-	if (dataBase.open() == false)
+void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
+	if (_dataBase.open() == false)
 		return;
 
-	QSqlQuery query(dataBase);
+	if (message.mediaAlbumId != 0)
+		if (rowExists(":mediaAlbumId", message.mediaAlbumId)) {
+			updateMessageInfo(message);
+			return;
+		}
+
+	QSqlQuery query(_dataBase);
 
 	const auto sqlInsertQuery = QString::fromUtf8("INSERT INTO "
 		+ std::string(DataBaseTableName)
-		+ "(sender, attachments, date, text) VALUES\n"
-		+ "(:sender, :attachments, :date, :text)"
+		+ "(sender, attachments, date, text, mediaAlbumId) VALUES\n"
+		+ "(:sender, :attachments, :date, :text, :mediaAlbumId)"
 	);
 
 	query.prepare(sqlInsertQuery);
 
-	QString attachments;
-	const auto attachmentsLength = message.attachments.length();
-
-	foreach (auto attachment, message.attachments)
-		attachments.append(message.attachments.indexOf(attachment) < attachmentsLength ? attachment + ", " : attachment);
-
 	query.bindValue(":sender", message.sender);
-	query.bindValue(":attachments", attachments);
+	query.bindValue(":attachments", message.attachment);
 	query.bindValue(":date", message.date);
 	query.bindValue(":text", message.text);
+	query.bindValue(":mediaAlbumId", message.mediaAlbumId);
 
-	dataBase.commit();
-	dataBase.close();
+	_dataBase.commit();
+	_dataBase.close();
 }
+
+void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
+	if (_dataBase.open() == false)
+		return;
+
+	QSqlQuery query(_dataBase);
+
+	const auto sqlUpdateQuery = QString::fromUtf8("UPDATE "
+		+ std::string(DataBaseTableName)
+		+ "SET attachments = :attachments AND text = :text WHERE mediaAlbumId = :mediaAlbumId"
+	);
+
+	query.prepare(sqlUpdateQuery);
+
+	query.bindValue(":attachments", ", " + message.attachment);
+	query.bindValue(":text", message.text);
+	query.bindValue(":mediaAlbumId", message.mediaAlbumId);
+
+	_dataBase.commit();
+	_dataBase.close();
+}
+
+bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parameter) {
+	QSqlQuery query(_dataBase);
+
+	const auto checkQuery = QString::fromUtf8("SELECT COUNT(*) FROM"
+		+ std::string(DataBaseTableName)
+		+ "WHERE %2 = :parameter"
+	);
+
+	query.prepare(checkQuery);
+	query.bindValue(":parameter", parameter);
+
+	if (query.exec() && query.next())
+		return query.value(0).toInt() > 0;
+
+	return false;
+}
+
 
 QString PostSqlManager::getDatabasePath() {
 #ifdef PROJECT_NAME
@@ -72,8 +108,9 @@ QString PostSqlManager::getDatabasePath() {
 		return "";
 
 	return appDataDir.absolutePath() + "/downloadedPosts.sqlite3";
-#endif
+#else
 	return "";
+#endif
 }
 
 

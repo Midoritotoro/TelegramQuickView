@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <future>
+#include <ctime>
 
 #include <QString>
 #include <QDebug>
@@ -25,7 +26,6 @@ TelegramParser::TelegramParser():
                 const auto chat = td::move_tl_object_as<td::td_api::chat>(object);
                 if (chat)
                     _userDataManager->setTargetChannelsChatIds(QList<qint64>({ chat->id_ }));
-
             }
         );
     }
@@ -35,6 +35,9 @@ TelegramParser::TelegramParser():
             _Future.get();
         _Future = std::async(&TelegramParser::startChatsChecking, this);*/
     });
+
+    foreach(const auto& id, _userDataManager->getIdsOfTargetChannels())
+        _chatIdsVector.push_back(id.toLongLong());
 
     if (isAuthorized())
         _Future = std::async(&TelegramParser::startChatsChecking, this);
@@ -111,33 +114,27 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 users_[user_id] = std::move(update_user.user_);
             },
             [this](td::td_api::updateNewMessage& update_new_message) {
-                auto chat_id = update_new_message.message_->chat_id_;
+                auto chatId = update_new_message.message_->chat_id_;
                 bool isTarget = false;
 
-                QVariantList chatIdsList = _userDataManager->getIdsOfTargetChannels();
-
-                foreach(const auto& chat_id, chatIdsList) {
-                    qDebug() << "Chat id: " << chat_id;
-                    if (chat_id.toLongLong() == chat_id) {
+                for (int index = 0; index < _chatIdsVector.size(); ++index) 
+                    if (_chatIdsVector[index] == chatId) {
                         isTarget = true;
                         break;
                     }
-                }
 
-                if (isTarget == false) {
-                    qDebug() << "Канал: " << update_new_message.message_->chat_id_ << " не находится в списке целей для парсера";
+                if (isTarget == false)
                     return;
-                }
 
-                std::string sender_name;
+                std::string senderName;
 
                 td::td_api::downcast_call(*update_new_message.message_->sender_id_,
                     overloaded(
-                        [this, &sender_name](td::td_api::messageSenderUser& user) {
-                            sender_name = getUserName(user.user_id_);
+                        [this, &senderName](td::td_api::messageSenderUser& user) {
+                            senderName = getUserName(user.user_id_);
                         },
-                        [this, &sender_name](td::td_api::messageSenderChat& chat) {
-                            sender_name = getChatTitle(chat.chat_id_);
+                        [this, &senderName](td::td_api::messageSenderChat& chat) {
+                            senderName = getChatTitle(chat.chat_id_);
                         }));
 
                 std::string text;
@@ -161,16 +158,20 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                         break;
                 }
 
-                qDebug() << "Text: " << text;
-                qDebug() << "mediaId: " << mediaId;
-
-                if (mediaId > 0) {
+                if (mediaId > 0)
                     sendQuery(
-                        td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
+                        td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false), 
                         createFileDownloadQueryHandler()
                     );
-                    qDebug() << "Downloaded!";
-                }
+
+                TelegramMessage message;
+
+                message.date = convertTdMessageTimestamp(update_new_message.message_->date_).c_str();
+                message.sender = senderName.c_str();
+                message.text = text.c_str();
+                message.mediaAlbumId = update_new_message.message_->media_album_id_;
+                message.attachment = "";
+                
             },
             [](auto& update) {
 
@@ -179,4 +180,18 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
     );
 
     processUpdate(std::move(update));
+}
+
+std::string TelegramParser::convertTdMessageTimestamp(int64_t time) {
+    char buffer[20];
+
+    time_t time = static_cast<time_t>(time);
+    tm* localTime = localtime(&time);
+
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localTime);
+    std::string formattedDate = buffer;
+
+    delete localTime;
+
+    return formattedDate;
 }

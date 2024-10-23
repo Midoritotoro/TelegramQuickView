@@ -42,8 +42,11 @@ AbstractTelegramParser::AbstractTelegramParser() :
     _filesDirectory = dir.absolutePath().toStdString() + "\\test";
 
     authorizationCheck();
+
     _userDataManager->setTargetChannels(QStringList({ "erfwfr", "antifishechki" }));
+    _userDataManager->setLastPostsCountForChannels(3);
 }
+
 
 void AbstractTelegramParser::authorizationCheck() {
     if (_userDataManager->isTelegramCredentialsValid())

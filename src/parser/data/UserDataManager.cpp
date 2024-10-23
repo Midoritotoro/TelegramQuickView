@@ -234,7 +234,6 @@ void UserDataManager::setTargetChannelsChatIds(QList<qint64> idsList) {
 
 void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
 	auto jsonDocument = getJsonDocument();
-
 	auto jsonObject = jsonDocument.object();
 
 	jsonObject.insert("lastPostsCount", lastPostsCount);
