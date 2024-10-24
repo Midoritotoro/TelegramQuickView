@@ -105,11 +105,8 @@ void UserDataManager::clearUsernamesOfChannels() {
 	if (channelsObject.isEmpty())
 		return;
 
-	if (channelsObject.value("usernames").isNull())
-		return;
-
-	channelsObject.remove("usernames");
-	jsonObject.insert("channels", channelsObject);
+	if (channelsObject.value("usernames").isNull() == false)
+		channelsObject.remove("usernames");
 
 	jsonDocument.setObject(jsonObject);
 
@@ -125,13 +122,10 @@ void UserDataManager::clearChatIdsOfChannels() {
 	if (channelsObject.isEmpty())
 		return;
 
-	if (channelsObject.value("ids").isNull())
-		return;
+	if (channelsObject.value("ids").isNull() == false)
+		channelsObject.remove("ids");
 
-	channelsObject.remove("ids");
-
-	jsonObject.insert("channels", channelsObject);
-	jsonDocument.setObject(channelsObject);
+	jsonDocument.setObject(jsonObject);
 
 	write(jsonDocument.toJson());
 }
@@ -185,15 +179,15 @@ void UserDataManager::setTargetChannels(QStringList usernameList) {
 		channelsObject = currentDocumentObject.value("channels").toObject();
 	else 
 		channelsObject = QJsonObject();
-	
 
 	if (channelsObject.contains("usernames"))
 		jsonArray = channelsObject.value("usernames").toArray();
 
 	clearUsernamesOfChannels();
 
-	foreach(const auto & channel, usernameList)
-		jsonArray.append(channel);
+	foreach(const auto& channel, usernameList)
+		if (jsonArray.contains(channel) == false)
+			jsonArray.append(channel);
 
 	channelsObject.insert("usernames", jsonArray);
 	currentDocumentObject.insert("channels", channelsObject);
@@ -222,7 +216,8 @@ void UserDataManager::setTargetChannelsChatIds(QList<qint64> idsList) {
 	clearChatIdsOfChannels();
 
 	foreach(const auto& id, idsList)
-		jsonArray.append(id);
+		if (jsonArray.contains(id) == false)
+			jsonArray.append(id);
 
 	channelsObject.insert("ids", jsonArray);
 	currentDocumentObject.insert("channels", channelsObject);

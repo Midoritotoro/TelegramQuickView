@@ -15,6 +15,7 @@ private:
 	QSqlDatabase _dataBase;
 public:
 	PostSqlManager();
+	~PostSqlManager();
 	
 	void writeMessageInfo(const TelegramMessage& message);
 private:

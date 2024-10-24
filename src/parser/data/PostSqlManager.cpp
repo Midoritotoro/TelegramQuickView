@@ -30,12 +30,15 @@ PostSqlManager::PostSqlManager() {
 		query.exec(sqlQuery);
 
 		_dataBase.commit();
-		_dataBase.close();
 	}
 }
 
+PostSqlManager::~PostSqlManager() {
+	_dataBase.close();
+}
+
 void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
-	if (_dataBase.open() == false) {
+	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return;
 	}
@@ -65,11 +68,10 @@ void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
 	query.exec();
 
 	_dataBase.commit();
-	_dataBase.close();
 }
 
 void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
-	if (_dataBase.open() == false) {
+	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return;
 	}
@@ -91,11 +93,10 @@ void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
 	query.exec();
 
 	_dataBase.commit();
-	_dataBase.close();
 }
 
 bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parameter) {
-	if (_dataBase.open() == false) {
+	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return false;
 	}

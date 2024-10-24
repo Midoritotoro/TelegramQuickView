@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <future>
+#include <xutility>
 #include <ctime>
 
 #include <QString>
@@ -65,13 +66,16 @@ auto TelegramParser::createFileDownloadQueryHandler() {
         auto it = _downloadingMessages.find(file->id_);
 
         if (it != _downloadingMessages.end()) {
-            it->second.attachment = file->local_->path_.c_str();
+            qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024*1024) << " Mb";
+            qDebug() << "Path to file: " << file->local_->path_.c_str();
+            if (file->local_->is_downloading_completed_)
+                it->second.attachment = file->local_->path_.c_str();
 
             _sqlManager->writeMessageInfo(it->second);
             _downloadingMessages.erase(it);
         }
 
-        checkFileDownloadError(std::move(object));
+       // checkFileDownloadError(std::move(object));
     };
 }
 
@@ -186,22 +190,30 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 message.text = text.c_str();
                 message.mediaAlbumId = update_new_message.message_->media_album_id_;
 
+                qDebug() << "mediaId: " << mediaId;
+                qDebug() << "mediaAlbumId: " << message.mediaAlbumId;
+       
                 if (mediaId == 0) {
-                    qDebug() << "Записывание данных сообщения без медиа...";
+                    qDebug() << "Запись данных о новом сообщении без медиа...";
                     _sqlManager->writeMessageInfo(message);
                     return;
                 }
+                
+                //if (message.mediaAlbumId == 0) { // Сообщение с одним медиа
+                //    qDebug() << "Запись данных о новом сообщении с одним медиа...";
+                //    _downloadingMessages[mediaId] = message;
+                //    sendQuery(
+                //        td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
+                //        createFileDownloadQueryHandler()
+                //    );
 
-                auto it = _downloadingMessages.find(mediaId);
-                const auto index = std::distance(_downloadingMessages.begin(), it);
+                //    return;
+                //}
 
-                if (mediaId != 0 && message.mediaAlbumId && _downloadingMessages.at(index).mediaAlbumId != message.mediaAlbumId) {
-                    qDebug() << "Запись данных о сообщении с несколькими медиа";
-                    _downloadingMessages[mediaId] = message;
-                }
-
+                _downloadingMessages[mediaId] = message;
+                
                 sendQuery(
-                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
+                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
                     createFileDownloadQueryHandler()
                 );      
             },
