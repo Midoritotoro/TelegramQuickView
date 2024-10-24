@@ -60,18 +60,18 @@ auto TelegramParser::createFileDownloadQueryHandler() {
     return [this](Object object) {
         if (object == nullptr)
             return;
-
+        
         auto file = move_tl_object_as<td::td_api::file>(object);
         auto it = _downloadingMessages.find(file->id_);
 
         if (it != _downloadingMessages.end()) {
             it->second.attachment = file->local_->path_.c_str();
 
-          //  _sqlManager->writeMessageInfo(it->second);
+            _sqlManager->writeMessageInfo(it->second);
             _downloadingMessages.erase(it);
         }
 
-      // checkFileDownloadError(std::move(object));
+        checkFileDownloadError(std::move(object));
     };
 }
 
@@ -152,7 +152,9 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                         },
                         [this, &senderName](td::td_api::messageSenderChat& chat) {
                             senderName = getChatTitle(chat.chat_id_);
-                        }));
+                        }
+                    )
+                );
 
                 qDebug() << "Получено сообщение от: " << senderName;
 
@@ -184,12 +186,19 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 message.text = text.c_str();
                 message.mediaAlbumId = update_new_message.message_->media_album_id_;
 
-                if (mediaId <= 0) {
+                if (mediaId == 0) {
+                    qDebug() << "Записывание данных сообщения без медиа...";
                     _sqlManager->writeMessageInfo(message);
                     return;
                 }
 
-                _downloadingMessages[mediaId] = message;
+                auto it = _downloadingMessages.find(mediaId);
+                const auto index = std::distance(_downloadingMessages.begin(), it);
+
+                if (mediaId != 0 && message.mediaAlbumId && _downloadingMessages.at(index).mediaAlbumId != message.mediaAlbumId) {
+                    qDebug() << "Запись данных о сообщении с несколькими медиа";
+                    _downloadingMessages[mediaId] = message;
+                }
 
                 sendQuery(
                     td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
