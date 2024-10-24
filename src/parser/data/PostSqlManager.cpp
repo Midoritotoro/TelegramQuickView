@@ -4,17 +4,20 @@
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QSqlQuery>
-
+#include <QSqlError>
 
 PostSqlManager::PostSqlManager() {
 	const auto dataBasePath = getDatabasePath();
+
+	qDebug() << "Database path: " << dataBasePath;
+
 	const auto sqlQuery = QString::fromUtf8(
 		"CREATE TABLE IF NOT EXISTS " + std::string(DataBaseTableName) + "(\n"
 			"id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
 			"sender TEXT,\n"
 			"attachments TEXT,\n"
 			"date DATETIME,\n"
-			"text TEXT\n"
+			"text TEXT,\n"
 			"mediaAlbumId INTEGER\n"
 		");"
 	);
@@ -32,13 +35,15 @@ PostSqlManager::PostSqlManager() {
 }
 
 void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
-	if (_dataBase.open() == false)
+	if (_dataBase.open() == false) {
+		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return;
+	}
 
 	if (message.mediaAlbumId != 0)
-		if (rowExists(":mediaAlbumId", message.mediaAlbumId)) {
-			updateMessageInfo(message);
-			return;
+		if (rowExists("mediaAlbumId", message.mediaAlbumId)) {
+			qDebug() << "Row already exists: updating...";
+			return updateMessageInfo(message);
 		}
 
 	QSqlQuery query(_dataBase);
@@ -57,44 +62,58 @@ void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
 	query.bindValue(":text", message.text);
 	query.bindValue(":mediaAlbumId", message.mediaAlbumId);
 
+	query.exec();
+
 	_dataBase.commit();
 	_dataBase.close();
 }
 
 void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
-	if (_dataBase.open() == false)
+	if (_dataBase.open() == false) {
+		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return;
-
+	}
 	QSqlQuery query(_dataBase);
 
 	const auto sqlUpdateQuery = QString::fromUtf8("UPDATE "
 		+ std::string(DataBaseTableName)
-		+ "SET attachments = :attachments AND text = :text WHERE mediaAlbumId = :mediaAlbumId"
+		+ " SET attachments = COALESCE(attachments, '') || :attachments, text = COALESCE(text, '') || :text WHERE mediaAlbumId = :mediaAlbumId"
 	);
 
 	query.prepare(sqlUpdateQuery);
 
+	qDebug() << query.lastError();
+
 	query.bindValue(":attachments", ", " + message.attachment);
 	query.bindValue(":text", message.text);
 	query.bindValue(":mediaAlbumId", message.mediaAlbumId);
+
+	query.exec();
 
 	_dataBase.commit();
 	_dataBase.close();
 }
 
 bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parameter) {
+	if (_dataBase.open() == false) {
+		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
+		return false;
+	}
+
 	QSqlQuery query(_dataBase);
 
-	const auto checkQuery = QString::fromUtf8("SELECT COUNT(*) FROM"
-		+ std::string(DataBaseTableName)
-		+ "WHERE %2 = :parameter"
-	);
+	const auto checkQuery = QString(
+		"SELECT EXISTS(SELECT * FROM %1 WHERE %2 = :parameter LIMIT 1)"
+	).arg(DataBaseTableName)
+	 .arg(columnName);
 
 	query.prepare(checkQuery);
 	query.bindValue(":parameter", parameter);
 
-	if (query.exec() && query.next())
-		return query.value(0).toInt() > 0;
+	if (query.exec() && query.next()) {
+		_dataBase.commit();
+		return query.value(0).toBool();
+	}
 
 	return false;
 }
@@ -112,5 +131,3 @@ QString PostSqlManager::getDatabasePath() {
 	return "";
 #endif
 }
-
-

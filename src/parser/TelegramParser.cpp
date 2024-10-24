@@ -67,11 +67,11 @@ auto TelegramParser::createFileDownloadQueryHandler() {
         if (it != _downloadingMessages.end()) {
             it->second.attachment = file->local_->path_.c_str();
 
-            _sqlManager->writeMessageInfo(it->second);
+          //  _sqlManager->writeMessageInfo(it->second);
             _downloadingMessages.erase(it);
         }
 
-       checkFileDownloadError(std::move(object));
+      // checkFileDownloadError(std::move(object));
     };
 }
 
