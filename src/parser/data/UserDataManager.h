@@ -29,6 +29,8 @@ public:
 	[[nodiscard]] TelegramCredentials getTelegramCredentials();
 	[[nodiscard]] std::string getTelegramAuthCode();
 
+	[[nodicard]] bool getDownloadSensitiveContentAbility();
+
 	[[nodiscard]] bool isTelegramCredentialsValid();
 
 	[[nodiscard]] QVariantList getUsernamesOfTargetChannels();
@@ -40,6 +42,8 @@ public:
 	void setTargetChannelsChatIds(QList<qint64> idsList);
 
 	void setLastPostsCountForChannels(int count);
+
+	void setDownloadSensitiveContentAbility(bool ability);
 private:
 	void clearUsernamesOfChannels();
 	void clearChatIdsOfChannels();

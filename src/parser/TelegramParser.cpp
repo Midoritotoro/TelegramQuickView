@@ -12,6 +12,7 @@
 TelegramParser::TelegramParser():
     AbstractTelegramParser()
     , _sqlManager(std::make_unique<PostSqlManager>())
+    , _downloadSensitiveContent(_userDataManager->getDownloadSensitiveContentAbility())
 {
     setlocale(LC_ALL, "");
 
@@ -135,6 +136,11 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 users_[user_id] = std::move(update_user.user_);
             },
             [this](td::td_api::updateNewMessage& update_new_message) {
+                if (update_new_message.message_->has_sensitive_content_ && _downloadSensitiveContent == false) {
+                    qDebug() << "Message has a 18+ content, so it`s has been skipped";
+                    return;
+                }
+
                 auto chatId = update_new_message.message_->chat_id_;
                 bool isTarget = false;
 
@@ -192,23 +198,13 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
 
                 qDebug() << "mediaId: " << mediaId;
                 qDebug() << "mediaAlbumId: " << message.mediaAlbumId;
+                qDebug() << "message text: " << message.text;
+
        
                 if (mediaId == 0) {
                     qDebug() << "Запись данных о новом сообщении без медиа...";
-                    _sqlManager->writeMessageInfo(message);
-                    return;
+                    return _sqlManager->writeMessageInfo(message);
                 }
-                
-                //if (message.mediaAlbumId == 0) { // Сообщение с одним медиа
-                //    qDebug() << "Запись данных о новом сообщении с одним медиа...";
-                //    _downloadingMessages[mediaId] = message;
-                //    sendQuery(
-                //        td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
-                //        createFileDownloadQueryHandler()
-                //    );
-
-                //    return;
-                //}
 
                 _downloadingMessages[mediaId] = message;
                 

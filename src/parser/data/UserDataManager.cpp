@@ -95,6 +95,12 @@ QVariantList UserDataManager::getIdsOfTargetChannels() {
 		toArray().toVariantList();
 }
 
+bool UserDataManager::getDownloadSensitiveContentAbility() {
+	const auto jsonDocument = getJsonDocument();
+	const auto jsonObject = jsonDocument.object();
+
+	return jsonObject.value("downloadSensitiveContent").toBool();
+}
 
 void UserDataManager::clearUsernamesOfChannels() {
 	auto jsonDocument = getJsonDocument();
@@ -232,6 +238,16 @@ void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
 	auto jsonObject = jsonDocument.object();
 
 	jsonObject.insert("lastPostsCount", lastPostsCount);
+	jsonDocument.setObject(jsonObject);
+
+	write(jsonDocument.toJson());
+}
+
+void UserDataManager::setDownloadSensitiveContentAbility(bool ability) {
+	auto jsonDocument = getJsonDocument();
+	auto jsonObject = jsonDocument.object();
+
+	jsonObject.insert("downloadSensitiveContent", ability);
 	jsonDocument.setObject(jsonObject);
 
 	write(jsonDocument.toJson());

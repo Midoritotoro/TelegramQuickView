@@ -43,6 +43,7 @@ AbstractTelegramParser::AbstractTelegramParser() :
 
     authorizationCheck();
 
+    _userDataManager->setDownloadSensitiveContentAbility(false);
     _userDataManager->setTargetChannels(QStringList({ "erfwfr", "antifishechki" }));
     _userDataManager->setLastPostsCountForChannels(3);
 }

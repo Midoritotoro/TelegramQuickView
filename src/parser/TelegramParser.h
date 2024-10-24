@@ -16,6 +16,8 @@ private:
 	std::future<void> _Future;
 
 	std::vector<long long> _chatIdsVector;
+
+	bool _downloadSensitiveContent;
 public:
 	TelegramParser();
 protected:
