@@ -38,8 +38,8 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 	QDir cssDir(currentPath + "/../../assets/images");
 
 	_isVolumeValueSmall
-	? speakerImagePath = cssDir.absolutePath() + "/speaker_white_on.png"
-	: speakerImagePath = cssDir.absolutePath() + "/speaker_white_small_on.png";
+	? speakerImagePath = cssDir.absolutePath() + "/speaker_white_small_on.png"
+	: speakerImagePath = cssDir.absolutePath() + "/speaker_white_on.png";
 
 	QPixmap pixmap(speakerImagePath);
 

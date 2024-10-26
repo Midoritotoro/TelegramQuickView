@@ -6,7 +6,9 @@
 #include <memory>
 
 class MessageMediaViewer;
-class ScrollArea;
+
+class QScrollArea;
+class QListView;
 
 
 class TelegramPostQuickView: public QWidget {
@@ -17,7 +19,7 @@ private:
 
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;
 	std::unique_ptr<MessageMediaViewer> _messageMediaViewer = nullptr;
-	ScrollArea* _chatScrollArea = nullptr;
+	QListView* _chatScrollArea = nullptr;
 
 	std::shared_ptr<History> _messagesHistory;
 public:
@@ -28,6 +30,7 @@ public:
 public Q_SLOTS:
 	void attachmentCliked();
 protected:
+
 	void showEvent(QShowEvent* event) override;
 	void addContentsRequest();
 };

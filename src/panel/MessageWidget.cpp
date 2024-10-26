@@ -77,6 +77,7 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 
 			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+
 			_telegramMessage->attachments.append(messageAttachment);
 
 		}
