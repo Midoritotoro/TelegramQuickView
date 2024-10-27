@@ -46,13 +46,7 @@ QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
-	QElapsedTimer timer;
-	timer.start();
-
-	if (_attachmentPreviewSize == size()) {
-		qDebug() << "MessageAttachment::paintEvent: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
-		return;
-	}
+	QLabel::paintEvent(event);
 
 	QPixmap preview;
 
@@ -66,10 +60,8 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 		preview.fill(Qt::gray);
 	}
 
-	if (preview.isNull()) {
-		qDebug() << "MessageAttachment::paintEvent: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
+	if (preview.isNull())
 		return;
-	}
 
 	QPainter painter(this);
 	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
@@ -78,13 +70,13 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 
 	case MessageWidget::MessageMediaDisplayMode::Stack:
-		painter.drawPixmap(0, 0, preview.width(), preview.height(), preview);
+		painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : preview);
 		break;
 
 	case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
 		if ((_parentMessage->attachmentsLength() - 1) > 0) {
 			painter.setOpacity(0.4);
-			painter.drawPixmap(0, 0, preview.width(), preview.height(), preview);
+			painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : preview);
 
 			painter.setPen(Qt::white);
 			QFont font("Arial", 16);
@@ -100,25 +92,17 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
 		}
 		else {
-			painter.drawPixmap(0, 0, preview.width(), preview.height(), preview);
+			painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : preview);
 		}
 		break;
 	}
-
-	qDebug() << "MessageAttachment::paintEvent: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
-
-	setFixedSize(_attachmentPreviewSize);
 }
 
 void MessageAttachment::resizeEvent(QResizeEvent* event) {
-	QElapsedTimer timer;
-	timer.start();
-
 	ClickableLabel::resizeEvent(event);
 
 	updatePreviewSize();
-
-	qDebug() << "MessageAttachment::resizeEvent: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
+	setFixedSize(_attachmentPreviewSize);
 }
 
 void MessageAttachment::updatePreviewSize() {

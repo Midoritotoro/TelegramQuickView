@@ -93,6 +93,10 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/NavigationButton.h
 	src/panel/MessageTextView.cpp
 	src/panel/MessageTextView.h
+	src/panel/ContinuousScroll.cpp
+	src/panel/ContinuousScroll.h
+	src/panel/ScrollArea.cpp
+	src/panel/ScrollArea.h
 
 	src/sql/SqlContentManager.cpp
 	src/sql/SqlContentManager.h

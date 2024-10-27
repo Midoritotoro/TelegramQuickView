@@ -23,7 +23,6 @@ QWidget(parent)
 	"}");
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	setMouseTracking(true);
 }
 
 void MessageWidget::addMessageText(const QString& text) {

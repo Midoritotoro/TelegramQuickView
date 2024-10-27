@@ -41,9 +41,9 @@ int main(int argc, char* argv[])
     TelegramPostQuickView* view = new TelegramPostQuickView();
     view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::Stack);
 
-    QUrlList list({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg") });
+    QUrlList list({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg")});
     
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 2; ++i)
         view->makeMessage(text, list);
 
     view->show();

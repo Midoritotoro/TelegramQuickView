@@ -4,8 +4,6 @@
 #include "MessageAttachment.h"
 #include "MessageMediaViewer.h"
 
-
-#include <QListView>
 #include "History.h"
 
 #include <QShowEvent>
@@ -29,21 +27,26 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	resize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
-	_chatScrollArea = new QListView(this);
-	_chatScrollAreaLayout = new QVBoxLayout(_chatScrollArea);
+	QWidget* chatScrollAreaWidget = new QWidget();
+	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
+	_chatScrollArea = new ContinuousScroll(this);
 
 	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+
+	_chatScrollArea->setWidgetResizable(true);
 
 	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 25, 15);
 	_chatScrollAreaLayout->setSpacing(15);
 
+	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
 	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
+
+	chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_chatScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	_chatScrollArea->setWidget(chatScrollAreaWidget);
 
-	_chatScrollArea->setMouseTracking(true);
+	chatScrollAreaWidget->setMouseTracking(true);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../src/css");
@@ -86,8 +89,9 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
+
 	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
-	connect(_chatScrollArea->verticalScrollBar(), &QScrollBar::valueChanged, this, &TelegramPostQuickView::addContentsRequest);
+	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContentsRequest);
 }
 
 void TelegramPostQuickView::makeMessage(const QString& messageText, const QUrlList& attachmentsPaths) {
@@ -104,9 +108,10 @@ void TelegramPostQuickView::makeMessage(const QString& messageText, const QUrlLi
 	_chatScrollAreaLayout->addWidget(messageWidget, 0, Qt::AlignHCenter | Qt::AlignTop);
 	_messagesHistory->makeMessage(messageWidget);
 
-	const MessageAttachmentsList& messageAttachmentsList = messageWidget->messageAttachments();
-	if (messageAttachmentsList.isEmpty())
+	if (!messageWidget->hasAttachments())
 		return;
+
+	const auto& messageAttachmentsList = messageWidget->messageAttachments();
 
 	foreach(auto attachment, messageAttachmentsList)
 		connect(attachment, &MessageAttachment::clicked, this, &TelegramPostQuickView::attachmentCliked);
@@ -120,10 +125,10 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 
 void TelegramPostQuickView::attachmentCliked() {
 	MessageAttachment* attachment = (MessageAttachment*)sender();
-	MessageWidget* attachmentParentMessage = attachment->parentMessage();
 
+	_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
 	_messageMediaViewer->show();
-	_messageMediaViewer->openMessageAttachment(attachmentParentMessage, attachmentParentMessage->indexOfAttachment(attachment));
+
 	showMinimized();
 }
 
@@ -133,6 +138,6 @@ void TelegramPostQuickView::showEvent(QShowEvent* event) {
 }
 
 void TelegramPostQuickView::addContentsRequest() {
-	if (_chatScrollArea->verticalScrollBar()->value() + _messagesHistory->messageAt(_messagesHistory->count() - 1)->height() >= _chatScrollArea->verticalScrollBar()->maximum())
-		makeMessage("Text message", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test7.jpg"),QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test8.jpg") });
+
+	makeMessage("text of message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test7.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test8.jpg") });
 }

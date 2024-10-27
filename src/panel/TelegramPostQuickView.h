@@ -5,10 +5,10 @@
 #include "History.h"
 #include <memory>
 
+#include "ContinuousScroll.h"
+
 class MessageMediaViewer;
 
-class QScrollArea;
-class QListView;
 
 
 class TelegramPostQuickView: public QWidget {
@@ -19,7 +19,7 @@ private:
 
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;
 	std::unique_ptr<MessageMediaViewer> _messageMediaViewer = nullptr;
-	QListView* _chatScrollArea = nullptr;
+	ContinuousScroll* _chatScrollArea = nullptr;
 
 	std::shared_ptr<History> _messagesHistory;
 public:

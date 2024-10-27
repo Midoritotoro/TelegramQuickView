@@ -44,16 +44,6 @@ public:
 
 	[[nodiscard]] inline bool hasAttachments() const { return !_telegramMessage->attachments.isEmpty(); }
 	[[nodiscard]] inline bool hasText() const { return !_telegramMessage->text.isEmpty(); }
-protected:
-	void resizeEvent(QResizeEvent* event) override {
-		QElapsedTimer timer;
-		timer.start();
-
-		QWidget::resizeEvent(event);
-
-
-		qDebug() << "MessageWidget::resizeEvent: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
-	}
 private:
 	std::unique_ptr<TelegramMessage> _telegramMessage = nullptr;
 	QGridLayout* _messageLayout = nullptr;
