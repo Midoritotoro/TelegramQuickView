@@ -8,11 +8,12 @@
 namespace style {
 	template <typename T>
 	[[nodiscard]] inline T ConvertScale(T value) {
-		if (value < 0.) {
+		if (value < 0.)
 			return -ConvertScale(-value);
-		}
+
 		const auto result = T(std::round(
-			(double(value) * 1 / 100.) - 0.01));
+			(double(value) / 100.) - 0.01));
+
 		return (!std::is_integral_v<T> || !value || result) ? result : 1;
 	}
 }
@@ -21,25 +22,38 @@ namespace style {
 ScrollArea::ScrollArea(QWidget* parent):
 	QScrollArea(parent)
 {
-	setFocusPolicy(Qt::NoFocus);
+	setLayoutDirection(Qt::LeftToRight);
 
-	qDebug() << style::ConvertScale(verticalScrollBar()->singleStep()) << verticalScrollBar()->singleStep();
+	//qDebug() << style::ConvertScale(verticalScrollBar()->singleStep()) << verticalScrollBar()->singleStep();
 
 	verticalScrollBar()->setSingleStep(style::ConvertScale(verticalScrollBar()->singleStep()));
-
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	setFrameStyle(int(QFrame::NoFrame) | QFrame::Plain);
 	viewport()->setAutoFillBackground(false);
 
-	_horizontalValue = horizontalScrollBar()->value();
 	_verticalValue = verticalScrollBar()->value();
+
+	connect(verticalScrollBar(), &QAbstractSlider::valueChanged, [=] {
+		scrolled();
+		});
+	connect(verticalScrollBar(), &QAbstractSlider::rangeChanged, [=] {
+		scrolled();
+		});
+
 }
 
-int ScrollArea::scrollWidth() const {
-	QWidget* w(widget());
-	return w ? qMax(w->width(), width()) : width();
+void ScrollArea::scrolled() {
+	const int verticalValue = verticalScrollBar()->value();
+
+	if (_verticalValue != verticalValue) {
+		if (_disabled) 
+			verticalScrollBar()->setValue(_verticalValue);
+		else
+			_verticalValue = verticalValue;
+	}
 }
 
 int ScrollArea::scrollHeight() const {
@@ -47,16 +61,8 @@ int ScrollArea::scrollHeight() const {
 	return w ? qMax(w->height(), height()) : height();
 }
 
-int ScrollArea::scrollLeftMax() const {
-	return scrollWidth() - width();
-}
-
 int ScrollArea::scrollTopMax() const {
 	return scrollHeight() - height();
-}
-
-int ScrollArea::scrollLeft() const {
-	return _horizontalValue;
 }
 
 int ScrollArea::scrollTop() const {
@@ -64,16 +70,21 @@ int ScrollArea::scrollTop() const {
 }
 
 bool ScrollArea::eventFilter(QObject* obj, QEvent* e) {
+	QElapsedTimer timer;
+	timer.start();
+
+	qDebug() << e->type();
+
 	const auto result = QScrollArea::eventFilter(obj, e);
-	return obj == widget() || result;
+
+	qDebug() << "eventFilter time taken: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
+	return result;
 }
 
 bool ScrollArea::viewportEvent(QEvent* e) {
 	if (e->type() == QEvent::Wheel) {
-		if (_customWheelProcess
-			&& _customWheelProcess(static_cast<QWheelEvent*>(e))) {
-			return true;
-		}
+		return false;
+		// ...
 	}
 	return QScrollArea::viewportEvent(e);
 }
@@ -81,47 +92,55 @@ bool ScrollArea::viewportEvent(QEvent* e) {
 void ScrollArea::keyPressEvent(QKeyEvent* e) {
 	if ((e->key() == Qt::Key_Up || e->key() == Qt::Key_Down)
 		&& (e->modifiers().testFlag(Qt::AltModifier)
-			|| e->modifiers().testFlag(Qt::ControlModifier))) {
+			|| e->modifiers().testFlag(Qt::ControlModifier)))
 		e->ignore();
-	}
-	else if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Back) {
+	else if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Back)
 		((QObject*)widget())->event(e);
-	}
-	else {
+	else
 		QScrollArea::keyPressEvent(e);
+}
+
+void ScrollArea::scrollToWidget(QWidget* widget) {
+	if (auto local = this->widget()) {
+		auto globalPosition = widget->mapToGlobal(QPoint(0, 0));
+		auto localPosition = local->mapFromGlobal(globalPosition);
+		auto localTop = localPosition.y();
+		auto localBottom = localTop + widget->height();
+		scrollToY(localTop, localBottom);
 	}
 }
 
 int ScrollArea::computeScrollTo(int toTop, int toBottom) {
 	const auto toMin = 0;
 	const auto toMax = scrollTopMax();
-	if (toTop < toMin) {
+
+	if (toTop < toMin)
 		toTop = toMin;
-	}
-	else if (toTop > toMax) {
+	else if (toTop > toMax)
 		toTop = toMax;
-	}
+	
 	const auto exact = (toBottom < 0);
 
 	const auto curTop = scrollTop();
 	const auto curHeight = height();
 	const auto curBottom = curTop + curHeight;
+
 	auto scToTop = toTop;
+
 	if (!exact && toTop >= curTop) {
-		if (toBottom < toTop) {
+		if (toBottom < toTop)
 			toBottom = toTop;
-		}
-		if (toBottom <= curBottom) {
+
+		if (toBottom <= curBottom) 
 			return curTop;
-		}
 
 		scToTop = toBottom - curHeight;
-		if (scToTop > toTop) {
+		if (scToTop > toTop)
+
 			scToTop = toTop;
-		}
-		if (scToTop == curTop) {
+		if (scToTop == curTop)
+
 			return curTop;
-		}
 	}
 	else {
 		scToTop = toTop;
@@ -133,14 +152,13 @@ void ScrollArea::scrollToY(int toTop, int toBottom) {
 	verticalScrollBar()->setValue(computeScrollTo(toTop, toBottom));
 }
 
+void ScrollArea::disableScroll(bool dis) {
+	_disabled = dis;
+}
 
 bool ScrollArea::focusNextPrevChild(bool next) {
 	if (QWidget::focusNextPrevChild(next)) {
 		return true;
 	}
 	return false;
-}
-
-void ScrollArea::setMovingByScrollBar(bool movingByScrollBar) {
-	_movingByScrollBar = movingByScrollBar;
 }

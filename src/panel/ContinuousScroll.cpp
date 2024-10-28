@@ -16,9 +16,9 @@ void ContinuousScroll::wheelEvent(QWheelEvent* event) {
 }
 
 void ContinuousScroll::setTrackingContent(bool value) {
-	if (_tracking == value) {
+	if (_tracking == value)
 		return;
-	}
+	
 	_tracking = value;
 	reconnect();
 }
@@ -28,6 +28,7 @@ void ContinuousScroll::reconnect() {
 		_connection = QMetaObject::Connection();
 		return;
 	}
+
 	const auto handleAction = [=](int action) {
 		const auto scroll = verticalScrollBar();
 		const auto step = (action == QAbstractSlider::SliderSingleStepAdd)
@@ -35,9 +36,13 @@ void ContinuousScroll::reconnect() {
 			: (action == QAbstractSlider::SliderPageStepAdd)
 			? scroll->pageStep()
 			: 0;
-		if (!action) {
+
+		if (!action)
 			return;
-		}
+
+		qDebug() << scrollTop() + step;
+		qDebug() << scrollTopMax();
+		
 		const auto newTop = scrollTop() + step;
 		if (newTop > scrollTopMax()) {
 			emit addContentRequest();
@@ -47,5 +52,6 @@ void ContinuousScroll::reconnect() {
 	_connection = QObject::connect(
 		verticalScrollBar(),
 		&QAbstractSlider::actionTriggered,
-		handleAction);
+		handleAction
+	);
 }

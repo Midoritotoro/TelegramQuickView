@@ -3,7 +3,7 @@
 #include "ScrollArea.h"
 
 
-class ContinuousScroll: public ScrollArea {
+class ContinuousScroll final: public ScrollArea {
 	Q_OBJECT
 public:
 	using ScrollArea::ScrollArea;
@@ -17,6 +17,5 @@ private:
 	void reconnect();
 
 	bool _tracking = false;
-
 	QMetaObject::Connection _connection;
 };

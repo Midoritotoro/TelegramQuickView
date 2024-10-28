@@ -32,5 +32,5 @@ public Q_SLOTS:
 protected:
 
 	void showEvent(QShowEvent* event) override;
-	void addContentsRequest();
+	void addContent();
 };

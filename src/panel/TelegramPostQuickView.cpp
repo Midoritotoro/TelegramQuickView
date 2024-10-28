@@ -31,6 +31,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
 	_chatScrollArea = new ContinuousScroll(this);
 
+	_chatScrollArea->setTrackingContent(true);
+
 	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
 
 	_chatScrollArea->setWidgetResizable(true);
@@ -91,7 +93,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 
 
 	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
-	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContentsRequest);
+	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
 }
 
 void TelegramPostQuickView::makeMessage(const QString& messageText, const QUrlList& attachmentsPaths) {
@@ -137,7 +139,7 @@ void TelegramPostQuickView::showEvent(QShowEvent* event) {
 	QWidget::showEvent(event);
 }
 
-void TelegramPostQuickView::addContentsRequest() {
+void TelegramPostQuickView::addContent() {
 
 	makeMessage("text of message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test7.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test8.jpg") });
 }
