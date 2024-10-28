@@ -8,7 +8,7 @@ class QPaintEvent;
 class QResizeEvent;
 
 
-class MessageAttachment: public ClickableLabel {
+class MessageAttachment final: public ClickableLabel {
 private:
 	Q_OBJECT
 	QString _attachmentPath;
@@ -32,5 +32,6 @@ protected:
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 private:
+	void preparePreview();
 	void updatePreviewSize();
 };

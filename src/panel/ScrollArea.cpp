@@ -4,20 +4,7 @@
 #include <QEvent>
 #include <QWheelEvent>
 
-
-namespace style {
-	template <typename T>
-	[[nodiscard]] inline T ConvertScale(T value) {
-		if (value < 0.)
-			return -ConvertScale(-value);
-
-		const auto result = T(std::round(
-			(double(value) / 100.) - 0.01));
-
-		return (!std::is_integral_v<T> || !value || result) ? result : 1;
-	}
-}
-
+#include "../core/StyleCore.h"
 
 ScrollArea::ScrollArea(QWidget* parent):
 	QScrollArea(parent)
@@ -26,7 +13,7 @@ ScrollArea::ScrollArea(QWidget* parent):
 
 	//qDebug() << style::ConvertScale(verticalScrollBar()->singleStep()) << verticalScrollBar()->singleStep();
 
-	verticalScrollBar()->setSingleStep(style::ConvertScale(verticalScrollBar()->singleStep()));
+	verticalScrollBar()->setSingleStep(style::convertScale(verticalScrollBar()->singleStep()));
 	
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

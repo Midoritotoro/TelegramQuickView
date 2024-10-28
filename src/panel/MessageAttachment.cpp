@@ -11,7 +11,11 @@
 #include <QPixmapCache>
 
 
+#include "../core/StyleCore.h"
+
+
 namespace {
+	
 	QSize textSize(const QString& text, const QFontMetrics& metrics) {
 		return metrics.size(0, text);
 	}
@@ -103,6 +107,10 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 
 	updatePreviewSize();
 	setFixedSize(_attachmentPreviewSize);
+}
+
+void MessageAttachment::preparePreview() {
+
 }
 
 void MessageAttachment::updatePreviewSize() {

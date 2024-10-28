@@ -56,6 +56,8 @@ SET(MAIN_SOURCES main.cpp
 	src/core/AutoRunUtils.h
 	src/core/MouseDetector.cpp
 	src/core/MouseDetector.h
+	src/core/StyleCore.cpp
+	src/core/StyleCore.h
 	src/media/WidgetsHider.h
 
 	src/media/ClickableLabel.cpp
