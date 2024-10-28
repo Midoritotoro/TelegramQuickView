@@ -27,8 +27,8 @@ void setDevicePixelRatio(int ratio);
 
 [[nodiscard]] QImage prepare(
 	QImage image, 
-	int w, 
-	int h, 
+	int width, 
+	int height, 
 	const QSize& _outer
 );
 

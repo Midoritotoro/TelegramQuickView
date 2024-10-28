@@ -1,5 +1,6 @@
 #include "StyleCore.h"
 
+#include <QPainter>
 
 namespace style {
 
@@ -20,45 +21,35 @@ void setDevicePixelRatio(int ratio) {
 
 QImage prepare(
 	QImage image,
-	int w,
-	int h,
+	int width,
+	int height,
 	const QSize& _outer)
 {
-	if (w <= 0
-		|| (w == image.width() && (h <= 0 || h == image.height()))) {
+	if (width <= 0
+		|| (width == image.width() && (height <= 0 || height == image.height()))) {
 	}
-	else if (h <= 0) {
+	else if (height <= 0) {
 		image = image.scaledToWidth(
-			w,
+			width,
 			Qt::SmoothTransformation);
 	}
 	else {
 		image = image.scaled(
-			w,
-			h,
+			width,
+			height,
 			Qt::IgnoreAspectRatio,
 			(Qt::SmoothTransformation));
 	}
 	auto outer = _outer;
 	if (!outer.isEmpty()) {
-		const auto ratio = style::devicePixelRatio;
+		const auto ratio = style::devicePixelRatio();
 		outer *= ratio;
-		if (outer != QSize(w, h)) {
+		if (outer != QSize(width, height)) {
 			image.setDevicePixelRatio(ratio);
 			auto result = QImage(outer, QImage::Format_ARGB32_Premultiplied);
 			result.setDevicePixelRatio(ratio);
-			if (args.options & Images::Option::TransparentBackground) {
-				result.fill(Qt::transparent);
-			}
 			{
 				QPainter p(&result);
-				if (!(args.options & Images::Option::TransparentBackground)) {
-					if (w < outer.width() || h < outer.height()) {
-						p.fillRect(
-							QRect({}, result.size() / ratio),
-							Qt::black);
-					}
-				}
 				p.drawImage(
 					(result.width() - image.width()) / (2 * ratio),
 					(result.height() - image.height()) / (2 * ratio),
@@ -68,14 +59,6 @@ QImage prepare(
 		}
 	}
 
-	if (args.options
-		& (Option::RoundCircle | Option::RoundLarge | Option::RoundSmall)) {
-		image = Round(std::move(image), args.options);
-		Assert(!image.isNull());
-	}
-	if (args.colored) {
-		image = Colored(std::move(image), *args.colored);
-	}
 	image.setDevicePixelRatio(style::devicePixelRatio());
 	return image;
 }

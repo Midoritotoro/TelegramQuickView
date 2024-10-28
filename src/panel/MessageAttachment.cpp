@@ -110,7 +110,8 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 }
 
 void MessageAttachment::preparePreview() {
-
+	//auto image = style::prepare(QImage(_attachmentPath), ..., ..., ...);
+	//const auto preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
 }
 
 void MessageAttachment::updatePreviewSize() {
