@@ -37,8 +37,6 @@ template <typename T>
 
 [[nodiscard]] QImage prepare(
 	QImage image, 
-	int width, 
-	int height, 
 	const QSize& _outer
 );
 

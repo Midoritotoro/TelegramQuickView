@@ -34,8 +34,9 @@ protected:
 	void resizeEvent(QResizeEvent* event) override;
 private:
 	void paintAttachmentCount(QPainter& painter);
+
 	void preparePreview();
-	void updatePreviewSize();
+	void updateSize();
 
 	QString _attachmentPath;
 	AttachmentType _attachmentType;
@@ -43,5 +44,9 @@ private:
 	MessageWidget* _parentMessage = nullptr;
 	QSize _attachmentPreviewSize;
 
+	QPixmap _preview;
+
 	int _attachmentWidth = 0;
 };
+
+// 69

@@ -29,10 +29,11 @@ void setScale(int scale) {
 
 QImage prepare(
 	QImage image,
-	int width,
-	int height,
 	const QSize& _outer)
 {
+	const auto width = image.width();
+	const auto height = image.height();
+
 	if (width <= 0
 		|| (width == image.width() && (height <= 0 || height == image.height()))) {
 	}
@@ -56,13 +57,13 @@ QImage prepare(
 			image.setDevicePixelRatio(ratio);
 			auto result = QImage(outer, QImage::Format_ARGB32_Premultiplied);
 			result.setDevicePixelRatio(ratio);
-			{
-				QPainter p(&result);
-				p.drawImage(
-					(result.width() - image.width()) / (2 * ratio),
-					(result.height() - image.height()) / (2 * ratio),
-					image);
-			}
+			
+			QPainter p(&result);
+			p.drawImage(
+				(result.width() - image.width()) / (2 * ratio),
+				(result.height() - image.height()) / (2 * ratio),
+				image);
+			
 			image = std::move(result);
 		}
 	}

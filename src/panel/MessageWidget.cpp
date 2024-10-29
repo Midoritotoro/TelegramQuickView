@@ -98,6 +98,9 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 			_telegramMessage->attachments.append(messageAttachment);
 		}
 		break;
+
+	case MessageMediaDisplayMode::Album:
+		break;
 	}
 }
 

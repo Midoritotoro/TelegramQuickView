@@ -25,6 +25,7 @@ namespace {
 	}
 }
 
+
 MessageAttachment::MessageAttachment(
 	QString attachmentPath,
 	int attachmentWidth,
@@ -39,6 +40,7 @@ MessageAttachment::MessageAttachment(
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setCursor(Qt::PointingHandCursor);
+
 }
 
 QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
@@ -55,41 +57,29 @@ MessageAttachment::AttachmentType MessageAttachment::detectMediaType(const QStri
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
-	QPixmap preview;
-
-	switch (_attachmentType) {
-		case AttachmentType::Photo:
-			if (!QPixmapCache::find(_attachmentPath, &preview)) {
-				preview = QPixmap(_attachmentPath);
-				QPixmapCache::insert(_attachmentPath, preview);
-			}
-			break;
-		case AttachmentType::Video:
-			preview.fill(Qt::gray);
-			break;
-	}
-
-	if (preview.isNull())
+	if (_preview.isNull())
 		return;
 
 	QPainter painter(this);
+
+	painter.setPen(Qt::NoPen);
 	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 		case MessageWidget::MessageMediaDisplayMode::Stack:
-			painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : preview);
+			painter.drawPixmap(0, 0, std::move(_preview));
 			break;
 
 		case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
 			if (_parentMessage->attachmentsLength() > 1) {
 				painter.setOpacity(0.4);
-				painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : preview);
+				painter.drawPixmap(0, 0, std::move(_preview));
 
 				paintAttachmentCount(painter);
 			}
 			else {
-				painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : preview);
+				painter.drawPixmap(0, 0, std::move(_preview));
 			}
 			break;
 	}
@@ -98,11 +88,11 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 void MessageAttachment::resizeEvent(QResizeEvent* event) {
 	ClickableLabel::resizeEvent(event);
 
-	updatePreviewSize();
+	updateSize();
+	preparePreview();
 }
 
 void MessageAttachment::paintAttachmentCount(QPainter& painter) {
-	painter.setPen(Qt::white);
 	QFont font("Arial", 16);
 
 	const auto attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
@@ -111,26 +101,30 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
 	attachmentsCountTextRect.moveCenter(rect().center());
 
-	painter.setOpacity(1.0);
+	painter.setPen(Qt::white);
 	painter.setFont(font);
+
+	painter.setOpacity(1.0);
 	painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
 }
 
 void MessageAttachment::preparePreview() {
-	//auto image = style::prepare(QImage(_attachmentPath), ..., ..., ...);
-	//const auto preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
+	auto image = style::prepare(QImage(_attachmentPath), size());
+	_preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
 }
 
-void MessageAttachment::updatePreviewSize() {
+void MessageAttachment::updateSize() {
+	QSize size;
+
 	switch (_attachmentType) {
 		case AttachmentType::Photo:
-			_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
-			setFixedSize(_attachmentPreviewSize);
+			size = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
 			break;
 
 		case AttachmentType::Video:
-			_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
-			setFixedSize(_attachmentPreviewSize);
+			size = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
 			break;
 	}
+
+	setFixedSize(size);
 }

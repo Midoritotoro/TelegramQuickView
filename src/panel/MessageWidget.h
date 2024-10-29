@@ -23,6 +23,7 @@ class MessageWidget: public QWidget {
 	Q_OBJECT
 public:
 	enum class MessageMediaDisplayMode {
+		Album,
 		Stack,
 		PreviewWithCount
 	};

@@ -51,8 +51,9 @@ int main(int argc, char* argv[])
 
     QUrlList list({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg")});
     
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 100; ++i)
         view->makeMessage(text, list);
+
 
     view->show();
     return app.exec();

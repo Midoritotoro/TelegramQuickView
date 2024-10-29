@@ -18,7 +18,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 {
 	setMouseTracking(true);
 
-	_messagesHistory = std::make_shared<History>();
+	//_messagesHistory = std::make_shared<History>();
 
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
@@ -34,7 +34,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	_chatScrollArea->setOpacity(0.1);
 	_chatScrollArea->setTrackingContent(true);
 
-	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+	//_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
 
 	_chatScrollArea->setWidgetResizable(true);
 
@@ -91,7 +91,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	widgetsHider->SetAnimationDuration(1500);
 
 
-	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
+	//connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
 }
 
@@ -100,19 +100,19 @@ void TelegramPostQuickView::makeMessage(const QString& messageText, const QUrlLi
 	timer.start();
 
 	const auto maximumMessageWidth = _panelWidth - (width() / 12.5);
-	MessageWidget* messageWidget = new MessageWidget();
+	MessageWidget* message = new MessageWidget();
 
-	messageWidget->setMessageMediaDisplayMode(_displayMode);
-	messageWidget->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
-	messageWidget->addMessageText(messageText);
+	message->setMessageMediaDisplayMode(_displayMode);
+	message->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
+	message->addMessageText(messageText);
 
-	_chatScrollAreaLayout->addWidget(messageWidget, 0, Qt::AlignHCenter | Qt::AlignTop);
-	_messagesHistory->makeMessage(messageWidget);
+	_chatScrollAreaLayout->addWidget(message, 0, Qt::AlignHCenter | Qt::AlignTop);
+	//_messagesHistory->makeMessage(messageWidget);
 
-	if (!messageWidget->hasAttachments())
+	if (!message->hasAttachments())
 		return;
 
-	const auto& messageAttachmentsList = messageWidget->messageAttachments();
+	const auto& messageAttachmentsList = message->messageAttachments();
 
 	foreach(auto attachment, messageAttachmentsList)
 		connect(attachment, &MessageAttachment::clicked, this, &TelegramPostQuickView::attachmentCliked);
@@ -127,8 +127,8 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 void TelegramPostQuickView::attachmentCliked() {
 	MessageAttachment* attachment = (MessageAttachment*)sender();
 
-	_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
-	_messageMediaViewer->show();
+	//_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
+	//_messageMediaViewer->show();
 
 	showMinimized();
 }
