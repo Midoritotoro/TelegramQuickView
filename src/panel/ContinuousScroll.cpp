@@ -12,6 +12,7 @@ void ContinuousScroll::wheelEvent(QWheelEvent* event) {
 		viewportEvent(event);
 		return;
 	}
+
 	QScrollArea::wheelEvent(event);
 }
 
@@ -40,9 +41,6 @@ void ContinuousScroll::reconnect() {
 		if (!action)
 			return;
 
-		qDebug() << scrollTop() + step;
-		qDebug() << scrollTopMax();
-		
 		const auto newTop = scrollTop() + step;
 		if (newTop > scrollTopMax()) {
 			emit addContentRequest();

@@ -6,17 +6,25 @@ namespace style {
 
 namespace {
 
-	int DevicePixelRatioValue = 1;
-	int ScaleValue = kScaleDefault;
+	int devicePixelRatioValue = 1;
+	int scaleValue = kScaleDefault;
 
 } // namespace
 
 int devicePixelRatio() {
-	return DevicePixelRatioValue;
+	return devicePixelRatioValue;
 }
 
 void setDevicePixelRatio(int ratio) {
-	DevicePixelRatioValue = std::clamp(ratio, 1, kScaleMax / kScaleMin);
+	devicePixelRatioValue = std::clamp(ratio, 1, kScaleMax / kScaleMin);
+}
+
+int scale() {
+	return scaleValue;
+}
+
+void setScale(int scale) {
+	scaleValue = scale;
 }
 
 QImage prepare(
@@ -38,7 +46,7 @@ QImage prepare(
 			width,
 			height,
 			Qt::IgnoreAspectRatio,
-			(Qt::SmoothTransformation));
+			Qt::SmoothTransformation);
 	}
 	auto outer = _outer;
 	if (!outer.isEmpty()) {

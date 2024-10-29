@@ -30,7 +30,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	QWidget* chatScrollAreaWidget = new QWidget();
 	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
 	_chatScrollArea = new ContinuousScroll(this);
-
+	
+	_chatScrollArea->setOpacity(0.1);
 	_chatScrollArea->setTrackingContent(true);
 
 	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
@@ -72,12 +73,10 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
 
-	setStyleSheet(QString::fromUtf8("*{\n"
+	setStyleSheet(QString::fromUtf8("QWidget { background-color: rgba(0, 0, 0, 0); }\n"
+		"*{\n"
 		"font-size: 14px;\n"
-		"}\n"
-		"QWidget{\n"
-		"background-color: rgba(35,36,37, 60);\n"
-		"}"));
+		"}\n"));
 
 	setContentsMargins(0, 0, 0, 0);
 
@@ -140,6 +139,5 @@ void TelegramPostQuickView::showEvent(QShowEvent* event) {
 }
 
 void TelegramPostQuickView::addContent() {
-
 	makeMessage("text of message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test7.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test8.jpg") });
 }

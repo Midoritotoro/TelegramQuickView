@@ -30,7 +30,7 @@ public:
 public Q_SLOTS:
 	void attachmentCliked();
 protected:
-
 	void showEvent(QShowEvent* event) override;
+
 	void addContent();
 };

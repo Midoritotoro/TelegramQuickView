@@ -36,8 +36,8 @@ MessageAttachment::MessageAttachment(
 	, _parentMessage(parentMessage)
 	, _attachmentWidth(attachmentWidth)
 {
-	setScaledContents(true);
-	setBackgroundRole(QPalette::Dark);
+	setAttribute(Qt::WA_NoSystemBackground);
+	setAttribute(Qt::WA_TranslucentBackground);
 	setCursor(Qt::PointingHandCursor);
 }
 
@@ -45,23 +45,28 @@ QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, c
 	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
 }
 
-QString MessageAttachment::detectMediaType(const QString& filePath) noexcept {
-	return QMimeDatabase().mimeTypeForFile(filePath).name();
+MessageAttachment::AttachmentType MessageAttachment::detectMediaType(const QString& filePath) noexcept {
+	const auto type = QMimeDatabase().mimeTypeForFile(filePath).name();
+
+	return type.contains("audio") ? AttachmentType::Audio
+		: type.contains("video") ? AttachmentType::Video
+		: type.contains("image") ? AttachmentType::Photo
+		: AttachmentType::Unknown;
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
-	QLabel::paintEvent(event);
-
 	QPixmap preview;
 
-	if (_attachmentType.contains("image")) {
-		if (!QPixmapCache::find(_attachmentPath, &preview)) {
-			preview = QPixmap(_attachmentPath);
-			QPixmapCache::insert(_attachmentPath, preview);
-		}
-	}
-	else if (_attachmentType.contains("video")) {
-		preview.fill(Qt::gray);
+	switch (_attachmentType) {
+		case AttachmentType::Photo:
+			if (!QPixmapCache::find(_attachmentPath, &preview)) {
+				preview = QPixmap(_attachmentPath);
+				QPixmapCache::insert(_attachmentPath, preview);
+			}
+			break;
+		case AttachmentType::Video:
+			preview.fill(Qt::gray);
+			break;
 	}
 
 	if (preview.isNull())
@@ -72,33 +77,21 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
+		case MessageWidget::MessageMediaDisplayMode::Stack:
+			painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : preview);
+			break;
 
-	case MessageWidget::MessageMediaDisplayMode::Stack:
-		painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : preview);
-		break;
+		case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
+			if (_parentMessage->attachmentsLength() > 1) {
+				painter.setOpacity(0.4);
+				painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : preview);
 
-	case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
-		if ((_parentMessage->attachmentsLength() - 1) > 0) {
-			painter.setOpacity(0.4);
-			painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : preview);
-
-			painter.setPen(Qt::white);
-			QFont font("Arial", 16);
-
-			const auto attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
-			const auto attachmentsCountTextSize = textSize(attachmentsCountText, font);
-
-			QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
-			attachmentsCountTextRect.moveCenter(rect().center());
-
-			painter.setOpacity(1.0);
-			painter.setFont(font);
-			painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
-		}
-		else {
-			painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : preview);
-		}
-		break;
+				paintAttachmentCount(painter);
+			}
+			else {
+				painter.drawPixmap(0, 0, preview.size() != _attachmentPreviewSize ? preview.scaled(_attachmentPreviewSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation) : preview);
+			}
+			break;
 	}
 }
 
@@ -106,7 +99,21 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 	ClickableLabel::resizeEvent(event);
 
 	updatePreviewSize();
-	setFixedSize(_attachmentPreviewSize);
+}
+
+void MessageAttachment::paintAttachmentCount(QPainter& painter) {
+	painter.setPen(Qt::white);
+	QFont font("Arial", 16);
+
+	const auto attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
+	const auto attachmentsCountTextSize = textSize(attachmentsCountText, font);
+
+	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
+	attachmentsCountTextRect.moveCenter(rect().center());
+
+	painter.setOpacity(1.0);
+	painter.setFont(font);
+	painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
 }
 
 void MessageAttachment::preparePreview() {
@@ -115,8 +122,15 @@ void MessageAttachment::preparePreview() {
 }
 
 void MessageAttachment::updatePreviewSize() {
-	if (_attachmentType.contains("image"))
-		_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
-	else if (_attachmentType.contains("video"))
-		_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
+	switch (_attachmentType) {
+		case AttachmentType::Photo:
+			_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
+			setFixedSize(_attachmentPreviewSize);
+			break;
+
+		case AttachmentType::Video:
+			_attachmentPreviewSize = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
+			setFixedSize(_attachmentPreviewSize);
+			break;
+	}
 }

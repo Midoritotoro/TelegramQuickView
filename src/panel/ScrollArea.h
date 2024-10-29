@@ -16,6 +16,8 @@ public:
 	bool viewportEvent(QEvent* e) override;
 	void keyPressEvent(QKeyEvent* e) override;
 
+	void setOpacity(double opacity);
+
 	[[nodiscard]] int computeScrollTo(int toTop, int toBottom);
 
 	void scrollToY(int toTop, int toBottom = -1);
@@ -25,9 +27,10 @@ public:
 
 	void disableScroll(bool dis);
 protected:
-	bool eventFilter(QObject* obj, QEvent* e) override;
+	void paintEvent(QPaintEvent* event) override;
 private:
 	bool _disabled = false;
 
 	int _verticalValue;
+	double _opacity;
 };

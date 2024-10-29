@@ -3,15 +3,15 @@
 #include <QScrollBar>
 #include <QEvent>
 #include <QWheelEvent>
+#include <QPainter>
 
 #include "../core/StyleCore.h"
+
 
 ScrollArea::ScrollArea(QWidget* parent):
 	QScrollArea(parent)
 {
 	setLayoutDirection(Qt::LeftToRight);
-
-	//qDebug() << style::ConvertScale(verticalScrollBar()->singleStep()) << verticalScrollBar()->singleStep();
 
 	verticalScrollBar()->setSingleStep(style::convertScale(verticalScrollBar()->singleStep()));
 	
@@ -23,24 +23,20 @@ ScrollArea::ScrollArea(QWidget* parent):
 
 	_verticalValue = verticalScrollBar()->value();
 
-	connect(verticalScrollBar(), &QAbstractSlider::valueChanged, [=] {
-		scrolled();
-		});
-	connect(verticalScrollBar(), &QAbstractSlider::rangeChanged, [=] {
-		scrolled();
-		});
+	connect(verticalScrollBar(), &QAbstractSlider::valueChanged, this, &ScrollArea::scrolled);
+	connect(verticalScrollBar(), &QAbstractSlider::rangeChanged, this, &ScrollArea::scrolled);
 
+	setOpacity(1);
 }
 
 void ScrollArea::scrolled() {
 	const int verticalValue = verticalScrollBar()->value();
 
-	if (_verticalValue != verticalValue) {
+	if (_verticalValue != verticalValue)
 		if (_disabled) 
 			verticalScrollBar()->setValue(_verticalValue);
 		else
 			_verticalValue = verticalValue;
-	}
 }
 
 int ScrollArea::scrollHeight() const {
@@ -56,22 +52,10 @@ int ScrollArea::scrollTop() const {
 	return _verticalValue;
 }
 
-bool ScrollArea::eventFilter(QObject* obj, QEvent* e) {
-	QElapsedTimer timer;
-	timer.start();
-
-	qDebug() << e->type();
-
-	const auto result = QScrollArea::eventFilter(obj, e);
-
-	qDebug() << "eventFilter time taken: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
-	return result;
-}
-
 bool ScrollArea::viewportEvent(QEvent* e) {
 	if (e->type() == QEvent::Wheel) {
-		return false;
-		// ...
+		verticalScrollBar()->setValue(verticalScrollBar()->value());
+		return true;
 	}
 	return QScrollArea::viewportEvent(e);
 }
@@ -88,11 +72,13 @@ void ScrollArea::keyPressEvent(QKeyEvent* e) {
 }
 
 void ScrollArea::scrollToWidget(QWidget* widget) {
-	if (auto local = this->widget()) {
-		auto globalPosition = widget->mapToGlobal(QPoint(0, 0));
-		auto localPosition = local->mapFromGlobal(globalPosition);
-		auto localTop = localPosition.y();
-		auto localBottom = localTop + widget->height();
+	if (const auto local = this->widget()) {
+		const auto globalPosition = widget->mapToGlobal(QPoint(0, 0));
+		const auto localPosition = local->mapFromGlobal(globalPosition);
+
+		const auto localTop = localPosition.y();
+		const auto localBottom = localTop + widget->height();
+
 		scrollToY(localTop, localBottom);
 	}
 }
@@ -143,9 +129,25 @@ void ScrollArea::disableScroll(bool dis) {
 	_disabled = dis;
 }
 
-bool ScrollArea::focusNextPrevChild(bool next) {
-	if (QWidget::focusNextPrevChild(next)) {
-		return true;
+void ScrollArea::setOpacity(double opacity) {
+	_opacity = opacity;
+	update();
+}
+
+void ScrollArea::paintEvent(QPaintEvent* event) {
+	QPainter painter(viewport());
+
+	if (_opacity > 0) {
+		painter.setPen(Qt::black);
+		painter.setBrush(Qt::black);
 	}
+	painter.setOpacity(_opacity);
+
+	painter.drawRect(rect());
+}
+
+bool ScrollArea::focusNextPrevChild(bool next) {
+	if (QWidget::focusNextPrevChild(next))
+		return true;
 	return false;
 }
