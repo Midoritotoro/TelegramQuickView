@@ -46,16 +46,8 @@ QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, c
 	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
 }
 
-MessageAttachment::AttachmentType MessageAttachment::detectMediaType(const QString& filePath) noexcept {
-	const auto type = QMimeDatabase().mimeTypeForFile(filePath).name();
-
-	return type.contains("audio") ? AttachmentType::Audio
-		: type.contains("video") ? AttachmentType::Video
-		: type.contains("image") ? AttachmentType::Photo
-		: AttachmentType::Unknown;
-}
-
 void MessageAttachment::paintEvent(QPaintEvent* event) {
+	const auto _preview = preparePreview();
 	if (_preview.isNull())
 		return;
 
@@ -63,18 +55,18 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 		case MessageWidget::MessageMediaDisplayMode::Stack:
-			painter.drawPixmap(0, 0, std::move(_preview));
+			painter.drawPixmap(0, 0, _preview);
 			break;
 
 		case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
 			if (_parentMessage->attachmentsLength() > 1) {
 				painter.setOpacity(0.4);
-				painter.drawPixmap(0, 0, std::move(_preview));
+				painter.drawPixmap(0, 0, _preview);
 
 				paintAttachmentCount(painter);
 			}
 			else {
-				painter.drawPixmap(0, 0, std::move(_preview));
+				painter.drawPixmap(0, 0, _preview);
 			}
 			break;
 	}
@@ -82,7 +74,6 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 
 void MessageAttachment::resizeEvent(QResizeEvent* event) {
 	updateSize();
-	preparePreview();
 }
 
 void MessageAttachment::paintAttachmentCount(QPainter& painter) {
@@ -101,10 +92,24 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 	painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
 }
 
-void MessageAttachment::preparePreview() {
-	auto image = style::prepare(QImage(_attachmentPath), size());
-	_preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-	_preview.setDevicePixelRatio(style::devicePixelRatio());
+QPixmap MessageAttachment::preparePreview() {
+	QPixmap preview;
+
+	QString key = _attachmentPath;
+	if (QPixmapCache::find(key, &preview)) {
+		return preview;
+	}
+	else {
+		auto image = style::prepare(QImage(_attachmentPath), size());
+		preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
+		preview.setDevicePixelRatio(style::devicePixelRatio());
+
+		if (QPixmapCache::cacheLimit() > 0) {
+			QPixmapCache::insert(key, preview);
+		}
+	}
+	return preview;
+	
 }
 
 void MessageAttachment::updateSize() {
@@ -121,4 +126,29 @@ void MessageAttachment::updateSize() {
 	}
 
 	setFixedSize(size);
+}
+
+inline void MessageAttachment::setParentMessage(MessageWidget* parentMessage) {
+	_parentMessage = parentMessage; 
+}
+
+QString MessageAttachment::attachmentPath() const noexcept { 
+	return _attachmentPath; 
+}
+
+MessageAttachment::AttachmentType MessageAttachment::attachmentType() const noexcept {
+	return _attachmentType;
+}
+
+MessageWidget* MessageAttachment::parentMessage() const noexcept {
+	return _parentMessage; 
+}
+
+MessageAttachment::AttachmentType MessageAttachment::detectMediaType(const QString& filePath) noexcept {
+	const auto type = QMimeDatabase().mimeTypeForFile(filePath).name();
+
+	return type.contains("audio") ? AttachmentType::Audio
+		: type.contains("video") ? AttachmentType::Video
+		: type.contains("image") ? AttachmentType::Photo
+		: AttachmentType::Unknown;
 }

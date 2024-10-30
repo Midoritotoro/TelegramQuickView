@@ -22,12 +22,12 @@ public:
 
 	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
 
-	inline void setParentMessage(MessageWidget* parentMessage) noexcept { _parentMessage = parentMessage; }
+	inline void setParentMessage(MessageWidget* parentMessage);
 
-	[[nodiscard]] inline QString attachmentPath() const noexcept { return _attachmentPath;  }
-	[[nodiscard]] inline AttachmentType attachmentType() const noexcept { return _attachmentType; }
+	[[nodiscard]] QString attachmentPath() const noexcept;
+	[[nodiscard]] AttachmentType attachmentType() const noexcept;
 
-	[[nodiscard]] inline MessageWidget* parentMessage() const noexcept { return _parentMessage; }
+	[[nodiscard]] MessageWidget* parentMessage() const noexcept;
 	[[nodiscard]] static AttachmentType detectMediaType(const QString& filePath) noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
@@ -35,7 +35,7 @@ protected:
 private:
 	void paintAttachmentCount(QPainter& painter);
 
-	void preparePreview();
+	[[nodiscard]] QPixmap preparePreview();
 	void updateSize();
 
 	QString _attachmentPath;
@@ -43,8 +43,6 @@ private:
 
 	MessageWidget* _parentMessage = nullptr;
 	QSize _attachmentPreviewSize;
-
-	QPixmap _preview;
 
 	int _attachmentWidth = 0;
 };

@@ -104,8 +104,40 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 	}
 }
 
+void MessageWidget::setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) {
+	_mediaDisplayMode = displayMode;
+}
+
+MessageWidget::MessageMediaDisplayMode MessageWidget::messsageMediaDisplayMode() const noexcept {
+	return _mediaDisplayMode; 
+}
+
+QString MessageWidget::messageText() const noexcept {
+	return _telegramMessage->text; 
+}
+
+const MessageAttachmentsList& MessageWidget::messageAttachments() const noexcept { 
+	return _telegramMessage->attachments; 
+}
+
+int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) const noexcept {
+	return _telegramMessage->attachments.indexOf(messageAttachment); 
+}
+
 MessageAttachment* MessageWidget::attachmentAt(int index) const noexcept {
 	if (index >= 0 && attachmentsLength() > index)
 		return _telegramMessage->attachments.at(index);
 	return nullptr;
+}
+
+int MessageWidget::attachmentsLength() const noexcept {
+	return _telegramMessage->attachments.length();
+}
+
+bool MessageWidget::hasAttachments() const noexcept {
+	return !_telegramMessage->attachments.isEmpty();
+}
+
+bool MessageWidget::hasText() const noexcept {
+	return !_telegramMessage->text.isEmpty();
 }
