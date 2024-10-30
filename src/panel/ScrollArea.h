@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QScrollArea>
-#include <functional>
+
 
 class ScrollArea: public QScrollArea {
 public:
@@ -12,10 +12,6 @@ public:
 	int scrollTop() const;
 
 	bool focusNextPrevChild(bool next) override;
-
-	bool viewportEvent(QEvent* e) override;
-	void keyPressEvent(QKeyEvent* e) override;
-
 	void setOpacity(double opacity);
 
 	[[nodiscard]] int computeScrollTo(int toTop, int toBottom);
@@ -27,6 +23,9 @@ public:
 
 	void disableScroll(bool dis);
 protected:
+	bool viewportEvent(QEvent* event) override;
+	void keyPressEvent(QKeyEvent* event) override;
+
 	void paintEvent(QPaintEvent* event) override;
 private:
 	bool _disabled = false;

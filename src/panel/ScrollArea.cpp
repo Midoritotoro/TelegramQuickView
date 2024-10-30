@@ -52,23 +52,24 @@ int ScrollArea::scrollTop() const {
 	return _verticalValue;
 }
 
-bool ScrollArea::viewportEvent(QEvent* e) {
-	if (e->type() == QEvent::Wheel) {
+bool ScrollArea::viewportEvent(QEvent* event) {
+	if (event->type() == QEvent::Wheel) {
 		verticalScrollBar()->setValue(verticalScrollBar()->value());
 		return true;
 	}
-	return QScrollArea::viewportEvent(e);
+	return QScrollArea::viewportEvent(event);
 }
 
-void ScrollArea::keyPressEvent(QKeyEvent* e) {
-	if ((e->key() == Qt::Key_Up || e->key() == Qt::Key_Down)
-		&& (e->modifiers().testFlag(Qt::AltModifier)
-			|| e->modifiers().testFlag(Qt::ControlModifier)))
-		e->ignore();
-	else if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Back)
-		((QObject*)widget())->event(e);
+void ScrollArea::keyPressEvent(QKeyEvent* event) {
+	if ((event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
+		&& (event->modifiers().testFlag(Qt::AltModifier)
+			|| event->modifiers().testFlag(Qt::ControlModifier))
+			|| event->key() == Qt::Key_Left || event->key() == Qt::Key_Right)
+		event->ignore();
+	else if (event->key() == Qt::Key_Escape || event->key() == Qt::Key_Back)
+		((QObject*)widget())->event(event);
 	else
-		QScrollArea::keyPressEvent(e);
+		QScrollArea::keyPressEvent(event);
 }
 
 void ScrollArea::scrollToWidget(QWidget* widget) {

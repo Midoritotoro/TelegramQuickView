@@ -40,7 +40,6 @@ MessageAttachment::MessageAttachment(
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setCursor(Qt::PointingHandCursor);
-
 }
 
 QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
@@ -62,10 +61,6 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 
 	QPainter painter(this);
 
-	painter.setPen(Qt::NoPen);
-	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 		case MessageWidget::MessageMediaDisplayMode::Stack:
 			painter.drawPixmap(0, 0, std::move(_preview));
@@ -86,8 +81,6 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 }
 
 void MessageAttachment::resizeEvent(QResizeEvent* event) {
-	ClickableLabel::resizeEvent(event);
-
 	updateSize();
 	preparePreview();
 }
@@ -111,6 +104,7 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 void MessageAttachment::preparePreview() {
 	auto image = style::prepare(QImage(_attachmentPath), size());
 	_preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
+	_preview.setDevicePixelRatio(style::devicePixelRatio());
 }
 
 void MessageAttachment::updateSize() {

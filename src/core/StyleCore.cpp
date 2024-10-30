@@ -34,21 +34,20 @@ QImage prepare(
 	const auto width = image.width();
 	const auto height = image.height();
 
-	if (width <= 0
-		|| (width == image.width() && (height <= 0 || height == image.height()))) {
-	}
-	else if (height <= 0) {
+	if (width <= 0|| (width == image.width() 
+		&& (height <= 0 || height == image.height())))
+		;
+	else if (height <= 0)
 		image = image.scaledToWidth(
 			width,
 			Qt::SmoothTransformation);
-	}
-	else {
+	else
 		image = image.scaled(
 			width,
 			height,
 			Qt::IgnoreAspectRatio,
 			Qt::SmoothTransformation);
-	}
+
 	auto outer = _outer;
 	if (!outer.isEmpty()) {
 		const auto ratio = style::devicePixelRatio();
@@ -59,6 +58,11 @@ QImage prepare(
 			result.setDevicePixelRatio(ratio);
 			
 			QPainter p(&result);
+
+			if (width < outer.width() || height < outer.height())
+				p.fillRect(
+					QRect({}, result.size() / ratio),
+					Qt::black);
 			p.drawImage(
 				(result.width() - image.width()) / (2 * ratio),
 				(result.height() - image.height()) / (2 * ratio),
