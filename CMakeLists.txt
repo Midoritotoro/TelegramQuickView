@@ -99,25 +99,24 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/ContinuousScroll.h
 	src/panel/ScrollArea.cpp
 	src/panel/ScrollArea.h
-
-	src/sql/SqlContentManager.cpp
-	src/sql/SqlContentManager.h
+	src/panel/data/SqlReader.cpp
+	src/panel/data/SqlReader.h
 )
 
-add_executable(TelegramParser ${PARSER_SOURCES})
+#add_executable(TelegramParser ${PARSER_SOURCES})
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
-set_property(TARGET TelegramParser PROPERTY CXX_STANDARD 20)
+#set_property(TARGET TelegramParser PROPERTY CXX_STANDARD 20)
 set_property(TARGET TelegramQuickView PROPERTY CXX_STANDARD 20)
 
-target_link_libraries(TelegramParser PRIVATE
-					Qt6::Core
-					Qt6::Widgets
-					Qt6::Sql
-					Qt::OpenGL
-					Td::TdJson
-					Td::TdStatic
-)
+#target_link_libraries(TelegramParser PRIVATE
+#					Qt6::Core
+#					Qt6::Widgets
+#					Qt6::Sql
+#					Qt::OpenGL
+#					Td::TdJson
+#					Td::TdStatic
+#)
 
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -138,8 +137,8 @@ SET_SOURCE_FILES_PROPERTIES(
 
 set(CMAKE_INSTALL_PREFIX "D:/${PROJECT_NAME}/")
 
-target_compile_definitions(TelegramParser PRIVATE PROJECT_NAME="${PROJECT_NAME}")
+#target_compile_definitions(TelegramParser PRIVATE PROJECT_NAME="${PROJECT_NAME}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}")
 
-install(TARGETS TelegramParser DESTINATION out/build)
+#install(TARGETS TelegramParser DESTINATION out/build)
 install(TARGETS TelegramQuickView DESTINATION out/build)

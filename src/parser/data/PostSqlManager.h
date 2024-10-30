@@ -20,8 +20,7 @@ public:
 	void writeMessageInfo(const TelegramMessage& message);
 private:
 	void updateMessageInfo(const TelegramMessage& message);
-
 	[[nodiscard]] bool rowExists(const QString& columnName, const QVariant& parameter);
 
-	[[nodiscard]] QString getDatabasePath();
+	[[nodiscard]] QString getDatabasePath() const;
 };

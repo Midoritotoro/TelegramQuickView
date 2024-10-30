@@ -10,8 +10,6 @@ MessageWidget::MessageWidget(
 QWidget(parent)
 , _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
-	_telegramMessage = std::make_unique<TelegramMessage>();
-
 	_messageLayout = new QGridLayout(this);
 	setContentsMargins(0, 0, 0, 0);
 	_messageLayout->setSpacing(0);
@@ -39,7 +37,7 @@ void MessageWidget::addMessageText(const QString& text) {
 	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
 	textLabel->setText(text);
-	_telegramMessage->text = text;
+	_text = text;
 
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		textLabel->setStyleSheet("QLabel{\n"
@@ -77,7 +75,7 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
-			_telegramMessage->attachments.append(messageAttachment);
+			_attachments.append(messageAttachment);
 
 		}
 
@@ -95,7 +93,7 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
 			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
-			_telegramMessage->attachments.append(messageAttachment);
+			_attachments.append(messageAttachment);
 		}
 		break;
 
@@ -113,31 +111,31 @@ MessageWidget::MessageMediaDisplayMode MessageWidget::messsageMediaDisplayMode()
 }
 
 QString MessageWidget::messageText() const noexcept {
-	return _telegramMessage->text; 
+	return _text; 
 }
 
 const MessageAttachmentsList& MessageWidget::messageAttachments() const noexcept { 
-	return _telegramMessage->attachments; 
+	return _attachments; 
 }
 
 int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) const noexcept {
-	return _telegramMessage->attachments.indexOf(messageAttachment); 
+	return _attachments.indexOf(messageAttachment); 
 }
 
 MessageAttachment* MessageWidget::attachmentAt(int index) const noexcept {
 	if (index >= 0 && attachmentsLength() > index)
-		return _telegramMessage->attachments.at(index);
+		return _attachments.at(index);
 	return nullptr;
 }
 
 int MessageWidget::attachmentsLength() const noexcept {
-	return _telegramMessage->attachments.length();
+	return _attachments.length();
 }
 
 bool MessageWidget::hasAttachments() const noexcept {
-	return !_telegramMessage->attachments.isEmpty();
+	return !_attachments.isEmpty();
 }
 
 bool MessageWidget::hasText() const noexcept {
-	return !_telegramMessage->text.isEmpty();
+	return !_text.isEmpty();
 }

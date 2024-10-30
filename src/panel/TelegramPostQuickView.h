@@ -4,11 +4,11 @@
 #include <QVBoxLayout>
 #include "History.h"
 #include <memory>
+#include "data/SqlReader.h"
 
 #include "ContinuousScroll.h"
 
 class MessageMediaViewer;
-
 
 
 class TelegramPostQuickView: public QWidget {
@@ -22,6 +22,9 @@ private:
 	ContinuousScroll* _chatScrollArea = nullptr;
 
 	std::shared_ptr<History> _messagesHistory;
+	std::unique_ptr<SqlReader> _sqlReader;
+
+	int _currentPostIndex;
 public:
 	TelegramPostQuickView(QWidget* parent = nullptr);
 

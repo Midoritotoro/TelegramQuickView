@@ -9,8 +9,6 @@
 PostSqlManager::PostSqlManager() {
 	const auto dataBasePath = getDatabasePath();
 
-	qDebug() << "Database path: " << dataBasePath;
-
 	const auto sqlQuery = QString::fromUtf8(
 		"CREATE TABLE IF NOT EXISTS " + std::string(DataBaseTableName) + "(\n"
 			"id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
@@ -44,10 +42,8 @@ void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
 	}
 
 	if (message.mediaAlbumId != 0)
-		if (rowExists("mediaAlbumId", message.mediaAlbumId)) {
-			qDebug() << "Row already exists: updating...";
+		if (rowExists("mediaAlbumId", message.mediaAlbumId))
 			return updateMessageInfo(message);
-		}
 
 	QSqlQuery query(_dataBase);
 
@@ -84,8 +80,6 @@ void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
 
 	query.prepare(sqlUpdateQuery);
 
-	qDebug() << query.lastError();
-
 	query.bindValue(":attachments", ", " + message.attachment);
 	query.bindValue(":text", message.text);
 	query.bindValue(":mediaAlbumId", message.mediaAlbumId);
@@ -120,7 +114,7 @@ bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parame
 }
 
 
-QString PostSqlManager::getDatabasePath() {
+QString PostSqlManager::getDatabasePath() const {
 #ifdef PROJECT_NAME
 	const QDir appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).replace(QCoreApplication::applicationName(), PROJECT_NAME);
 

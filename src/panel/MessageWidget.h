@@ -12,11 +12,6 @@ class MessageAttachment;
 typedef QList<QUrl> QUrlList;
 typedef QList<MessageAttachment*> MessageAttachmentsList;
 
-typedef struct _TelegramMessage {
-	QString text;
-	MessageAttachmentsList attachments;
-} TelegramMessage;
-
 
 class MessageWidget: public QWidget {
 	Q_OBJECT
@@ -46,7 +41,8 @@ public:
 	[[nodiscard]] bool hasAttachments() const noexcept;
 	[[nodiscard]] bool hasText() const noexcept;
 private:
-	std::unique_ptr<TelegramMessage> _telegramMessage = nullptr;
+	QString _text;
+	MessageAttachmentsList _attachments;
 	QGridLayout* _messageLayout = nullptr;
 	MessageMediaDisplayMode _mediaDisplayMode;
 };

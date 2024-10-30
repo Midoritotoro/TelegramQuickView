@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
     style::setDevicePixelRatio(useRatio);
-    
+  /*  
     QString text = "🚩Загадка. Сколько здоровья у вороны?)\n Поломанный герой, который бустит свои статы не от базы, а от фактического здоровья во второй форме, в следствии чего выбивает огромные цифры урона и живет дольше некоторых боссов 🔫 ауф, дайте парочку таких\n И отсутствие перезарядки на воскрешение при убийстве - это отдельный вид искусства.Не надо сравнивать с Маричкой, она в соло команды не выносит и ее можно убить одним героем.";
 
     TelegramPostQuickView* view = new TelegramPostQuickView();
@@ -51,10 +51,15 @@ int main(int argc, char* argv[])
 
     QUrlList list({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg") });
     
-    for (int i = 0; i < 1000; ++i)
+    for (int i = 0; i < 2; ++i)
         view->makeMessage(text, list);
 
 
-    view->show();
+    view->show();*/
+
+    SqlReader reader;
+    auto message = reader.getMessage(1);
+    qDebug() << message.date;
+
     return app.exec();
 }

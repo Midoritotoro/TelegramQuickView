@@ -15,6 +15,8 @@
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	QWidget(parent)
 	, _displayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount)
+	, _sqlReader(std::make_unique<SqlReader>())
+	, _currentPostIndex(1)
 {
 	setMouseTracking(true);
 
@@ -139,5 +141,16 @@ void TelegramPostQuickView::showEvent(QShowEvent* event) {
 }
 
 void TelegramPostQuickView::addContent() {
-	makeMessage("text of message.", QUrlList{ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\gift.mp4"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test7.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test8.jpg") });
+	const auto message = _sqlReader->getMessage(_currentPostIndex);
+	qDebug() << message.date << message.attachments << message.text;
+
+	if (message.isNull())
+		return;
+
+	QUrlList urlList;
+	foreach(const auto& item, message.attachments)
+		urlList.push_back(QUrl(item));
+
+	makeMessage(message.text, urlList);
+	++_currentPostIndex;
 }
