@@ -60,8 +60,9 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 
 		case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
 			if (_parentMessage->attachmentsLength() > 1) {
-				painter.setOpacity(0.4);
 				painter.drawPixmap(0, 0, _preview);
+				painter.setOpacity(0.4);
+				painter.fillRect(rect(), Qt::black);
 
 				paintAttachmentCount(painter);
 			}
@@ -96,17 +97,23 @@ QPixmap MessageAttachment::preparePreview() {
 	QPixmap preview;
 
 	QString key = _attachmentPath;
-	if (QPixmapCache::find(key, &preview)) {
+	if (QPixmapCache::find(key, &preview)) 
 		return preview;
-	}
 	else {
-		auto image = style::prepare(QImage(_attachmentPath), size());
-		preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-		preview.setDevicePixelRatio(style::devicePixelRatio());
+		auto image = style::Prepare(QImage(_attachmentPath), size());
 
-		if (QPixmapCache::cacheLimit() > 0) {
+		image = std::move(image).scaled(
+			image.width() * style::DevicePixelRatio(),
+			image.height() * style::DevicePixelRatio(),
+			Qt::IgnoreAspectRatio,
+			Qt::SmoothTransformation);
+
+		image = style::Opaque(std::move(image));
+		preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
+		preview.setDevicePixelRatio(style::DevicePixelRatio());
+
+		if (QPixmapCache::cacheLimit() > 0)
 			QPixmapCache::insert(key, preview);
-		}
 	}
 	return preview;
 	

@@ -1,5 +1,8 @@
 ﻿cmake_minimum_required (VERSION 3.24)
 
+set(CMAKE_C_COMPILER "D:/msys64/mingw64/bin/gcc.exe")
+set(CMAKE_CXX_COMPILER "D:/msys64/mingw64/bin/gcc.exe")
+
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
@@ -52,6 +55,9 @@ SET(PARSER_SOURCES src/parser/main.cpp
 
 SET(MAIN_SOURCES main.cpp
 
+	src/Application.cpp
+	src/Application.h
+
 	src/core/AutoRunUtils.cpp
 	src/core/AutoRunUtils.h
 	src/core/MouseDetector.cpp
@@ -103,6 +109,10 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/data/SqlReader.h
 )
 
+include(cmake/lib_openh264.cmake)
+include(cmake/lib_opus.cmake)
+include(cmake/lib_ffmpeg.cmake)
+
 #add_executable(TelegramParser ${PARSER_SOURCES})
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
@@ -125,6 +135,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 					Qt6::Multimedia
 					Qt6::MultimediaWidgets
 					Qt6::Sql
+					app::external_openh264
+					app::external_opus
+					app::external_ffmpeg
 )
 
 

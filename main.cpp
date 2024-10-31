@@ -8,27 +8,24 @@
     #endif // _UNICODE
 #endif // _WIN32
 
-#ifdef __linux__
-    #pragma message("Невозможно запустить на Linux")
-#endif // __linux__
-
-#include "src/core/AutoRunUtils.h"
-
-#include <QApplication>
-#include "src/panel/TelegramPostQuickView.h"
-#include "src/settings/MainWindow.h"
-#include "src/media/player/MediaPlayer.h"
+#include "src/Application.h"
+//#include "src/panel/TelegramPostQuickView.h"
 
 #include "src/core/StyleCore.h"
+
+extern "C" {
+    #include <libavfilter/avfilter.h>
+}
+
 
 int main(int argc, char* argv[])
 {
 #ifdef _WIN32
 
-    if (!IS_MINIMUM_WINDOWS_VERSION) {
+    /*if (!IS_MINIMUM_WINDOWS_VERSION) {
         MessageBox(NULL, L"Приложение работает на версиях Windows от 10 и выше", L"Ошибка", MB_OK);
         return -1;
-    }
+    }*/
 
     /*if (!addParserToAutoRun()) {
         MessageBox(NULL, L"Произошла ошибка при добавлении парсера Телеграм в автозагрузку", L"Ошибка", MB_OK);
@@ -37,29 +34,28 @@ int main(int argc, char* argv[])
 
 #endif // _WIN32
 
-    QApplication app(argc, argv);
+    //QApplication app(argc, argv);
 
-    const auto ratio = app.devicePixelRatio();
+    //const auto ratio = app.devicePixelRatio();
 
-    const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
-    style::setDevicePixelRatio(useRatio);
-  /*  
-    QString text = "🚩Загадка. Сколько здоровья у вороны?)\n Поломанный герой, который бустит свои статы не от базы, а от фактического здоровья во второй форме, в следствии чего выбивает огромные цифры урона и живет дольше некоторых боссов 🔫 ауф, дайте парочку таких\n И отсутствие перезарядки на воскрешение при убийстве - это отдельный вид искусства.Не надо сравнивать с Маричкой, она в соло команды не выносит и ее можно убить одним героем.";
+    //const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
+    //style::SetDevicePixelRatio(useRatio);
+
+
+    
+  /*  QString text = "🚩Загадка. Сколько здоровья у вороны?)\n Поломанный герой, который бустит свои статы не от базы, а от фактического здоровья во второй форме, в следствии чего выбивает огромные цифры урона и живет дольше некоторых боссов 🔫 ауф, дайте парочку таких\n И отсутствие перезарядки на воскрешение при убийстве - это отдельный вид искусства.Не надо сравнивать с Маричкой, она в соло команды не выносит и ее можно убить одним героем.";
 
     TelegramPostQuickView* view = new TelegramPostQuickView();
     view->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::Stack);
 
-    QUrlList list({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg") });
+    QUrlList list({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotestvertical.mp4") });
     
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 1000; ++i)
         view->makeMessage(text, list);
 
 
     view->show();*/
 
-    SqlReader reader;
-    auto message = reader.getMessage(1);
-    qDebug() << message.date;
-
-    return app.exec();
+   // return app.exec();
+    return 0;
 }

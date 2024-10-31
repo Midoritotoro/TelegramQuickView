@@ -13,16 +13,18 @@ inline constexpr auto kScaleMin = 50;
 inline constexpr auto kScaleMax = 300;
 inline constexpr auto kScaleDefault = 100;
 
-[[nodiscard]] int devicePixelRatio();
-void setDevicePixelRatio(int ratio);
+[[nodiscard]] int DevicePixelRatio();
+void SetDevicePixelRatio(int ratio);
 
-[[nodiscard]] int scale();
-void setScale(int scale);
+[[nodiscard]] int Scale();
+void SetScale(int scale);
+
+[[nodiscard]] QImage Opaque(QImage&& image);
 
 template <typename T>
-[[nodiscard]] inline T convertScale(T value, int scale) {
+[[nodiscard]] inline T ConvertScale(T value, int scale) {
 	if (value < 0.)
-		return -convertScale(-value, scale);
+		return -ConvertScale(-value, scale);
 
 	const auto result = T(std::round(
 		(double(value) * scale / 100.) - 0.01));
@@ -31,11 +33,11 @@ template <typename T>
 }
 
 template <typename T>
-[[nodiscard]] inline T convertScale(T value) {
-	return convertScale(value, scale());
+[[nodiscard]] inline T ConvertScale(T value) {
+	return ConvertScale(value, Scale());
 }
 
-[[nodiscard]] QImage prepare(
+[[nodiscard]] QImage Prepare(
 	QImage image, 
 	const QSize& _outer
 );

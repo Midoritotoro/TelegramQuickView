@@ -13,7 +13,7 @@ ScrollArea::ScrollArea(QWidget* parent):
 {
 	setLayoutDirection(Qt::LeftToRight);
 
-	verticalScrollBar()->setSingleStep(style::convertScale(verticalScrollBar()->singleStep()));
+	verticalScrollBar()->setSingleStep(style::ConvertScale(verticalScrollBar()->singleStep()));
 	
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

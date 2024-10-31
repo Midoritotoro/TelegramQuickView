@@ -50,13 +50,16 @@ TelegramMessage SqlReader::getMessage(int id) {
 	QSqlQuery query(_dataBase);
 
 	const auto selectQuery = QString(
-		"SELECT * FROM %1 WHERE id = :id LIMIT 1"
+		"SELECT * FROM %1 WHERE id = :id"
 	).arg(DataBaseTableName);
 
 	query.prepare(selectQuery);
 	query.bindValue(":id", id);
 
-	if (query.exec() && query.next()) {
+	if (!query.exec())
+		return message;
+
+	while (query.next()) {
 		message.attachments = query.value("attachments").toString().split(", ");
 		message.sender = query.value("sender").toString();
 		message.date = query.value("date").toString();
@@ -75,16 +78,16 @@ bool SqlReader::rowExists(const QString& columnName, const QVariant& parameter) 
 	QSqlQuery query(_dataBase);
 
 	const auto checkQuery = QString(
-		"SELECT EXISTS(SELECT * FROM %1 WHERE %2 = :parameter LIMIT 1)"
+		"SELECT EXISTS(SELECT * FROM %1 WHERE %2 = :parameter)"
 	).arg(DataBaseTableName)
-		.arg(columnName);
+	 .arg(columnName);
 
 	query.prepare(checkQuery);
 	query.bindValue(":parameter", parameter);
 
 	if (query.exec() && query.next()) {
 		_dataBase.commit();
-		return query.value(0).toBool();
+		return !query.value(0).isNull();
 	}
 
 	return false;

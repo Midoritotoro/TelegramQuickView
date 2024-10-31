@@ -89,7 +89,7 @@ void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
 	_dataBase.commit();
 }
 
-bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parameter) {
+bool SqlReader::rowExists(const QString& columnName, const QVariant& parameter) {
 	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return false;
@@ -98,7 +98,7 @@ bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parame
 	QSqlQuery query(_dataBase);
 
 	const auto checkQuery = QString(
-		"SELECT EXISTS(SELECT * FROM %1 WHERE %2 = :parameter LIMIT 1)"
+		"SELECT EXISTS(SELECT * FROM %1 WHERE %2 = :parameter)"
 	).arg(DataBaseTableName)
 	 .arg(columnName);
 
@@ -107,11 +107,12 @@ bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parame
 
 	if (query.exec() && query.next()) {
 		_dataBase.commit();
-		return query.value(0).toBool();
+		return !query.value(0).isNull();
 	}
 
 	return false;
 }
+
 
 
 QString PostSqlManager::getDatabasePath() const {
