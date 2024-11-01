@@ -28,7 +28,8 @@ SqlReader::SqlReader() {
 		QSqlQuery query(_dataBase);
 		query.exec(sqlQuery);
 
-		_dataBase.commit();
+		if (_dataBase.transaction())
+			_dataBase.commit();
 	}
 }
 
@@ -44,55 +45,34 @@ TelegramMessage SqlReader::getMessage(int id) {
 		return message;
 	}
 
-	if (!rowExists("id", id))
-		return message;
-
 	QSqlQuery query(_dataBase);
 
 	const auto selectQuery = QString(
-		"SELECT * FROM %1 WHERE id = :id"
+		"SELECT * FROM %1"
 	).arg(DataBaseTableName);
 
-	query.prepare(selectQuery);
-	query.bindValue(":id", id);
-
-	if (!query.exec())
+	if (!query.exec(selectQuery)) {
+		qDebug() << "Error while executing query: " << query.lastQuery() << " - " << _dataBase.lastError().text();
 		return message;
+	}
 
 	while (query.next()) {
-		message.attachments = query.value("attachments").toString().split(", ");
-		message.sender = query.value("sender").toString();
-		message.date = query.value("date").toString();
-		message.text = query.value("text").toString();
+		if (query.value("id").toInt() == id) {
+			if (query.value("attachments").toString().length() != 0)
+				message.attachments = query.value("mediaAlbumId").toInt() != 0
+						? query.value("attachments").toString().split(", ")
+						: query.value("attachments").toStringList();
+
+			message.sender = query.value("sender").toString();
+			message.date = query.value("date").toString();
+			message.text = query.value("text").toString();
+
+			return message;
+		}
 	}
 
 	return message;
 }
-
-bool SqlReader::rowExists(const QString& columnName, const QVariant& parameter) {
-	if (_dataBase.isOpen() == false) {
-		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
-		return false;
-	}
-
-	QSqlQuery query(_dataBase);
-
-	const auto checkQuery = QString(
-		"SELECT EXISTS(SELECT * FROM %1 WHERE %2 = :parameter)"
-	).arg(DataBaseTableName)
-	 .arg(columnName);
-
-	query.prepare(checkQuery);
-	query.bindValue(":parameter", parameter);
-
-	if (query.exec() && query.next()) {
-		_dataBase.commit();
-		return !query.value(0).isNull();
-	}
-
-	return false;
-}
-
 
 QString SqlReader::getDatabasePath() const {
 #ifdef PROJECT_NAME

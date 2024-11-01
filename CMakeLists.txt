@@ -1,7 +1,9 @@
 ﻿cmake_minimum_required (VERSION 3.24)
 
-set(CMAKE_C_COMPILER "D:/msys64/mingw64/bin/gcc.exe")
-set(CMAKE_CXX_COMPILER "D:/msys64/mingw64/bin/gcc.exe")
+#set(CMAKE_C_COMPILER "D:/msys64/mingw64/bin/gcc.exe")
+#set(CMAKE_CXX_COMPILER "D:/msys64/mingw64/bin/gcc.exe")
+
+enable_language(ASM)
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -14,6 +16,9 @@ project("TelegramQuickView" LANGUAGES CXX)
 
 set(Td_DIR "D:/Packages/td/tdlib/lib/cmake/Td")
 
+#include(cmake/lib_openh264.cmake)
+#include(cmake/lib_opus.cmake)
+#include(cmake/lib_ffmpeg.cmake)
 
 find_package(Td 1.8.36 REQUIRED)
 
@@ -109,10 +114,6 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/data/SqlReader.h
 )
 
-include(cmake/lib_openh264.cmake)
-include(cmake/lib_opus.cmake)
-include(cmake/lib_ffmpeg.cmake)
-
 #add_executable(TelegramParser ${PARSER_SOURCES})
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
@@ -127,6 +128,13 @@ set_property(TARGET TelegramQuickView PROPERTY CXX_STANDARD 20)
 #					Td::TdJson
 #					Td::TdStatic
 #)
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	target_link_options(${PROJECT_NAME}
+		PRIVATE
+		/DELAYLOAD:shlwapi.dll
+		/DELAYLOAD:bcrypt.dll
+	)
+endif()
 
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -135,9 +143,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 					Qt6::Multimedia
 					Qt6::MultimediaWidgets
 					Qt6::Sql
-					app::external_openh264
-					app::external_opus
-					app::external_ffmpeg
+					#app::external_ffmpeg
 )
 
 

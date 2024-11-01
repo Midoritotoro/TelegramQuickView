@@ -1,2 +1,0 @@
-set(__QT_DEPLOY_TARGET_TelegramQuickView_FILE D:/TelegramQuickView/TelegramQuickView.exe)
-set(__QT_DEPLOY_TARGET_TelegramQuickView_RUNTIME_DLLS D:/Packages/Qt/6.7.0/msvc2019_64/bin/Qt6MultimediaWidgets.dll;D:/Packages/Qt/6.7.0/msvc2019_64/bin/Qt6Sql.dll;D:/Packages/Qt/6.7.0/msvc2019_64/bin/Qt6Multimedia.dll;D:/Packages/Qt/6.7.0/msvc2019_64/bin/Qt6Network.dll;D:/Packages/Qt/6.7.0/msvc2019_64/bin/Qt6Widgets.dll;D:/Packages/Qt/6.7.0/msvc2019_64/bin/Qt6Gui.dll;D:/Packages/Qt/6.7.0/msvc2019_64/bin/Qt6Core.dll)

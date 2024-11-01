@@ -49,7 +49,7 @@ bool SetAutoRunKey(LPWSTR path)
 
 bool addParserToAutoRun()
 {
-#if defined(_WIN32)
+#ifdef _WIN32
     TCHAR szExeName[MAX_PATH];
     TCHAR fileName[12] = L"\\Parser.exe";
     rsize_t stringSize = MAX_PATH;
@@ -60,7 +60,6 @@ bool addParserToAutoRun()
 
     _tcscat_s(szExeName, stringSize, fileName);
     return SetAutoRunKey(szExeName);
-#elif defined(__linux__)
-    ;
-#endif
+#endif // _WIN32
+    return FALSE;
 }

@@ -1,4 +1,5 @@
 set(libs_loc "D:/Libraries/win64")
+
 add_library(external_ffmpeg INTERFACE IMPORTED GLOBAL)
 add_library(app::external_ffmpeg ALIAS external_ffmpeg)
 
@@ -25,12 +26,15 @@ set(ffmpeg_lib_list)
 set(ffmpeg_lib_loc ${libs_loc}/ffmpeg)
 
 list(APPEND ffmpeg_lib_list
-    external_opus
+    app::external_opus
+    app::external_openh264
 )
 
 list(APPEND ffmpeg_lib_list
-    ${libs_loc}/dav1d/builddir-$<IF:$<CONFIG:Debug>,debug,release>/src/libdav1d.a
+    ${libs_loc}/dav1d/builddir-release/src/libdav1d.a
 )
+
+#message(${libs_loc}/dav1d/builddir-$<IF:$<CONFIG:Debug>,debug,release>/src/libdav1d.a)
 
 target_include_directories(external_ffmpeg SYSTEM
 INTERFACE

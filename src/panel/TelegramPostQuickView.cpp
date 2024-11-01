@@ -108,7 +108,7 @@ void TelegramPostQuickView::makeMessage(const QString& messageText, const QUrlLi
 	message->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
 	message->addMessageText(messageText);
 
-	_chatScrollAreaLayout->addWidget(message, 0, Qt::AlignHCenter | Qt::AlignTop);
+	_chatScrollAreaLayout->addWidget(message, 0, Qt::AlignLeft | Qt::AlignTop);
 	_messagesHistory->makeMessage(message);
 
 	if (!message->hasAttachments())
@@ -142,15 +142,24 @@ void TelegramPostQuickView::showEvent(QShowEvent* event) {
 
 void TelegramPostQuickView::addContent() {
 	const auto message = _sqlReader->getMessage(_currentPostIndex);
-	qDebug() << message.date << message.attachments << message.text;
+	++_currentPostIndex;
 
-	if (message.isNull())
+	if (message.isNull()) 
 		return;
 
-	QUrlList urlList;
-	foreach(const auto& item, message.attachments)
-		urlList.push_back(QUrl(item));
+	//qDebug() << message.date << message.attachments << message.text;
+	//qDebug() << message.isNull();
+	//qDebug() << "attachments.isEmpty(): " << message.attachments.isEmpty();
+	//qDebug() << "text.isEmpty(): " << message.text.isEmpty();
 
-	makeMessage(message.text, urlList);
-	++_currentPostIndex;
+	if (message.attachments.isEmpty() == false) {
+		QUrlList urlList;
+		foreach(const auto& item, message.attachments)
+			urlList.push_back(QUrl(item));
+		qDebug() << urlList;
+		makeMessage(message.text, urlList);
+	}
+	else {
+		makeMessage(message.text);
+	}
 }

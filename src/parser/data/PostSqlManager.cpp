@@ -97,23 +97,19 @@ bool SqlReader::rowExists(const QString& columnName, const QVariant& parameter) 
 
 	QSqlQuery query(_dataBase);
 
-	const auto checkQuery = QString(
-		"SELECT EXISTS(SELECT * FROM %1 WHERE %2 = :parameter)"
-	).arg(DataBaseTableName)
-	 .arg(columnName);
+	const auto selectQuery = QString(
+		"SELECT * FROM %1"
+	).arg(DataBaseTableName);
 
-	query.prepare(checkQuery);
-	query.bindValue(":parameter", parameter);
+	if (!query.exec(selectQuery))
+		return false;
 
-	if (query.exec() && query.next()) {
-		_dataBase.commit();
-		return !query.value(0).isNull();
-	}
+	while (query.next())
+		if (query.value(columnName) == parameter)
+			return !query.value(0).isNull();
 
 	return false;
 }
-
-
 
 QString PostSqlManager::getDatabasePath() const {
 #ifdef PROJECT_NAME

@@ -24,7 +24,7 @@ QWidget(parent)
 }
 
 void MessageWidget::addMessageText(const QString& text) {
-	if (text.length() < 1)
+	if (text.length() == 0)
 		return;
 
 	QLabel* textLabel = new QLabel();
@@ -55,13 +55,13 @@ void MessageWidget::addMessageText(const QString& text) {
 }
 
 void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth) {
-	if (attachmentsPaths.length() < 1)
+	if (attachmentsPaths.length() == 0)
 		return;
 
 	switch (_mediaDisplayMode) {
 
 	case MessageMediaDisplayMode::PreviewWithCount:
-		foreach(const QUrl& url, attachmentsPaths) {
+		foreach(const auto& url, attachmentsPaths) {
 			QString sourcePath;
 
 			if (url.path().at(0) == "/"[0])
@@ -82,7 +82,7 @@ void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int 
 		break;
 
 	case MessageMediaDisplayMode::Stack:
-		foreach(const QUrl& url, attachmentsPaths) {
+		foreach(const auto& url, attachmentsPaths) {
 			QString sourcePath;
 
 			if (url.path().at(0) == "/"[0])

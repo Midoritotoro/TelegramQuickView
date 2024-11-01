@@ -15,8 +15,7 @@ typedef struct _TelegramMessage {
 	QStringList attachments = {};
 
 	[[nodiscard]] bool isNull() const {
-		return text.isEmpty() && attachments.isEmpty()
-				&& sender.isEmpty() && date.isEmpty();
+		return text.isEmpty() && attachments.isEmpty();
 	}
 } TelegramMessage;
 
@@ -30,7 +29,5 @@ public:
 
 	[[nodiscard]] TelegramMessage getMessage(int id);
 private:
-	[[nodiscard]] bool rowExists(const QString& columnName, const QVariant& parameter);
-
 	[[nodiscard]] QString getDatabasePath() const;
 };

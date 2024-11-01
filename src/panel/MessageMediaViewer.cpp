@@ -176,6 +176,8 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 	if (_mediaPlayer->isHidden())
 		_mediaPlayer->setVisible(true);
 
+	qDebug() << messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath();
+
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
 
 	updateMediaNavigationButtons();
