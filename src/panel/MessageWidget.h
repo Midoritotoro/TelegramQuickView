@@ -9,7 +9,6 @@
 
 class MessageAttachment;
 
-typedef QList<QUrl> QUrlList;
 typedef QList<MessageAttachment*> MessageAttachmentsList;
 
 
@@ -25,7 +24,7 @@ public:
 	MessageWidget(QWidget* parent = nullptr);
 
 	void addMessageText(const QString& text);
-	void addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth);
+	void addMessageAttachments(const QStringList& attachmentsPaths, int maximumMessageWidth);
 
 	void setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode);
 

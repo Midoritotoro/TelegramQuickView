@@ -15,18 +15,24 @@
 
 class NavigationButton;
 class MessageTextView;
+class WidgetsHider;
 
 
 class MessageMediaViewer: public QWidget {
-private:
 	Q_OBJECT
+private:
 	QGridLayout* _grid = nullptr;
+
 	std::unique_ptr<MediaPlayer> _mediaPlayer = nullptr;
+	std::unique_ptr<WidgetsHider> _widgetsHider = nullptr;
+
 	NavigationButton* _nextAttachment = nullptr;
 	NavigationButton* _previousAttachment = nullptr;
+
 	MessageWidget* _currentMessage = nullptr;
 	History* _messagesHistory;
 	MessageTextView* _messageTextView = nullptr;
+
 	int _currentMessageAttachmentIndex = 0;
 public:
 	MessageMediaViewer(History* messagesHistory, QWidget* parent = nullptr);

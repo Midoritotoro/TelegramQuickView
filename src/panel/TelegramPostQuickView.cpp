@@ -97,7 +97,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
 }
 
-void TelegramPostQuickView::makeMessage(const QString& messageText, const QUrlList& attachmentsPaths) {
+void TelegramPostQuickView::makeMessage(const QString& messageText, const QStringList& attachmentsPaths) {
 	QElapsedTimer timer;
 	timer.start();
 
@@ -152,14 +152,8 @@ void TelegramPostQuickView::addContent() {
 	//qDebug() << "attachments.isEmpty(): " << message.attachments.isEmpty();
 	//qDebug() << "text.isEmpty(): " << message.text.isEmpty();
 
-	if (message.attachments.isEmpty() == false) {
-		QUrlList urlList;
-		foreach(const auto& item, message.attachments)
-			urlList.push_back(QUrl(item));
-		qDebug() << urlList;
-		makeMessage(message.text, urlList);
-	}
-	else {
+	if (message.attachments.isEmpty() == false)
+		makeMessage(message.text, message.attachments);
+	else
 		makeMessage(message.text);
-	}
 }

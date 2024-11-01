@@ -81,15 +81,15 @@ MessageMediaViewer::MessageMediaViewer(
 	_messageTextView->setMaximumWidth(screenWidth * 0.8);
 
 	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
-	WidgetsHider* widgetsHider = new WidgetsHider(true, widgetsList);
-	widgetsHider->SetInactivityDuration(3000);
-	widgetsHider->SetAnimationDuration(3000);
-
+	_widgetsHider =  std::make_unique<WidgetsHider>(true, widgetsList);
+	_widgetsHider->SetInactivityDuration(3000);
+	_widgetsHider->SetAnimationDuration(3000);
+	
 	QShortcut* nextAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
 	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
 	QShortcut* showMinimizedShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);
 
-	connect(widgetsHider, &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
+	connect(_widgetsHider.get(), &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
 
 	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
@@ -125,14 +125,17 @@ void MessageMediaViewer::updateMessageTextView() {
 		return;
 
 	if (!_currentMessage->hasText()) {
-		if (!_messageTextView->isHidden())
+		if (!_messageTextView->isHidden()) {
 			_messageTextView->hide();
+			_widgetsHider->removeWidget(_messageTextView);
+		}
 		return;
 	}
 
 	if (_messageTextView->isHidden())
 		_messageTextView->show();
 
+	_widgetsHider->addWidget(_messageTextView);
 	_messageTextView->setText(_currentMessage->messageText());
 
 	int yCoordinate = 0;
@@ -175,8 +178,6 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 
 	if (_mediaPlayer->isHidden())
 		_mediaPlayer->setVisible(true);
-
-	qDebug() << messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath();
 
 	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
 

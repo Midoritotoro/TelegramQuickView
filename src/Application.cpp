@@ -15,7 +15,7 @@ Application::Application(int& argc, char** argv):
     _postsView = std::make_unique<TelegramPostQuickView>();
     _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
-    QUrlList list({ QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test4.jpg"),  QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test3.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test2.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\test1.jpg"), QUrl::fromLocalFile("C:\\Users\\danya\\Downloads\\videotestvertical.mp4") });
+    QStringList list({ "C:\\Users\\danya\\Downloads\\test4.jpg",  "C:\\Users\\danya\\Downloads\\test1.jpg", "C:\\Users\\danya\\Downloads\\test3.jpg", "C:\\Users\\danya\\Downloads\\test2.jpg", "C:\\Users\\danya\\Downloads\\test1.jpg", "C:\\Users\\danya\\Downloads\\videotestvertical.mp4" });
 
     for (int i = 0; i < 3; ++i)
         _postsView->makeMessage(text, list);

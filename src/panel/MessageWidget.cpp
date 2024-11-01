@@ -54,43 +54,28 @@ void MessageWidget::addMessageText(const QString& text) {
 	_messageLayout->addWidget(textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 }
 
-void MessageWidget::addMessageAttachments(const QUrlList& attachmentsPaths, int maximumMessageWidth) {
+void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths, int maximumMessageWidth) {
 	if (attachmentsPaths.length() == 0)
 		return;
 
 	switch (_mediaDisplayMode) {
 
 	case MessageMediaDisplayMode::PreviewWithCount:
-		foreach(const auto& url, attachmentsPaths) {
-			QString sourcePath;
-
-			if (url.path().at(0) == "/"[0])
-				sourcePath = url.path().remove(0, 1);
-			else
-				sourcePath = url.path();
-
-			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
+		foreach(const auto& path, attachmentsPaths) {
+			MessageAttachment* messageAttachment = new MessageAttachment(path, maximumMessageWidth, this);
 			messageAttachment->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
 			_attachments.append(messageAttachment);
-
 		}
 
 		break;
 
 	case MessageMediaDisplayMode::Stack:
-		foreach(const auto& url, attachmentsPaths) {
-			QString sourcePath;
-
-			if (url.path().at(0) == "/"[0])
-				sourcePath = url.path().remove(0, 1);
-			else
-				sourcePath = url.path();
-
-			MessageAttachment* messageAttachment = new MessageAttachment(sourcePath, maximumMessageWidth, this);
+		foreach(const auto& path, attachmentsPaths) {
+			MessageAttachment* messageAttachment = new MessageAttachment(path, maximumMessageWidth, this);
 			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
 			_attachments.append(messageAttachment);
