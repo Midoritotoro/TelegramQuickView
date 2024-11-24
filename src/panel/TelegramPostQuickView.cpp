@@ -88,7 +88,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	grid->addWidget(_chatScrollArea, grid->rowCount(), 0, 1, 1);
 
 	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
-	WidgetsHider* widgetsHider = new WidgetsHider(true, widgetsList);
+	WidgetsHider* widgetsHider = new WidgetsHider(true, true, widgetsList);
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 

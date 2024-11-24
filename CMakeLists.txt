@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.24)
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -6,19 +6,13 @@ if (POLICY CMP0141)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 project("TelegramQuickView" LANGUAGES CXX)
-
-enable_language(ASM)
-
-set(Td_DIR "D:/Packages/td/tdlib/lib/cmake/Td")
-
-find_package(Td 1.8.36 REQUIRED)
 
 include(cmake/lib_openh264.cmake)
 include(cmake/lib_opus.cmake)
 include(cmake/lib_ffmpeg.cmake)
 include(cmake/lib_openal.cmake)
+include(cmake/lib_td.cmake)
 
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
@@ -71,9 +65,6 @@ SET(MAIN_SOURCES main.cpp
     src/media/player/VolumeController.h
     src/media/player/WidgetsHider.h
 
-    src/media/player/effects/OpenGLBlur.cpp
-    src/media/player/effects/OpenGLBlur.h
-    src/media/player/effects/vertex.h
     src/media/ClickableLabel.cpp
     src/media/ClickableLabel.h
    
@@ -199,8 +190,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
             Qt6::OpenGL
             app::external_ffmpeg
             app::external_openal		
-			Td::TdJson
-			Td::TdStatic
+			app::external_td
 )
 
 

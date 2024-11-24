@@ -56,7 +56,7 @@ void PostSqlManager::writeMessageInfo(const Telegram::Message& message) {
 	query.prepare(sqlInsertQuery);
 
 	query.bindValue(":sender", message.sender);
-	query.bindValue(":attachments", message.attachment);
+	query.bindValue(":attachments", message.attachments[0]);
 	query.bindValue(":date", message.date);
 	query.bindValue(":text", message.text);
 	query.bindValue(":mediaAlbumId", message.mediaAlbumId);
@@ -89,7 +89,7 @@ void PostSqlManager::updateMessageInfo(const Telegram::Message& message) {
 	_dataBase.commit();
 }
 
-bool SqlReader::rowExists(const QString& columnName, const QVariant& parameter) {
+bool PostSqlManager::rowExists(const QString& columnName, const QVariant& parameter) {
 	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return false;

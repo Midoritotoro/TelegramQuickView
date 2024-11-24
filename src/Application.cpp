@@ -16,6 +16,9 @@ Application::Application(int& argc, char** argv):
     _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
     _postsView->show();
+
+    for (int index = 0; index < 100; ++index)
+        _postsView->makeMessage(text);
 }
 
 Application::~Application() {

@@ -574,27 +574,27 @@ void NavigationButton::drawBadge(QPainter& _painter, const QStyleOptionComplex& 
     QBrush brush;
     switch (badgeValue_.type())
     {
-    case QVariant::Color:
+    case QMetaType::Type::QColor:
         brush = badgeValue_.value<QColor>();
         break;
-    case QVariant::Brush:
+    case QMetaType::Type::QBrush:
         brush = badgeValue_.value<QBrush>();
         break;
-    case QVariant::UInt:
-    case QVariant::ULongLong:
+    case QMetaType::Type::UInt:
+    case QMetaType::Type::ULongLong:
         brush = _option.palette.highlight();
         text = bageText(badgeValue_.toULongLong());
         break;
-    case QVariant::Int:
-    case QVariant::LongLong:
+    case QMetaType::Type::Int:
+    case QMetaType::Type::LongLong:
         brush = _option.palette.highlight();
         text = bageText(badgeValue_.toLongLong());
         break;
-    case QVariant::Char:
+    case QMetaType::Type::Char:
         brush = _option.palette.highlight();
         text = bageText(badgeValue_.toChar());
         break;
-    case QVariant::String:
+    case QMetaType::Type::QString:
         brush = _option.palette.highlight();
         text = bageText(badgeValue_.toString());
         break;

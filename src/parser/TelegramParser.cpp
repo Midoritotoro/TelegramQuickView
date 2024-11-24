@@ -63,7 +63,7 @@ auto TelegramParser::createFileDownloadQueryHandler() {
         if (object == nullptr)
             return;
         
-        auto file = move_tl_object_as<td::td_api::file>(object);
+        auto file = td::move_tl_object_as<td::td_api::file>(object);
         auto it = _downloadingMessages.find(file->id_);
 
         if (it != _downloadingMessages.end()) {
