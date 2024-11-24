@@ -2,7 +2,7 @@
 
 #include <QLabel>
 
-class ClickableLabel: public QLabel
+class ClickableLabel : public QLabel
 {
 private:
     Q_OBJECT

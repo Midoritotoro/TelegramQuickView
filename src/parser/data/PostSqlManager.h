@@ -17,9 +17,9 @@ public:
 	PostSqlManager();
 	~PostSqlManager();
 	
-	void writeMessageInfo(const TelegramMessage& message);
+	void writeMessageInfo(const Telegram::Message& message);
 private:
-	void updateMessageInfo(const TelegramMessage& message);
+	void updateMessageInfo(const Telegram::Message& message);
 	[[nodiscard]] bool rowExists(const QString& columnName, const QVariant& parameter);
 
 	[[nodiscard]] QString getDatabasePath() const;

@@ -25,7 +25,7 @@ void EnhancedSlider::mousePressEvent(QMouseEvent* event) {
     if (event->button() != Qt::LeftButton)
         return;
     setSliderDown(true);
-    int32_t pos = mousePostionToSliderVal(event->pos());
+    int64_t pos = mousePositionToSliderVal(event->pos());
         if (pos != sliderPosition()) {
             setSliderPosition(pos);
             emit sliderMoved(pos);
@@ -49,7 +49,7 @@ void EnhancedSlider::mouseReleaseEvent(QMouseEvent* event) {
         bIsMove = false;
     }
     else {
-        int32_t pos = mousePostionToSliderVal(event->pos());
+        int64_t pos = mousePositionToSliderVal(event->pos());
         if (pos != sliderPosition()) {
             setSliderPosition(pos);
             emit sliderMoved(pos);
@@ -57,9 +57,9 @@ void EnhancedSlider::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-int32_t EnhancedSlider::mousePostionToSliderVal(const QPoint& pos) {
-    int32_t duration = maximum() - minimum();
-    int32_t sliderPos = 0;
+int64_t EnhancedSlider::mousePositionToSliderVal(const QPoint& pos) {
+    int64_t duration = maximum() - minimum();
+    int64_t sliderPos = 0;
     qreal mousePos = 0;
     uint16_t handleLen = 0;
     if (Qt::Vertical == orientation()) {

@@ -1,7 +1,7 @@
 ﻿#include "MessageMediaViewer.h"
 
 #include "NavigationButton.h"
-#include "../media/WidgetsHider.h"
+#include "../media/player/WidgetsHider.h"
 #include "MessageTextView.h"
 #include "MessageAttachment.h"
 #include "MessageWidget.h"
@@ -100,7 +100,7 @@ MessageMediaViewer::MessageMediaViewer(
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
-	connect(_mediaPlayer.get(), &MediaPlayer::videoSizeChanged, this, &MessageMediaViewer::updateMessageTextView);
+	connect(_mediaPlayer.get(), &MediaPlayer::mediaGeometryChanged, this, &MessageMediaViewer::updateMessageTextView);
 }
 
 void MessageMediaViewer::updateMediaNavigationButtons() {
@@ -140,8 +140,8 @@ void MessageMediaViewer::updateMessageTextView() {
 
 	int yCoordinate = 0;
 	
-	const auto mediaSize = _mediaPlayer->occupiedMediaSpace().toSize();
-	const auto mediaPosition = _mediaPlayer->mediaPosition().toPoint();
+	const auto mediaSize = _mediaPlayer->occupiedMediaSpace();
+	const auto mediaPosition = _mediaPlayer->mediaPosition();
 
 	const auto videoControlsHeight = _mediaPlayer->getVideoControlsHeight();
 
@@ -179,7 +179,7 @@ void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int
 	if (_mediaPlayer->isHidden())
 		_mediaPlayer->setVisible(true);
 
-	_mediaPlayer->setSource(QUrl::fromLocalFile(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath()));
+	_mediaPlayer->setMedia(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath());
 
 	updateMediaNavigationButtons();
 	updateMessageTextView();
@@ -210,7 +210,7 @@ void MessageMediaViewer::goToPreviousMessage() {
 				_currentMessage = previousMessage;
 
 				_currentMessageAttachmentIndex = _currentMessage->attachmentsLength() - 1;
-				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
 				if (_nextAttachment->isHidden())
 					_nextAttachment->show();
@@ -230,7 +230,7 @@ void MessageMediaViewer::goToNextMessage() {
 				_currentMessage = nextMessage;
 				
 				_currentMessageAttachmentIndex = 0;
-				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
 				if (_previousAttachment->isHidden())
 					_previousAttachment->show();
@@ -254,7 +254,7 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (messageAttachmentsCount - (index + 1) > 0) {
 				_currentMessageAttachmentIndex = index + 1;
-				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
 				if (_previousAttachment->isHidden())
 					_previousAttachment->show();
@@ -283,7 +283,7 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 		if (_currentMessage->indexOfAttachment(attachment) == index) {
 			if (index - 1 >= 0) {
 				_currentMessageAttachmentIndex = index - 1;
-				_mediaPlayer->setSource(QUrl::fromLocalFile(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath()));
+				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
 				if (_nextAttachment->isHidden())
 					_nextAttachment->show();

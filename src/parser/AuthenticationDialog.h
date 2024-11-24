@@ -20,7 +20,7 @@ class AuthenticationDialog: public QDialog
 {
     Q_OBJECT
 private:
-    ErrorCodes _currentErrorCode;
+    Telegram::ErrorCodes _currentErrorCode;
     int _sleepSeconds = 0;
     bool _shakeSwitch = true, _skipFirstAuthenticationStage = false, _canClose = false;
     QPushButton* _confirmCredentialsButton = nullptr, * _confirmAuthCodeButton = nullptr, * _backToFirstFrameButton = nullptr, *_sendCodeAgainButton = nullptr;
@@ -33,7 +33,7 @@ public:
     void shake();
 
     void setSleepSeconds(int seconds);
-    void setErrorCode(ErrorCodes code);
+    void setErrorCode(Telegram::ErrorCodes code);
     void setCloseAbility(bool closeAbility);
 
     void toSecondFrame();

@@ -12,6 +12,10 @@
 #include <QPainterPath>
 #include <QApplication>
 #include <QScreen>
+#include <QBrush>
+#include <QPalette>
+#include <QElapsedTimer>
+#include "../ffmpeg/Time.h"
 
 
 namespace  {
@@ -28,8 +32,8 @@ namespace  {
 }
 
 
-MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
-	QWidget(parent) 
+MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
+	QWidget(parent)
 {
 	setContentsMargins(0, 0, 0, 0);
 
@@ -51,7 +55,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_remainingTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../src/css");
+	QDir cssDir(currentPath + "/../../../src/css");
 
 	QString sliderStylePath = cssDir.absolutePath() + "/SliderStyle.css";
 
@@ -73,6 +77,9 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	_volumeSlider->setFixedHeight(20);
 	_playbackSlider->setFixedHeight(20);
 
+	updateSize();
+	updateControlsGeometry();
+
 	connect(_volumeToggle, &QPushButton::clicked, this, [this]() {
 		_volumeToggle->isSpeakerOn() 
 		? setVolume(0)
@@ -82,7 +89,9 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent):
 	connect(_volumeSlider, &QSlider::valueChanged, this, &MediaPlayerPanel::setVolume);
 
 	connect(_fullScreenButton, &QAbstractButton::clicked, this, [this]() {
-		_fullScreenButton->state() == FullScreenButton::State::FullScreenTo ? emit mediaPlayerNeedsNormal() : emit mediaPlayerNeedsFullScreen();
+		_fullScreenButton->state() == FullScreenButton::State::FullScreenTo 
+			? emit mediaPlayerNeedsNormal() 
+			: emit mediaPlayerNeedsFullScreen();
 	});
 
 	connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
@@ -183,7 +192,7 @@ void MediaPlayerPanel::updateControlsGeometry() {
 	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5.,
 			_volumeSlider->height());
 	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(),
-			_volumeToggle->height() / 2 - contentTop());
+			_volumeToggle->height() / 2. - contentTop());
 
 	_volumeToggle->move(contentLeft(), contentTop());
 	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2., contentTop());
@@ -217,8 +226,9 @@ void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
 
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
+
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-	painter.setOpacity(0.8);
+	painter.setOpacity(0.75);
 
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);

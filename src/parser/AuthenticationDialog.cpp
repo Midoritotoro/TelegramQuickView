@@ -56,7 +56,7 @@ namespace {
 
 AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     QDialog(parent)
-    , _currentErrorCode(ErrorCodes::OK)
+    , _currentErrorCode(Telegram::ErrorCodes::OK)
 {
     setWindowTitle(PROJECT_NAME);
 
@@ -167,7 +167,7 @@ void AuthenticationDialog::setSleepSeconds(int seconds) {
     _sleepSeconds = seconds;
 }
 
-void AuthenticationDialog::setErrorCode(ErrorCodes code) {
+void AuthenticationDialog::setErrorCode(Telegram::ErrorCodes code) {
     _currentErrorCode = code;
 }
 
@@ -269,22 +269,22 @@ void AuthenticationDialog::paintErrorMessage(QPainter& painter) {
     QString text;
 
     switch (_currentErrorCode) {
-    case ErrorCodes::OK:
+    case Telegram::ErrorCodes::OK:
         break;
 
-    case ErrorCodes::IncorrectApiHashOrId:
+    case Telegram::ErrorCodes::IncorrectApiHashOrId:
         text = incorrectCredentialsMessage;
         break;
 
-    case ErrorCodes::IncorrectAuthCode:
+    case Telegram::ErrorCodes::IncorrectAuthCode :
         text = incorrectCodeMessage;
         break;
 
-    case ErrorCodes::IncorrectPhoneNumber:
+    case Telegram::ErrorCodes::IncorrectPhoneNumber:
         text = incorrectPhoneMessage;
         break;
 
-    case ErrorCodes::TooManyRequests:
+    case Telegram::ErrorCodes::TooManyRequests:
         text = tooManyRequestsMessage.arg(_sleepSeconds);
         break;
     }

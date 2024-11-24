@@ -1,0 +1,78 @@
+#pragma once
+
+#include "Utility.h"
+#include "Time.h"
+
+namespace FFmpeg {
+
+class FrameGenerator {
+public:
+	struct Frame {
+		Time::time duration = 0;
+		QImage image;
+		bool last = false;
+	};
+
+	FrameGenerator(const QByteArray& bytes);
+
+	[[nodiscard]] Frame renderNext(
+		QSize size,
+		Qt::AspectRatioMode mode,
+		bool fullScreen = false);
+	[[nodiscard]] Frame renderCurrent(
+		QSize size,
+		Qt::AspectRatioMode mode,
+		bool fullScreen = false);
+
+	void setSpeed(float speed);
+	void rewind(Time::time positionMs);
+
+	[[nodiscard]] Time::time duration() const noexcept;
+	[[nodiscard]] Time::time position() const noexcept;
+
+	[[nodiscard]] Time::time frameDelay() const noexcept;
+private:
+	struct ReadFrame {
+		FramePointer frame = nullptr;
+		Time::time position = 0;
+		Time::time duration = 0;
+	};
+
+	void readNextFrame();
+	void resolveNextFrameTiming();
+
+	[[nodiscard]] static int Read(void* opaque,
+		uint8_t* buffer,
+		int bufferSize);
+	[[nodiscard]] static int64_t Seek(void* opaque,
+		int64_t offset,
+		int whence);
+
+	[[nodiscard]] int read(uint8_t* buffer, int bufferSize);
+	[[nodiscard]] int64_t seek(int64_t offset, int whence);
+
+	FormatPointer _format = nullptr;
+	CodecPointer _codec = nullptr;
+
+	SwscalePointer _scale = nullptr;
+
+	ReadFrame _current;
+	ReadFrame _next;
+
+	Time::time _framePosition = 0;
+
+	int _deviceOffset = 0;
+	int _bestVideoStreamId = 0;
+
+	int _nextFrameDelay = 0;
+	int _currentFrameDelay = 0;
+	int _frameIndex = 0;
+
+	float _speed = 1.f;
+
+	QByteArray _bytes = nullptr;
+
+	int _swscaleFlags = SWS_BICUBLIN;
+};
+
+} // namespace FFmpeg

@@ -35,7 +35,7 @@ PostSqlManager::~PostSqlManager() {
 	_dataBase.close();
 }
 
-void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
+void PostSqlManager::writeMessageInfo(const Telegram::Message& message) {
 	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return;
@@ -66,7 +66,7 @@ void PostSqlManager::writeMessageInfo(const TelegramMessage& message) {
 	_dataBase.commit();
 }
 
-void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
+void PostSqlManager::updateMessageInfo(const Telegram::Message& message) {
 	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();
 		return;
@@ -80,7 +80,7 @@ void PostSqlManager::updateMessageInfo(const TelegramMessage& message) {
 
 	query.prepare(sqlUpdateQuery);
 
-	query.bindValue(":attachments", ", " + message.attachment);
+	query.bindValue(":attachments", ", " + message.attachments[0]);
 	query.bindValue(":text", message.text);
 	query.bindValue(":mediaAlbumId", message.mediaAlbumId);
 

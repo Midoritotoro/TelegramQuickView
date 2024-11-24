@@ -1,6 +1,6 @@
 ﻿#include "TelegramPostQuickView.h"
 
-#include "../media/WidgetsHider.h"
+#include "../media/player/WidgetsHider.h"
 #include "MessageAttachment.h"
 #include "MessageMediaViewer.h"
 
@@ -146,11 +146,6 @@ void TelegramPostQuickView::addContent() {
 
 	if (message.isNull()) 
 		return;
-
-	//qDebug() << message.date << message.attachments << message.text;
-	//qDebug() << message.isNull();
-	//qDebug() << "attachments.isEmpty(): " << message.attachments.isEmpty();
-	//qDebug() << "text.isEmpty(): " << message.text.isEmpty();
 
 	if (message.attachments.isEmpty() == false)
 		makeMessage(message.text, message.attachments);

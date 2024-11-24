@@ -1,25 +1,79 @@
-﻿#pragma once
+#pragma once
 
-#include "AbstractMediaPlayer.h"
+#include "../Manager.h"
 #include "MediaPlayerPanel.h"
 
-class WidgetsHider;
+#include "WidgetsHider.h"
+#include "../../core/StyleCore.h"
+
+#include <QWidget>
 
 
-class MediaPlayer : public AbstractMediaPlayer
-{
-private:
+class MediaPlayer final: public QWidget {
 	Q_OBJECT
-	MediaPlayerPanel* _mediaPlayerPanel = nullptr;
-	WidgetsHider* _widgetsHider = nullptr;
-	int _previousVolume;
 public:
+	enum class MediaType {
+		Image,
+		Video,
+		Audio,
+		Unknown
+	};
+
 	MediaPlayer(QWidget* parent = nullptr);
 
+	void setMedia(const QString& path);
+
 	[[nodiscard]] int getVideoControlsHeight() const noexcept;
+
+	[[nodiscard]] static MediaType detectMediaType(const QString& path);
+	[[nodiscard]] QSize occupiedMediaSpace() const noexcept;
+	[[nodiscard]] QPoint mediaPosition() const noexcept;
+
+	[[nodiscard]] Manager::State playbackState() const noexcept;
+
+	void play();
+	void pause();
+
+	void rewind(Time::time positionMs);
+
+	void changeVolume(int value);
+Q_SIGNALS:
+	void mediaGeometryChanged();
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
+	void mousePressEvent(QMouseEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override { event->accept(); };
 private:
-	void updateMediaPlayerPanelVisibility(const QUrl& media);
-}; 
+	enum class MediaDisplayType {
+		FullScreen,
+		Normal
+	};
+
+	void paintBackground(QPainter& painter);
+	void updatePanelVisibility();
+
+	void setFullScreen();
+	void setNormal();
+
+	void cleanUp();
+
+	[[nodiscard]] QImage prepareImage(const QImage& sourceImage);
+
+	std::unique_ptr<Manager> _manager = nullptr;
+	MediaPlayerPanel* _mediaPlayerPanel = nullptr;
+
+	std::unique_ptr<WidgetsHider> _widgetsHider = nullptr;
+
+	QImage _current;
+	QRect _currentFrameRect;
+
+	Manager::State _playbackState;
+
+	Time::time _currMs;
+
+	MediaDisplayType _displayType = MediaDisplayType::Normal;
+	MediaType _currentMediaType = MediaType::Unknown;
+
+	QString _currentMediaPath;
+};

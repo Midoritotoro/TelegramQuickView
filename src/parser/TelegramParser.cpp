@@ -70,7 +70,7 @@ auto TelegramParser::createFileDownloadQueryHandler() {
             qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024*1024) << " Mb";
             qDebug() << "Path to file: " << file->local_->path_.c_str();
             if (file->local_->is_downloading_completed_)
-                it->second.attachment = file->local_->path_.c_str();
+                it->second.attachments.append(file->local_->path_.c_str());
 
             _sqlManager->writeMessageInfo(it->second);
             _downloadingMessages.erase(it);
@@ -124,7 +124,7 @@ std::string TelegramParser::getChatTitle(std::int64_t chat_id) const {
 
 void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
     td::td_api::downcast_call(
-        *update, overloaded(
+        *update, Telegram::overloaded(
             [this](td::td_api::updateNewChat& update_new_chat) {  
                 chat_title_[update_new_chat.chat_->id_] = update_new_chat.chat_->title_;
             },
@@ -156,7 +156,7 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 std::string senderName;
 
                 td::td_api::downcast_call(*update_new_message.message_->sender_id_,
-                    overloaded(
+                    Telegram::overloaded(
                         [this, &senderName](td::td_api::messageSenderUser& user) {
                             senderName = getUserName(user.user_id_);
                         },
@@ -189,7 +189,7 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                         break;
                 }
 
-                TelegramMessage message;
+                Telegram::Message message;
 
                 message.date = convertTdMessageTimestamp(update_new_message.message_->date_).c_str();
                 message.sender = senderName.c_str();

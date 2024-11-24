@@ -155,7 +155,7 @@ void AbstractTelegramParser::processUpdate(td::td_api::object_ptr<td::td_api::Ob
         return;
 
     td::td_api::downcast_call(
-        *update, overloaded(
+        *update, Telegram::overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {
                 _authorizationState = std::move(update_authorization_state.authorization_state_);
                 on_authorizationStateUpdate();
@@ -174,7 +174,7 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
     _authenticationQueryId++;
 
     td::td_api::downcast_call(*_authorizationState,
-        overloaded(
+        Telegram::overloaded(
             [this](td::td_api::authorizationStateReady&) {
                 qDebug() << "authorizationStateReady";
                 emit userAuthorized();
@@ -288,22 +288,22 @@ void AbstractTelegramParser::handleTooManyRequestsError(const td::td_api::object
 
 void AbstractTelegramParser::handleError(const td::td_api::object_ptr<td::td_api::error>& error) {
     switch (error->code_) {
-    case ErrorCodes::TooManyRequests:
-        _authDialog->setErrorCode(ErrorCodes::TooManyRequests);
+    case Telegram::ErrorCodes::TooManyRequests:
+        _authDialog->setErrorCode(Telegram::ErrorCodes::TooManyRequests);
         handleTooManyRequestsError(error);
 
         _authDialog->repaint();
         break;
 
-    case ErrorCodes::IncorrectApiHashOrId:
-        _authDialog->setErrorCode(ErrorCodes::IncorrectApiHashOrId);
+    case Telegram::ErrorCodes::IncorrectApiHashOrId:
+        _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectApiHashOrId);
         _authDialog->shake();
 
         _authDialog->repaint();
         break;
 
-    case ErrorCodes::IncorrectAuthCode:
-        _authDialog->setErrorCode(ErrorCodes::IncorrectAuthCode);
+    case Telegram::ErrorCodes::IncorrectAuthCode:
+        _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectAuthCode);
         _authDialog->shake();
 
         _authDialog->repaint();
@@ -311,8 +311,8 @@ void AbstractTelegramParser::handleError(const td::td_api::object_ptr<td::td_api
         _authorizationCode.erase(_authorizationCode.begin(), _authorizationCode.end());
         break;
 
-    case ErrorCodes::IncorrectPhoneNumber:
-        _authDialog->setErrorCode(ErrorCodes::IncorrectPhoneNumber);
+    case Telegram::ErrorCodes::IncorrectPhoneNumber:
+        _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectPhoneNumber);
         _authDialog->shake();
 
         _authDialog->repaint();
@@ -324,7 +324,7 @@ QString AbstractTelegramParser::findLargestNonSystemDisk() const {
     qint64 maximumSize = 0;
     QString driverName = "";
 
-    foreach(const auto & storage, QStorageInfo::mountedVolumes())
+    foreach(const auto& storage, QStorageInfo::mountedVolumes())
         if (storage.isValid() && storage.isReady())
             if (storage.isReadOnly() == false)
                 if (storage.bytesFree() > maximumSize) {

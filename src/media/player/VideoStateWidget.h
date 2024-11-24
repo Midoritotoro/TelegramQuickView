@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../ClickableLabel.h"
 #include <QPushButton>
-
 
 class VideoStateWidget : public QPushButton {
     Q_OBJECT

@@ -9,7 +9,7 @@ VideoStateWidget::VideoStateWidget(QWidget* parent):
     QPushButton(parent)
 {
     QString currentPath = QCoreApplication::applicationDirPath();
-    QDir assetsDir(currentPath + "/../../assets/images");
+    QDir assetsDir(currentPath + "/../../../assets/images");
 
     _pauseImagePath = assetsDir.absolutePath() + "/stop.png";
     _playImagePath = assetsDir.absolutePath() + "/play.png";

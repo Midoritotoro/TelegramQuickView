@@ -29,7 +29,7 @@ public:
 	[[nodiscard]] TelegramCredentials getTelegramCredentials();
 	[[nodiscard]] std::string getTelegramAuthCode();
 
-	[[nodicard]] bool getDownloadSensitiveContentAbility();
+	[[nodiscard]] bool getDownloadSensitiveContentAbility();
 
 	[[nodiscard]] bool isTelegramCredentialsValid();
 

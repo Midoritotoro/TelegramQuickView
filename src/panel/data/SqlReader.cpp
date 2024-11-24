@@ -37,8 +37,8 @@ SqlReader::~SqlReader() {
 	_dataBase.close();
 }
 
-TelegramMessage SqlReader::getMessage(int id) {
-	TelegramMessage message;
+Telegram::Message SqlReader::getMessage(int id) {
+	Telegram::Message message;
 
 	if (_dataBase.isOpen() == false) {
 		qDebug() << "Ошибка открытия базы данных: " << _dataBase.lastError();

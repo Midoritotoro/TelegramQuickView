@@ -6,19 +6,9 @@
 #include <QUrl>
 #include <QString>
 
+#include "../../parser/utils.h"
+
 #define DataBaseTableName "PostsInfo"
-
-typedef struct _TelegramMessage {
-	QString sender = "";
-	QString text = "";
-	QString date = "";
-	QStringList attachments = {};
-
-	[[nodiscard]] bool isNull() const {
-		return text.isEmpty() && attachments.isEmpty();
-	}
-} TelegramMessage;
-
 
 class SqlReader {
 private:
@@ -27,7 +17,7 @@ public:
 	SqlReader();
 	~SqlReader();
 
-	[[nodiscard]] TelegramMessage getMessage(int id);
+	[[nodiscard]] Telegram::Message getMessage(int id);
 private:
 	[[nodiscard]] QString getDatabasePath() const;
 };

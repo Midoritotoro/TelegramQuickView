@@ -1,164 +1,368 @@
-﻿#include "MediaPlayer.h"
+#include "MediaPlayer.h"
 
-#include "../WidgetsHider.h"
-#include <QAudioOutput>
+#include <QByteArray>
+
+#include <QPainter>
+#include <QMouseEvent>
+#include <QMimeDatabase>
+
+#include <QAudioDevice>
+#include <QAudio>
+#include <QShortcut>
+#include <QPainterPath>
+
+#include <QMetaObject>
+
+#include <QPointF>
+#include <QRectF>
 
 
 namespace {
-	constexpr int mediaPlayerPanelBottomIndent = 5;
+	inline constexpr auto kPanelBottomIndent = 5;
+
+	[[nodiscard]] QByteArray ReadFile(const QString& filepath) {
+		auto file = QFile(filepath);
+		return file.open(QIODevice::ReadOnly)
+			? file.readAll()
+			: QByteArray();
+	}
+
+	[[nodiscard]] QImage Prepare(
+		QImage image,
+		const QSize& _outer)
+	{
+		const auto imageWidth = image.width();
+		const auto imageHeight = image.height();
+
+		if (_outer.width() <= 0 || (_outer.width() == imageWidth
+			&& (_outer.height() <= 0 || _outer.height() == imageHeight)))
+			;
+		else if (imageHeight <= 0)
+			image = image.scaledToWidth(
+				_outer.width(),
+				Qt::SmoothTransformation);
+		else
+			image = image.scaled(
+				_outer.width(),
+				_outer.height(),
+				Qt::IgnoreAspectRatio,
+				Qt::SmoothTransformation);
+
+		auto outer = _outer;
+
+		if (!outer.isEmpty()) {
+			const auto ratio = style::DevicePixelRatio();
+			outer *= ratio;
+			if (outer != QSize(_outer.width(), _outer.height())) {
+				image.setDevicePixelRatio(ratio);
+
+				auto result = QImage(outer, QImage::Format_ARGB32_Premultiplied);
+				result.setDevicePixelRatio(ratio);
+
+				QPainter painter(&result);
+
+				if (_outer.width() < outer.width() || _outer.height() < outer.height())
+					painter.fillRect(
+						QRect({}, result.size() / ratio),
+						Qt::black);
+				painter.drawImage(
+					(result.width() - imageWidth) / (2 * ratio),
+					(result.height() - imageWidth) / (2 * ratio),
+					image);
+
+				image = std::move(result);
+			}
+		}
+
+		image.setDevicePixelRatio(style::DevicePixelRatio());
+		return image;
+	}
 }
 
 
 MediaPlayer::MediaPlayer(QWidget* parent) :
-	AbstractMediaPlayer(parent)
+	QWidget(parent)
+	, _manager(std::make_unique<Manager>())
 {
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
 
-	_widgetsHider = new WidgetsHider(true);
+	resize(1920, 1080);
+	setNormal();
+
+	_widgetsHider = std::make_unique<WidgetsHider>(false, true, QWidgetList({ _mediaPlayerPanel }));
 
 	_widgetsHider->SetInactivityDuration(3000);
 	_widgetsHider->SetAnimationDuration(3000);
 
-	connect(mediaPlayer(), &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-		adjustVideoSize();
+	setAttribute(Qt::WA_TranslucentBackground);
+	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+	setMouseTracking(true);
 
-		if (status == QMediaPlayer::MediaStatus::EndOfMedia) {
-			mediaPlayer()->pause();
-			const auto duration = mediaPlayer()->duration();
-
-			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
-			videoRewind(duration - duration / 1000);
-		}
+	connect(_manager.get(), &Manager::endOfMedia, this, [this] {
+		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
+		qDebug() << "Media player time taken: " << static_cast<double>(Time::now() - _currMs) / 1000 << " seconds";
+		if (_manager->hasVideo() || _manager->hasAudio())
+			cleanUp();
 		});
 
-	connect(mediaPlayer(), &QMediaPlayer::durationChanged, _mediaPlayerPanel, &MediaPlayerPanel::setVideoSliderMaximum);
-	connect(mediaPlayer(), &QMediaPlayer::positionChanged, this, [this](qint64 position) {
-		const auto duration = mediaPlayer()->duration();
-
+	connect(_manager.get(), &Manager::durationChanged, _mediaPlayerPanel, &MediaPlayerPanel::setVideoSliderMaximum);
+	connect(_manager.get(), &Manager::positionChanged, this, [this](qint64 position) {
+		disconnect(_mediaPlayerPanel->playbackSlider(), &QSlider::valueChanged, _manager.get(), &Manager::rewind);
 		_mediaPlayerPanel->playbackSlider()->setValue(position);
-		_mediaPlayerPanel->updateTimeText(position, duration);
-	});
 
-	connect(mediaPlayer(), &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
+		_mediaPlayerPanel->updateTimeText(position, _manager->duration());
+		connect(_mediaPlayerPanel->playbackSlider(), &QSlider::valueChanged, _manager.get(), &Manager::rewind);
+		});
+
+	connect(_manager.get(), &Manager::playbackStateChanged, this, [this](Manager::State state) {
+		_playbackState = state;
 		switch (state) {
 
-		case QMediaPlayer::PlaybackState::PlayingState: 
+		case Manager::State::Playing:
 			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
 			break;
 
-		case QMediaPlayer::PlaybackState::PausedState:
-			const auto duration = mediaPlayer()->duration();
-			const auto position = mediaPlayer()->position();
-
-			if ((duration - position) > 100)
-				_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
-			
+		case Manager::State::Paused:
+			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
 			break;
 		}
 		});
 
-	connect(this, &AbstractMediaPlayer::videoClicked, this, [this]() {
-
-		switch (mediaPlayer()->playbackState()) {
-
-		case QMediaPlayer::PlayingState:
-			mediaPlayer()->pause();
-			break;
-
-		case QMediaPlayer::PausedState: 
-			const auto duration = mediaPlayer()->duration();
-			const auto position = mediaPlayer()->position();
-
-			if ((duration - position) <= 100)
-				videoRewind(0);
-
-			mediaPlayer()->play();
-
-			break;
-		}
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoRepeatClicked, [this] {
+		rewind(0);
+		_currMs = Time::now();
 		});
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoRepeatClicked, this, [this]() {
-		videoRewind(0);
-		mediaPlayer()->play();
-		});
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPlayClicked, this, &MediaPlayer::play);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPauseClicked, this, &MediaPlayer::pause);
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPlayClicked, mediaPlayer(), &QMediaPlayer::play);
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPauseClicked, mediaPlayer(), &QMediaPlayer::pause);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsNormal, this, &MediaPlayer::setNormal);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, &MediaPlayer::setFullScreen);
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsNormal, this, &AbstractMediaPlayer::mediaPlayerShowNormal);
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, &AbstractMediaPlayer::mediaPlayerShowFullScreen);
-
-	connect(this, &AbstractMediaPlayer::sourceChanged, this, &MediaPlayer::updateMediaPlayerPanelVisibility);
-
-	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderPressed, [this]() {
-		disconnect(mediaPlayer(), &QMediaPlayer::positionChanged, _mediaPlayerPanel->playbackSlider(), &QSlider::setValue);
-		mediaPlayer()->pause();
-		});
-
-	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderReleased, [this]() {
-		connect(mediaPlayer(), &QMediaPlayer::positionChanged, _mediaPlayerPanel->playbackSlider(), &QSlider::setValue);
-		_sleep(1);
-		mediaPlayer()->play();
-		});
-
-	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::sliderMoved, this, &MediaPlayer::videoRewind);
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsChangeVolume, this, &AbstractMediaPlayer::changeVolume);
+	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::valueChanged, _manager.get(), &Manager::rewind);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsChangeVolume, this, &MediaPlayer::changeVolume);
 
 	_mediaPlayerPanel->setVolume(20);
+
+	connect(_manager.get(), &Manager::needToRepaint, this, [this](const QImage& image) {
+		_current = image;
+		update();
+		});
+
+	QShortcut* videoStateShortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
+
+	connect(videoStateShortcut, &QShortcut::activated, [this] {
+		playbackState() == Manager::State::Playing
+			? pause()
+			: play();
+		});
+}
+
+void MediaPlayer::setMedia(const QString& path) {
+	if (_manager->hasVideo() || _manager->hasAudio())
+		cleanUp();
+
+	_currentMediaType = detectMediaType(path);
+	_currentMediaPath = path;
+
+	if (_currentMediaType == MediaType::Unknown)
+		return;
+
+	updatePanelVisibility();
+	const auto data = ReadFile(path);
+
+	switch (_currentMediaType) {
+	case MediaType::Video:
+		_manager->setVideo(std::move(std::make_unique<FFmpeg::FrameGenerator>(data)));
+		play();
+
+		_currMs = Time::now();
+		break;
+	case MediaType::Image:
+		_current.loadFromData(data);
+		_current = prepareImage(_current);
+
+		update();
+		break;
+
+	case MediaType::Audio:
+		auto audioReader = std::make_unique<FFmpeg::AudioReader>(data);
+
+		_manager->setAudio(std::move(audioReader));
+		play();
+
+		_currMs = Time::now();
+		break;
+	}
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
-	if (mediaPlayer()->source().isEmpty() == false)
-		return _mediaPlayerPanel->height(); 
-	return 0;
+	return	!_mediaPlayerPanel->isHidden()
+		? _mediaPlayerPanel->height()
+		: 0;
+}
+
+MediaPlayer::MediaType MediaPlayer::detectMediaType(const QString& filePath) {
+	const auto mimeType = QMimeDatabase().mimeTypeForFile(filePath).name();
+
+	if (mimeType.contains("video"))
+		return MediaType::Video;
+	else if (mimeType.contains("image"))
+		return MediaType::Image;
+	else if (mimeType.contains("audio"))
+		return MediaType::Audio;
+
+	return MediaType::Unknown;
+}
+
+QSize MediaPlayer::occupiedMediaSpace() const noexcept {
+	return _currentFrameRect.size();
+}
+
+QPoint MediaPlayer::mediaPosition() const noexcept {
+	return QPoint(_currentFrameRect.x(), _currentFrameRect.y());
+}
+
+Manager::State MediaPlayer::playbackState() const noexcept {
+	return _playbackState;
+}
+
+void MediaPlayer::play() {
+	if (playbackState() != Manager::State::Stopped)
+		QMetaObject::invokeMethod(_manager.get(), "play", Qt::QueuedConnection);
+}
+
+void MediaPlayer::pause() {
+	QMetaObject::invokeMethod(_manager.get(), "pause", Qt::QueuedConnection);
+}
+
+void MediaPlayer::rewind(Time::time positionMs) {
+	if (_manager->hasVideo() == false && _currentMediaPath.isEmpty() == false)
+		setMedia(_currentMediaPath);
+	QMetaObject::invokeMethod(_manager.get(), "rewind", Qt::QueuedConnection, Q_ARG(Time::time, positionMs));
+}
+
+void MediaPlayer::cleanUp() {
+	QMetaObject::invokeMethod(_manager.get(), "cleanUp", Qt::QueuedConnection);
 }
 
 void MediaPlayer::resizeEvent(QResizeEvent* event) {
-	AbstractMediaPlayer::resizeEvent(event);
-
 	_mediaPlayerPanel->move((width() - _mediaPlayerPanel->width()) / 2,
-		height() - _mediaPlayerPanel->height() - mediaPlayerPanelBottomIndent);
+		height() - _mediaPlayerPanel->height() - kPanelBottomIndent);
 }
 
 void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
+	paintBackground(painter);
 
-	painter.setRenderHints(QPainter::Antialiasing);
-	painter.setOpacity(0.1);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-	painter.setBrush(Qt::black);
-	painter.setPen(Qt::NoPen);
+	const auto center = _current.size().width() < size().width()
+		|| _current.size().height() < size().height()
+		? QPoint((width() - _current.width()) / 2, (height() - _current.height()) / 2) : QPoint(0, 0);
 
-	painter.drawRect(rect());
+	_currentFrameRect = QRect(center, _current.size());
+	painter.drawImage(center, _current);
 }
 
-void MediaPlayer::updateMediaPlayerPanelVisibility(const QUrl& media) {
-	QString sourcePath;
+void MediaPlayer::mousePressEvent(QMouseEvent* event) {
+	if (!(event->button() == Qt::LeftButton && _currentFrameRect.contains(event->pos())))
+		return;
 
-	media.path().at(0) == "/"[0]
-		? sourcePath = media.path().remove(0, 1)
-		: sourcePath = media.path();
+	switch (playbackState()) {
 
-	MediaType mediaType = detectMediaType(sourcePath);
+	case Manager::State::Playing:
+		pause();
+		break;
 
-	switch (mediaType) {
-		case MediaType::Video:
-			_widgetsHider->addWidget(_mediaPlayerPanel);
-			_widgetsHider->resetTimer();
+	case Manager::State::Paused:
+		if (_manager->hasVideo() == false && _currentMediaPath.isEmpty() == false)
+			setMedia(_currentMediaPath);
 
-			_mediaPlayerPanel->show();
-			break;
-
-		case MediaType::Image:
-			_widgetsHider->removeWidget(_mediaPlayerPanel);
-			_widgetsHider->resetTimer();
-
-			_mediaPlayerPanel->hide();
-			break;
-
-		case MediaType::Audio:
-			break;
+		if ((_manager->duration() - _manager->position()) <= 100)
+			rewind(0);
+		play();
+		break;
 	}
-	
+}
+
+
+void MediaPlayer::updatePanelVisibility() {
+	switch (_currentMediaType) {
+	case MediaType::Video:
+		_widgetsHider->addWidget(_mediaPlayerPanel);
+		_widgetsHider->resetTimer();
+
+		_mediaPlayerPanel->show();
+		break;
+
+	case MediaType::Image:
+		_widgetsHider->removeWidget(_mediaPlayerPanel);
+		_widgetsHider->resetTimer();
+
+		_mediaPlayerPanel->hide();
+		break;
+
+	case MediaType::Audio:
+		break;
+	}
+}
+
+void MediaPlayer::setFullScreen() {
+	_displayType = MediaDisplayType::FullScreen;
+	_manager->setDisplayType(false);
+
+	_manager->setTargetSize(size());
+	emit mediaGeometryChanged();
+
+	update();
+}
+
+void MediaPlayer::setNormal() {
+	_displayType = MediaDisplayType::Normal;
+	_manager->setDisplayType(true);
+
+	_manager->setTargetSize(QSize());
+	emit mediaGeometryChanged();
+
+	update();
+}
+
+QImage MediaPlayer::prepareImage(const QImage& sourceImage) {
+	const auto ms = Time::now();
+	const auto timeCheck = Guard::finally([&ms] { qDebug() << "MediaPlayer::prepareImage: " << Time::now() - ms << " ms"; });
+
+	auto resolveSize = [=](const QSize& size) -> QSize {
+		const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
+
+		double scale = qMin(static_cast<double>(screenSize.width()) / size.width(),
+			static_cast<double>(screenSize.height()) / size.height());
+
+		if (size.width() * scale <= (screenSize.width() * 0.7))
+			return size;
+
+		scale = qMin(scale, (screenSize.width() * 0.7) / size.width());
+
+		return QSize(size.width() * scale, size.height() * scale);
+		};
+
+	return Prepare(sourceImage, resolveSize(sourceImage.size()));
+}
+
+void MediaPlayer::changeVolume(int value) {
+	const auto linearVolume = QAudio::convertVolume(value / qreal(100),
+		QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
+}
+
+void MediaPlayer::paintBackground(QPainter& painter) {
+	const auto opacity = painter.opacity();
+
+	painter.setOpacity(0.5);
+
+	painter.setPen(Qt::NoPen);
+	painter.setBrush(Qt::black);
+
+	painter.drawRect(rect());
+
+	painter.setOpacity(1.0);
 }
