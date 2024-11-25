@@ -201,7 +201,7 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 
 void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
-	paintBackground(painter);
+	paintBackground(painter, event);
 
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
@@ -211,7 +211,6 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 
 	_currentFrameRect = QRect(center, _current.size());
 	painter.drawImage(center, _current);
-	qDebug() << "current image: " << _current.size();
 }
 
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {
@@ -301,15 +300,16 @@ void MediaPlayer::changeVolume(int value) {
 		QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 }
 
-void MediaPlayer::paintBackground(QPainter& painter) {
+void MediaPlayer::paintBackground(QPainter& painter, QPaintEvent* event) {
 	const auto opacity = painter.opacity();
+	const auto fill = event->rect().intersected(QRect(0, 0, width(), height()));
 
 	painter.setOpacity(0.5);
 
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::black);
 
-	painter.drawRect(rect());
+	painter.drawRect(fill);
 
-	painter.setOpacity(1.0);
+	painter.setOpacity(opacity);
 }

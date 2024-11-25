@@ -11,6 +11,10 @@ class VolumeController: public QPushButton
 private:
 	EnhancedSlider* _volumeSlider = nullptr;
 	bool _isSpeakerOn, _isVolumeValueSmall;
+	QString _speakerOnImagePath;
+	QString _speakerSmallOnImagePath;
+	QString _speakerOffImagePath;
+	QPixmap _currentPixmap;
 	int _previousVolume;
 public:
 	VolumeController(QWidget* parent = nullptr);

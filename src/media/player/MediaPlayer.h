@@ -52,7 +52,7 @@ private:
 		Normal
 	};
 
-	void paintBackground(QPainter& painter);
+	void paintBackground(QPainter& painter, QPaintEvent* event);
 	void updatePanelVisibility();
 
 	[[nodiscard]] QImage prepareImage(const QImage& sourceImage);

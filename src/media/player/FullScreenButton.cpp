@@ -1,5 +1,7 @@
 #include "FullScreenButton.h"
 
+#include "../../core/StyleCore.h"
+
 #include <QDir>
 #include <QApplication>
 #include <QPainter>
@@ -30,18 +32,25 @@ void FullScreenButton::paintEvent(QPaintEvent* event) {
 	painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::NoPen);
 
-	_currentPixmap.load(_state == State::FullScreenTo 
-								? _fullScreenToImagePath 
-								: _fullScreenFromImagePath);
+	if (_currentPixmap.size() == size())
+		return;
 
-	if (_currentPixmap.size() != size())
-		_currentPixmap = _currentPixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	auto image = QImage(_state == State::FullScreenTo
+		? _fullScreenToImagePath
+		: _fullScreenFromImagePath);
+	image = style::Prepare(image, size());
 
+	image = std::move(image).scaled(
+		image.width() * style::DevicePixelRatio(),
+		image.height() * style::DevicePixelRatio(),
+		Qt::IgnoreAspectRatio,
+		Qt::SmoothTransformation);
+
+	image = style::Opaque(std::move(image));
+	_currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
+
+	_currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
 	painter.drawPixmap(0, 0, _currentPixmap);
-}
-
-void FullScreenButton::resizeEvent(QResizeEvent* event) {
-	QPushButton::resizeEvent(event);
 }
 
 void FullScreenButton::mousePressEvent(QMouseEvent* event) {
