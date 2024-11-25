@@ -9,6 +9,6 @@ INTERFACE
 )
 
 set_target_properties(external_td PROPERTIES
-    IMPORTED_LOCATION ${libs_loc}/td/build/Release/tdjson.lib  ${libs_loc}/td/build/Release/tdjson_static.lib
-    IMPORTED_LOCATION_DEBUG ${libs_loc}/td/build/Release/tdjson.lib  ${libs_loc}/td/build/Release/tdjson_static.lib
+    IMPORTED_LOCATION ${libs_loc}/td/build/Release/tdjson_static.lib
+    IMPORTED_LOCATION_DEBUG ${libs_loc}/td/build/Debug/tdjson_static.lib
 )

@@ -96,6 +96,7 @@ MessageMediaViewer::MessageMediaViewer(
 	connect(showMinimizedShortcut, &QShortcut::activated, this, [this]() {
 		showMinimized();
 		emit escaped();
+		_mediaPlayer->cleanUp();
 		});
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
@@ -169,9 +170,6 @@ void MessageMediaViewer::updateMessageTextView() {
 void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
 	_currentMessage = messageWidget;
 	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
-	 
-	showNormal();
-	_mediaPlayer->showNormal();
 
 	_mediaPlayer->showFullScreen();
 	showFullScreen();
@@ -306,5 +304,7 @@ void MessageMediaViewer::resizeEvent(QResizeEvent* event) {
 
 void MessageMediaViewer::closeEvent(QCloseEvent* event) {
 	emit escaped();
+	_mediaPlayer->cleanUp();
+
 	QWidget::closeEvent(event);
 }

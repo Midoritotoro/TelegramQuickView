@@ -4,7 +4,6 @@
 #include "MediaPlayerPanel.h"
 
 #include "WidgetsHider.h"
-#include "../../core/StyleCore.h"
 
 #include <QWidget>
 
@@ -31,9 +30,13 @@ public:
 
 	[[nodiscard]] Manager::State playbackState() const noexcept;
 
+	void setFullScreen();
+	void setNormal();
+
 	void play();
 	void pause();
 
+	void cleanUp();
 	void rewind(Time::time positionMs);
 
 	void changeVolume(int value);
@@ -43,7 +46,6 @@ protected:
 	void resizeEvent(QResizeEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
-	void mouseMoveEvent(QMouseEvent* event) override { event->accept(); };
 private:
 	enum class MediaDisplayType {
 		FullScreen,
@@ -52,11 +54,6 @@ private:
 
 	void paintBackground(QPainter& painter);
 	void updatePanelVisibility();
-
-	void setFullScreen();
-	void setNormal();
-
-	void cleanUp();
 
 	[[nodiscard]] QImage prepareImage(const QImage& sourceImage);
 

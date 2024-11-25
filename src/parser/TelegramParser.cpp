@@ -200,7 +200,6 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 qDebug() << "mediaAlbumId: " << message.mediaAlbumId;
                 qDebug() << "message text: " << message.text;
 
-       
                 if (mediaId == 0) {
                     qDebug() << "Запись данных о новом сообщении без медиа...";
                     return _sqlManager->writeMessageInfo(message);

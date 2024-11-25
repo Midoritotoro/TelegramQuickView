@@ -100,43 +100,45 @@ QImage Prepare(
 	QImage image,
 	const QSize& _outer)
 {
-	const auto width = image.width();
-	const auto height = image.height();
+	const auto imageWidth = image.width();
+	const auto imageHeight = image.height();
 
-	if (width <= 0|| (width == image.width() 
-		&& (height <= 0 || height == image.height())))
+	if (_outer.width() <= 0 || (_outer.width() == imageWidth
+		&& (_outer.height() <= 0 || _outer.height() == imageHeight)))
 		;
-	else if (height <= 0)
+	else if (imageHeight <= 0)
 		image = image.scaledToWidth(
-			width,
+			_outer.width(),
 			Qt::SmoothTransformation);
 	else
 		image = image.scaled(
-			width,
-			height,
+			_outer.width(),
+			_outer.height(),
 			Qt::IgnoreAspectRatio,
 			Qt::SmoothTransformation);
 
 	auto outer = _outer;
+
 	if (!outer.isEmpty()) {
 		const auto ratio = style::DevicePixelRatio();
 		outer *= ratio;
-		if (outer != QSize(width, height)) {
+		if (outer != QSize(_outer.width(), _outer.height())) {
 			image.setDevicePixelRatio(ratio);
+
 			auto result = QImage(outer, QImage::Format_ARGB32_Premultiplied);
 			result.setDevicePixelRatio(ratio);
-			
-			QPainter p(&result);
 
-			if (width < outer.width() || height < outer.height())
-				p.fillRect(
+			QPainter painter(&result);
+
+			if (_outer.width() < outer.width() || _outer.height() < outer.height())
+				painter.fillRect(
 					QRect({}, result.size() / ratio),
 					Qt::black);
-			p.drawImage(
-				(result.width() - image.width()) / (2 * ratio),
-				(result.height() - image.height()) / (2 * ratio),
+			painter.drawImage(
+				(result.width() - imageWidth) / (2 * ratio),
+				(result.height() - imageWidth) / (2 * ratio),
 				image);
-			
+
 			image = std::move(result);
 		}
 	}

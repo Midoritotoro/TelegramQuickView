@@ -10,7 +10,7 @@ FullScreenButton::FullScreenButton(QWidget* parent) :
 	, _state (State::FullScreenTo)
 {
 	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir assetsDir(currentPath + "/../../../assets/images");
+	QDir assetsDir(currentPath + "/../../assets/images");
 
 	_fullScreenToImagePath = assetsDir.absolutePath() + "/player_fullscreen.png";
 	_fullScreenFromImagePath = assetsDir.absolutePath() + "/player_minimize.png";

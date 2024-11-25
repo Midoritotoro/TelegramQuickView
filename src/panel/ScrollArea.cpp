@@ -54,7 +54,7 @@ int ScrollArea::scrollTop() const {
 
 bool ScrollArea::viewportEvent(QEvent* event) {
 	if (event->type() == QEvent::Wheel) {
-		verticalScrollBar()->setValue(verticalScrollBar()->value());
+		verticalScrollBar()->setValue(verticalScrollBar()->value() + verticalScrollBar()->singleStep());
 		return true;
 	}
 	return QScrollArea::viewportEvent(event);

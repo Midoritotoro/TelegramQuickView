@@ -6,15 +6,11 @@
 #include <QMouseEvent>
 #include <QMimeDatabase>
 
-#include <QAudioDevice>
-#include <QAudio>
 #include <QShortcut>
-#include <QPainterPath>
-
+#include <QAudio>
 #include <QMetaObject>
 
-#include <QPointF>
-#include <QRectF>
+#include "../../core/StyleCore.h"
 
 
 namespace {
@@ -26,73 +22,19 @@ namespace {
 			? file.readAll()
 			: QByteArray();
 	}
+} // namespace
 
-	[[nodiscard]] QImage Prepare(
-		QImage image,
-		const QSize& _outer)
-	{
-		const auto imageWidth = image.width();
-		const auto imageHeight = image.height();
-
-		if (_outer.width() <= 0 || (_outer.width() == imageWidth
-			&& (_outer.height() <= 0 || _outer.height() == imageHeight)))
-			;
-		else if (imageHeight <= 0)
-			image = image.scaledToWidth(
-				_outer.width(),
-				Qt::SmoothTransformation);
-		else
-			image = image.scaled(
-				_outer.width(),
-				_outer.height(),
-				Qt::IgnoreAspectRatio,
-				Qt::SmoothTransformation);
-
-		auto outer = _outer;
-
-		if (!outer.isEmpty()) {
-			const auto ratio = style::DevicePixelRatio();
-			outer *= ratio;
-			if (outer != QSize(_outer.width(), _outer.height())) {
-				image.setDevicePixelRatio(ratio);
-
-				auto result = QImage(outer, QImage::Format_ARGB32_Premultiplied);
-				result.setDevicePixelRatio(ratio);
-
-				QPainter painter(&result);
-
-				if (_outer.width() < outer.width() || _outer.height() < outer.height())
-					painter.fillRect(
-						QRect({}, result.size() / ratio),
-						Qt::black);
-				painter.drawImage(
-					(result.width() - imageWidth) / (2 * ratio),
-					(result.height() - imageWidth) / (2 * ratio),
-					image);
-
-				image = std::move(result);
-			}
-		}
-
-		image.setDevicePixelRatio(style::DevicePixelRatio());
-		return image;
-	}
-}
-
-
-MediaPlayer::MediaPlayer(QWidget* parent) :
+MediaPlayer::MediaPlayer(QWidget* parent):
 	QWidget(parent)
 	, _manager(std::make_unique<Manager>())
 {
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
-
-	resize(1920, 1080);
-	setNormal();
-
 	_widgetsHider = std::make_unique<WidgetsHider>(false, true, QWidgetList({ _mediaPlayerPanel }));
 
 	_widgetsHider->SetInactivityDuration(3000);
 	_widgetsHider->SetAnimationDuration(3000);
+
+	setNormal();
 
 	setAttribute(Qt::WA_TranslucentBackground);
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -117,14 +59,13 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 	connect(_manager.get(), &Manager::playbackStateChanged, this, [this](Manager::State state) {
 		_playbackState = state;
 		switch (state) {
+			case Manager::State::Playing:
+				_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
+				break;
 
-		case Manager::State::Playing:
-			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
-			break;
-
-		case Manager::State::Paused:
-			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
-			break;
+			case Manager::State::Paused:
+				_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Play);
+				break;
 		}
 		});
 
@@ -159,11 +100,15 @@ MediaPlayer::MediaPlayer(QWidget* parent) :
 }
 
 void MediaPlayer::setMedia(const QString& path) {
-	if (_manager->hasVideo() || _manager->hasAudio())
+	if (_manager->hasVideo() || _manager->hasAudio()) {
+		pause();
 		cleanUp();
+	}
 
 	_currentMediaType = detectMediaType(path);
 	_currentMediaPath = path;
+
+	qDebug() << "currentMediaPath: " << _currentMediaPath;
 
 	if (_currentMediaType == MediaType::Unknown)
 		return;
@@ -172,32 +117,32 @@ void MediaPlayer::setMedia(const QString& path) {
 	const auto data = ReadFile(path);
 
 	switch (_currentMediaType) {
-	case MediaType::Video:
-		_manager->setVideo(std::move(std::make_unique<FFmpeg::FrameGenerator>(data)));
-		play();
+		case MediaType::Video:
+			_manager->setVideo(std::move(std::make_unique<FFmpeg::FrameGenerator>(data)));
+			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
+			play();
 
-		_currMs = Time::now();
-		break;
-	case MediaType::Image:
-		_current.loadFromData(data);
-		_current = prepareImage(_current);
+			_currMs = Time::now();
+			break;
+		case MediaType::Image:
+			_current.loadFromData(data);
+			_current = prepareImage(_current);
 
-		update();
-		break;
+			update();
+			break;
 
-	case MediaType::Audio:
-		auto audioReader = std::make_unique<FFmpeg::AudioReader>(data);
+		case MediaType::Audio:
+			_manager->setAudio(std::move(std::make_unique<FFmpeg::AudioReader>(data)));
+			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
+			play();
 
-		_manager->setAudio(std::move(audioReader));
-		play();
-
-		_currMs = Time::now();
-		break;
+			_currMs = Time::now();
+			break;
 	}
 }
 
 int MediaPlayer::getVideoControlsHeight() const noexcept {
-	return	!_mediaPlayerPanel->isHidden()
+	return !_mediaPlayerPanel->isHidden()
 		? _mediaPlayerPanel->height()
 		: 0;
 }
@@ -243,6 +188,9 @@ void MediaPlayer::rewind(Time::time positionMs) {
 }
 
 void MediaPlayer::cleanUp() {
+	_currentFrameRect = QRect();
+	_current = QImage();
+
 	QMetaObject::invokeMethod(_manager.get(), "cleanUp", Qt::QueuedConnection);
 }
 
@@ -263,6 +211,7 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 
 	_currentFrameRect = QRect(center, _current.size());
 	painter.drawImage(center, _current);
+	qDebug() << "current image: " << _current.size();
 }
 
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {
@@ -276,7 +225,7 @@ void MediaPlayer::mousePressEvent(QMouseEvent* event) {
 		break;
 
 	case Manager::State::Paused:
-		if (_manager->hasVideo() == false && _currentMediaPath.isEmpty() == false)
+		if (_manager->hasVideo() == false && _currentMediaPath.isEmpty() == false && _currentMediaType == MediaType::Video)
 			setMedia(_currentMediaPath);
 
 		if ((_manager->duration() - _manager->position()) <= 100)
@@ -334,7 +283,6 @@ QImage MediaPlayer::prepareImage(const QImage& sourceImage) {
 
 	auto resolveSize = [=](const QSize& size) -> QSize {
 		const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
-
 		double scale = qMin(static_cast<double>(screenSize.width()) / size.width(),
 			static_cast<double>(screenSize.height()) / size.height());
 
@@ -342,11 +290,10 @@ QImage MediaPlayer::prepareImage(const QImage& sourceImage) {
 			return size;
 
 		scale = qMin(scale, (screenSize.width() * 0.7) / size.width());
-
 		return QSize(size.width() * scale, size.height() * scale);
-		};
+	};
 
-	return Prepare(sourceImage, resolveSize(sourceImage.size()));
+	return style::Prepare(sourceImage, resolveSize(sourceImage.size()));
 }
 
 void MediaPlayer::changeVolume(int value) {

@@ -98,8 +98,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 }
 
 void TelegramPostQuickView::makeMessage(const QString& messageText, const QStringList& attachmentsPaths) {
-	QElapsedTimer timer;
-	timer.start();
+	auto ms = Time::now();
+	const auto timer = Guard::finally([&ms] { qDebug() << "TelegramPostQuickView::makeMessage: " << Time::now() - ms << " ms";  });
 
 	const auto maximumMessageWidth = _panelWidth - (width() / 12.5);
 	MessageWidget* message = new MessageWidget();
@@ -118,8 +118,6 @@ void TelegramPostQuickView::makeMessage(const QString& messageText, const QStrin
 
 	foreach(auto attachment, messageAttachmentsList)
 		connect(attachment, &MessageAttachment::clicked, this, &TelegramPostQuickView::attachmentCliked);
-
-	qDebug() << "TelegramPostQuickView::makeMessage: " << static_cast<double>(timer.elapsed()) / 1000 << " s";
 }
 
 void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode displayMode) {
@@ -133,11 +131,6 @@ void TelegramPostQuickView::attachmentCliked() {
 	_messageMediaViewer->show();
 
 	showMinimized();
-}
-
-void TelegramPostQuickView::showEvent(QShowEvent* event) {
-	_chatScrollArea->verticalScrollBar()->setValue(_chatScrollArea->verticalScrollBar()->minimum());
-	QWidget::showEvent(event);
 }
 
 void TelegramPostQuickView::addContent() {

@@ -55,7 +55,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	_remainingTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../../src/css");
+	QDir cssDir(currentPath + "/../../src/css");
 
 	QString sliderStylePath = cssDir.absolutePath() + "/SliderStyle.css";
 

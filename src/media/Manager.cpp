@@ -24,8 +24,6 @@ Manager::Manager():
 
 Manager::~Manager() {
 	_thread->quit();
-	_thread->wait();
-
 	cleanUp();
 }
 
@@ -40,19 +38,28 @@ void Manager::cleanUp() {
 		_frameGenerator = nullptr;
 	}
 
-	_state = State::Playing;
 	if (hasAudio()) {
 		_audioReader.reset();
 		_audioReader = nullptr;
 	}
+
+
+	if (_thread->isRunning())
+		_thread->quit();
+
+	_state = State::Playing;
 }
 
 Time::time Manager::duration() const noexcept {
-	return _frameGenerator->duration();
+	return hasVideo() 
+		? _frameGenerator->duration()
+		: 0;
 }
 
 Time::time Manager::position() const noexcept {
-	return _frameGenerator->position();
+	return hasVideo()
+		? _frameGenerator->position()
+		: 0;
 }
 
 void Manager::pause() {
@@ -102,6 +109,8 @@ void Manager::setDisplayType(bool showNormal) {
 }
 
 void Manager::setVideo(std::unique_ptr<FFmpeg::FrameGenerator>&& generator, const QSize& size) {
+	QMutexLocker locker(&_mutex);
+
 	_size = size;
 	_frameGenerator = std::move(generator);
 
@@ -113,9 +122,15 @@ void Manager::setVideo(std::unique_ptr<FFmpeg::FrameGenerator>&& generator, cons
 }
 
 void Manager::setAudio(std::unique_ptr<FFmpeg::AudioReader>&& audio) {
-	_audioReader = std::move(audio);
+	QMutexLocker locker(&_mutex);
 
+	_audioReader = std::move(audio);
 	emit durationChanged(_audioReader->duration());
+
+	if (!_thread->isRunning())
+		_thread->start();
+
+	_thread->setPriority(QThread::HighestPriority);
 }
 
 bool Manager::hasVideo() const noexcept {
@@ -136,6 +151,9 @@ void Manager::rewind(Time::time position) {
 
 	if (hasVideo()) {
 		_frameGenerator->rewind(position);
+
+		const auto frame = _frameGenerator->renderNext(_size, Qt::IgnoreAspectRatio, _showNormal);
+		emit needToRepaint(frame.image);
 
 		if (_frameGenerator->position() >= _frameGenerator->duration() - _frameGenerator->frameDelay())
 			emit endOfMedia();

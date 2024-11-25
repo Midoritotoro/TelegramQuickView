@@ -18,7 +18,7 @@ VolumeController::VolumeController(QWidget* parent) :
 
 void VolumeController::paintSpeakerOff(QPainter& painter) {
 	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../../assets/images");
+	QDir cssDir(currentPath + "/../../assets/images");
 
 	QString speakerImagePath = cssDir.absolutePath() + "/speaker_white_off.png";
 
@@ -34,7 +34,7 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 	QString speakerImagePath;
 
 	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../../assets/images");
+	QDir cssDir(currentPath + "/../../assets/images");
 
 	_isVolumeValueSmall
 	? speakerImagePath = cssDir.absolutePath() + "/speaker_white_small_on.png"
