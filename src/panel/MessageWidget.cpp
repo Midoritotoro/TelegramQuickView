@@ -11,7 +11,9 @@ QWidget(parent)
 , _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
 	_messageLayout = new QGridLayout(this);
+
 	setContentsMargins(0, 0, 0, 0);
+
 	_messageLayout->setSpacing(0);
 	_messageLayout->setContentsMargins(0, 0, 0, 0);
 

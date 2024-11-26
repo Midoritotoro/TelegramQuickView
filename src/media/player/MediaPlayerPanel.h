@@ -8,6 +8,7 @@
 
 class VolumeController;
 class FullScreenButton;
+class SpeedButton;
 
 
 class MediaPlayerPanel: public QWidget {

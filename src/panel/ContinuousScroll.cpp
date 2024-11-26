@@ -31,7 +31,6 @@ void ContinuousScroll::reconnect() {
 	}
 
 	const auto handleAction = [=](int action) {
-		qDebug() << "handleAction: " << action;
 		const auto scroll = verticalScrollBar();
 		const auto step = (action == QAbstractSlider::SliderSingleStepAdd)
 			? scroll->singleStep()

@@ -1,41 +1,32 @@
-#include "FullScreenButton.h"
+#include "SpeedButton.h"
 
 #include "../../core/StyleCore.h"
 
 #include <QDir>
-#include <QApplication>
+#include <QCoreApplication>
 #include <QPainter>
 
-
-FullScreenButton::FullScreenButton(QWidget* parent) :
-	QPushButton(parent)
-	, _state (State::FullScreenTo)
+SpeedButton::SpeedButton(QWidget* parent) :
+	QWidget(parent)
 {
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir assetsDir(currentPath + "/../../assets/images");
 
-	_fullScreenToImagePath = assetsDir.absolutePath() + "/player_fullscreen.png";
-	_fullScreenFromImagePath = assetsDir.absolutePath() + "/player_minimize.png";
+	_speedButtonImagePath = assetsDir.absolutePath() + "/speed_button.png";
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
 }
 
-[[nodiscard]] FullScreenButton::State FullScreenButton::state() const noexcept {
-	return _state;
-}
-
-void FullScreenButton::paintEvent(QPaintEvent* event) {
+void SpeedButton::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-	painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::NoPen);
+	painter.setBrush(Qt::NoBrush);
 
 	if (_currentPixmap.size() != size()) {
-		auto image = QImage(_state == State::FullScreenTo
-			? _fullScreenToImagePath
-			: _fullScreenFromImagePath);
+		auto image = QImage(_speedButtonImagePath);
 		image = style::Prepare(image, size());
 
 		image = std::move(image).scaled(
@@ -49,13 +40,4 @@ void FullScreenButton::paintEvent(QPaintEvent* event) {
 	}
 
 	painter.drawPixmap(0, 0, _currentPixmap);
-}
-
-void FullScreenButton::mousePressEvent(QMouseEvent* event) {
-	QPushButton::mousePressEvent(event);
-
-	if (event->button() == Qt::LeftButton)
-		_state = _state == State::FullScreenTo
-			? State::FullScreenFrom
-			: State::FullScreenTo;
 }

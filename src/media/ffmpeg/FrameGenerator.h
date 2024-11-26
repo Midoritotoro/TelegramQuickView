@@ -72,7 +72,7 @@ private:
 
 	QByteArray _bytes = nullptr;
 
-	int _swscaleFlags = 0;
+	int _swscaleFlags = SWS_BICUBIC;
 };
 
 } // namespace FFmpeg

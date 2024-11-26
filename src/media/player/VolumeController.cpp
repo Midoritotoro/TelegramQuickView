@@ -35,7 +35,6 @@ void VolumeController::paintSpeakerOff(QPainter& painter) {
 		Qt::IgnoreAspectRatio,
 		Qt::SmoothTransformation);
 
-	image = style::Opaque(std::move(image));
 	_currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
 
 	_currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
@@ -54,7 +53,6 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 		Qt::IgnoreAspectRatio,
 		Qt::SmoothTransformation);
 
-	image = style::Opaque(std::move(image));
 	_currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
 
 	_currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
@@ -63,7 +61,7 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 
 void VolumeController::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);

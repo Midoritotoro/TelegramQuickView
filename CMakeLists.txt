@@ -64,8 +64,8 @@ SET(MAIN_SOURCES main.cpp
     src/media/player/VideoStateWidget.h
     src/media/player/VolumeController.cpp
     src/media/player/VolumeController.h
-    src/media/player/SettingsButton.cpp
-    src/media/player/SettingsButton.h
+    src/media/player/SpeedButton.cpp
+    src/media/player/SpeedButton.h
     src/media/player/WidgetsHider.h
 
     src/media/ClickableLabel.cpp

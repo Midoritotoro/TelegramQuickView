@@ -47,6 +47,7 @@ public:
 	void goToPreviousMessage();
 	void goToNextMessage();
 Q_SIGNALS:
+	void needScrollToMessage(MessageWidget* message);
 	void escaped();
 public Q_SLOTS:
 	void nextAttachmentButton_clicked();

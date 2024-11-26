@@ -42,6 +42,7 @@ public:
 	void changeVolume(int value);
 Q_SIGNALS:
 	void mediaGeometryChanged();
+	void needScrollToMessage();
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;

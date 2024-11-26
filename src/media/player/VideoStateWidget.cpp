@@ -1,5 +1,7 @@
 #include "VideoStateWidget.h"
 
+#include "../../core/StyleCore.h"
+
 #include <QPainter>
 #include <QCoreApplication>
 #include <QDir>
@@ -25,7 +27,7 @@ void VideoStateWidget::setState(State state) {
         return;
 
     _state = state;
-    repaint();
+    update();
 }
 
 VideoStateWidget::State VideoStateWidget::state() const noexcept {
@@ -34,27 +36,39 @@ VideoStateWidget::State VideoStateWidget::state() const noexcept {
 
 void VideoStateWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    switch (_state) {
-        case State::Play:
-            _currentPixmap.load(_playImagePath);
-            break;
-
-        case State::Pause:
-            _currentPixmap.load(_pauseImagePath);
-            break;
-
-        case State::Repeat:
-            _currentPixmap.load(_repeatImagePath);
-            break;
-    }
-
-    if (_currentPixmap.size() != size())
-        _currentPixmap = _currentPixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::NoBrush);
+
+    if (_currentPixmap.size() != size()) {
+        auto image = QImage();
+
+        switch (_state) {
+            case State::Play:
+                image = QImage(_playImagePath);
+                break;
+
+            case State::Pause:
+                image = QImage(_pauseImagePath);
+                break;
+
+            case State::Repeat:
+                image = QImage(_repeatImagePath);
+                break;
+        }
+
+        image = style::Prepare(image, size());
+        image = std::move(image).scaled(
+            image.width() * style::DevicePixelRatio(),
+            image.height() * style::DevicePixelRatio(),
+            Qt::IgnoreAspectRatio,
+            Qt::SmoothTransformation);
+
+        _currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
+        _currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
+    }
+
     painter.drawPixmap(0, 0, _currentPixmap);
 }
 

@@ -12,6 +12,7 @@ ScrollArea::ScrollArea(QWidget* parent):
 	QScrollArea(parent)
 {
 	setLayoutDirection(Qt::LeftToRight);
+	setOpacity(1);
 
 	verticalScrollBar()->setSingleStep(style::ConvertScale(verticalScrollBar()->singleStep()));
 	
@@ -21,12 +22,10 @@ ScrollArea::ScrollArea(QWidget* parent):
 	setFrameStyle(int(QFrame::NoFrame) | QFrame::Plain);
 	viewport()->setAutoFillBackground(false);
 
-	_verticalValue = verticalScrollBar()->value();
-
 	connect(verticalScrollBar(), &QAbstractSlider::valueChanged, this, &ScrollArea::scrolled);
 	connect(verticalScrollBar(), &QAbstractSlider::rangeChanged, this, &ScrollArea::scrolled);
 
-	setOpacity(1);
+	_verticalValue = verticalScrollBar()->value();
 }
 
 void ScrollArea::scrolled() {

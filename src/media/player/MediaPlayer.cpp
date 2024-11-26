@@ -1,4 +1,4 @@
-#include "MediaPlayer.h"
+﻿#include "MediaPlayer.h"
 
 #include <QByteArray>
 
@@ -36,9 +36,16 @@ MediaPlayer::MediaPlayer(QWidget* parent):
 
 	setNormal();
 
+	setContextMenuPolicy(Qt::ActionsContextMenu);
+
 	setAttribute(Qt::WA_TranslucentBackground);
+
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setMouseTracking(true);
+
+	addAction(QString::fromUtf8("Перейти к сообщению"), [this]() {
+		emit needScrollToMessage(); 
+	});
 
 	connect(_manager.get(), &Manager::endOfMedia, this, [this] {
 		_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Repeat);
@@ -229,6 +236,7 @@ void MediaPlayer::mousePressEvent(QMouseEvent* event) {
 
 		if ((_manager->duration() - _manager->position()) <= 100)
 			rewind(0);
+
 		play();
 		break;
 	}

@@ -145,8 +145,6 @@ bool Manager::hasAudio() const noexcept {
 void Manager::rewind(Time::time position) {
 	QMutexLocker locker(&_mutex);
 
-	qDebug() << "Rewind: " << position;
-
 	emit positionChanged(position);
 
 	if (hasVideo()) {

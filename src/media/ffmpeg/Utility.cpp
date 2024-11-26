@@ -186,6 +186,8 @@ CodecPointer MakeCodecPointer(CodecDescriptor descriptor) {
 		return {};
 
 	context->codec = codec;
+
+	av_opt_set(context, "refcounted_frames", "1", 0);
 	av_opt_set_int(context, "threads", GetCpuCount() - 2, 0);
 
 	if (codec->capabilities & AV_CODEC_CAP_FRAME_THREADS)

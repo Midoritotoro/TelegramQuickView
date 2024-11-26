@@ -52,11 +52,7 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 	Qt::AspectRatioMode mode,
 	bool fullScreen)
 {
-	const auto ms = Time::now();
-	const auto time = Guard::finally([&ms] { qDebug() << "renderCurrent: " << Time::now() - ms << " ms"; });
-
 	const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
-
 	const auto frame = _current.frame.get();
 
 	const auto width = frame->width;
@@ -306,8 +302,8 @@ int64_t FrameGenerator::seek(int64_t offset, int whence) {
 
 
 void FrameGenerator::readNextFrame() {
-	const auto milliseconds = Time::now();
-	const auto time = Guard::finally([&milliseconds] { qDebug() << "readNextFrame: " << Time::now() - milliseconds << " ms";  });
+	//	const auto milliseconds = Time::now();
+	//	const auto time = Guard::finally([&milliseconds] { qDebug() << "readNextFrame: " << Time::now() - milliseconds << " ms";  });
 
 	auto frame = _next.frame 
 		? std::exchange(_next.frame, {}) 
@@ -318,7 +314,7 @@ void FrameGenerator::readNextFrame() {
 		auto ms = Time::now();
 		auto result = avcodec_receive_frame(_codec.get(), frame.get());
 
-		qDebug() << "avcodec_receive_frame(_codec.get(), frame.get()): " << Time::now() - ms << " ms";
+	//	qDebug() << "avcodec_receive_frame(_codec.get(), frame.get()): " << Time::now() - ms << " ms";
 
 		if (result >= 0) {
 			if (frame->width * frame->height > kMaxArea)
@@ -352,7 +348,7 @@ void FrameGenerator::readNextFrame() {
 				return;
 		} while (packet.fields().stream_index != _bestVideoStreamId);
 
-		qDebug() << "read frame while: " << Time::now() - ms << " ms";
+	//	qDebug() << "read frame while: " << Time::now() - ms << " ms";
 		ms = Time::now();
 
 		if (finished)
@@ -370,7 +366,7 @@ void FrameGenerator::readNextFrame() {
 				});
 			result = avcodec_send_packet(_codec.get(), native);
 		}
-		qDebug() << " avcodec_send_packet(_codec.get(), native): " << Time::now() - ms << " ms";
+		//qDebug() << " avcodec_send_packet(_codec.get(), native): " << Time::now() - ms << " ms";
 		if (result < 0) 
 			return;
 		}

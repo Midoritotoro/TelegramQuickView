@@ -85,15 +85,18 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	grid->setContentsMargins(0, 0, 5, 4);
 	grid->setVerticalSpacing(4);
 	grid->setHorizontalSpacing(0);
+
 	grid->addWidget(_chatScrollArea, grid->rowCount(), 0, 1, 1);
 
 	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
 	WidgetsHider* widgetsHider = new WidgetsHider(true, true, widgetsList);
+
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
-
 	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
+	connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
+
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
 }
 

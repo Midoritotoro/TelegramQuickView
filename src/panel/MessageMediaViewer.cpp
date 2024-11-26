@@ -33,7 +33,6 @@ MessageMediaViewer::MessageMediaViewer(
 {
 	setMouseTracking(true);
 
-	const int screenHeight = QApplication::primaryScreen()->availableGeometry().width();
 	const int screenWidth = QApplication::primaryScreen()->availableGeometry().height();
 
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -78,10 +77,12 @@ MessageMediaViewer::MessageMediaViewer(
 	_previousAttachment->setVisible(true);
 	_nextAttachment->setVisible(true);
 	_messageTextView->setVisible(true);
+
 	_messageTextView->setMaximumWidth(screenWidth * 0.8);
 
-	QWidgetList widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
+	const auto widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
 	_widgetsHider =  std::make_unique<WidgetsHider>(true, true, widgetsList);
+
 	_widgetsHider->SetInactivityDuration(3000);
 	_widgetsHider->SetAnimationDuration(3000);
 	
@@ -101,7 +102,14 @@ MessageMediaViewer::MessageMediaViewer(
 
 	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
 	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
+
 	connect(_mediaPlayer.get(), &MediaPlayer::mediaGeometryChanged, this, &MessageMediaViewer::updateMessageTextView);
+	connect(_mediaPlayer.get(), &MediaPlayer::needScrollToMessage, [this]() {
+		showMinimized();
+
+		emit escaped();
+		emit needScrollToMessage(_currentMessage);
+	});
 }
 
 void MessageMediaViewer::updateMediaNavigationButtons() {
@@ -110,10 +118,8 @@ void MessageMediaViewer::updateMediaNavigationButtons() {
 
 	if (nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex + 1) == nullptr
-		) {
-		// Впереди нет сообщений с медиа и в текущем сообщении не существует больше медиа
+	) // Впереди нет сообщений с медиа и в текущем сообщении не существует больше медиа
 		_nextAttachment->hide();
-	}
 
 	if (previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage)) == -1
 		&& _currentMessage->attachmentAt(_currentMessageAttachmentIndex - 1) == nullptr
@@ -139,7 +145,7 @@ void MessageMediaViewer::updateMessageTextView() {
 	_widgetsHider->addWidget(_messageTextView);
 	_messageTextView->setText(_currentMessage->messageText());
 
-	int yCoordinate = 0;
+	auto yCoordinate = 0;
 	
 	const auto mediaSize = _mediaPlayer->occupiedMediaSpace();
 	const auto mediaPosition = _mediaPlayer->mediaPosition();
@@ -198,68 +204,61 @@ int MessageMediaViewer::previousMessageWithAttachmentsIndex(int currentIndex) co
 }
 
 void MessageMediaViewer::goToPreviousMessage() {
-	int previousMessageIndex = previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage));
+	const auto previousMessageIndex = previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage));
 
-	if (previousMessageIndex != -1) {
-		if (previousMessageIndex >= 0) {
-			MessageWidget* previousMessage = _messagesHistory->messageAt(previousMessageIndex);
+	if (previousMessageIndex < 0)
+		return;
 
-			if (previousMessage) {
-				_currentMessage = previousMessage;
+	if (const auto previousMessage = _messagesHistory->messageAt(previousMessageIndex)) {
+		_currentMessage = previousMessage;
 
-				_currentMessageAttachmentIndex = _currentMessage->attachmentsLength() - 1;
-				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
+		_currentMessageAttachmentIndex = _currentMessage->attachmentsLength() - 1;
+		_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
-				if (_nextAttachment->isHidden())
-					_nextAttachment->show();
-			}
-		}
+		if (_nextAttachment->isHidden())
+			_nextAttachment->show();
 	}
 }
 
 void MessageMediaViewer::goToNextMessage() {
-	int nextMessageIndex = nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage));
+	const auto nextMessageIndex = nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage));
 
-	if (nextMessageIndex != -1) {
-		if (nextMessageIndex >= 0) {
-			MessageWidget* nextMessage = _messagesHistory->messageAt(nextMessageIndex);
+	if (nextMessageIndex < 0)
+		return;
 
-			if (nextMessage) {
-				_currentMessage = nextMessage;
+	if (const auto nextMessage = _messagesHistory->messageAt(nextMessageIndex)) {
+		_currentMessage = nextMessage;
 				
-				_currentMessageAttachmentIndex = 0;
-				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
+		_currentMessageAttachmentIndex = 0;
+		_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
-				if (_previousAttachment->isHidden())
-					_previousAttachment->show();
-			}
-		}
+		if (_previousAttachment->isHidden())
+			_previousAttachment->show();
 	}
 }
 
 void MessageMediaViewer::nextAttachmentButton_clicked() {
-	int messageAttachmentsCount = _currentMessage->attachmentsLength();
+	const auto attachmentsCount = _currentMessage->attachmentsLength();
 
-	for (int index = 0; index < messageAttachmentsCount; ++index) {
-		if ((messageAttachmentsCount - (_currentMessageAttachmentIndex + 1)) <= 0) {
+	for (int index = 0; index < attachmentsCount; ++index) {
+		if ((attachmentsCount - (_currentMessageAttachmentIndex + 1)) <= 0) {
 			// Медиа в текущем сообщении нет, идём к следующему
 			goToNextMessage();
 			break;
 		}
 
-		MessageAttachment* attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
+		const auto attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
 
-		if (_currentMessage->indexOfAttachment(attachment) == index) {
-			if (messageAttachmentsCount - (index + 1) > 0) {
-				_currentMessageAttachmentIndex = index + 1;
-				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
+		if (_currentMessage->indexOfAttachment(attachment) != index || attachmentsCount - (index + 1) <= 0)
+			continue;
 
-				if (_previousAttachment->isHidden())
-					_previousAttachment->show();
+		_currentMessageAttachmentIndex = ++index;
+		_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
-				break;
-			}
-		}
+		if (_previousAttachment->isHidden())
+			_previousAttachment->show();
+
+		break;
 	}
 
 	updateMediaNavigationButtons();
@@ -267,28 +266,27 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 }
 
 void MessageMediaViewer::previousAttachmentButton_clicked() {
-	int messageAttachmentsCount = _currentMessage->attachmentsLength();
+	const auto attachmentsCount = _currentMessage->attachmentsLength();
 
-	for (int index = messageAttachmentsCount; index >= 0; --index) {
+	for (int index = attachmentsCount; index >= 0; --index) {
 		if (_currentMessageAttachmentIndex <= 0) {
-			goToPreviousMessage();
 			// Медиа в текущем сообщении нет, идём к предыдущему
+			goToPreviousMessage();
 			break;
 		}
 
-		MessageAttachment* attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
+		const auto attachment = _currentMessage->attachmentAt(_currentMessageAttachmentIndex);
 
-		if (_currentMessage->indexOfAttachment(attachment) == index) {
-			if (index - 1 >= 0) {
-				_currentMessageAttachmentIndex = index - 1;
-				_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
+		if (_currentMessage->indexOfAttachment(attachment) != index || index - 1 < 0)
+			continue;
+			
+		_currentMessageAttachmentIndex = --index;
+		_mediaPlayer->setMedia(_currentMessage->attachmentAt(_currentMessageAttachmentIndex)->attachmentPath());
 
-				if (_nextAttachment->isHidden())
-					_nextAttachment->show();
+		if (_nextAttachment->isHidden())
+			_nextAttachment->show();
 
-				break;
-			}
-		}
+		break;
 	}
 
 	updateMediaNavigationButtons();
