@@ -2,19 +2,21 @@
 
 #include "VolumeController.h"
 #include "FullScreenButton.h"
+#include "SpeedButton.h"
 
 #include <QPaintEvent>
 #include <QMargins>
 #include <QPainter>
+
 #include <QCoreApplication>
+
 #include <QDir>
 #include <QFile>
 #include <QPainterPath>
+
 #include <QApplication>
 #include <QScreen>
-#include <QBrush>
-#include <QPalette>
-#include <QElapsedTimer>
+
 #include "../ffmpeg/Time.h"
 
 
@@ -39,6 +41,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	_mediaPlayerPanelWidth = screenWidth / 4;
+
+	_speedButton = new SpeedButton(this);
 
 	_videoStateWidget = new VideoStateWidget(this);
 	_volumeToggle = new VolumeController(this);
@@ -71,6 +75,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	}
 
 	_fullScreenButton->setFixedSize(25, 25);
+	_speedButton->setFixedSize(25, 25);
+
 	_videoStateWidget->setFixedSize(30, 30);
 	_volumeToggle->setFixedSize(25, 25);
 
@@ -201,6 +207,7 @@ void MediaPlayerPanel::updateControlsGeometry() {
 	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2.,
 			height() + contentBottom() - _remainingTimeLabel->height());
 
+	_speedButton->move(width() - contentRight() - contentLeft() - _speedButton->width() * 2, contentTop());
 	_fullScreenButton->move(width() - contentRight() - _fullScreenButton->width(), contentTop());
 }
 

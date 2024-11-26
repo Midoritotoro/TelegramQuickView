@@ -6,40 +6,44 @@
 #include <algorithm>
 #include <cmath>
 
+#include <QFontMetrics>
 
 namespace style {
 
-inline constexpr auto kScaleMin = 50;
-inline constexpr auto kScaleMax = 300;
-inline constexpr auto kScaleDefault = 100;
+	inline constexpr auto kScaleMin = 50;
+	inline constexpr auto kScaleMax = 300;
+	inline constexpr auto kScaleDefault = 100;
 
-[[nodiscard]] int DevicePixelRatio();
-void SetDevicePixelRatio(int ratio);
+	[[nodiscard]] int DevicePixelRatio();
+	void SetDevicePixelRatio(int ratio);
 
-[[nodiscard]] int Scale();
-void SetScale(int scale);
+	[[nodiscard]] int Scale();
+	void SetScale(int scale);
 
-[[nodiscard]] QImage Opaque(QImage&& image);
+	[[nodiscard]] QSize textSize(const QString& text, const QFontMetrics& metrics);
+	[[nodiscard]] QSize textSize(const QString& text, const QFont& font);
 
-template <typename T>
-[[nodiscard]] inline T ConvertScale(T value, int scale) {
-	if (value < 0.)
-		return -ConvertScale(-value, scale);
+	[[nodiscard]] QImage Opaque(QImage&& image);
 
-	const auto result = T(std::round(
-		(double(value) * scale / 100.) - 0.01));
+	template <typename T>
+	[[nodiscard]] inline T ConvertScale(T value, int scale) {
+		if (value < 0.)
+			return -ConvertScale(-value, scale);
 
-	return (!std::is_integral_v<T> || !value || result) ? result : 1;
-}
+		const auto result = T(std::round(
+			(double(value) * scale / 100.) - 0.01));
 
-template <typename T>
-[[nodiscard]] inline T ConvertScale(T value) {
-	return ConvertScale(value, Scale());
-}
+		return (!std::is_integral_v<T> || !value || result) ? result : 1;
+	}
 
-[[nodiscard]] QImage Prepare(
-	QImage image, 
-	const QSize& _outer
-);
+	template <typename T>
+	[[nodiscard]] inline T ConvertScale(T value) {
+		return ConvertScale(value, Scale());
+	}
+
+	[[nodiscard]] QImage Prepare(
+		QImage image, 
+		const QSize& _outer
+	);
 
 } // namespace style

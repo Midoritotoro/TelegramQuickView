@@ -19,6 +19,8 @@ private:
 	QLabel* _timeLabel = nullptr, *_remainingTimeLabel = nullptr;
 
 	FullScreenButton *_fullScreenButton = nullptr;
+	SpeedButton* _speedButton = nullptr;
+
 	QString _fullScreenToImagePath;
 
 	VolumeController* _volumeToggle = nullptr;

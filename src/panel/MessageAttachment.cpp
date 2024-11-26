@@ -13,19 +13,6 @@
 
 #include "../core/StyleCore.h"
 
-
-namespace {
-	
-	QSize textSize(const QString& text, const QFontMetrics& metrics) {
-		return metrics.size(0, text);
-	}
-
-	QSize textSize(const QString& text, const QFont& font) {
-		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
-	}
-}
-
-
 MessageAttachment::MessageAttachment(
 	QString attachmentPath,
 	int attachmentWidth,
@@ -81,7 +68,7 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 	QFont font("Arial", 16);
 
 	const auto attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
-	const auto attachmentsCountTextSize = textSize(attachmentsCountText, font);
+	const auto attachmentsCountTextSize = style::textSize(attachmentsCountText, font);
 
 	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
 	attachmentsCountTextRect.moveCenter(rect().center());
