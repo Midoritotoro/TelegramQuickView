@@ -10,6 +10,8 @@ class SpeedButtonOverlay: public QWidget {
 	Q_OBJECT
 private:
 	EnhancedSlider* _speedSlider = nullptr;
+	QRect _textRect;
+
 	float _speed = 1.0f;
 public:
 	SpeedButtonOverlay(QWidget* parent = nullptr);

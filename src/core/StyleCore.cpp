@@ -1,10 +1,12 @@
 #include "StyleCore.h"
 
+#include <QPainterPath>
 #include <QPainter>
+
 #include <QFile>
+#include <QDir>
 
 #include <QCoreApplication>
-#include <QDir>
 
 namespace style {
 
@@ -142,6 +144,28 @@ namespace style {
 
 	QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth) {
 		return QSize(targetWidth, targetWidth * imageSize.height() / imageSize.width());
+	}
+
+	void drawRoundedCorners(QPainter& painter, const QSize& widgetSize, int borderRadius) {
+		auto path = QPainterPath();
+
+		path.moveTo(borderRadius, 0);
+
+		path.lineTo(widgetSize.width() - borderRadius, 0);
+		path.quadTo(widgetSize.width(), 0, widgetSize.width(), borderRadius);
+
+		path.lineTo(widgetSize.width(), widgetSize.height() - borderRadius);
+		path.quadTo(widgetSize.width(), widgetSize.height(), 
+			widgetSize.width() - borderRadius, widgetSize.height());
+
+		path.lineTo(borderRadius, widgetSize.height());
+		path.quadTo(0, widgetSize.height(), 0,
+			widgetSize.height() - borderRadius);
+
+		path.lineTo(0, borderRadius);
+		path.quadTo(0, 0, borderRadius, 0);
+
+		painter.drawPath(path);
 	}
 
 	QImage Prepare(

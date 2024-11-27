@@ -2,15 +2,11 @@
 
 #include <QGridLayout>
 #include <QApplication>
+
 #include <QScreen>
-#include <QPainterPath>
 #include <QPainter>
 
-
-namespace {
-	constexpr QMargins textLabelMargins = { 8, 5, 8, 8 };
-	constexpr int messageTextViewBorderRadius = 10;
-}
+#include "../core/StyleCore.h"
 
 
 MessageTextView::MessageTextView(QWidget* parent):
@@ -25,7 +21,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 
 	_textLabel->setWordWrap(true);
 	_textLabel->setAlignment(Qt::AlignLeft);
-	_textLabel->setContentsMargins(textLabelMargins);
+	_textLabel->setContentsMargins(style::messageTextViewMargins);
 
 	_textLabel->setAttribute(Qt::WA_NoSystemBackground);
 	_textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -69,25 +65,5 @@ void MessageTextView::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 	painter.setOpacity(0.65);
 
-	drawRoundedCorners(painter, messageTextViewBorderRadius);
-}
-
-void MessageTextView::drawRoundedCorners(QPainter& painter, int borderRadius) {
-	QPainterPath path;
-
-	path.moveTo(borderRadius, 0);
-
-	path.lineTo(width() - borderRadius, 0);
-	path.quadTo(width(), 0, width(), borderRadius);
-
-	path.lineTo(width(), height() - borderRadius);
-	path.quadTo(width(), height(), width() - borderRadius, height());
-
-	path.lineTo(borderRadius, height());
-	path.quadTo(0, height(), 0, height() - borderRadius);
-
-	path.lineTo(0, borderRadius);
-	path.quadTo(0, 0, borderRadius, 0);
-
-	painter.drawPath(path);
+	style::drawRoundedCorners(painter, size(), style::messageTextViewBorderRadius);
 }

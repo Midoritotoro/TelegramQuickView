@@ -76,11 +76,11 @@ MessageMediaViewer::MessageMediaViewer(
 
 	_previousAttachment->setVisible(true);
 	_nextAttachment->setVisible(true);
-	_messageTextView->setVisible(true);
+	_messageTextView->setVisible(false);
 
 	_messageTextView->setMaximumWidth(screenWidth * 0.8);
 
-	const auto widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, _messageTextView });
+	const auto widgetsList = QWidgetList({ _previousAttachment, _nextAttachment, /* _messageTextViev */ });
 	_widgetsHider =  std::make_unique<WidgetsHider>(true, true, widgetsList);
 
 	_widgetsHider->SetInactivityDuration(3000);
@@ -131,18 +131,18 @@ void MessageMediaViewer::updateMessageTextView() {
 	if (!_currentMessage)
 		return;
 
-	if (!_currentMessage->hasText()) {
-		if (!_messageTextView->isHidden()) {
-			_messageTextView->hide();
-			_widgetsHider->removeWidget(_messageTextView);
-		}
-		return;
-	}
+	//if (!_currentMessage->hasText()) {
+	//	if (!_messageTextView->isHidden()) {
+	//		_messageTextView->hide();
+	//		_widgetsHider->removeWidget(_messageTextView);
+	//	}
+	//	return;
+	//}
 
-	if (_messageTextView->isHidden())
-		_messageTextView->show();
+	//if (_messageTextView->isHidden())
+	//	_messageTextView->show();
 
-	_widgetsHider->addWidget(_messageTextView);
+	//_widgetsHider->addWidget(_messageTextView);
 	_messageTextView->setText(_currentMessage->messageText());
 
 	auto yCoordinate = 0;
@@ -170,7 +170,7 @@ void MessageMediaViewer::updateMessageTextView() {
 			- messageTextViewBottomIndent * 2. - videoControlsHeight;
 	}
 
-	_messageTextView->hide();
+	//_messageTextView->hide();
 	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);
 }
 

@@ -189,26 +189,6 @@ void MediaPlayerPanel::updateControlsGeometry() {
 	_fullScreenButton->move(width() - style::mediaPlayerPanelMargins.right() - _fullScreenButton->width(), style::mediaPlayerPanelMargins.top());
 }
 
-void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
-	QPainterPath path;
-
-	path.moveTo(borderRadius, 0);
-
-	path.lineTo(width() - borderRadius, 0);
-	path.quadTo(width(), 0, width(), borderRadius);
-
-	path.lineTo(width(), height() - borderRadius);
-	path.quadTo(width(), height(), width() - borderRadius, height());
-
-	path.lineTo(borderRadius, height());
-	path.quadTo(0, height(), 0, height() - borderRadius);
-
-	path.lineTo(0, borderRadius);
-	path.quadTo(0, 0, borderRadius, 0);
-
-	painter.drawPath(path);
-}
-
 void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 
@@ -218,7 +198,7 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);
 
-	drawRoundedCorners(painter, style::mediaPlayerPanelBorderRadius);
+	style::drawRoundedCorners(painter, size(), style::mediaPlayerPanelBorderRadius);
 }
 
 void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {

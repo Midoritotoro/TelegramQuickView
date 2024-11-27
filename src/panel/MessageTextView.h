@@ -14,6 +14,4 @@ public:
 	void setText(const QString& text);
 protected:
 	void paintEvent(QPaintEvent* event) override;
-private:
-	void drawRoundedCorners(QPainter& painter, int borderRadius);
 };

@@ -16,6 +16,9 @@ namespace style {
 	inline auto maximumMessageWidth = 0;
 	inline constexpr auto sliderHeight = 20;
 
+	inline constexpr QMargins messageTextViewMargins = { 8, 5, 8, 8 };
+	inline constexpr auto messageTextViewBorderRadius = 10;
+
 	inline constexpr auto kScaleMin = 50;
 	inline constexpr auto kScaleMax = 300;
 	inline constexpr auto kScaleDefault = 100;
@@ -34,6 +37,8 @@ namespace style {
 
 	[[nodiscard]] QImage Opaque(QImage&& image);
 	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth);
+
+	void drawRoundedCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
 
 	template <typename T>
 	[[nodiscard]] inline T ConvertScale(T value, int scale) {

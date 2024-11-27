@@ -45,8 +45,6 @@ Q_SIGNALS:
 	void mediaPlayerNeedsNormal();
 	void mediaPlayerNeedsChangeVolume(int value);
 protected:
-	void drawRoundedCorners(QPainter& painter, int borderRadius);
-
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;

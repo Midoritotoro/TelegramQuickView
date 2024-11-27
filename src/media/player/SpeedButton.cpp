@@ -16,15 +16,19 @@ SpeedButtonOverlay::SpeedButtonOverlay(QWidget* parent):
 {
 	_speedSlider = new EnhancedSlider(this);
 
-	_speedSlider->setValue(_speed);
 	_speedSlider->setMaximum(20);
 
 	_speedSlider->setStyleSheet(style::SliderStyle());
 	_speedSlider->setFixedHeight(style::sliderHeight);
 
 	connect(_speedSlider, &QAbstractSlider::valueChanged, [this](int value) {
-		_speed = static_cast<float>(value) / 10;
+		_speed = value / 10.;
+		_textRect = QRect(QPoint(), style::TextSize(QString::number(_speed, 'f', 1) + "x", font()));
+		_textRect.moveTo(QPoint(style::mediaPlayerPanelMargins.left() * 0.5,
+			(height() - _textRect.height()) / 2.));
 	});
+
+	_speedSlider->setValue(_speed * 10.);
 }
 
 float SpeedButtonOverlay::speed() const noexcept {
@@ -36,31 +40,21 @@ void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
 	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::gray);
+	painter.setBrush(QColor(41, 45, 51));
 
 	painter.drawRect(rect());
 
-	QFont font("Arial", 16);
-
-	auto speedTextRect = QRect(QPoint(), style::TextSize(QString::number(_speed), font));
-	speedTextRect.moveTo(QPoint(style::mediaPlayerPanelMargins.left() * 0.5,
-		(height() - speedTextRect.height()) / 2.));
-
 	painter.setPen(Qt::white);
-	painter.setFont(font);
-
-	painter.drawText(speedTextRect, Qt::AlignCenter, QString::number(_speed));
+	painter.drawText(_textRect, Qt::AlignCenter, QString::number(_speed, 'f', 1) + "x");
 }
 
 void SpeedButtonOverlay::resizeEvent(QResizeEvent* event) {
 	_speedSlider->setGeometry(
-		(width() - _speedSlider->width() - style::mediaPlayerPanelMargins.left() - style::mediaPlayerPanelMargins.right()) / 2.,
+		_textRect.right() + style::mediaPlayerPanelMargins.left(),
 		(height() - _speedSlider->height()) / 2.,
-		width() - style::mediaPlayerPanelMargins.left() - style::mediaPlayerPanelMargins.right() * 0.5,
-		height()
-	);
-
-	qDebug() << "ResizeEvent: " << width() << height() << _speedSlider->size() << _speedSlider->pos();
+		width() - _textRect.right() - style::mediaPlayerPanelMargins.left() *
+		1.5 - style::mediaPlayerPanelMargins.right(), 
+		_speedSlider->height());
 }
 
 SpeedController::SpeedController(QWidget* parent):
