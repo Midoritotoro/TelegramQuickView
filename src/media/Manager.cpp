@@ -167,3 +167,9 @@ void Manager::rewind(Time::time position) {
 			play();
 	}*/
 }
+
+void Manager::setSpeed(float speed) {
+	QMutexLocker locker(&_mutex);
+	if (hasVideo())
+		_frameGenerator->setSpeed(speed);
+}

@@ -49,6 +49,7 @@ public:
 	[[nodiscard]] bool hasAudio() const noexcept;
 
 	Q_INVOKABLE void rewind(Time::time position);
+	Q_INVOKABLE void setSpeed(float speed);
 private:
 	void process();
 

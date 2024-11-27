@@ -84,11 +84,13 @@ MediaPlayer::MediaPlayer(QWidget* parent):
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPlayClicked, this, &MediaPlayer::play);
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::videoPauseClicked, this, &MediaPlayer::pause);
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsNormal, this, &MediaPlayer::setNormal);
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsFullScreen, this, &MediaPlayer::setFullScreen);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::needsNormal, this, &MediaPlayer::setNormal);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::needsFullScreen, this, &MediaPlayer::setFullScreen);
 
 	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::valueChanged, _manager.get(), &Manager::rewind);
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::mediaPlayerNeedsChangeVolume, this, &MediaPlayer::changeVolume);
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::needsChangeVolume, this, &MediaPlayer::changeVolume);
+
+	connect(_mediaPlayerPanel, &MediaPlayerPanel::needsChangeSpeed, _manager.get(), &Manager::setSpeed);
 
 	_mediaPlayerPanel->setVolume(20);
 

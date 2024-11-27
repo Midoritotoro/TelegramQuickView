@@ -81,6 +81,8 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/audio/AbstractAudioReader.h
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
+    src/media/ffmpeg/ThumbnailGenerator.cpp
+    src/media/ffmpeg/ThumbnailGenerator.h
 
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h

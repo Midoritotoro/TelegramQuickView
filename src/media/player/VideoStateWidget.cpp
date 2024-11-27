@@ -19,6 +19,7 @@ VideoStateWidget::VideoStateWidget(QWidget* parent):
 
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
+
     setState(State::Pause);
 }
 
@@ -41,33 +42,31 @@ void VideoStateWidget::paintEvent(QPaintEvent* event) {
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::NoBrush);
 
-    if (_currentPixmap.size() != size()) {
-        auto image = QImage();
+    auto image = QImage();
 
-        switch (_state) {
-            case State::Play:
-                image = QImage(_playImagePath);
-                break;
+    switch (_state) {
+        case State::Play:
+            image = QImage(_playImagePath);
+            break;
 
-            case State::Pause:
-                image = QImage(_pauseImagePath);
-                break;
+        case State::Pause:
+            image = QImage(_pauseImagePath);
+            break;
 
-            case State::Repeat:
-                image = QImage(_repeatImagePath);
-                break;
-        }
-
-        image = style::Prepare(image, size());
-        image = std::move(image).scaled(
-            image.width() * style::DevicePixelRatio(),
-            image.height() * style::DevicePixelRatio(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation);
-
-        _currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-        _currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
+        case State::Repeat:
+            image = QImage(_repeatImagePath);
+            break;
     }
+
+    image = style::Prepare(image, size());
+    image = std::move(image).scaled(
+        image.width() * style::DevicePixelRatio(),
+        image.height() * style::DevicePixelRatio(),
+        Qt::IgnoreAspectRatio,
+        Qt::SmoothTransformation);
+
+    _currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
+    _currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
 
     painter.drawPixmap(0, 0, _currentPixmap);
 }

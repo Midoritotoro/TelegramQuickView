@@ -17,19 +17,28 @@ SpeedButtonOverlay::SpeedButtonOverlay(QWidget* parent):
 {
 	_speedSlider = new EnhancedSlider(this);
 
-	_speedSlider->setMaximum(20);
+	_speedSlider->setMaximum(25);
+	_speedSlider->setMinimum(5);
 
 	_speedSlider->setStyleSheet(style::SliderStyle());
 	_speedSlider->setFixedHeight(style::sliderHeight);
 
 	connect(_speedSlider, &QAbstractSlider::valueChanged, [this](int value) {
 		_speed = value / 10.;
+
+		if (_onSpeedChangedCallback)
+			_onSpeedChangedCallback(_speed);
+
 		_textRect = QRect(QPoint(), style::TextSize(QString::number(_speed, 'f', 1) + "x", font()));
 		_textRect.moveTo(QPoint(style::mediaPlayerPanelMargins.left() * 0.5,
 			(height() - _textRect.height()) / 2.));
 	});
 
 	_speedSlider->setValue(_speed * 10.);
+}
+
+void SpeedButtonOverlay::setCallback(std::function<void (float speed)> callback) {
+	_onSpeedChangedCallback = callback;
 }
 
 float SpeedButtonOverlay::speed() const noexcept {
@@ -76,6 +85,10 @@ SpeedController::SpeedController(QWidget* parent):
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
+}
+
+void SpeedController::setCallback(std::function<void (float speed)> callback) {
+	_overlay->setCallback(callback);
 }
 
 void SpeedController::paintEvent(QPaintEvent* event) {

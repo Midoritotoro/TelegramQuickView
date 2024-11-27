@@ -198,7 +198,7 @@ FrameGenerator::Frame FrameGenerator::renderNext(
 }
 
 void FrameGenerator::setSpeed(float speed) {
-	if (speed < 0.5 || speed > 2)
+	if (speed < 0.5 || speed > 2.5)
 		return;
 
 	_speed = speed;

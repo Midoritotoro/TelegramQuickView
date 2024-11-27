@@ -3,6 +3,8 @@
 #include <QWidget>
 #include <QPushButton>
 
+#include <functional>
+
 #include "EnhancedSlider.h"
 
 
@@ -12,10 +14,13 @@ private:
 	EnhancedSlider* _speedSlider = nullptr;
 	QRect _textRect;
 
+	std::function<void (float speed)> _onSpeedChangedCallback;
+
 	float _speed = 1.0f;
 public:
 	SpeedButtonOverlay(QWidget* parent = nullptr);
 	
+	void setCallback(std::function<void (float speed)> callback);
 	[[nodiscard]] float speed() const noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
@@ -32,6 +37,8 @@ private:
 	QPixmap _currentPixmap;
 public:
 	SpeedController(QWidget* parent = nullptr);
+
+	void setCallback(std::function<void (float speed)> callback);
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;

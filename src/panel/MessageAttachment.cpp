@@ -11,9 +11,7 @@
 #include <QPixmapCache>
 
 #include "../core/StyleCore.h"
-
-#include "../media/ffmpeg/Time.h"
-#include "../media/ffmpeg/Guard.h"
+#include "../media/ffmpeg/ThumbnailGenerator.h"
 
 
 MessageAttachment::MessageAttachment(
@@ -78,8 +76,8 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 }
 
 QPixmap MessageAttachment::preparePreview() {
-	//auto currentTime = Time::now();
-	//const auto timer = Guard::finally([&currentTime] { qDebug() << "MessageAttachment::preparePreview(): " << Time::now() - currentTime << " ms";  });
+	auto currentTime = Time::now();
+	const auto timer = Guard::finally([&currentTime] { qDebug() << "MessageAttachment::preparePreview(): " << Time::now() - currentTime << " ms";  });
 
 	auto preview = QPixmap();
 	const auto key = _attachmentPath;
@@ -87,7 +85,17 @@ QPixmap MessageAttachment::preparePreview() {
 	if (QPixmapCache::find(key, &preview)) 
 		return preview;
 	else {
-		auto image = style::Prepare(QImage(_attachmentPath), size());
+		auto image = QImage();
+
+		switch (_attachmentType) {
+			case AttachmentType::Photo:
+				image = style::Prepare(QImage(_attachmentPath), size());
+				break;
+
+			case AttachmentType::Video:
+				image = style::Prepare(ThumbnailGenerator::Generate(_attachmentPath), size());
+				break;
+		}
 
 		image = std::move(image).scaled(
 			image.width() * style::DevicePixelRatio(),
@@ -120,7 +128,7 @@ void MessageAttachment::updateSize() {
 		case AttachmentType::Video:
 			setFixedSize(
 				style::getMinimumSizeWithAspectRatio(
-					QSize(100, 100),
+					ThumbnailGenerator::Generate(_attachmentPath).size(),
 					style::maximumMessageWidth)
 			);
 			break;

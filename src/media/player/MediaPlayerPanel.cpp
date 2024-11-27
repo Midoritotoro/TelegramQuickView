@@ -41,6 +41,12 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 
 	_fullScreenButton = new FullScreenButton(this);
 
+	_speedButton->setCallback(
+		[this](float speed) { 
+			return emit needsChangeSpeed(speed);
+		}
+	);
+
 	_timeLabel->setAttribute(Qt::WA_NoSystemBackground);
 	_remainingTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
 
@@ -69,8 +75,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 
 	connect(_fullScreenButton, &QAbstractButton::clicked, this, [this]() {
 		_fullScreenButton->state() == FullScreenButton::State::FullScreenTo 
-			? emit mediaPlayerNeedsNormal() 
-			: emit mediaPlayerNeedsFullScreen();
+			? emit needsNormal() 
+			: emit needsFullScreen();
 	});
 
 	connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
@@ -139,7 +145,7 @@ void MediaPlayerPanel::setVolume(int value) {
 		_previousVolumeSliderValue = value;
 
 	_volumeSlider->setValue(value);
-	emit mediaPlayerNeedsChangeVolume(value);
+	emit needsChangeVolume(value);
 }
 
 void MediaPlayerPanel::updateSize() {

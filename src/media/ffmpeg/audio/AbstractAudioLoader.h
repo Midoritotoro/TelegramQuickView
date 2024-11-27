@@ -12,8 +12,10 @@ namespace FFmpeg {
 
 		virtual bool open(Time::time positionMs, float speed = 1.) = 0;
 		virtual Time::time duration() = 0;
+
 		virtual int samplesFrequency() = 0;
 		virtual int sampleSize() = 0;
+
 		virtual int format() = 0;
 
 		virtual void dropFramesTill(int64_t samples) {

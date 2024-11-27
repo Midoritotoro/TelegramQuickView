@@ -41,9 +41,11 @@ Q_SIGNALS:
 	void videoPlayClicked();
 	void videoPauseClicked();
 
-	void mediaPlayerNeedsFullScreen();
-	void mediaPlayerNeedsNormal();
-	void mediaPlayerNeedsChangeVolume(int value);
+	void needsFullScreen();
+	void needsNormal();
+	void needsChangeVolume(int volume);
+
+	void needsChangeSpeed(float speed);
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;

@@ -20,17 +20,21 @@ Application::Application(int& argc, char** argv) :
     QString path5 = "C:\\Users\\danya\\Downloads\\test4.jpg";
     QString path6 = "C:\\Users\\danya\\Downloads\\top.png";
 
+    QString videoPath = "C:\\Users\\danya\\Downloads\\raidvid.mp4";
+    QString videoPath2 = "C:\\Users\\danya\\Downloads\\slipknot-yen_208773.mp4";
+    QString videoPath3 = "C:\\Users\\danya\\Downloads\\slipknot-the-devil-in-i_830862.mp4";
+
     _postsView = std::make_unique<TelegramPostQuickView>();
     _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
     _postsView->show();
 
-    auto list = QStringList({ path, path2, path3, path4, path5, path6 });
+    auto list = QStringList({ videoPath, path, path2, path3, path4, path5, path6 });
     auto list2 = QStringList({ path2, path, path3, path4, path5, path6 });
     auto list3 = QStringList({ path3, path2, path, path4, path5, path6 });
-    auto list4 = QStringList({ path4, path2, path3, path, path5, path6 });
+    auto list4 = QStringList({ videoPath2, path4, path2, path3, path, path5, path6 });
     auto list5 = QStringList({ path5, path2, path3, path4, path, path6 });
-    auto list6 = QStringList({ path6, path2, path3, path4, path5, path });
+    auto list6 = QStringList({ videoPath3, path6, path2, path3, path4, path5, path });
 
     _postsView->makeMessage(text, list);
     _postsView->makeMessage(text, list2);
