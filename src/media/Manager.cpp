@@ -158,14 +158,14 @@ void Manager::rewind(Time::time position) {
 			play();
 	}
 
-	/*if (hasAudio()) {
+	if (hasAudio()) {
 		_audioReader->open(position);
 
 		if (_audioReader->position() >= _audioReader->duration())
 			emit endOfMedia();
 		else if (_state == State::Playing)
 			play();
-	}*/
+	}
 }
 
 void Manager::setSpeed(float speed) {

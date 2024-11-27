@@ -26,6 +26,7 @@ namespace FFmpeg {
 		AVPacket _packet;
 		bool _readTillEnd = false;
 
+		Time::time _position = 0;
 		float _volume = 100;
 	};
 

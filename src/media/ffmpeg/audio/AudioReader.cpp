@@ -84,6 +84,7 @@ namespace FFmpeg {
 
 		alSourcei(_alSource, AL_LOOPING, 1);
 		alSourcef(_alSource, AL_GAIN, _volume);
+		alSourcei(_alSource, AL_SAMPLE_OFFSET, static_cast<ALint>(_position));
 		
 		alGetError();
 
@@ -94,8 +95,6 @@ namespace FFmpeg {
 
 		if (state != AL_PLAYING)
 			alSourcePlay(_alSource);
-		else if (state == AL_PLAYING)
-			alSourceStop(_alSource);
 
 		alGetError();
 
@@ -137,18 +136,16 @@ namespace FFmpeg {
 	}
 
 	bool AudioReader::seekTo(Time::time positionMs) {
-		if (positionMs) {
-			const auto stream = fmtContext->streams[streamId];
-			const auto timeBase = stream->time_base;
-			const auto timeStamp = (positionMs * timeBase.den)
-				/ (1000LL * timeBase.num);
-			const auto flags1 = AVSEEK_FLAG_ANY;
-			if (av_seek_frame(fmtContext, streamId, timeStamp, flags1) < 0) {
-				const auto flags2 = 0;
-				if (av_seek_frame(fmtContext, streamId, timeStamp, flags2) < 0) {
-				}
-			}
-		}
+		const auto stream = fmtContext->streams[streamId];
+		const auto timeBase = stream->time_base;
+
+		const auto timeStamp = (positionMs * timeBase.den)
+			/ (1000LL * timeBase.num);
+
+		if (av_seek_frame(fmtContext, streamId, timeStamp, AVSEEK_FLAG_BACKWARD) < 0)
+			av_seek_frame(fmtContext, streamId, timeStamp, 0);
+
+		avcodec_flush_buffers(_codecContext);
 
 		return true;
 	}

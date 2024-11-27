@@ -24,12 +24,14 @@ Application::Application(int& argc, char** argv) :
     QString videoPath2 = "C:\\Users\\danya\\Downloads\\slipknot-yen_208773.mp4";
     QString videoPath3 = "C:\\Users\\danya\\Downloads\\slipknot-the-devil-in-i_830862.mp4";
 
+    QString audioPath = "C:\\Users\\danya\\Downloads\\Störagéd.mp3";
+
     _postsView = std::make_unique<TelegramPostQuickView>();
     _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
     _postsView->show();
 
-    auto list = QStringList({ videoPath, path, path2, path3, path4, path5, path6 });
+    auto list = QStringList({ videoPath, audioPath, path, path2, path3, path4, path5, path6 });
     auto list2 = QStringList({ path2, path, path3, path4, path5, path6 });
     auto list3 = QStringList({ path3, path2, path, path4, path5, path6 });
     auto list4 = QStringList({ videoPath2, path4, path2, path3, path, path5, path6 });
