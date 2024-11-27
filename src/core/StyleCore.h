@@ -38,7 +38,9 @@ namespace style {
 	[[nodiscard]] QImage Opaque(QImage&& image);
 	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth);
 
-	void drawRoundedCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
+	void RoundCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
+	void RoundTopCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
+	void RoundBottomCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
 
 	template <typename T>
 	[[nodiscard]] inline T ConvertScale(T value, int scale) {

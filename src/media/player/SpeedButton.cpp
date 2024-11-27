@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QScreen>
 
+#include <QPainterPath>
 #include <QMouseEvent>
 
 SpeedButtonOverlay::SpeedButtonOverlay(QWidget* parent):
@@ -42,6 +43,7 @@ void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(QColor(41, 45, 51));
 
+	style::RoundCorners(painter, size(), 10);
 	painter.drawRect(rect());
 
 	painter.setPen(Qt::white);

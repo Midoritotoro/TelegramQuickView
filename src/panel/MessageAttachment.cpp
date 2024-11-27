@@ -10,8 +10,11 @@
 #include <QUrl>
 #include <QPixmapCache>
 
-
 #include "../core/StyleCore.h"
+
+#include "../media/ffmpeg/Time.h"
+#include "../media/ffmpeg/Guard.h"
+
 
 MessageAttachment::MessageAttachment(
 	MessageWidget* parentMessage, 
@@ -34,6 +37,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 		return;
 
 	QPainter painter(this);
+	style::RoundTopCorners(painter, size(), 10);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 		case MessageWidget::MessageMediaDisplayMode::Stack:
@@ -74,6 +78,9 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 }
 
 QPixmap MessageAttachment::preparePreview() {
+	//auto currentTime = Time::now();
+	//const auto timer = Guard::finally([&currentTime] { qDebug() << "MessageAttachment::preparePreview(): " << Time::now() - currentTime << " ms";  });
+
 	auto preview = QPixmap();
 	const auto key = _attachmentPath;
 
@@ -95,7 +102,7 @@ QPixmap MessageAttachment::preparePreview() {
 
 		if (QPixmapCache::cacheLimit() > 0)
 			QPixmapCache::insert(key, preview);
-	}
+		}
 
 	return preview;
 }

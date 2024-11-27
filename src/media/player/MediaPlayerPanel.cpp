@@ -198,7 +198,8 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);
 
-	style::drawRoundedCorners(painter, size(), style::mediaPlayerPanelBorderRadius);
+	style::RoundCorners(painter, size(), style::mediaPlayerPanelBorderRadius);
+	painter.drawRect(rect());
 }
 
 void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {

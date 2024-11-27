@@ -65,5 +65,7 @@ void MessageTextView::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 	painter.setOpacity(0.65);
 
-	style::drawRoundedCorners(painter, size(), style::messageTextViewBorderRadius);
+	style::RoundCorners(painter, size(), style::messageTextViewBorderRadius);
+
+	painter.drawRect(rect());
 }

@@ -11,12 +11,17 @@
 namespace style {
 
 	namespace {
-
 		int devicePixelRatioValue = 1;
 		int scaleValue = kScaleDefault;
 
 		QString _sliderStyle = "";
 		QString _scrollAreaStyle = "";
+
+		enum Round {
+			All,
+			Top,
+			Bottom
+		};
 
 		struct Shifted {
 			Shifted() = default;
@@ -39,6 +44,59 @@ namespace style {
 			return Shifted(shifted.value * multiplier);
 		}
 
+		void RoundCorners(QPainter& painter, const QSize& widgetSize, int borderRadius, Round roundType) {
+			QPainterPath path;
+			path.setFillRule(Qt::WindingFill);
+
+			switch (roundType) {
+				case Round::Top:
+					path.moveTo(borderRadius, 0);
+					path.lineTo(widgetSize.width() - borderRadius, 0);
+
+					path.arcTo(widgetSize.width() - 2 * borderRadius, 0, 2 * borderRadius, 2 * borderRadius, 90, -90);
+					path.lineTo(widgetSize.width(), widgetSize.height());
+
+					path.lineTo(0, widgetSize.height());
+					path.lineTo(0, borderRadius);
+
+					path.arcTo(0, 0, 2 * borderRadius, 2 * borderRadius, 180, -90);
+					break;
+				
+				case Round::Bottom:
+					path.moveTo(0, widgetSize.height() - borderRadius);
+					path.lineTo(0, borderRadius);
+
+					path.lineTo(widgetSize.width(), borderRadius);
+					path.lineTo(widgetSize.width(), widgetSize.height() - borderRadius);
+
+					path.arcTo(widgetSize.width() - 2 * borderRadius, widgetSize.height() - 2 * borderRadius, 2 * borderRadius, 2 * borderRadius, 0, -90);
+					path.lineTo(borderRadius, widgetSize.height());
+
+					path.arcTo(0, widgetSize.height() - 2 * borderRadius, 2 * borderRadius, 2 * borderRadius, 180, -90);
+					break;
+				
+				case Round::All:
+					path.moveTo(borderRadius, 0);
+
+					path.lineTo(widgetSize.width() - borderRadius, 0);
+					path.quadTo(widgetSize.width(), 0, widgetSize.width(), borderRadius);
+
+					path.lineTo(widgetSize.width(), widgetSize.height() - borderRadius);
+					path.quadTo(widgetSize.width(), widgetSize.height(), 
+						widgetSize.width() - borderRadius, widgetSize.height());
+
+					path.lineTo(borderRadius, widgetSize.height());
+					path.quadTo(0, widgetSize.height(), 0,
+						widgetSize.height() - borderRadius);
+
+					path.lineTo(0, borderRadius);
+					path.quadTo(0, 0, borderRadius, 0);
+
+					break;
+			}
+
+			painter.setClipPath(path);
+		}
 
 		Shifted reshifted(Shifted components) {
 			return (components.value >> 8) & 0x00FF00FF00FF00FFULL;
@@ -146,26 +204,16 @@ namespace style {
 		return QSize(targetWidth, targetWidth * imageSize.height() / imageSize.width());
 	}
 
-	void drawRoundedCorners(QPainter& painter, const QSize& widgetSize, int borderRadius) {
-		auto path = QPainterPath();
+	void RoundCorners(QPainter& painter, const QSize& widgetSize, int borderRadius) {
+		return RoundCorners(painter, widgetSize, borderRadius, Round::All);
+	}
 
-		path.moveTo(borderRadius, 0);
+	void RoundTopCorners(QPainter& painter, const QSize& widgetSize, int borderRadius) {
+		return RoundCorners(painter, widgetSize, borderRadius, Round::Top);
+	}
 
-		path.lineTo(widgetSize.width() - borderRadius, 0);
-		path.quadTo(widgetSize.width(), 0, widgetSize.width(), borderRadius);
-
-		path.lineTo(widgetSize.width(), widgetSize.height() - borderRadius);
-		path.quadTo(widgetSize.width(), widgetSize.height(), 
-			widgetSize.width() - borderRadius, widgetSize.height());
-
-		path.lineTo(borderRadius, widgetSize.height());
-		path.quadTo(0, widgetSize.height(), 0,
-			widgetSize.height() - borderRadius);
-
-		path.lineTo(0, borderRadius);
-		path.quadTo(0, 0, borderRadius, 0);
-
-		painter.drawPath(path);
+	void RoundBottomCorners(QPainter& painter, const QSize& widgetSize, int borderRadius) {
+		return RoundCorners(painter, widgetSize, borderRadius, Round::Bottom);
 	}
 
 	QImage Prepare(
