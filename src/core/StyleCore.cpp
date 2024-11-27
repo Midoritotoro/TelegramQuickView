@@ -1,6 +1,10 @@
 #include "StyleCore.h"
 
 #include <QPainter>
+#include <QFile>
+
+#include <QCoreApplication>
+#include <QDir>
 
 namespace style {
 
@@ -8,6 +12,9 @@ namespace style {
 
 		int devicePixelRatioValue = 1;
 		int scaleValue = kScaleDefault;
+
+		QString _sliderStyle = "";
+		QString _scrollAreaStyle = "";
 
 		struct Shifted {
 			Shifted() = default;
@@ -56,6 +63,21 @@ namespace style {
 			return reshifted(components * alpha);
 		}
 
+		void loadStyles() {
+			const auto currentPath = QCoreApplication::applicationDirPath();
+			const auto cssDir = QDir(currentPath + "/../../src/css");
+
+			const auto sliderStyle = cssDir.absolutePath() + "/SliderStyle.css";
+			const auto scrollAreaStyle = cssDir.absolutePath() + "/ScrollAreaStyle.css";
+
+			auto sliderStyleFile = QFile(sliderStyle);
+			auto scrollAreaStyleFile = QFile(scrollAreaStyle);
+		
+			if (sliderStyleFile.open(QFile::ReadOnly))
+				_sliderStyle = sliderStyleFile.readAll();
+			if (scrollAreaStyleFile.open(QFile::ReadOnly))
+				_scrollAreaStyle = scrollAreaStyleFile.readAll();
+		}
 	} // namespace
 
 	int DevicePixelRatio() {
@@ -74,12 +96,24 @@ namespace style {
 		scaleValue = scale;
 	}
 
-	QSize textSize(const QString& text, const QFontMetrics& metrics) {
+	QSize TextSize(const QString& text, const QFontMetrics& metrics) {
 		return metrics.size(0, text);
 	}
 
-	QSize textSize(const QString& text, const QFont& font) {
-		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
+	QSize TextSize(const QString& text, const QFont& font) {
+		return text.isEmpty() ? QSize{} : TextSize(text, QFontMetrics(font));
+	}
+
+	QString SliderStyle() {
+		if (_sliderStyle.isEmpty())
+			loadStyles();
+		return _sliderStyle;
+	}
+
+	QString ScrollAreaStyle() {
+		if (_scrollAreaStyle.isEmpty())
+			loadStyles();
+		return _scrollAreaStyle;
 	}
 
 	QImage Opaque(QImage&& image) {

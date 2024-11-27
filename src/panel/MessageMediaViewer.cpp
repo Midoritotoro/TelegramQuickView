@@ -170,6 +170,7 @@ void MessageMediaViewer::updateMessageTextView() {
 			- messageTextViewBottomIndent * 2. - videoControlsHeight;
 	}
 
+	_messageTextView->hide();
 	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);
 }
 

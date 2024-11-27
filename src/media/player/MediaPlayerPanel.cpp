@@ -18,21 +18,7 @@
 #include <QScreen>
 
 #include "../ffmpeg/Time.h"
-
-
-namespace  {
-	QSize textSize(const QString& text, const QFontMetrics& metrics) {
-		return metrics.size(0, text);
-	}
-
-	QSize textSize(const QString& text, const QFont& font) {
-		return text.isEmpty() ? QSize{} : textSize(text, QFontMetrics(font));
-	}
-
-	constexpr QMargins mediaPlayerPanelMargins = { 10, 5, 10, 5 };
-	constexpr int mediaPlayerPanelBorderRadius = 10;
-}
-
+#include "../../core/StyleCore.h"
 
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	QWidget(parent)
@@ -42,7 +28,7 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	_mediaPlayerPanelWidth = screenWidth / 4;
 
-	_speedButton = new SpeedButton(this);
+	_speedButton = new SpeedController(parent);
 
 	_videoStateWidget = new VideoStateWidget(this);
 	_volumeToggle = new VolumeController(this);
@@ -58,21 +44,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	_timeLabel->setAttribute(Qt::WA_NoSystemBackground);
 	_remainingTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
 
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../src/css");
-
-	QString sliderStylePath = cssDir.absolutePath() + "/SliderStyle.css";
-
-	QFile sliderStyleFile(sliderStylePath);
-	if (sliderStyleFile.open(QFile::ReadOnly)) {
-
-		QByteArray sliderStyle = sliderStyleFile.readAll();
-
-		_playbackSlider->setStyleSheet(sliderStyle);
-		_volumeSlider->setStyleSheet(sliderStyle);
-
-		sliderStyleFile.close();
-	}
+	_playbackSlider->setStyleSheet(style::SliderStyle());
+	_volumeSlider->setStyleSheet(style::SliderStyle());
 
 	_fullScreenButton->setFixedSize(25, 25);
 	_speedButton->setFixedSize(25, 25);
@@ -88,8 +61,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 
 	connect(_volumeToggle, &QPushButton::clicked, this, [this]() {
 		_volumeToggle->isSpeakerOn() 
-		? setVolume(0)
-		: setVolume(_previousVolumeSliderValue);
+			? setVolume(0)
+			: setVolume(_previousVolumeSliderValue);
 	});
 
 	connect(_volumeSlider, &QSlider::valueChanged, this, &MediaPlayerPanel::setVolume);
@@ -102,18 +75,17 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 
 	connect(_videoStateWidget, &QPushButton::clicked, this, [this]() {
 		switch (_videoStateWidget->state()) {
+			case VideoStateWidget::State::Play:
+				emit videoPlayClicked();
+				break;
 
-		case VideoStateWidget::State::Play:
-			emit videoPlayClicked();
-			break;
+			case VideoStateWidget::State::Pause:
+				emit videoPauseClicked();
+				break;
 
-		case VideoStateWidget::State::Pause:
-			emit videoPauseClicked();
-			break;
-
-		case VideoStateWidget::State::Repeat:
-			emit videoRepeatClicked();
-			break;
+			case VideoStateWidget::State::Repeat:
+				emit videoRepeatClicked();
+				break;
 		}
 		});
 }
@@ -171,15 +143,15 @@ void MediaPlayerPanel::setVolume(int value) {
 }
 
 void MediaPlayerPanel::updateSize() {
-	const auto width = contentLeft() + _mediaPlayerPanelWidth + contentRight();
-	const auto height = contentTop() + contentHeight() + contentBottom();
+	const auto width = style::mediaPlayerPanelMargins.left() + _mediaPlayerPanelWidth + style::mediaPlayerPanelMargins.right();
+	const auto height = style::mediaPlayerPanelMargins.top() + contentHeight() + style::mediaPlayerPanelMargins.bottom();
 
 	resize(width, height);
 }
 
 void MediaPlayerPanel::updateTimeSize() {
-	const auto timeLabelSize = textSize(_timeLabel->text(), _timeLabel->font());
-	const auto remainingTimeLabelSize = textSize(_remainingTimeLabel->text(), _remainingTimeLabel->font());
+	const auto timeLabelSize = style::TextSize(_timeLabel->text(), _timeLabel->font());
+	const auto remainingTimeLabelSize = style::TextSize(_remainingTimeLabel->text(), _remainingTimeLabel->font());
 
 	if (timeLabelSize.isNull() || remainingTimeLabelSize.isNull())
 		return;
@@ -189,26 +161,32 @@ void MediaPlayerPanel::updateTimeSize() {
 }
 
 void MediaPlayerPanel::updateControlsGeometry() {
-	_playbackSlider->resize(width() - _remainingTimeLabel->width() / 2.
-			- _timeLabel->width() / 2., _playbackSlider->height());
+	_playbackSlider->setGeometry(
+		_timeLabel->width() / 2.,
+		height() - style::mediaPlayerPanelMargins.bottom() - _playbackSlider->height(),
+		width() - _remainingTimeLabel->width() / 2. - _timeLabel->width() / 2.,
+		_playbackSlider->height()
+	);
 
-	_playbackSlider->move(_timeLabel->width() / 2.,
-			height() - contentBottom() - _playbackSlider->height());
+	_volumeSlider->setGeometry(
+		style::mediaPlayerPanelMargins.left() * 1.5 + _volumeToggle->width(),
+		_volumeToggle->height() / 2. - style::mediaPlayerPanelMargins.top(),
+		(width() - style::mediaPlayerPanelMargins.left() - style::mediaPlayerPanelMargins.right()) / 5.,
+		_volumeSlider->height()
+	);
 
-	_volumeSlider->resize((width() - contentLeft() - contentRight()) / 5.,
-			_volumeSlider->height());
-	_volumeSlider->move(contentLeft() * 1.5 + _volumeToggle->width(),
-			_volumeToggle->height() / 2. - contentTop());
+	_volumeToggle->move(style::mediaPlayerPanelMargins.left(), style::mediaPlayerPanelMargins.top());
+	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2., style::mediaPlayerPanelMargins.top());
 
-	_volumeToggle->move(contentLeft(), contentTop());
-	_videoStateWidget->move((width() - _videoStateWidget->width()) / 2., contentTop());
+	_timeLabel->move(style::mediaPlayerPanelMargins.left(), height() + style::mediaPlayerPanelMargins.bottom() - _timeLabel->height());
+	_remainingTimeLabel->move(width() + style::mediaPlayerPanelMargins.right() - _remainingTimeLabel->width() / 2.,
+			height() + style::mediaPlayerPanelMargins.bottom() - _remainingTimeLabel->height());
 
-	_timeLabel->move(contentLeft(), height() + contentBottom() - _timeLabel->height());
-	_remainingTimeLabel->move(width() + contentRight() - _remainingTimeLabel->width() / 2.,
-			height() + contentBottom() - _remainingTimeLabel->height());
+	_speedButton->move(
+		parentWidget()->width() - (width() * 1.5) - style::mediaPlayerPanelMargins.right() * 2 - style::mediaPlayerPanelMargins.left(),
+		parentWidget()->height() - height() + style::mediaPlayerPanelMargins.top() * 0.5);
 
-	_speedButton->move(width() - contentRight() - contentLeft() - _speedButton->width() * 2, contentTop());
-	_fullScreenButton->move(width() - contentRight() - _fullScreenButton->width(), contentTop());
+	_fullScreenButton->move(width() - style::mediaPlayerPanelMargins.right() - _fullScreenButton->width(), style::mediaPlayerPanelMargins.top());
 }
 
 void MediaPlayerPanel::drawRoundedCorners(QPainter& painter, int borderRadius) {
@@ -240,7 +218,7 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 	painter.setBrush(Qt::black);
 	painter.setPen(Qt::NoPen);
 
-	drawRoundedCorners(painter, mediaPlayerPanelBorderRadius);
+	drawRoundedCorners(painter, style::mediaPlayerPanelBorderRadius);
 }
 
 void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
@@ -252,23 +230,7 @@ void MediaPlayerPanel::mousePressEvent(QMouseEvent* event) {
 	event->accept();
 }
 
-int MediaPlayerPanel::contentLeft() const noexcept {
-	return mediaPlayerPanelMargins.left();
-}
-
-int MediaPlayerPanel::contentTop() const noexcept {
-	return mediaPlayerPanelMargins.top();
-}
-
-int MediaPlayerPanel::contentRight() const noexcept {
-	return mediaPlayerPanelMargins.right();
-}
-
-int MediaPlayerPanel::contentBottom() const noexcept {
-	return mediaPlayerPanelMargins.bottom();
-}
-
 int MediaPlayerPanel::contentHeight() const noexcept {
 	return _videoStateWidget->height() + _playbackSlider->height()
-		+ contentTop() + contentBottom();
+		+ style::mediaPlayerPanelMargins.top() + style::mediaPlayerPanelMargins.bottom();
 }

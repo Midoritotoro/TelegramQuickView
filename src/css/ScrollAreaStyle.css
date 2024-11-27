@@ -17,12 +17,12 @@ QScrollBar {
         background: rgb(79,85,92);
     }
 
-        QScrollBar::handle:vertical {
-            width: 6px;
-            border: 5px;
-            border-radius: 3px;
-            min-height: 10px;
-        }
+    QScrollBar::handle:vertical {
+        width: 6px;
+        border: 5px;
+        border-radius: 3px;
+        min-height: 10px;
+    }
 
     QScrollBar::add-line {
         border: 5px;

@@ -31,13 +31,6 @@ std::unique_ptr<Application> Application::Create(int argc, char* argv[]) {
 }
 
 void Application::init() {
-    setlocale(LC_ALL, "");
-
-    const auto ratio = devicePixelRatio();
-    const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
-
-    style::SetDevicePixelRatio(useRatio);
-
 #ifdef Q_OS_WIN
     if (!IS_MINIMUM_WINDOWS_VERSION)
         ExitProcess(1);
@@ -46,4 +39,13 @@ void Application::init() {
         ExitProcess(1);
 
 #endif // Q_OS_WIN
+
+    setlocale(LC_ALL, "");
+
+    const auto ratio = devicePixelRatio();
+    const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
+
+    style::SetDevicePixelRatio(useRatio);
+
+    setFont(QFont("OpenSans-SemiBoldItalic", 10));
 }

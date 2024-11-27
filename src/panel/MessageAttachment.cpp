@@ -65,16 +65,14 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 }
 
 void MessageAttachment::paintAttachmentCount(QPainter& painter) {
-	QFont font("Arial", 16);
-
 	const auto attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
-	const auto attachmentsCountTextSize = style::textSize(attachmentsCountText, font);
+	const auto attachmentsCountTextSize = style::TextSize(attachmentsCountText, font());
 
 	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
 	attachmentsCountTextRect.moveCenter(rect().center());
 
 	painter.setPen(Qt::white);
-	painter.setFont(font);
+	painter.setFont(font());
 
 	painter.setOpacity(1.0);
 	painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);

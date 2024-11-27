@@ -8,7 +8,7 @@
 
 class VolumeController;
 class FullScreenButton;
-class SpeedButton;
+class SpeedController;
 
 
 class MediaPlayerPanel: public QWidget {
@@ -19,7 +19,7 @@ private:
 	QLabel* _timeLabel = nullptr, *_remainingTimeLabel = nullptr;
 
 	FullScreenButton *_fullScreenButton = nullptr;
-	SpeedButton* _speedButton = nullptr;
+	SpeedController* _speedButton = nullptr;
 
 	QString _fullScreenToImagePath;
 
@@ -55,12 +55,6 @@ private:
 	void updateTimeSize();
 
 	void updateControlsGeometry();
-
-	int contentLeft() const noexcept;
-	int contentTop() const noexcept;
-
-	int contentRight() const noexcept;
-	int contentBottom() const noexcept;
 
 	int contentHeight() const noexcept;
 };

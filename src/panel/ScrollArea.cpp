@@ -25,6 +25,8 @@ ScrollArea::ScrollArea(QWidget* parent):
 	connect(verticalScrollBar(), &QAbstractSlider::valueChanged, this, &ScrollArea::scrolled);
 	connect(verticalScrollBar(), &QAbstractSlider::rangeChanged, this, &ScrollArea::scrolled);
 
+	setStyleSheet(style::ScrollAreaStyle());
+
 	_verticalValue = verticalScrollBar()->value();
 }
 
@@ -142,12 +144,10 @@ void ScrollArea::setOpacity(double opacity) {
 void ScrollArea::paintEvent(QPaintEvent* event) {
 	QPainter painter(viewport());
 
-	if (_opacity > 0) {
-		painter.setPen(Qt::black);
-		painter.setBrush(Qt::black);
-	}
+	painter.setPen(Qt::black);
+	painter.setBrush(Qt::black);
+	
 	painter.setOpacity(_opacity);
-
 	painter.drawRect(rect());
 }
 

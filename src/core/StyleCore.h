@@ -9,6 +9,10 @@
 #include <QFontMetrics>
 
 namespace style {
+	inline constexpr QMargins mediaPlayerPanelMargins = { 
+		10, 5, 10, 5 
+	};
+	inline constexpr auto mediaPlayerPanelBorderRadius = 10;
 
 	inline constexpr auto kScaleMin = 50;
 	inline constexpr auto kScaleMax = 300;
@@ -20,8 +24,11 @@ namespace style {
 	[[nodiscard]] int Scale();
 	void SetScale(int scale);
 
-	[[nodiscard]] QSize textSize(const QString& text, const QFontMetrics& metrics);
-	[[nodiscard]] QSize textSize(const QString& text, const QFont& font);
+	[[nodiscard]] QSize TextSize(const QString& text, const QFontMetrics& metrics);
+	[[nodiscard]] QSize TextSize(const QString& text, const QFont& font);
+
+	[[nodicard]] QString SliderStyle();
+	[[nodiscard]] QString ScrollAreaStyle();
 
 	[[nodiscard]] QImage Opaque(QImage&& image);
 

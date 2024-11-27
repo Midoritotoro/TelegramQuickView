@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QPushButton>
 
 #include "EnhancedSlider.h"
 
@@ -8,16 +9,17 @@
 class SpeedButtonOverlay: public QWidget {
 	Q_OBJECT
 private:
-	EnhancedSlider* _speedController = nullptr;
+	EnhancedSlider* _speedSlider = nullptr;
 	float _speed = 1.0f;
 public:
 	SpeedButtonOverlay(QWidget* parent = nullptr);
 protected:
 	void paintEvent(QPaintEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
 };
 
 
-class SpeedButton: public QWidget {
+class SpeedController: public QPushButton {
 	Q_OBJECT
 private:
 	SpeedButtonOverlay* _overlay = nullptr;
@@ -25,9 +27,10 @@ private:
 	QString _speedButtonImagePath;
 	QPixmap _currentPixmap;
 public:
-	SpeedButton(QWidget* parent = nullptr);
+	SpeedController(QWidget* parent = nullptr);
 protected:
 	void paintEvent(QPaintEvent* event) override;
-	void mouseMoveEvent(QMouseEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
+
+	bool eventFilter(QObject* sender, QEvent* event) override;
 };

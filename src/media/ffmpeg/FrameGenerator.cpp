@@ -181,8 +181,8 @@ FrameGenerator::Frame FrameGenerator::renderNext(
 	QSize size,
 	Qt::AspectRatioMode mode,
 	bool fullScreen) {
-	const auto ms = Time::now();
-	const auto time = Guard::finally([&ms] { qDebug() << "renderNext: " << Time::now() - ms << " ms"; });
+//	const auto ms = Time::now();
+	//const auto time = Guard::finally([&ms] { qDebug() << "renderNext: " << Time::now() - ms << " ms"; });
 
 	if (!_codec)
 		return {};

@@ -43,7 +43,6 @@ void Manager::cleanUp() {
 		_audioReader = nullptr;
 	}
 
-
 	if (_thread->isRunning())
 		_thread->quit();
 
@@ -91,8 +90,8 @@ void Manager::process() {
 		auto nowMs = Time::now() - ms;
 		const auto timeout = qMax(1, _frameGenerator->frameDelay() - nowMs);
 
-		qDebug() << "_frameGenerator->frameDelay(): " << _frameGenerator->frameDelay();
-		qDebug() << timeout;
+		//qDebug() << "_frameGenerator->frameDelay(): " << _frameGenerator->frameDelay();
+		//qDebug() << timeout;
 
 		_timer.start(timeout);
 	}

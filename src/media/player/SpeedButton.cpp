@@ -11,7 +11,8 @@
 SpeedButtonOverlay::SpeedButtonOverlay(QWidget* parent):
 	QWidget(parent)
 {
-	_speedController = new EnhancedSlider(this);
+	_speedSlider = new EnhancedSlider(this);
+	_speedSlider->setStyleSheet(style::SliderStyle());
 }
 
 void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
@@ -23,7 +24,7 @@ void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
 
 	painter.drawRect(rect());
 
-	QFont font("Arial", 16);
+	/*QFont font("Arial", 16);
 	const auto speedTextSize = style::textSize(QString::number(_speed), font);
 
 	QRect speedTextRect(QPoint(), speedTextSize);
@@ -32,16 +33,25 @@ void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::white);
 	painter.setFont(font);
 
-	painter.drawText(speedTextRect, Qt::AlignCenter, QString::number(_speed));
+	painter.drawText(speedTextRect, Qt::AlignCenter, QString::number(_speed));*/
 }
 
-SpeedButton::SpeedButton(QWidget* parent) :
-	QWidget(parent)
+void SpeedButtonOverlay::resizeEvent(QResizeEvent* event) {
+	_speedSlider->setGeometry(
+		(width() - _speedSlider->width()) / 2.,
+		(height() - _speedSlider->height()) / 2.,
+		width(),
+		height()
+	);
+}
+
+SpeedController::SpeedController(QWidget* parent):
+	QPushButton(parent)
 {
 	_overlay = new SpeedButtonOverlay(parent);
 	_overlay->resize(100, 30);
 
-	setMouseTracking(true);
+	_overlay->hide();
 
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir assetsDir(currentPath + "/../../assets/images");
@@ -52,7 +62,7 @@ SpeedButton::SpeedButton(QWidget* parent) :
 	setCursor(Qt::PointingHandCursor);
 }
 
-void SpeedButton::paintEvent(QPaintEvent* event) {
+void SpeedController::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
@@ -76,30 +86,39 @@ void SpeedButton::paintEvent(QPaintEvent* event) {
 	painter.drawPixmap(0, 0, _currentPixmap);
 }
 
-void SpeedButton::mouseMoveEvent(QMouseEvent* event) {
-	if (!rect().contains(event->pos())) {
-		_overlay->hide();
-		return;
-	}
+void SpeedController::mousePressEvent(QMouseEvent* event) {
+	_overlay->isHidden()
+		? _overlay->show()
+		: _overlay->hide();
 
-	_overlay->show();
+	_overlay->move(
+		width() - _overlay->width() + x(),
+		height() - _overlay->height() + y() - 
+		style::mediaPlayerPanelMargins.top() * 2. -
+		style::mediaPlayerPanelMargins.bottom() * 2.
+	);
 
-	const auto overlayX = x() + width() - _overlay->width();
-	const auto overlayY = y() + height() - _overlay->height();
-
-	_overlay->move(overlayX, overlayY);
+	_overlay->raise();
 }
 
-void SpeedButton::mousePressEvent(QMouseEvent* event) {
-	if (!_overlay->rect().contains(event->pos())) {
-		_overlay->hide();
-		return;
-	}
+bool SpeedController::eventFilter(QObject* sender, QEvent* event) {
+	qDebug() << "SpeedButton::eventFilter";
+	switch (event->type()) {
+		case QEvent::Enter:
+			_overlay->show();
 
-	_overlay->show();
+			_overlay->move(
+				width() - _overlay->width() + x(),
+				height() - _overlay->height() + y() - 
+				style::mediaPlayerPanelMargins.top() * 2. - 
+				style::mediaPlayerPanelMargins.bottom() * 2.
+			);
+			return true;
 
-	const auto overlayX = x() + width() - _overlay->width();
-	const auto overlayY = y() + height() - _overlay->height();
+		case QEvent::Leave:
+			_overlay->hide();
+			return true;
+		}
 
-	_overlay->move(overlayX, overlayY);
+	return QPushButton::eventFilter(sender, event);
 }

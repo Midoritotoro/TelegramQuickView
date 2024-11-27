@@ -26,6 +26,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
 	_panelWidth = screenWidth / 3.5;
+
 	resize(_panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
@@ -53,34 +54,9 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 
 	chatScrollAreaWidget->setMouseTracking(true);
 
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../src/css");
-
-	QString chatScrollAreaStylePath = cssDir.absolutePath() + "/ChatScrollAreaStyle.css";
-
-	QFile chatScrollAreaStyleFile(chatScrollAreaStylePath);
-	if (chatScrollAreaStyleFile.open(QFile::ReadOnly)) {
-
-		QByteArray chatScrollAreaStyle = chatScrollAreaStyleFile.readAll();
-		_chatScrollArea->setStyleSheet(chatScrollAreaStyle);
-
-		chatScrollAreaStyleFile.close();
-	}
-
-
 	QGridLayout* grid = new QGridLayout(this);
 
 	grid->setVerticalSpacing(0);
-
-	setWindowFlag(Qt::FramelessWindowHint);
-	setAttribute(Qt::WA_TranslucentBackground);
-
-	setStyleSheet(QString::fromUtf8("QWidget { background-color: rgba(0, 0, 0, 0); }\n"
-		"*{\n"
-		"font-size: 14px;\n"
-		"}\n"));
-
-	setContentsMargins(0, 0, 0, 0);
 
 	grid->setContentsMargins(0, 0, 5, 4);
 	grid->setVerticalSpacing(4);
@@ -90,6 +66,15 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 
 	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
 	WidgetsHider* widgetsHider = new WidgetsHider(true, true, widgetsList);
+
+	setStyleSheet(QString::fromUtf8("QWidget {\n"
+		"background-color: rgba(0, 0, 0, 0); }\n"
+	));
+
+	setWindowFlag(Qt::FramelessWindowHint);
+	setAttribute(Qt::WA_TranslucentBackground);
+
+	setContentsMargins(0, 0, 0, 0);
 
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
