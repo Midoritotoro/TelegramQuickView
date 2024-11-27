@@ -13,6 +13,8 @@ private:
 	float _speed = 1.0f;
 public:
 	SpeedButtonOverlay(QWidget* parent = nullptr);
+	
+	[[nodiscard]] float speed() const noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;

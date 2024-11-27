@@ -14,7 +14,6 @@ class MessageMediaViewer;
 class TelegramPostQuickView: public QWidget {
 	Q_OBJECT
 private:
-	int _panelWidth;
 	MessageWidget::MessageMediaDisplayMode _displayMode;
 
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;

@@ -5,7 +5,7 @@
 
 class ScrollArea: public QScrollArea {
 public:
-	ScrollArea(QWidget* parent);
+	ScrollArea(QWidget* parent = nullptr);
 
 	int scrollHeight() const;
 	int scrollTopMax() const;

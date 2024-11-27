@@ -4,7 +4,10 @@
 
 #include <QDir>
 #include <QCoreApplication>
+
+#include <QApplication>
 #include <QPainter>
+#include <QScreen>
 
 #include <QMouseEvent>
 
@@ -12,7 +15,20 @@ SpeedButtonOverlay::SpeedButtonOverlay(QWidget* parent):
 	QWidget(parent)
 {
 	_speedSlider = new EnhancedSlider(this);
+
+	_speedSlider->setValue(_speed);
+	_speedSlider->setMaximum(20);
+
 	_speedSlider->setStyleSheet(style::SliderStyle());
+	_speedSlider->setFixedHeight(style::sliderHeight);
+
+	connect(_speedSlider, &QAbstractSlider::valueChanged, [this](int value) {
+		_speed = static_cast<float>(value) / 10;
+	});
+}
+
+float SpeedButtonOverlay::speed() const noexcept {
+	return _speed;
 }
 
 void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
@@ -20,38 +36,42 @@ void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
 	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::black);
+	painter.setBrush(Qt::gray);
 
 	painter.drawRect(rect());
 
-	/*QFont font("Arial", 16);
-	const auto speedTextSize = style::textSize(QString::number(_speed), font);
+	QFont font("Arial", 16);
 
-	QRect speedTextRect(QPoint(), speedTextSize);
-	speedTextRect.moveCenter(rect().center());
+	auto speedTextRect = QRect(QPoint(), style::TextSize(QString::number(_speed), font));
+	speedTextRect.moveTo(QPoint(style::mediaPlayerPanelMargins.left() * 0.5,
+		(height() - speedTextRect.height()) / 2.));
 
 	painter.setPen(Qt::white);
 	painter.setFont(font);
 
-	painter.drawText(speedTextRect, Qt::AlignCenter, QString::number(_speed));*/
+	painter.drawText(speedTextRect, Qt::AlignCenter, QString::number(_speed));
 }
 
 void SpeedButtonOverlay::resizeEvent(QResizeEvent* event) {
 	_speedSlider->setGeometry(
-		(width() - _speedSlider->width()) / 2.,
+		(width() - _speedSlider->width() - style::mediaPlayerPanelMargins.left() - style::mediaPlayerPanelMargins.right()) / 2.,
 		(height() - _speedSlider->height()) / 2.,
-		width(),
+		width() - style::mediaPlayerPanelMargins.left() - style::mediaPlayerPanelMargins.right() * 0.5,
 		height()
 	);
+
+	qDebug() << "ResizeEvent: " << width() << height() << _speedSlider->size() << _speedSlider->pos();
 }
 
 SpeedController::SpeedController(QWidget* parent):
 	QPushButton(parent)
 {
 	_overlay = new SpeedButtonOverlay(parent);
-	_overlay->resize(100, 30);
-
 	_overlay->hide();
+
+	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
+
+	_overlay->resize(screenWidth / 12., 30);
 
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir assetsDir(currentPath + "/../../assets/images");
@@ -102,7 +122,6 @@ void SpeedController::mousePressEvent(QMouseEvent* event) {
 }
 
 bool SpeedController::eventFilter(QObject* sender, QEvent* event) {
-	qDebug() << "SpeedButton::eventFilter";
 	switch (event->type()) {
 		case QEvent::Enter:
 			_overlay->show();

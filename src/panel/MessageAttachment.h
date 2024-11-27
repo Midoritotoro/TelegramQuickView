@@ -18,9 +18,7 @@ public:
 		Unknown
 	};
 
-	MessageAttachment(QString attachmentPath, int attachmentWidth, MessageWidget* parentMessage);
-
-	[[nodiscard]] static QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth);
+	MessageAttachment(MessageWidget* parentMessage, QString attachmentPath);
 
 	inline void setParentMessage(MessageWidget* parentMessage);
 
@@ -42,10 +40,4 @@ private:
 	AttachmentType _attachmentType;
 
 	MessageWidget* _parentMessage = nullptr;
-	QSize _attachmentPreviewSize;
-
-	int _attachmentWidth = 0;
 };
-
-// 44.3 мЅ - 1000 сообщений без вложений
-// 1376 мЅ - 1000 сообщений с вложени€ми

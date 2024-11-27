@@ -53,8 +53,8 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	_videoStateWidget->setFixedSize(30, 30);
 	_volumeToggle->setFixedSize(25, 25);
 
-	_volumeSlider->setFixedHeight(20);
-	_playbackSlider->setFixedHeight(20);
+	_volumeSlider->setFixedHeight(style::sliderHeight);
+	_playbackSlider->setFixedHeight(style::sliderHeight);
 
 	updateSize();
 	updateControlsGeometry();

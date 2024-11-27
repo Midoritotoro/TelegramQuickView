@@ -13,11 +13,14 @@ namespace
 {
     inline constexpr int kBorderWidth = 2;
     inline constexpr int kSpacing = 8;
+
     inline constexpr qreal kMenuButtonAngle = qDegreesToRadians(qreal(42));
     inline constexpr qreal kBadgeAngle = kMenuButtonAngle;
+
     inline constexpr QMargins kBorderMargins{ kBorderWidth, kBorderWidth, kBorderWidth, kBorderWidth };
     inline constexpr QMargins kButtonMargins{ 4, 8, 4, 4 };
     inline constexpr QMargins kIconMargins{ 8, 8, 8, 8 };
+
     inline constexpr QSize kBadgeSize{ 12, 12 };
     inline constexpr QSize kMenuButtonSize{ 14, 14 };
 

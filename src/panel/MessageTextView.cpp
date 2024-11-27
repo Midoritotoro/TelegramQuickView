@@ -17,6 +17,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 	QWidget(parent)
 {
 	setContentsMargins(0, 0, 0, 0);
+
 	setAttribute(Qt::WA_TransparentForMouseEvents);
 	setAttribute(Qt::WA_NoSystemBackground);
 

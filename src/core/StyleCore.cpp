@@ -70,13 +70,15 @@ namespace style {
 			const auto sliderStyle = cssDir.absolutePath() + "/SliderStyle.css";
 			const auto scrollAreaStyle = cssDir.absolutePath() + "/ScrollAreaStyle.css";
 
-			auto sliderStyleFile = QFile(sliderStyle);
-			auto scrollAreaStyleFile = QFile(scrollAreaStyle);
+			auto file = QFile(sliderStyle);
 		
-			if (sliderStyleFile.open(QFile::ReadOnly))
-				_sliderStyle = sliderStyleFile.readAll();
-			if (scrollAreaStyleFile.open(QFile::ReadOnly))
-				_scrollAreaStyle = scrollAreaStyleFile.readAll();
+			if (file.open(QFile::ReadOnly))
+				_sliderStyle = file.readAll();
+
+			file.setFileName(scrollAreaStyle);
+
+			if (file.open(QFile::ReadOnly))
+				_scrollAreaStyle = file.readAll();
 		}
 	} // namespace
 
@@ -136,6 +138,10 @@ namespace style {
 			}
 		}
 		return std::move(image);
+	}
+
+	QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth) {
+		return QSize(targetWidth, targetWidth * imageSize.height() / imageSize.width());
 	}
 
 	QImage Prepare(

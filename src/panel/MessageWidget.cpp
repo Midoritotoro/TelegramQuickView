@@ -7,8 +7,8 @@
 MessageWidget::MessageWidget(
 	QWidget* parent
 ):
-QWidget(parent)
-, _mediaDisplayMode(MessageMediaDisplayMode::Stack)
+	QWidget(parent)
+	, _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
 	_messageLayout = new QGridLayout(this);
 
@@ -56,7 +56,7 @@ void MessageWidget::addMessageText(const QString& text) {
 	_messageLayout->addWidget(textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 }
 
-void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths, int maximumMessageWidth) {
+void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths) {
 	if (attachmentsPaths.length() == 0)
 		return;
 
@@ -64,7 +64,7 @@ void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths, i
 
 	case MessageMediaDisplayMode::PreviewWithCount:
 		foreach(const auto& path, attachmentsPaths) {
-			MessageAttachment* messageAttachment = new MessageAttachment(path, maximumMessageWidth, this);
+			auto messageAttachment = new MessageAttachment(this, path);
 			messageAttachment->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 			if (_messageLayout->rowCount() <= 1)
@@ -77,7 +77,7 @@ void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths, i
 
 	case MessageMediaDisplayMode::Stack:
 		foreach(const auto& path, attachmentsPaths) {
-			MessageAttachment* messageAttachment = new MessageAttachment(path, maximumMessageWidth, this);
+			auto messageAttachment = new MessageAttachment(this, path);
 			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
 			_attachments.append(messageAttachment);

@@ -13,6 +13,8 @@ namespace style {
 		10, 5, 10, 5 
 	};
 	inline constexpr auto mediaPlayerPanelBorderRadius = 10;
+	inline auto maximumMessageWidth = 0;
+	inline constexpr auto sliderHeight = 20;
 
 	inline constexpr auto kScaleMin = 50;
 	inline constexpr auto kScaleMax = 300;
@@ -31,6 +33,7 @@ namespace style {
 	[[nodiscard]] QString ScrollAreaStyle();
 
 	[[nodiscard]] QImage Opaque(QImage&& image);
+	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth);
 
 	template <typename T>
 	[[nodiscard]] inline T ConvertScale(T value, int scale) {

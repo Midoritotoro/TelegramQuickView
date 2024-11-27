@@ -1,6 +1,8 @@
 ﻿#include "TelegramPostQuickView.h"
 
 #include "../media/player/WidgetsHider.h"
+#include "../core/StyleCore.h"
+
 #include "MessageAttachment.h"
 #include "MessageMediaViewer.h"
 
@@ -25,9 +27,11 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
-	_panelWidth = screenWidth / 3.5;
+	const auto panelWidth = (screenWidth / 3.5);
 
-	resize(_panelWidth, screenHeight);
+	style::maximumMessageWidth = panelWidth - (width() / 12.5);
+
+	resize(panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
 	QWidget* chatScrollAreaWidget = new QWidget();
@@ -89,11 +93,10 @@ void TelegramPostQuickView::makeMessage(const QString& messageText, const QStrin
 	auto ms = Time::now();
 	const auto timer = Guard::finally([&ms] { qDebug() << "TelegramPostQuickView::makeMessage: " << Time::now() - ms << " ms";  });
 
-	const auto maximumMessageWidth = _panelWidth - (width() / 12.5);
-	MessageWidget* message = new MessageWidget();
+	auto message = new MessageWidget();
 
 	message->setMessageMediaDisplayMode(_displayMode);
-	message->addMessageAttachments(attachmentsPaths, maximumMessageWidth);
+	message->addMessageAttachments(attachmentsPaths);
 	message->addMessageText(messageText);
 
 	_chatScrollAreaLayout->addWidget(message, 0, Qt::AlignLeft | Qt::AlignTop);
@@ -114,6 +117,9 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 
 void TelegramPostQuickView::attachmentCliked() {
 	MessageAttachment* attachment = (MessageAttachment*)sender();
+
+	if (_messageMediaViewer == nullptr)
+		_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
 
 	_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
 	_messageMediaViewer->show();

@@ -24,7 +24,7 @@ public:
 	MessageWidget(QWidget* parent = nullptr);
 
 	void addMessageText(const QString& text);
-	void addMessageAttachments(const QStringList& attachmentsPaths, int maximumMessageWidth);
+	void addMessageAttachments(const QStringList& attachmentsPaths);
 
 	void setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode);
 

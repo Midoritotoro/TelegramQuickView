@@ -14,23 +14,18 @@
 #include "../core/StyleCore.h"
 
 MessageAttachment::MessageAttachment(
-	QString attachmentPath,
-	int attachmentWidth,
-	MessageWidget* parentMessage
+	MessageWidget* parentMessage, 
+	QString attachmentPath
 )
-	: ClickableLabel(nullptr)
+	: ClickableLabel()
 	, _attachmentPath(attachmentPath)
 	, _attachmentType(detectMediaType(attachmentPath))
 	, _parentMessage(parentMessage)
-	, _attachmentWidth(attachmentWidth)
 {
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TranslucentBackground);
-	setCursor(Qt::PointingHandCursor);
-}
 
-QSize MessageAttachment::getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
-	return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
+	setCursor(Qt::PointingHandCursor);
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
@@ -79,9 +74,9 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 }
 
 QPixmap MessageAttachment::preparePreview() {
-	QPixmap preview;
+	auto preview = QPixmap();
+	const auto key = _attachmentPath;
 
-	QString key = _attachmentPath;
 	if (QPixmapCache::find(key, &preview)) 
 		return preview;
 	else {
@@ -94,30 +89,35 @@ QPixmap MessageAttachment::preparePreview() {
 			Qt::SmoothTransformation);
 
 		image = style::Opaque(std::move(image));
+
 		preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
 		preview.setDevicePixelRatio(style::DevicePixelRatio());
 
 		if (QPixmapCache::cacheLimit() > 0)
 			QPixmapCache::insert(key, preview);
 	}
+
 	return preview;
-	
 }
 
 void MessageAttachment::updateSize() {
-	QSize size;
-
 	switch (_attachmentType) {
 		case AttachmentType::Photo:
-			size = getMinimumSizeWithAspectRatio(QPixmap(_attachmentPath).size(), _attachmentWidth);
+			setFixedSize(
+				style::getMinimumSizeWithAspectRatio(
+					QPixmap(_attachmentPath).size(),
+					style::maximumMessageWidth)
+			);
 			break;
 
 		case AttachmentType::Video:
-			size = getMinimumSizeWithAspectRatio(QSize(100, 100), _attachmentWidth);
+			setFixedSize(
+				style::getMinimumSizeWithAspectRatio(
+					QSize(100, 100),
+					style::maximumMessageWidth)
+			);
 			break;
 	}
-
-	setFixedSize(size);
 }
 
 inline void MessageAttachment::setParentMessage(MessageWidget* parentMessage) {
