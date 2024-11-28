@@ -3,15 +3,20 @@
 
 #include <QFontMetrics>
 #include <QImage>
+
 #include <QMimeDatabase>
 #include <QPainter>
+
 #include <QPaintEvent>
 #include <QResizeEvent>
+
 #include <QUrl>
 #include <QPixmapCache>
 
 #include "../core/StyleCore.h"
-#include "../media/ffmpeg/ThumbnailGenerator.h"
+
+#include "../media/ffmpeg/Guard.h"
+#include "../core/Time.h"
 
 
 MessageAttachment::MessageAttachment(
@@ -30,12 +35,16 @@ MessageAttachment::MessageAttachment(
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
-	const auto _preview = preparePreview();
+	const auto _preview = style::GenerateThumbnail(_attachmentPath, size());
 	if (_preview.isNull())
 		return;
 
 	QPainter painter(this);
-	style::RoundTopCorners(painter, size(), 10);
+
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
+	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+	style::RoundTopCorners(painter, size(), 15);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 		case MessageWidget::MessageMediaDisplayMode::Stack:
@@ -62,7 +71,7 @@ void MessageAttachment::resizeEvent(QResizeEvent* event) {
 }
 
 void MessageAttachment::paintAttachmentCount(QPainter& painter) {
-	const auto attachmentsCountText = "+ " + QString::number(_parentMessage->attachmentsLength() - 1);
+	const auto attachmentsCountText = "+" + QString::number(_parentMessage->attachmentsLength() - 1);
 	const auto attachmentsCountTextSize = style::TextSize(attachmentsCountText, font());
 
 	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
@@ -75,64 +84,12 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 	painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
 }
 
-QPixmap MessageAttachment::preparePreview() {
-	auto currentTime = Time::now();
-	const auto timer = Guard::finally([&currentTime] { qDebug() << "MessageAttachment::preparePreview(): " << Time::now() - currentTime << " ms";  });
-
-	auto preview = QPixmap();
-	const auto key = _attachmentPath;
-
-	if (QPixmapCache::find(key, &preview)) 
-		return preview;
-	else {
-		auto image = QImage();
-
-		switch (_attachmentType) {
-			case AttachmentType::Photo:
-				image = style::Prepare(QImage(_attachmentPath), size());
-				break;
-
-			case AttachmentType::Video:
-				image = style::Prepare(ThumbnailGenerator::Generate(_attachmentPath), size());
-				break;
-		}
-
-		image = std::move(image).scaled(
-			image.width() * style::DevicePixelRatio(),
-			image.height() * style::DevicePixelRatio(),
-			Qt::IgnoreAspectRatio,
-			Qt::SmoothTransformation);
-
-		image = style::Opaque(std::move(image));
-
-		preview = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-		preview.setDevicePixelRatio(style::DevicePixelRatio());
-
-		if (QPixmapCache::cacheLimit() > 0)
-			QPixmapCache::insert(key, preview);
-		}
-
-	return preview;
-}
-
 void MessageAttachment::updateSize() {
-	switch (_attachmentType) {
-		case AttachmentType::Photo:
-			setFixedSize(
-				style::getMinimumSizeWithAspectRatio(
-					QPixmap(_attachmentPath).size(),
-					style::maximumMessageWidth)
-			);
-			break;
-
-		case AttachmentType::Video:
-			setFixedSize(
-				style::getMinimumSizeWithAspectRatio(
-					ThumbnailGenerator::Generate(_attachmentPath).size(),
-					style::maximumMessageWidth)
-			);
-			break;
-	}
+	setFixedSize(
+		style::getMinimumSizeWithAspectRatio(
+			style::GenerateThumbnail(_attachmentPath).size(),
+			style::maximumMessageWidth)
+	);
 }
 
 inline void MessageAttachment::setParentMessage(MessageWidget* parentMessage) {

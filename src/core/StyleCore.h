@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include <QFontMetrics>
+#include <QPixmapCache>
 
 namespace style {
 	inline constexpr QMargins mediaPlayerPanelMargins = { 
@@ -37,6 +38,8 @@ namespace style {
 
 	[[nodiscard]] QImage Opaque(QImage&& image);
 	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth);
+
+	[[nodiscard]] QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize = QSize());
 
 	void RoundCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
 	void RoundTopCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);

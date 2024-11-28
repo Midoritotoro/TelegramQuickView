@@ -29,7 +29,7 @@ MediaPlayer::MediaPlayer(QWidget* parent):
 	, _manager(std::make_unique<Manager>())
 {
 	_mediaPlayerPanel = new MediaPlayerPanel(this);
-	_widgetsHider = std::make_unique<WidgetsHider>(false, true, QWidgetList({ _mediaPlayerPanel }));
+	_widgetsHider = std::make_unique<WidgetsHider>(false, true, QWidgetList({ _mediaPlayerPanel, _mediaPlayerPanel->speedController() }));
 
 	_widgetsHider->SetInactivityDuration(3000);
 	_widgetsHider->SetAnimationDuration(3000);
@@ -90,7 +90,7 @@ MediaPlayer::MediaPlayer(QWidget* parent):
 	connect(_mediaPlayerPanel->playbackSlider(), &QSlider::valueChanged, _manager.get(), &Manager::rewind);
 	connect(_mediaPlayerPanel, &MediaPlayerPanel::needsChangeVolume, this, &MediaPlayer::changeVolume);
 
-	connect(_mediaPlayerPanel, &MediaPlayerPanel::needsChangeSpeed, _manager.get(), &Manager::setSpeed);
+	connect(_mediaPlayerPanel->speedController(), &SpeedController::speedChanged, _manager.get(), &Manager::setSpeed);
 
 	_mediaPlayerPanel->setVolume(20);
 
@@ -197,9 +197,6 @@ void MediaPlayer::rewind(Time::time positionMs) {
 }
 
 void MediaPlayer::cleanUp() {
-	_currentFrameRect = QRect();
-	_current = QImage();
-
 	QMetaObject::invokeMethod(_manager.get(), "cleanUp", Qt::QueuedConnection);
 }
 
@@ -249,19 +246,29 @@ void MediaPlayer::updatePanelVisibility() {
 	switch (_currentMediaType) {
 	case MediaType::Video:
 		_widgetsHider->addWidget(_mediaPlayerPanel);
-		_widgetsHider->resetTimer();
+		_widgetsHider->addWidget(_mediaPlayerPanel->speedController());
 
+		_widgetsHider->resetTimer();
 		_mediaPlayerPanel->show();
+
 		break;
 
 	case MediaType::Image:
 		_widgetsHider->removeWidget(_mediaPlayerPanel);
-		_widgetsHider->resetTimer();
+		_widgetsHider->removeWidget(_mediaPlayerPanel->speedController());
 
+		_widgetsHider->resetTimer();
 		_mediaPlayerPanel->hide();
+
 		break;
 
 	case MediaType::Audio:
+		_widgetsHider->addWidget(_mediaPlayerPanel);
+		_widgetsHider->addWidget(_mediaPlayerPanel->speedController());
+
+		_widgetsHider->resetTimer();
+		_mediaPlayerPanel->show();
+
 		break;
 	}
 }

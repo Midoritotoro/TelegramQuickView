@@ -2,6 +2,7 @@
 
 #include "core/AutoRunUtils.h"
 #include "core/StyleCore.h"
+
 #include "src/panel/TelegramPostQuickView.h"
 
 
@@ -71,5 +72,6 @@ void Application::init() {
 
     style::SetDevicePixelRatio(useRatio);
 
-    setFont(QFont("OpenSans-SemiBoldItalic", 10));
+    QPixmapCache::setCacheLimit(100);
+    setFont(QFont("OpenSans-Italic", 10));
 }

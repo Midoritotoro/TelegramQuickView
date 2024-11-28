@@ -2,7 +2,6 @@
 
 #include "VolumeController.h"
 #include "FullScreenButton.h"
-#include "SpeedButton.h"
 
 #include <QPaintEvent>
 #include <QMargins>
@@ -17,8 +16,9 @@
 #include <QApplication>
 #include <QScreen>
 
-#include "../ffmpeg/Time.h"
+#include "../../core/Time.h"
 #include "../../core/StyleCore.h"
+
 
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	QWidget(parent)
@@ -40,12 +40,6 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 	_remainingTimeLabel = new QLabel(this);
 
 	_fullScreenButton = new FullScreenButton(this);
-
-	_speedButton->setCallback(
-		[this](float speed) { 
-			return emit needsChangeSpeed(speed);
-		}
-	);
 
 	_timeLabel->setAttribute(Qt::WA_NoSystemBackground);
 	_remainingTimeLabel->setAttribute(Qt::WA_NoSystemBackground);
@@ -121,12 +115,12 @@ void MediaPlayerPanel::updateStateWidget(VideoStateWidget::State state) {
 	_videoStateWidget->setState(state);
 }
 
-EnhancedSlider* MediaPlayerPanel::volumeSlider() const noexcept {
-	return _volumeSlider;
-}
-
 EnhancedSlider* MediaPlayerPanel::playbackSlider() const noexcept {
 	return _playbackSlider;
+}
+
+SpeedController* MediaPlayerPanel::speedController() const noexcept {
+	return _speedButton;
 }
 
 void MediaPlayerPanel::setVideoSliderMaximum(int value) {
@@ -211,10 +205,6 @@ void MediaPlayerPanel::paintEvent(QPaintEvent* event) {
 void MediaPlayerPanel::resizeEvent(QResizeEvent* event) {
 	updateSize();
 	updateControlsGeometry();
-}
-
-void MediaPlayerPanel::mousePressEvent(QMouseEvent* event) {
-	event->accept();
 }
 
 int MediaPlayerPanel::contentHeight() const noexcept {

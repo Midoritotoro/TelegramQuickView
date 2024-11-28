@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Utility.h"
-#include "Time.h"
+#include "../../core/Time.h"
 
 namespace FFmpeg {
 

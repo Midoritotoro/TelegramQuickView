@@ -1,5 +1,8 @@
 #include "StyleCore.h"
 
+#include "../media/ffmpeg/FrameGenerator.h"
+#include "../media/player/MediaPlayer.h"
+
 #include <QPainterPath>
 #include <QPainter>
 
@@ -185,9 +188,12 @@ namespace style {
 
 			auto ints = reinterpret_cast<quint32*>(image.bits());
 			const auto bg = shifted(QColor(Qt::white));
+
 			const auto width = image.width();
 			const auto height = image.height();
+
 			const auto addPerLine = (image.bytesPerLine() / sizeof(quint32)) - width;
+
 			for (auto y = 0; y != height; ++y) {
 				for (auto x = 0; x != width; ++x) {
 					const auto components = shifted(*ints);
@@ -202,6 +208,62 @@ namespace style {
 
 	QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth) {
 		return QSize(targetWidth, targetWidth * imageSize.height() / imageSize.width());
+	}
+
+	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
+		auto thumbnail = QPixmap();
+		const auto key = path;
+
+		if (QPixmapCache::find(key, &thumbnail))
+			return thumbnail;
+
+		auto file = QFile(path);
+		if (!file.open(QIODevice::ReadOnly))
+			return QPixmap();
+
+		auto mediaData = file.readAll();
+
+		if (mediaData.isNull())
+			return QPixmap();
+
+		auto thumbnailImage = QImage();
+
+		switch (MediaPlayer::detectMediaType(path)) {
+			case MediaPlayer::MediaType::Image:
+				thumbnailImage.loadFromData(mediaData);
+				break;
+
+			case MediaPlayer::MediaType::Video:
+				thumbnailImage = FFmpeg::FrameGenerator(mediaData)
+					.renderNext(QSize(), Qt::IgnoreAspectRatio, false).image;
+			
+				break;
+
+			case MediaPlayer::MediaType::Audio:
+				return QPixmap();
+
+			case MediaPlayer::MediaType::Unknown:
+				return QPixmap();
+		}
+
+		thumbnailImage = style::Prepare(std::move(thumbnailImage), 
+			style::getMinimumSizeWithAspectRatio(thumbnailImage.size(), targetSize.width()));
+
+		thumbnailImage = std::move(thumbnailImage).scaled(
+			thumbnailImage.width() * style::DevicePixelRatio(),
+			thumbnailImage.height() * style::DevicePixelRatio(),
+			Qt::IgnoreAspectRatio,
+			Qt::SmoothTransformation);
+
+		thumbnailImage = style::Opaque(std::move(thumbnailImage));
+
+		thumbnail = QPixmap::fromImage(std::move(thumbnailImage), Qt::ColorOnly);
+		thumbnail.setDevicePixelRatio(style::DevicePixelRatio());
+		
+		if (QPixmapCache::cacheLimit() > 0)
+			QPixmapCache::insert(key, thumbnail);
+
+		return thumbnail;
 	}
 
 	void RoundCorners(QPainter& painter, const QSize& widgetSize, int borderRadius) {

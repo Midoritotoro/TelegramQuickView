@@ -37,9 +37,9 @@ SET(MAIN_SOURCES main.cpp
 	src/core/MouseDetector.h
 	src/core/StyleCore.cpp
 	src/core/StyleCore.h
-	
-	src/media/ffmpeg/Time.cpp
-	src/media/ffmpeg/Time.h
+	src/core/Time.cpp
+	src/core/Time.h
+
 	src/media/ffmpeg/Utility.cpp
 	src/media/ffmpeg/Utility.h 
 	src/media/ffmpeg/FrameGenerator.h
@@ -81,8 +81,6 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/audio/AbstractAudioReader.h
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
-    src/media/ffmpeg/ThumbnailGenerator.cpp
-    src/media/ffmpeg/ThumbnailGenerator.h
 
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h

@@ -22,23 +22,6 @@ SpeedButtonOverlay::SpeedButtonOverlay(QWidget* parent):
 
 	_speedSlider->setStyleSheet(style::SliderStyle());
 	_speedSlider->setFixedHeight(style::sliderHeight);
-
-	connect(_speedSlider, &QAbstractSlider::valueChanged, [this](int value) {
-		_speed = value / 10.;
-
-		if (_onSpeedChangedCallback)
-			_onSpeedChangedCallback(_speed);
-
-		_textRect = QRect(QPoint(), style::TextSize(QString::number(_speed, 'f', 1) + "x", font()));
-		_textRect.moveTo(QPoint(style::mediaPlayerPanelMargins.left() * 0.5,
-			(height() - _textRect.height()) / 2.));
-	});
-
-	_speedSlider->setValue(_speed * 10.);
-}
-
-void SpeedButtonOverlay::setCallback(std::function<void (float speed)> callback) {
-	_onSpeedChangedCallback = callback;
 }
 
 float SpeedButtonOverlay::speed() const noexcept {
@@ -60,6 +43,10 @@ void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
 }
 
 void SpeedButtonOverlay::resizeEvent(QResizeEvent* event) {
+	_textRect = QRect(QPoint(), style::TextSize(QString::number(_speed, 'f', 1) + "x", font()));
+	_textRect.moveTo(QPoint(style::mediaPlayerPanelMargins.left() * 0.5,
+		(height() - _textRect.height()) / 2.));
+
 	_speedSlider->setGeometry(
 		_textRect.right() + style::mediaPlayerPanelMargins.left(),
 		(height() - _speedSlider->height()) / 2.,
@@ -72,6 +59,13 @@ SpeedController::SpeedController(QWidget* parent):
 	QPushButton(parent)
 {
 	_overlay = new SpeedButtonOverlay(parent);
+
+	connect(_overlay->_speedSlider, &QAbstractSlider::valueChanged, [this](int value) {
+		_overlay->_speed = value / 10.;
+		emit speedChanged(_overlay->_speed);
+		});
+
+	_overlay->_speedSlider->setValue(_overlay->_speed * 10.);
 	_overlay->hide();
 
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
@@ -85,10 +79,6 @@ SpeedController::SpeedController(QWidget* parent):
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
-}
-
-void SpeedController::setCallback(std::function<void (float speed)> callback) {
-	_overlay->setCallback(callback);
 }
 
 void SpeedController::paintEvent(QPaintEvent* event) {

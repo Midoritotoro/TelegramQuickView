@@ -6,9 +6,10 @@
 #include "VideoStateWidget.h"
 #include "EnhancedSlider.h"
 
+#include "SpeedButton.h"
+
 class VolumeController;
 class FullScreenButton;
-class SpeedController;
 
 
 class MediaPlayerPanel: public QWidget {
@@ -31,8 +32,8 @@ public:
 	void updateTimeText(int mediaPosition, int mediaDuration);
 	void updateStateWidget(VideoStateWidget::State state);
 
-	[[nodiscard]] EnhancedSlider* volumeSlider() const noexcept;
 	[[nodiscard]] EnhancedSlider* playbackSlider() const noexcept;
+	[[nodiscard]] SpeedController* speedController() const noexcept;
 
 	void setVideoSliderMaximum(int value);
 	void setVolume(int value);
@@ -44,12 +45,9 @@ Q_SIGNALS:
 	void needsFullScreen();
 	void needsNormal();
 	void needsChangeVolume(int volume);
-
-	void needsChangeSpeed(float speed);
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
-	void mousePressEvent(QMouseEvent* event) override;
 private:
 	void updateSize();
 	void updateTimeSize();

@@ -32,8 +32,6 @@ protected:
 	void resizeEvent(QResizeEvent* event) override;
 private:
 	void paintAttachmentCount(QPainter& painter);
-
-	[[nodiscard]] QPixmap preparePreview();
 	void updateSize();
 
 	QString _attachmentPath;
