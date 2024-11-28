@@ -37,9 +37,9 @@ MessageMediaViewer::MessageMediaViewer(
 
 	setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
-	setStyleSheet("QWidget{\n "
+	setStyleSheet("QWidget{\n"
 		"background-color: rgba(15, 15, 15, 99)\n"
-		"}");
+	"}");
 
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir cssDir(currentPath + "/../../assets/images");

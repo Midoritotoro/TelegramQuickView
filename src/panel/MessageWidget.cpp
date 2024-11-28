@@ -65,7 +65,6 @@ void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths) {
 	case MessageMediaDisplayMode::PreviewWithCount:
 		foreach(const auto& path, attachmentsPaths) {
 			auto messageAttachment = new MessageAttachment(this, path);
-			messageAttachment->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
@@ -78,8 +77,8 @@ void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths) {
 	case MessageMediaDisplayMode::Stack:
 		foreach(const auto& path, attachmentsPaths) {
 			auto messageAttachment = new MessageAttachment(this, path);
-			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
+			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 			_attachments.append(messageAttachment);
 		}
 		break;

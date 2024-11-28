@@ -28,11 +28,11 @@ Application::Application(int& argc, char** argv) :
     QString audioPath = "C:\\Users\\danya\\Downloads\\Störagéd.mp3";
 
     _postsView = std::make_unique<TelegramPostQuickView>();
-    _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
+    _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::Stack);
 
     _postsView->show();
 
-    auto list = QStringList({ videoPath, audioPath, path, path2, path3, path4, path5, path6 });
+    auto list = QStringList({ videoPath, /* audioPath */ path, path2, path3, path4, path5, path6});
     auto list2 = QStringList({ path2, path, path3, path4, path5, path6 });
     auto list3 = QStringList({ path3, path2, path, path4, path5, path6 });
     auto list4 = QStringList({ videoPath2, path4, path2, path3, path, path5, path6 });
@@ -72,6 +72,6 @@ void Application::init() {
 
     style::SetDevicePixelRatio(useRatio);
 
-    QPixmapCache::setCacheLimit(100);
-    setFont(QFont("OpenSans-Italic", 10));
+    QPixmapCache::setCacheLimit(1024 * 1024); 
+    setFont(QFont("OpenSans-SemiBoldItalic", 10));
 }

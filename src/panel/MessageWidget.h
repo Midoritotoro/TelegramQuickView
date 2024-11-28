@@ -2,13 +2,10 @@
 
 #include <QWidget>
 #include <QGridLayout>
-#include <QList>
-#include <QUrl>
-#include <memory>
 
+#include <QList>
 
 class MessageAttachment;
-
 typedef QList<MessageAttachment*> MessageAttachmentsList;
 
 

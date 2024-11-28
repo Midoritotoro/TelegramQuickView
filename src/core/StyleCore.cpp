@@ -211,6 +211,10 @@ namespace style {
 	}
 
 	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
+		auto size = targetSize;
+		if (size.width() <= 0)
+			size.setWidth(style::maximumMessageWidth);
+
 		auto thumbnail = QPixmap();
 		const auto key = path;
 
@@ -236,7 +240,6 @@ namespace style {
 			case MediaPlayer::MediaType::Video:
 				thumbnailImage = FFmpeg::FrameGenerator(mediaData)
 					.renderNext(QSize(), Qt::IgnoreAspectRatio, false).image;
-			
 				break;
 
 			case MediaPlayer::MediaType::Audio:
@@ -246,8 +249,11 @@ namespace style {
 				return QPixmap();
 		}
 
+		if (thumbnailImage.isNull())
+			return QPixmap();
+
 		thumbnailImage = style::Prepare(std::move(thumbnailImage), 
-			style::getMinimumSizeWithAspectRatio(thumbnailImage.size(), targetSize.width()));
+			style::getMinimumSizeWithAspectRatio(thumbnailImage.size(), size.width()));
 
 		thumbnailImage = std::move(thumbnailImage).scaled(
 			thumbnailImage.width() * style::DevicePixelRatio(),

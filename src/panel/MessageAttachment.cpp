@@ -7,9 +7,6 @@
 #include <QMimeDatabase>
 #include <QPainter>
 
-#include <QPaintEvent>
-#include <QResizeEvent>
-
 #include <QUrl>
 #include <QPixmapCache>
 
@@ -42,26 +39,29 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
-	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-
-	style::RoundTopCorners(painter, size(), 15);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 		case MessageWidget::MessageMediaDisplayMode::Stack:
+			if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
+				style::RoundTopCorners(painter, size(), 15);
+
 			painter.drawPixmap(0, 0, _preview);
 			break;
 
 		case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
+			style::RoundTopCorners(painter, size(), 15);
+
 			if (_parentMessage->attachmentsLength() > 1) {
 				painter.drawPixmap(0, 0, _preview);
+
 				painter.setOpacity(0.4);
 				painter.fillRect(rect(), Qt::black);
 
 				paintAttachmentCount(painter);
 			}
-			else {
+			else
 				painter.drawPixmap(0, 0, _preview);
-			}
+
 			break;
 	}
 }
