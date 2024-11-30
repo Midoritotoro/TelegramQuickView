@@ -36,6 +36,8 @@ public:
 	[[nodiscard]] QVariantList getUsernamesOfTargetChannels();
 	[[nodiscard]] QVariantList getIdsOfTargetChannels();
 
+	[[nodiscard]] int getCountOfLatestDownloadingMessages();
+
 	bool setTelegramCredentials(const TelegramCredentials& telegramCredentials);
 
 	void setTargetChannels(QStringList usernameList);

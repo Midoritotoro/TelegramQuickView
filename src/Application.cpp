@@ -1,10 +1,8 @@
 ﻿#include "Application.h"
 
 #include "core/AutoRunUtils.h"
+#include "panel/TelegramPostQuickView.h"
 #include "core/StyleCore.h"
-
-#include "src/panel/TelegramPostQuickView.h"
-#include "src/media/player/MediaPlayer.h"
 
 
 Application::Application(int& argc, char** argv) :
@@ -13,7 +11,7 @@ Application::Application(int& argc, char** argv) :
     init();
 
     QString text = "Test text";
-    QString videoPath = "C:\\Users\\danya\\Downloads\\raidvid.mp4";
+    QString videoPath = "C:\\Users\\danya\\Downloads\\2024-11-22_22-56-37.png";
 
     _postsView = std::make_unique<TelegramPostQuickView>();
     _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::Stack);
@@ -22,7 +20,8 @@ Application::Application(int& argc, char** argv) :
 
     auto list = QStringList({ videoPath });
 
-    _postsView->makeMessage(text, list);
+    for (int i = 0; i < 5; ++i)
+        _postsView->makeMessage(text, list);
 }
 
 Application::~Application() {

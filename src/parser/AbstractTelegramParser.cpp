@@ -23,9 +23,9 @@ AbstractTelegramParser::AbstractTelegramParser() :
     , _authenticationQueryId(0)
     , _userDataManager(std::make_unique<UserDataManager>())
     , _clientManager(std::make_unique<td::ClientManager>())
+    , _thread(new QThread())
 {
     td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(0));
-
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
 
     const auto& largestDiskPath = findLargestNonSystemDisk();
@@ -40,27 +40,27 @@ AbstractTelegramParser::AbstractTelegramParser() :
 
     _databaseDirectory = dir.absolutePath().toStdString();
     _filesDirectory = dir.absolutePath().toStdString() + "\\test";
+   
+    _userDataManager->setDownloadSensitiveContentAbility(false);
+    _userDataManager->setTargetChannels(QStringList({ "fksfhsfierw3irh", "antifishechki" }));
+    _userDataManager->setLastPostsCountForChannels(3);
 
     authorizationCheck();
-
-    _userDataManager->setDownloadSensitiveContentAbility(false);
-    _userDataManager->setTargetChannels(QStringList({ "erfwfr", "antifishechki" }));
-    _userDataManager->setLastPostsCountForChannels(3);
 }
 
 
 void AbstractTelegramParser::authorizationCheck() {
+    qDebug() << "ff";
     if (_userDataManager->isTelegramCredentialsValid())
         setTelegramCredentials(_userDataManager->getTelegramCredentials());
     
+    qDebug() << "f12f";
     qDebug() << isCredentialsAccepted() << isAuthorized();
     if (isCredentialsAccepted() && isAuthorized())
         return;
 
     if (_authDialog == nullptr)
         _authDialog = std::make_unique<AuthenticationDialog>();
-
-    qDebug() << "dialog maked";
 
     if (isCredentialsAccepted() && isAuthorized() == false)
         _authDialog->toSecondFrame();
@@ -153,7 +153,7 @@ void AbstractTelegramParser::processResponse(td::ClientManager::Response respons
 void AbstractTelegramParser::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
     if (_isWaiting)
         return;
-
+    qDebug() << "auth update";
     td::td_api::downcast_call(
         *update, Telegram::overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {
@@ -212,7 +212,7 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
 
                 if (_authorizationCode.empty())
                     return;
-
+                qDebug() << "send auth code: " << _authorizationCode;
                 sendQuery(
                     td::td_api::make_object<td::td_api::checkAuthenticationCode>(_authorizationCode),
                     createAuthenticationQueryHandler()
@@ -239,12 +239,15 @@ void AbstractTelegramParser::on_authorizationStateUpdate() {
                     request->files_directory_ = _filesDirectory;
 
                 request->use_message_database_ = true;
+                request->use_chat_info_database_ = true;
+
                 request->use_secret_chats_ = true;
                 request->use_file_database_ = true;
                 request->use_test_dc_ = false;
 
                 request->system_language_code_ = "en";
                 request->device_model_ = "Desktop";
+                request->system_version_ = "1.0";
                 request->application_version_ = "1.0";
 
                 sendQuery(

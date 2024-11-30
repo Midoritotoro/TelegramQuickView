@@ -1,11 +1,14 @@
 ﻿#include "TelegramPostQuickView.h"
 
 #include "../media/player/WidgetsHider.h"
+#include "../media/ffmpeg/Guard.h"
+
 #include "../core/StyleCore.h"
+#include "../core/Time.h"
+
+#include "../parser/TelegramParser.h"
 
 #include "MessageAttachment.h"
-#include "MessageMediaViewer.h"
-
 #include "History.h"
 
 #include <QShowEvent>
@@ -16,6 +19,7 @@
 
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	QWidget(parent)
+	, _telegramParser(std::make_unique<TelegramParser>())
 	, _displayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount)
 	, _currentPostIndex(1)
 {
@@ -40,7 +44,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	_chatScrollArea->setOpacity(0.1);
 	_chatScrollArea->setTrackingContent(true);
 
-	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+	//_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
 
 	_chatScrollArea->setWidgetResizable(true);
 
@@ -82,8 +86,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
-	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
-	connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
+	//connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
+	//connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
 
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
 }
@@ -117,11 +121,11 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 void TelegramPostQuickView::attachmentCliked() {
 	auto attachment = (MessageAttachment*)sender();
 
-	if (_messageMediaViewer == nullptr)
-		_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+	//if (_messageMediaViewer == nullptr)
+	//	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
 
-	_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
-	_messageMediaViewer->show();
+	//_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
+	//_messageMediaViewer->show();
 
 	showMinimized();
 }
@@ -130,15 +134,15 @@ void TelegramPostQuickView::addContent() {
 	_chatScrollArea->disableScroll(true);
 	++_currentPostIndex;
 
-	/*if (message.isNull()) 
-		return;
+	const auto message = _telegramParser->loadMessage();
 
-	if (message.attachments.isEmpty() == false)
-		makeMessage(message.text, message.attachments);
-	else
-		makeMessage(message.text);*/
+	//if (message.isNull()) 
+	//	return;
 
-	// makeMessage();
+	//if (message.attachments.isEmpty() == false)
+	//	makeMessage(message.text, message.attachments);
+	//else
+	//	makeMessage(message.text);
 
 	_chatScrollArea->disableScroll(false);
 }

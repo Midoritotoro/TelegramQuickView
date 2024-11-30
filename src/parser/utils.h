@@ -4,6 +4,8 @@
 #include <QString>
 
 namespace Telegram {
+    inline constexpr auto maximumMessageAttachmentsCount = 10;
+
     enum ErrorCodes {
         OK = 200,
         TooManyRequests = 429,

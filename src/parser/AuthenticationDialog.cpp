@@ -11,6 +11,8 @@
 #include <QPainterPath>
 #include <QMargins>
 
+#include <QThread>
+
 namespace {
     QSize textSize(const QString& text, const QFontMetrics& metrics) {
         return metrics.size(0, text);
@@ -61,7 +63,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
     setWindowTitle(PROJECT_NAME);
 
     QString currentPath = QCoreApplication::applicationDirPath();
-    QDir assetsDir(currentPath + "/../../assets/images");
+    QDir assetsDir(currentPath + "/../../../assets/images");
 
     _pathToBackgroundImage = assetsDir.absolutePath() + "/main_screen.jpg";
     _background = QPixmap(_pathToBackgroundImage);
@@ -161,6 +163,10 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
         });
 
     toFirstFrame();
+
+    _apiHashLineEdit->setText("019edf3f20c8460b741fb94114e6fec0");
+    _apiIdLineEdit->setText("13711370");
+    _phoneNumberLineEdit->setText("+375292384917");
 }
 
 void AuthenticationDialog::setSleepSeconds(int seconds) {
@@ -211,8 +217,9 @@ void AuthenticationDialog::resizeEvent(QResizeEvent* event) {
     if (_background.size() == size())
         return;
 
-    _background = _background.scaled(getMinimumSizeWithAspectRatio(_background.size(), _background.size().width() / 4.), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    setFixedSize(_background.size());
+    _background = _background.scaled(getMinimumSizeWithAspectRatio(_background.size(), _background.size().width() / 4.),
+                    Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    resize(_background.size());
 
     updateWidgetsGeometry();
 }
@@ -223,7 +230,6 @@ void AuthenticationDialog::paintEvent(QPaintEvent* event) {
 
     QPainter painter(this);
 
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     painter.drawPixmap(0, 0, _background);
 
@@ -307,16 +313,22 @@ void AuthenticationDialog::drawRoundedCorners(QPainter& painter, QRect rect, int
     path.moveTo(rect.x() + borderRadius, rect.y());
 
     path.lineTo(rect.x() + rect.width() - borderRadius, rect.y());
-    path.quadTo(rect.x() + rect.width(), rect.y(), rect.x() + rect.width(), rect.y() + borderRadius);
+    path.quadTo(rect.x() + rect.width(), rect.y(),
+        rect.x() + rect.width(), rect.y() + borderRadius);
 
-    path.lineTo(rect.x() + rect.width(), rect.y() + rect.height() - borderRadius);
-    path.quadTo(rect.x() + rect.width(), rect.y() + rect.height(), rect.x() + rect.width() - borderRadius, rect.y() + rect.height());
+    path.lineTo(rect.x() + rect.width(), 
+        rect.y() + rect.height() - borderRadius);
+    path.quadTo(rect.x() + rect.width(), rect.y() + rect.height(),
+        rect.x() + rect.width() - borderRadius, rect.y() + rect.height());
 
-    path.lineTo(rect.x() + borderRadius, rect.y() + rect.height());
-    path.quadTo(rect.x(), rect.y() + rect.height(), rect.x(), rect.y() + rect.height() - borderRadius);
+    path.lineTo(rect.x() + borderRadius, 
+        rect.y() + rect.height());
+    path.quadTo(rect.x(), rect.y() + rect.height(), 
+        rect.x(), rect.y() + rect.height() - borderRadius);
 
     path.lineTo(rect.x(), rect.y() + borderRadius);
-    path.quadTo(rect.x(), rect.y(), rect.x() + borderRadius, rect.y());
+    path.quadTo(rect.x(), rect.y(), 
+        rect.x() + borderRadius, rect.y());
 
     painter.drawPath(path);
 }

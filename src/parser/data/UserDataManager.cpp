@@ -95,6 +95,17 @@ QVariantList UserDataManager::getIdsOfTargetChannels() {
 		toArray().toVariantList();
 }
 
+int UserDataManager::getCountOfLatestDownloadingMessages() {
+	auto jsonDocument = getJsonDocument();
+	auto jsonObject = jsonDocument.object();
+
+	const auto count = jsonObject.value("lastPostsCount");
+
+	return !count.isNull()
+		? count.toInt()
+		: 1;
+}
+
 bool UserDataManager::getDownloadSensitiveContentAbility() {
 	const auto jsonDocument = getJsonDocument();
 	const auto jsonObject = jsonDocument.object();

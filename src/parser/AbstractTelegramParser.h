@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <future>
+#include <QThread>
 
 #include "AuthenticationDialog.h"
 
@@ -27,6 +28,7 @@ protected:
     std::unique_ptr<UserDataManager> _userDataManager = nullptr;
 
     bool _isWaiting;
+    QThread* _thread = nullptr;
 private:
     bool _isCredentialsAccepted, _isAuthCodeAccepted;
 

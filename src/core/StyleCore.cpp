@@ -1,7 +1,9 @@
 #include "StyleCore.h"
 
-#include "../media/ffmpeg/FrameGenerator.h"
-#include "../media/player/MediaPlayer.h"
+//#include "../media/ffmpeg/FrameGenerator.h"
+//#include "../media/player/MediaPlayer.h"
+
+#include <QMimeDataBase>
 
 #include <QPainterPath>
 #include <QPainter>
@@ -207,7 +209,10 @@ namespace style {
 	}
 
 	QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth) {
-		return QSize(targetWidth, targetWidth * imageSize.height() / imageSize.width());
+		return imageSize.width() != 0 
+			? QSize(targetWidth, targetWidth * 
+				imageSize.height() / imageSize.width())
+			: QSize(style::maximumMessageWidth, 100);
 	}
 
 	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
@@ -226,13 +231,21 @@ namespace style {
 			return QPixmap();
 
 		auto mediaData = file.readAll();
-
 		if (mediaData.isNull())
 			return QPixmap();
 
 		auto thumbnailImage = QImage();
 
-		switch (MediaPlayer::detectMediaType(path)) {
+		if (QMimeDatabase().mimeTypeForFile(path).name().contains("image"))
+			thumbnailImage.loadFromData(mediaData);
+		else {
+			auto pixmap = QPixmap(size);
+			pixmap.fill(Qt::black);
+			
+			return pixmap;
+		}
+
+		/*switch (MediaPlayer::detectMediaType(path)) {
 			case MediaPlayer::MediaType::Image:
 				thumbnailImage.loadFromData(mediaData);
 				break;
@@ -247,7 +260,7 @@ namespace style {
 
 			case MediaPlayer::MediaType::Unknown:
 				return QPixmap();
-		}
+		}*/
 
 		if (thumbnailImage.isNull())
 			return QPixmap();

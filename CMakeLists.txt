@@ -2,7 +2,7 @@
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,Release>:EditAndContinue>,$<$<CONFIG:Debug,Release>:ProgramDatabase>>")
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -11,13 +11,13 @@ project("TelegramQuickView" LANGUAGES CXX)
 include(cmake/lib_openh264.cmake)
 include(cmake/lib_opus.cmake)
 include(cmake/lib_ffmpeg.cmake)
+
 include(cmake/lib_openal.cmake)
+#include(cmake/lib_td.cmake)
 
-include(cmake/lib_openssl_ssl.cmake)
-include(cmake/lib_openssl_crypto.cmake)
-include(cmake/lib_openssl_common.cmake)
-include(cmake/lib_td.cmake)
+set(Td_DIR "D:/Libraries/win64//td/tdlib/lib/cmake/Td/")
 
+find_package(Td 1.8.40 REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
 			Widgets
@@ -43,50 +43,14 @@ SET(MAIN_SOURCES main.cpp
 	src/core/Time.cpp
 	src/core/Time.h
 
-	src/media/ffmpeg/Utility.cpp
-	src/media/ffmpeg/Utility.h 
-	src/media/ffmpeg/FrameGenerator.h
-    src/media/ffmpeg/FrameGenerator.cpp
-    src/media/ffmpeg/Guard.h
-        
-    src/media/ffmpeg/HardwareAcceleration.cpp
-    src/media/ffmpeg/HardwareAcceleration.h
-        
-    src/media/player/MediaPlayer.h 
-    src/media/player/MediaPlayer.cpp
-    src/media/Manager.cpp
-    src/media/Manager.h
-
-    src/media/player/EnhancedSlider.cpp
-    src/media/player/EnhancedSlider.h
-    src/media/player/FullScreenButton.cpp
-    src/media/player/FullScreenButton.h
-    src/media/player/MediaPlayerPanel.cpp
-    src/media/player/MediaPlayerPanel.h
-    src/media/player/VideoStateWidget.cpp
-    src/media/player/VideoStateWidget.h
-    src/media/player/VolumeController.cpp
-    src/media/player/VolumeController.h
-    src/media/player/SpeedButton.cpp
-    src/media/player/SpeedButton.h
-    src/media/player/WidgetsHider.h
-
-    src/media/ClickableLabel.cpp
-    src/media/ClickableLabel.h
-   
-    src/media/ffmpeg/audio/AudioReader.cpp
-    src/media/ffmpeg/audio/AudioReader.h
-    src/media/ffmpeg/Scale.cpp
-    src/media/ffmpeg/Scale.h 
-    src/media/ffmpeg/audio/AbstractAudioLoader.cpp
-    src/media/ffmpeg/audio/AbstractAudioLoader.h
-    src/media/ffmpeg/audio/AbstractAudioReader.cpp
-    src/media/ffmpeg/audio/AbstractAudioReader.h
-    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
-    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
-
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h
+
+	src/media/ClickableLabel.h
+	src/media/ClickableLabel.cpp
+
+	src/media/ffmpeg/Guard.h
+	src/media/player/WidgetsHider.h
 
 	src/panel/MessageWidget.cpp
 	src/panel/MessageWidget.h
@@ -94,8 +58,7 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/TelegramPostQuickView.h
 	src/panel/MessageAttachment.cpp
 	src/panel/MessageAttachment.h
-	src/panel/MessageMediaViewer.cpp
-	src/panel/MessageMediaViewer.h
+
 	src/panel/History.cpp
 	src/panel/History.h
 	src/panel/NavigationButton.cpp
@@ -135,8 +98,8 @@ SET(MAIN_SOURCES main.cpp
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+   # set_target_properties(${PROJECT_NAME} PROPERTIES
+      #  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
     target_compile_options(${PROJECT_NAME}
     INTERFACE
@@ -167,11 +130,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         /Zc:__cplusplus
     )
 
-    target_link_options(${PROJECT_NAME}
-    INTERFACE
-        $<IF:$<CONFIG:Debug>,/NODEFAULTLIB:LIBCMT,/DEBUG;/OPT:REF>
-        /INCREMENTAL:NO
-    )
+#    target_link_options(${PROJECT_NAME}
+#    INTERFACE
+ #       $<IF:$<CONFIG:Debug>,/NODEFAULTLIB:LIBCMT,/DEBUG;/OPT:REF>
+  #      /INCREMENTAL:NO
+ #   )
 
     if (WIN32)
         target_link_libraries(${PROJECT_NAME}
@@ -193,9 +156,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 			Qt6::MultimediaWidgets
 			Qt6::Sql
             Qt6::OpenGL
-            app::external_ffmpeg
-            app::external_openal		
-            app::external_td
+            Td::TdStatic
 )
 
 

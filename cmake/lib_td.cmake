@@ -1,4 +1,4 @@
-add_library(external_td INTERFACE IMPORTED GLOBAL)
+add_library(external_td STATIC IMPORTED GLOBAL)
 add_library(app::external_td ALIAS external_td)
 
 set(libs_loc "D:/Libraries/win64")

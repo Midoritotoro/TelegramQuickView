@@ -9,17 +9,17 @@
 #include <QDebug>
 
 
-TelegramParser::TelegramParser():
+TelegramParser::TelegramParser() :
     AbstractTelegramParser()
-    , _sqlManager(std::make_unique<PostSqlManager>())
     , _downloadSensitiveContent(_userDataManager->getDownloadSensitiveContentAbility())
+    , _countOfLatestDownloadingMessages(_userDataManager->getCountOfLatestDownloadingMessages())
 {
     setlocale(LC_ALL, "");
 
     foreach(const auto& element, _userDataManager->getUsernamesOfTargetChannels())
         _targetChannelsList.append(element.toString());
 
-    foreach(const auto& channel, _targetChannelsList) {
+    foreach(const auto & channel, _targetChannelsList) {
         sendQuery(td::td_api::make_object<td::td_api::searchPublicChat>(channel.toStdString()),
             [this](Object object) {
                 if (object == nullptr)
@@ -40,54 +40,161 @@ TelegramParser::TelegramParser():
     }
 
     connect(this, &AbstractTelegramParser::userAuthorized, [this]() {
-      /*  if (_Future.valid())
-            _Future.get();
-        _Future = std::async(&TelegramParser::startChatsChecking, this);*/
-    });
+      //  if (_thread->isRunning())
+      //      _thread->quit();
+
+      //  moveToThread(_thread);
+      //  connect(_thread, &QThread::started, this, &TelegramParser::startChatsChecking);
+
+      //  _thread->start();
+        });
 
     foreach(const auto& id, _userDataManager->getIdsOfTargetChannels())
         _chatIdsVector.push_back(id.toLongLong());
 
-    if (isAuthorized())
-        _Future = std::async(&TelegramParser::startChatsChecking, this);
+
+    //if (isAuthorized()) {
+      //  moveToThread(_thread);
+    //    connect(_thread, &QThread::started, this, &TelegramParser::startChatsChecking);
+
+      // _thread->start();
+    //}
 }
 
-void TelegramParser::startChatsChecking() {
-    for (;;)
-        processResponse(_clientManager->receive(10));
+TelegramParser::~TelegramParser() {
+    //_thread->quit();
 }
-
 
 auto TelegramParser::createFileDownloadQueryHandler() {
     return [this](Object object) {
-        if (object == nullptr)
+        if (object == nullptr || object->get_id() != td::td_api::file::ID)
             return;
-        
+
         auto file = td::move_tl_object_as<td::td_api::file>(object);
+        if (file == nullptr || file->size_ == 0)
+            return;
+
         auto it = _downloadingMessages.find(file->id_);
 
         if (it != _downloadingMessages.end()) {
-            qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024*1024) << " Mb";
+            qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024 * 1024) << " Mb";
             qDebug() << "Path to file: " << file->local_->path_.c_str();
             if (file->local_->is_downloading_completed_)
                 it->second.attachments.append(file->local_->path_.c_str());
 
-            _sqlManager->writeMessageInfo(it->second);
+            _downloadedMessages[_downloadedMessages.size()].
+                attachments.append(file->local_->path_.c_str());
             _downloadingMessages.erase(it);
         }
 
-       // checkFileDownloadError(std::move(object));
+        checkFileDownloadError(std::move(object));
+        };
+}
+
+auto TelegramParser::createHistoryRequestHandler() {
+    return [this](Object object) {
+        if (object == nullptr || object->get_id() != td::td_api::messages::ID)
+            return;
+
+        auto messages = td::move_tl_object_as<td::td_api::messages>(object);
+        qDebug() << messages->total_count_;
+        if (messages == nullptr || messages->total_count_ == 0)
+            return;
+      
+        _downloadedMessages.erase(_downloadedMessages.begin(), _downloadedMessages.end());
+        for (auto index = 0; index < messages->total_count_; ++index) {
+            auto chatMessage = std::move(messages->messages_[index]);
+            std::string sender = "";
+
+            std::string text = "";
+            int64_t mediaId = 0;
+
+            td::td_api::downcast_call(*chatMessage->sender_id_,
+                Telegram::overloaded(
+                    [this, &sender](td::td_api::messageSenderUser& user) {
+                        sender = getUserName(user.user_id_);
+                    },
+                    [this, &sender](td::td_api::messageSenderChat& chat) {
+                        sender = getChatTitle(chat.chat_id_);
+                    }
+                )
+            );
+
+            qDebug() << "message: " << index;
+
+            _downloadedMessages[index].sender = QString::fromStdString(sender);
+            _downloadedMessages[index].date = QString::fromStdString(convertTdMessageTimestamp(chatMessage->date_));
+            _downloadedMessages[index].mediaAlbumId = chatMessage->media_album_id_;
+
+            parseMessageContent(std::exchange(chatMessage, {}), text, mediaId);
+
+            sendQuery(
+                td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
+                createFileDownloadQueryHandler()
+            );
+
+            _downloadedMessages[index].text = QString::fromStdString(text);
+        }
     };
 }
 
-void TelegramParser::checkFileDownloadError(Object object) {
-    if (object->get_id() == td::td_api::error::ID) {
-        auto error = td::move_tl_object_as<td::td_api::error>(object);
-        std::cout << "Error: " << to_string(error) << std::flush;
+Telegram::Message TelegramParser::loadMessage() {
+    sendQuery(
+        td::td_api::make_object<td::td_api::getChatHistory>(_chatIdsVector[0], 0, 
+        _countOfLatestDownloadingMessages * Telegram::maximumMessageAttachmentsCount, _countOfLatestDownloadingMessages, false),
+        createHistoryRequestHandler()
+    );
+    
+    while (true) {
+        processResponse(_clientManager->receive(10));
+       
+        if (_downloadedMessages.size() <= 0)
+            continue;
 
-        handleError(error);
-        on_NewMessageUpdate(std::move(object));
+        auto message = _downloadedMessages.at(_downloadedMessages.size() - 1);
+        _downloadedMessages.pop_back();
+
+        return message;
     }
+
+    qDebug() << "returning";
+    return Telegram::Message();
+}
+
+void TelegramParser::parseMessageContent(td::td_api::object_ptr<td::td_api::message>&& message, std::string& text, int64_t& mediaId) {
+    switch (message->content_->get_id()) {
+        case td::td_api::messageText::ID:
+            text = static_cast<td::td_api::messageText&>(*message->content_).text_->text_;
+            break;
+
+        case td::td_api::messagePhoto::ID:
+            mediaId = static_cast<td::td_api::messagePhoto&>(*message->content_).photo_->sizes_.back()->photo_->id_;
+            break;
+
+        case td::td_api::messageVideo::ID:
+            mediaId = static_cast<td::td_api::messageVideo&>(*message->content_).video_->video_->id_;
+            break;
+
+        case td::td_api::messageDocument::ID:
+            mediaId = static_cast<td::td_api::messageDocument&>(*message->content_).document_->document_->id_;
+            break;
+    }
+}
+
+void TelegramParser::startChatsChecking() {
+    while (true)
+        processResponse(_clientManager->receive(10));
+}
+
+void TelegramParser::checkFileDownloadError(Object object) {
+    if (object == nullptr || object->get_id() != td::td_api::error::ID)
+        return;
+
+    auto error = td::move_tl_object_as<td::td_api::error>(object);
+    std::cout << "Error: " << to_string(error) << std::flush;
+
+    handleError(error);
+    on_NewMessageUpdate(std::move(object));
 }
 
 void TelegramParser::processResponse(td::ClientManager::Response response) {
@@ -169,25 +276,9 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 qDebug() << "Получено сообщение от: " << senderName;
 
                 std::string text;
-                int32_t mediaId = 0;
+                int64_t mediaId = 0;
 
-                switch (update_new_message.message_->content_->get_id()) {
-                    case td::td_api::messageText::ID:
-                        text = static_cast<td::td_api::messageText&>(*update_new_message.message_->content_).text_->text_;
-                        break;
-
-                    case td::td_api::messagePhoto::ID:
-                        mediaId = static_cast<td::td_api::messagePhoto&>(*update_new_message.message_->content_).photo_->sizes_.back()->photo_->id_;
-                        break;
-
-                    case td::td_api::messageVideo::ID:
-                        mediaId = static_cast<td::td_api::messageVideo&>(*update_new_message.message_->content_).video_->video_->id_;
-                        break;
-
-                    case td::td_api::messageDocument::ID:
-                        mediaId = static_cast<td::td_api::messageDocument&>(*update_new_message.message_->content_).document_->document_->id_;
-                        break;
-                }
+                parseMessageContent(std::move(update_new_message.message_), text, mediaId);
 
                 Telegram::Message message;
 
@@ -200,10 +291,8 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 qDebug() << "mediaAlbumId: " << message.mediaAlbumId;
                 qDebug() << "message text: " << message.text;
 
-                if (mediaId == 0) {
-                    qDebug() << "Запись данных о новом сообщении без медиа...";
-                    return _sqlManager->writeMessageInfo(message);
-                }
+                if (mediaId == 0)
+                    return;
 
                 _downloadingMessages[mediaId] = message;
                 
@@ -212,7 +301,6 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                     createFileDownloadQueryHandler()
                 );      
             },
-
             [](auto& update) {
 
             }
