@@ -1,14 +1,16 @@
-add_library(external_td STATIC IMPORTED GLOBAL)
+add_library(external_td INTERFACE IMPORTED GLOBAL)
 add_library(app::external_td ALIAS external_td)
 
 set(libs_loc "D:/Libraries/win64")
+set(Td_DIR ${libs_loc}/td/tdlib/lib/cmake/Td/)
 
 target_include_directories(external_td SYSTEM
 INTERFACE
     ${libs_loc}/td/tdlib/include
 )
 
-set_target_properties(external_td PROPERTIES
-    IMPORTED_LOCATION ${libs_loc}/td/build/Release/tdjson_static.lib
-    IMPORTED_LOCATION_DEBUG ${libs_loc}/td/build/Debug/tdjson_static.lib
+find_package(Td 1.8.40 REQUIRED)
+
+target_link_libraries(external_td
+    INTERFACE Td::TdStatic
 )

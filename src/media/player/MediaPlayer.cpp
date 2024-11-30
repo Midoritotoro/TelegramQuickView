@@ -34,7 +34,7 @@ MediaPlayer::MediaPlayer(QWidget* parent):
 	_widgetsHider->SetInactivityDuration(3000);
 	_widgetsHider->SetAnimationDuration(3000);
 
-	setNormal();
+	setFullScreen();
 
 	setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -209,14 +209,14 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	paintBackground(painter, event);
 
-	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-
 	const auto center = _current.size().width() < size().width()
 		|| _current.size().height() < size().height()
 		? QPoint((width() - _current.width()) / 2, (height() - _current.height()) / 2) : QPoint(0, 0);
 
 	_currentFrameRect = QRect(center, _current.size());
-	painter.drawImage(center, _current);
+
+	if (const auto fill = rect().intersected(event->rect()); !fill.isNull())
+		painter.drawImage(center, _current);
 }
 
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {
@@ -319,14 +319,10 @@ void MediaPlayer::changeVolume(int value) {
 
 void MediaPlayer::paintBackground(QPainter& painter, QPaintEvent* event) {
 	const auto opacity = painter.opacity();
-	const auto fill = event->rect().intersected(QRect(0, 0, width(), height()));
-
 	painter.setOpacity(0.5);
 
-	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::black);
-
-	painter.drawRect(fill);
+	if (const auto fill = rect().intersected(event->rect()); !fill.isNull())
+		painter.fillRect(fill, Qt::black);
 
 	painter.setOpacity(opacity);
 }

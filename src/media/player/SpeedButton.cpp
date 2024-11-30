@@ -76,6 +76,7 @@ SpeedController::SpeedController(QWidget* parent):
 	QDir assetsDir(currentPath + "/../../assets/images");
 
 	_speedButtonImagePath = assetsDir.absolutePath() + "/speed_button.png";
+	qDebug() << _speedButtonImagePath;
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);

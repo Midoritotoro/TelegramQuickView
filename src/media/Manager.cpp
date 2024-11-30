@@ -90,8 +90,7 @@ void Manager::process() {
 		auto nowMs = Time::now() - ms;
 		const auto timeout = qMax(1, _frameGenerator->frameDelay() - nowMs);
 
-		//qDebug() << "_frameGenerator->frameDelay(): " << _frameGenerator->frameDelay();
-		//qDebug() << timeout;
+		qDebug() << "_frameGenerator->frameDelay(): " << _frameGenerator->frameDelay() << " timeout: " << _frameGenerator->frameDelay() - nowMs;
 
 		_timer.start(timeout);
 	}

@@ -6,7 +6,7 @@
 class ContinuousScroll final: public ScrollArea {
 	Q_OBJECT
 public:
-	using ScrollArea::ScrollArea;
+	ContinuousScroll(QWidget* parent = nullptr);
 
 	void setTrackingContent(bool value);
 Q_SIGNALS:

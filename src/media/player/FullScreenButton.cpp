@@ -9,7 +9,7 @@
 
 FullScreenButton::FullScreenButton(QWidget* parent) :
 	QPushButton(parent)
-	, _state (State::FullScreenTo)
+	, _state (State::FullScreenFrom)
 {
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir assetsDir(currentPath + "/../../assets/images");

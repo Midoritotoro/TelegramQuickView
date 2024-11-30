@@ -17,7 +17,6 @@
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	QWidget(parent)
 	, _displayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount)
-	, _sqlReader(std::make_unique<SqlReader>())
 	, _currentPostIndex(1)
 {
 	setMouseTracking(true);
@@ -116,7 +115,7 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 }
 
 void TelegramPostQuickView::attachmentCliked() {
-	MessageAttachment* attachment = (MessageAttachment*)sender();
+	auto attachment = (MessageAttachment*)sender();
 
 	if (_messageMediaViewer == nullptr)
 		_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
@@ -128,14 +127,18 @@ void TelegramPostQuickView::attachmentCliked() {
 }
 
 void TelegramPostQuickView::addContent() {
-	const auto message = _sqlReader->getMessage(_currentPostIndex);
+	_chatScrollArea->disableScroll(true);
 	++_currentPostIndex;
 
-	if (message.isNull()) 
+	/*if (message.isNull()) 
 		return;
 
 	if (message.attachments.isEmpty() == false)
 		makeMessage(message.text, message.attachments);
 	else
-		makeMessage(message.text);
+		makeMessage(message.text);*/
+
+	// makeMessage();
+
+	_chatScrollArea->disableScroll(false);
 }

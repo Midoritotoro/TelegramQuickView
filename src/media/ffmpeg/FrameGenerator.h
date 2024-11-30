@@ -68,11 +68,11 @@ private:
 	int _currentFrameDelay = 0;
 	int _frameIndex = 0;
 
-	float _speed = 1.f;
+	float _speed = 1.0f;
 
 	QByteArray _bytes = nullptr;
 
-	int _swscaleFlags = SWS_BICUBIC;
+	int _swscaleFlags = 0;
 };
 
 } // namespace FFmpeg

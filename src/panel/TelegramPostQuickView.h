@@ -2,9 +2,9 @@
 
 #include "MessageWidget.h"
 #include <QVBoxLayout>
+
 #include "History.h"
 #include <memory>
-#include "data/SqlReader.h"
 
 #include "ContinuousScroll.h"
 
@@ -21,7 +21,6 @@ private:
 	ContinuousScroll* _chatScrollArea = nullptr;
 
 	std::shared_ptr<History> _messagesHistory;
-	std::unique_ptr<SqlReader> _sqlReader;
 
 	int _currentPostIndex;
 public:

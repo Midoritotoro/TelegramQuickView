@@ -13,7 +13,10 @@ include(cmake/lib_opus.cmake)
 include(cmake/lib_ffmpeg.cmake)
 include(cmake/lib_openal.cmake)
 
-#include(cmake/lib_td.cmake)
+include(cmake/lib_openssl_ssl.cmake)
+include(cmake/lib_openssl_crypto.cmake)
+include(cmake/lib_openssl_common.cmake)
+include(cmake/lib_td.cmake)
 
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
@@ -106,27 +109,27 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/data/SqlReader.cpp
 	src/panel/data/SqlReader.h
 
-#	src/parser/effects/shaders/dual_kawase_down.frag
-	#src/parser/effects/shaders/dual_kawase_up.frag
-#	src/parser/effects/shaders/simple.vert
+    src/parser/effects/shaders/dual_kawase_down.frag
+	src/parser/effects/shaders/dual_kawase_up.frag
+	src/parser/effects/shaders/simple.vert
 
-#	src/parser/effects/vertex.h
-#	src/parser/effects/OpenGLBlur.cpp
-#	src/parser/effects/OpenGLBlur.h
+	src/parser/effects/vertex.h
+    src/parser/effects/OpenGLBlur.cpp
+	src/parser/effects/OpenGLBlur.h
 
-#	src/parser/data/UserDataManager.cpp
-#	src/parser/data/UserDataManager.h
-#	src/parser/AuthenticationDialog.cpp
-#	src/parser/AuthenticationDialog.h
+	src/parser/data/UserDataManager.cpp
+	src/parser/data/UserDataManager.h
+	src/parser/AuthenticationDialog.cpp
+	src/parser/AuthenticationDialog.h
 
-#	src/parser/utils.h
-#	src/parser/AbstractTelegramParser.cpp
-#	src/parser/AbstractTelegramParser.h
-#	src/parser/TelegramParser.cpp
-#	src/parser/TelegramParser.h
+	src/parser/utils.h
+	src/parser/AbstractTelegramParser.cpp
+	src/parser/AbstractTelegramParser.h
+	src/parser/TelegramParser.cpp
+	src/parser/TelegramParser.h
 
-#	src/parser/data/PostSqlManager.cpp
-#	src/parser/data/PostSqlManager.h
+	src/parser/data/PostSqlManager.cpp
+	src/parser/data/PostSqlManager.h
 )
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
@@ -183,7 +186,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     endif()
 endif()
 
-
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 			Qt6::Core
 			Qt6::Widgets
@@ -193,7 +195,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
             Qt6::OpenGL
             app::external_ffmpeg
             app::external_openal		
-			#app::external_td
+            app::external_td
 )
 
 

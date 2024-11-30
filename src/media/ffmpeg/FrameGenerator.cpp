@@ -393,7 +393,7 @@ void FrameGenerator::resolveNextFrameTiming() {
 	if (duration == AV_NOPTS_VALUE)
 		_nextFrameDelay = 0;
 	else
-		_nextFrameDelay = (duration * 1000LL * base.num) / base.den / _speed;
+		_nextFrameDelay = (duration * 1000LL * base.num) / base.den;
 
 	_framePosition = framePosition;
 

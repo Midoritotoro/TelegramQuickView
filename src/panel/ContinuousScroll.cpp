@@ -3,6 +3,16 @@
 #include <QScrollBar>
 #include <QWheelEvent>
 
+ContinuousScroll::ContinuousScroll(QWidget* parent):
+	ScrollArea(parent)
+{
+	setTrackingContent(true);
+	connect(verticalScrollBar(), &QAbstractSlider::valueChanged, [this] {
+		if (verticalScrollBar()->value() >= scrollTopMax()
+			- verticalScrollBar()->singleStep())
+			emit addContentRequest();
+	});
+}
 
 void ContinuousScroll::wheelEvent(QWheelEvent* event) {
 	if (!event->angleDelta().isNull()

@@ -4,7 +4,7 @@
 #include <QApplication>
 
 class TelegramPostQuickView;
-
+class MediaPlayer;
 
 class Application final: public QApplication {
 private:
