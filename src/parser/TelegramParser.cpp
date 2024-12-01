@@ -58,7 +58,7 @@ TelegramParser::~TelegramParser() {
 }
 
 auto TelegramParser::createFileDownloadQueryHandler(const int index) {
-    return [this, &index](Object object) {
+    return [this, index](Object object) {
         if (object == nullptr || object->get_id() != td::td_api::file::ID)
             return checkFileDownloadError(std::move(object));
 
@@ -68,7 +68,6 @@ auto TelegramParser::createFileDownloadQueryHandler(const int index) {
 
         auto it = _downloadingMessages.find(file->id_);
 
-
         if (it != _downloadingMessages.end()) {
             qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024 * 1024) << " Mb";
             qDebug() << "Path to file: " << file->local_->path_.c_str();
@@ -76,16 +75,17 @@ auto TelegramParser::createFileDownloadQueryHandler(const int index) {
             if (file->local_->is_downloading_completed_)
                 it->second.attachments.append(file->local_->path_.c_str());
 
-            _downloadedMessages[index].
-                attachments.append(file->local_->path_.c_str());
+            if (!_downloadedMessages.empty()) {
+                _downloadedMessages[index].
+                    attachments.append(file->local_->path_.c_str());
+            }
+            else {
+                _downloadedMessages.push_back(Telegram::Message());
+                _downloadedMessages[0].
+                    attachments.append(file->local_->path_.c_str());
+            }
    
             _downloadingMessages.erase(it);
-
-            QMutexLocker locker(&_mutex);
-            _downloadedFiles++;
-            _waitCondition.wakeOne();
-
-            qDebug() << "wakeOne";
         }
     };
 }
@@ -104,11 +104,10 @@ auto TelegramParser::createHistoryRequestHandler() {
         qDebug() << "messages->total_count_: " << messages->total_count_;
 
         _downloadedMessages.clear();
-        _totalFilesToDownload = 0;
 
         for (auto index = 0; index < messages->total_count_; ++index) {
-          /*  if (index >= _countOfLatestDownloadingMessages * Telegram::maximumMessageAttachmentsCount)
-                break;*/
+           if (index >= _countOfLatestDownloadingMessages * Telegram::maximumMessageAttachmentsCount)
+                break;
 
             auto chatMessage = std::move(messages->messages_[index]);
             std::string sender = "";
@@ -126,11 +125,6 @@ auto TelegramParser::createHistoryRequestHandler() {
                     }
                 )
             );
-       
-            //if (!_downloadedMessages.empty())
-            //    if (_downloadedMessages.back().mediaAlbumId != chatMessage->media_album_id_
-            //        || _downloadedMessages.back().mediaAlbumId == 0) // Новое сообщение
-            //        ++index;
 
             if (_downloadedMessages.empty())
                 _downloadedMessages.push_back(Telegram::Message());
@@ -144,29 +138,28 @@ auto TelegramParser::createHistoryRequestHandler() {
             parseMessageContent(std::exchange(chatMessage, {}), text, mediaId);
 
             currentMessage.text = text.c_str();
-            
+
+            _downloadedMessages[_downloadedMessages.size() - 1] = currentMessage;
+
             if (mediaId != 0) {
-                _totalFilesToDownload++;
+                _downloadingMessages[mediaId] = currentMessage;
 
+                const auto attachmentsSize = currentMessage.attachments.size();
                 sendQuery(
-                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
-                    createFileDownloadQueryHandler(_downloadingMessages.size() - 1)
+                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
+                    createFileDownloadQueryHandler(_downloadedMessages.size() - 1)
                 );
+
+                while (_downloadedMessages[_downloadedMessages.size() - 1].attachments.size() == attachmentsSize) {
+                    processResponse(_clientManager->receive(10));
+                }
             }
 
-            if (!currentMessage.isNull()) {
-                if (mediaId == 0)
-                    _downloadedMessages[_downloadedMessages.size() - 1] = currentMessage;
-            }
-
-            if (_totalFilesToDownload > 0) {
-                QMutexLocker locker(&_mutex);
-                _waitCondition.wait(&_mutex, QDeadlineTimer::Forever);
-                --_totalFilesToDownload;
-            }
+            //if (!currentMessage.isNull() && mediaId == 0)
+            //    _downloadedMessages[_downloadedMessages.size() - 1] = currentMessage;
+            
         }
-
-        emit messagesLoaded();
+        emit messagesLoaded(); 
     };
 }
 
@@ -347,7 +340,7 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                 
                 sendQuery(
                     td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
-                    createFileDownloadQueryHandler(_downloadingMessages.size() - 1)
+                    createFileDownloadQueryHandler(_downloadedMessages.size() - 1)
                 );      
             },
             [](auto& update) {

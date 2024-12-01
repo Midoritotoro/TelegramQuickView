@@ -90,6 +90,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	//connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
 
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
+	addContent();
 }
 
 void TelegramPostQuickView::makeMessage(const QString& messageText, const QStringList& attachmentsPaths) {

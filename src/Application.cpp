@@ -17,11 +17,10 @@ Application::Application(int& argc, char** argv) :
     _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::Stack);
 
     _postsView->show();
-
-    auto list = QStringList({ videoPath });
+  /*  auto list = QStringList({ videoPath });
 
     for (int i = 0; i < 5; ++i)
-        _postsView->makeMessage(text, list);
+        _postsView->makeMessage(text, list);*/
 }
 
 Application::~Application() {
