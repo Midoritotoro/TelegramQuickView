@@ -294,37 +294,40 @@ void AbstractTelegramParser::handleTooManyRequestsError(const td::td_api::object
 }
 
 void AbstractTelegramParser::handleError(const td::td_api::object_ptr<td::td_api::error>& error) {
+    if (_authDialog == nullptr)
+        return;
+
     switch (error->code_) {
-    case Telegram::ErrorCodes::TooManyRequests:
-        _authDialog->setErrorCode(Telegram::ErrorCodes::TooManyRequests);
-        handleTooManyRequestsError(error);
+        case Telegram::ErrorCodes::TooManyRequests:
+            _authDialog->setErrorCode(Telegram::ErrorCodes::TooManyRequests);
+            handleTooManyRequestsError(error);
 
-        _authDialog->repaint();
-        break;
+            _authDialog->repaint();
+            break;
 
-    case Telegram::ErrorCodes::IncorrectApiHashOrId:
-        _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectApiHashOrId);
-        _authDialog->shake();
+        case Telegram::ErrorCodes::IncorrectApiHashOrId:
+            _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectApiHashOrId);
+            _authDialog->shake();
 
-        _authDialog->repaint();
-        break;
+            _authDialog->repaint();
+            break;
 
-    case Telegram::ErrorCodes::IncorrectAuthCode:
-        _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectAuthCode);
-        _authDialog->shake();
+        case Telegram::ErrorCodes::IncorrectAuthCode:
+            _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectAuthCode);
+            _authDialog->shake();
 
-        _authDialog->repaint();
+            _authDialog->repaint();
 
-        _authorizationCode.erase(_authorizationCode.begin(), _authorizationCode.end());
-        break;
+            _authorizationCode.erase(_authorizationCode.begin(), _authorizationCode.end());
+            break;
 
-    case Telegram::ErrorCodes::IncorrectPhoneNumber:
-        _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectPhoneNumber);
-        _authDialog->shake();
+        case Telegram::ErrorCodes::IncorrectPhoneNumber:
+            _authDialog->setErrorCode(Telegram::ErrorCodes::IncorrectPhoneNumber);
+            _authDialog->shake();
 
-        _authDialog->repaint();
-        break;
-    }
+            _authDialog->repaint();
+            break;
+        }
 }
 
 QString AbstractTelegramParser::findLargestNonSystemDisk() const {

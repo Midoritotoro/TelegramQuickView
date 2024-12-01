@@ -9,6 +9,7 @@
 #include <QDebug>
 
 #include <QMutex>
+#include "../media/ffmpeg/Guard.h"
 
 TelegramParser::TelegramParser():
     AbstractTelegramParser()
@@ -39,7 +40,9 @@ TelegramParser::TelegramParser():
     }
 
     connect(this, &AbstractTelegramParser::userAuthorized, [this]() {
-        
+        moveToThread(_thread);
+        if (!_thread->isRunning())
+            _thread->start();
     });
 
     foreach(const auto& id, _userDataManager->getIdsOfTargetChannels())
@@ -65,13 +68,15 @@ auto TelegramParser::createFileDownloadQueryHandler() {
 
         auto it = _downloadingMessages.find(file->id_);
 
+
         if (it != _downloadingMessages.end()) {
             qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024 * 1024) << " Mb";
             qDebug() << "Path to file: " << file->local_->path_.c_str();
+
             if (file->local_->is_downloading_completed_)
                 it->second.attachments.append(file->local_->path_.c_str());
 
-            if (_downloadedMessages.size() != 0)
+            if (!_downloadedMessages.empty())
                 _downloadedMessages[_downloadedMessages.size() - 1].
                     attachments.append(file->local_->path_.c_str());
             else
@@ -80,9 +85,9 @@ auto TelegramParser::createFileDownloadQueryHandler() {
    
             _downloadingMessages.erase(it);
 
-           // QMutexLocker locker(&_mutex);
+          /*  QMutexLocker locker(&_mutex);
             _downloadedFiles++;
-           // _waitCondition.wakeOne();
+            _waitCondition.wakeOne();*/
         }
     };
 }
@@ -95,16 +100,17 @@ auto TelegramParser::createHistoryRequestHandler() {
         }
 
         auto messages = td::move_tl_object_as<td::td_api::messages>(object);
-        qDebug() << "messages->total_count_: " << messages->total_count_;
         if (messages == nullptr || messages->total_count_ == 0)
             return;
+
+        qDebug() << "messages->total_count_: " << messages->total_count_;
 
         _downloadedMessages.clear();
         _totalFilesToDownload = 0;
 
-        for (auto index = 0; index < messages->total_count_;) {
-            if (index > _countOfLatestDownloadingMessages)
-                break;
+        for (auto index = 0; index < messages->total_count_; ++index) {
+           /* if (index >= _countOfLatestDownloadingMessages)
+                break;*/
 
             auto chatMessage = std::move(messages->messages_[index]);
             std::string sender = "";
@@ -126,36 +132,48 @@ auto TelegramParser::createHistoryRequestHandler() {
             if (mediaId != 0)
                 _totalFilesToDownload++;
 
-            if (_downloadedMessages.back().mediaAlbumId != chatMessage->media_album_id_
-                || _downloadedMessages.back().mediaAlbumId == 0) // Новое сообщение
-                ++index;
+            //if (!_downloadedMessages.empty())
+            //    if (_downloadedMessages.back().mediaAlbumId != chatMessage->media_album_id_
+            //        || _downloadedMessages.back().mediaAlbumId == 0) // Новое сообщение
+            //        ++index;
 
-            _downloadedMessages.push_back(Telegram::Message());
+            if (_downloadedMessages.empty())
+                _downloadedMessages.push_back(Telegram::Message());
 
-            _downloadedMessages[_downloadedMessages.size() - 1].sender = sender.c_str();
-            _downloadedMessages[_downloadedMessages.size() - 1].date = convertTdMessageTimestamp(chatMessage->date_).c_str();
-            _downloadedMessages[_downloadedMessages.size() - 1].mediaAlbumId = chatMessage->media_album_id_;
+            Telegram::Message currentMessage;
+
+            currentMessage.sender = sender.c_str();
+            currentMessage.date = convertTdMessageTimestamp(chatMessage->date_).c_str();
+            currentMessage.mediaAlbumId = chatMessage->media_album_id_;
 
             parseMessageContent(std::exchange(chatMessage, {}), text, mediaId);
 
             sendQuery(
-                td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
+                td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
                 createFileDownloadQueryHandler()
             );
 
-            _downloadedMessages[_downloadedMessages.size() - 1].text = QString::fromStdString(text);
+            currentMessage.text = text.c_str();
+            _downloadedMessages[_downloadedMessages.size() - 1] = currentMessage;
+
+            if (!currentMessage.isNull()) {
+                emit messagesLoaded();
+                break;
+            }
+            qDebug() << "parsed message with text: " << text;
         }
 
-     /*  if (_totalFilesToDownload > 0) {
+    /*   if (_totalFilesToDownload > 0) {
             QMutexLocker locker(&_mutex);
             _waitCondition.wait(&_mutex, QDeadlineTimer::Forever);
        }*/
 
-        emit messagesLoaded();
+       
     };
 }
 
 Telegram::Message TelegramParser::loadMessage() {
+    const auto test = Guard::finally([] { qDebug() << "message successfully returned";  });
     if (!_downloadedMessages.empty()) {
         auto message = _downloadedMessages.back();
         _downloadedMessages.pop_back();
@@ -167,10 +185,9 @@ Telegram::Message TelegramParser::loadMessage() {
 
     sendQuery(
         td::td_api::make_object<td::td_api::getChatHistory>(_chatIdsVector[0], 0, 
-        -_countOfLatestDownloadingMessages, _countOfLatestDownloadingMessages, false),
+        -Telegram::maximumMessageAttachmentsCount * _countOfLatestDownloadingMessages, 100, false),
         createHistoryRequestHandler()
     );
-
 
     bool needBreak = false;
     connect(this, &TelegramParser::messagesLoaded, [=, &needBreak]() {
@@ -178,9 +195,11 @@ Telegram::Message TelegramParser::loadMessage() {
         needBreak = true;
     });
 
-    while (!needBreak)
+    while (!needBreak) {
+        qDebug() << "process...";
         processResponse(_clientManager->receive(10));
-    
+    }
+
     if (_downloadedMessages.empty())
         return Telegram::Message();
     
