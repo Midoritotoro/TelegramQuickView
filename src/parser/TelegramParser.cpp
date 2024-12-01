@@ -72,19 +72,19 @@ auto TelegramParser::createFileDownloadQueryHandler(const int index) {
             qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024 * 1024) << " Mb";
             qDebug() << "Path to file: " << file->local_->path_.c_str();
 
-            if (file->local_->is_downloading_completed_)
+            if (file->local_->is_downloading_completed_) {
                 it->second.attachments.append(file->local_->path_.c_str());
 
-            if (!_downloadedMessages.empty()) {
-                _downloadedMessages[index].
-                    attachments.append(file->local_->path_.c_str());
+                if (!_downloadedMessages.empty()) {
+                    _downloadedMessages[index].
+                        attachments.append(file->local_->path_.c_str());
+                }
+                else {
+                    _downloadedMessages.push_back(Telegram::Message());
+                    _downloadedMessages[0].
+                        attachments.append(file->local_->path_.c_str());
+                }
             }
-            else {
-                _downloadedMessages.push_back(Telegram::Message());
-                _downloadedMessages[0].
-                    attachments.append(file->local_->path_.c_str());
-            }
-   
             _downloadingMessages.erase(it);
         }
     };
@@ -154,10 +154,6 @@ auto TelegramParser::createHistoryRequestHandler() {
                     processResponse(_clientManager->receive(10));
                 }
             }
-
-            //if (!currentMessage.isNull() && mediaId == 0)
-            //    _downloadedMessages[_downloadedMessages.size() - 1] = currentMessage;
-            
         }
         emit messagesLoaded(); 
     };
@@ -174,7 +170,7 @@ Telegram::Message TelegramParser::loadMessage() {
     }
 
     sendQuery(
-        td::td_api::make_object<td::td_api::getChatHistory>(_chatIdsVector[1], 0, 
+        td::td_api::make_object<td::td_api::getChatHistory>(_chatIdsVector[0], 0, 
         -Telegram::maximumMessageAttachmentsCount * _countOfLatestDownloadingMessages, 100, false),
         createHistoryRequestHandler()
     );

@@ -136,10 +136,7 @@ void TelegramPostQuickView::addContent() {
 	_chatScrollArea->disableScroll(true);
 
 	for (int count = 0; count < 5; ++count) {
-		qDebug() << "Trying to get message...";
-
 		const auto message = _telegramParser->loadMessage();
-		qDebug() << "message.isNull(): " << message.isNull();
 
 		if (message.isNull())
 			continue;
