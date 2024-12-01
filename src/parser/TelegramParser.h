@@ -16,7 +16,7 @@ private:
 	std::vector<Telegram::Message> _downloadedMessages;
 
 	QStringList _targetChannelsList;
-	std::vector<long long> _chatIdsVector;
+	std::vector<int64_t> _chatIdsVector;
 	
 	QMutex _mutex;
 	QWaitCondition _waitCondition;
@@ -41,7 +41,7 @@ private:
 	void startChatsChecking();
 
 	auto createHistoryRequestHandler();
-	auto createFileDownloadQueryHandler();
+	auto createFileDownloadQueryHandler(const int index);
 	void checkFileDownloadError(Object object);
 
 	std::string getUserName(std::int64_t user_id) const;

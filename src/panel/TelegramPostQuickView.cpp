@@ -132,20 +132,20 @@ void TelegramPostQuickView::attachmentCliked() {
 
 void TelegramPostQuickView::addContent() {
 	const auto guard = Guard::finally([this] { _chatScrollArea->disableScroll(false); });
-
 	_chatScrollArea->disableScroll(true);
-	++_currentPostIndex;
 
-	qDebug() << "Trying to get message...";
+	for (int count = 0; count < 5; ++count) {
+		qDebug() << "Trying to get message...";
 
-	const auto message = _telegramParser->loadMessage();
-	qDebug() << "message.isNull(): " << message.isNull();
+		const auto message = _telegramParser->loadMessage();
+		qDebug() << "message.isNull(): " << message.isNull();
 
-	if (message.isNull()) 
-		return;
+		if (message.isNull())
+			continue;
 
-	if (message.attachments.isEmpty() == false)
-		makeMessage(message.text, message.attachments);
-	else
-		makeMessage(message.text);
+		if (message.attachments.isEmpty() == false)
+			makeMessage(message.text, message.attachments);
+		else
+			makeMessage(message.text);
+	}
 }
