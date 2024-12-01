@@ -90,6 +90,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	//connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
 
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
+	addContent();
 }
 
 void TelegramPostQuickView::makeMessage(const QString& messageText, const QStringList& attachmentsPaths) {
@@ -134,15 +135,18 @@ void TelegramPostQuickView::addContent() {
 	_chatScrollArea->disableScroll(true);
 	++_currentPostIndex;
 
+	qDebug() << "Trying to get message...";
+
 	const auto message = _telegramParser->loadMessage();
+	qDebug() << "message.isNull(): " << message.isNull();
 
-	//if (message.isNull()) 
-	//	return;
+	if (message.isNull()) 
+		return;
 
-	//if (message.attachments.isEmpty() == false)
-	//	makeMessage(message.text, message.attachments);
-	//else
-	//	makeMessage(message.text);
+	if (message.attachments.isEmpty() == false)
+		makeMessage(message.text, message.attachments);
+	else
+		makeMessage(message.text);
 
 	_chatScrollArea->disableScroll(false);
 }

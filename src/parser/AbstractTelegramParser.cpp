@@ -25,6 +25,12 @@ AbstractTelegramParser::AbstractTelegramParser() :
     , _clientManager(std::make_unique<td::ClientManager>())
     , _thread(new QThread())
 {
+    if (_thread->isRunning())
+        _thread->quit();
+
+    moveToThread(_thread);
+    _thread->start();
+
     td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(0));
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
 
@@ -41,20 +47,18 @@ AbstractTelegramParser::AbstractTelegramParser() :
     _databaseDirectory = dir.absolutePath().toStdString();
     _filesDirectory = dir.absolutePath().toStdString() + "\\test";
    
-    _userDataManager->setDownloadSensitiveContentAbility(false);
+   /* _userDataManager->setDownloadSensitiveContentAbility(false);
     _userDataManager->setTargetChannels(QStringList({ "fksfhsfierw3irh", "antifishechki" }));
-    _userDataManager->setLastPostsCountForChannels(3);
+    _userDataManager->setLastPostsCountForChannels(3);*/
 
     authorizationCheck();
 }
 
 
 void AbstractTelegramParser::authorizationCheck() {
-    qDebug() << "ff";
     if (_userDataManager->isTelegramCredentialsValid())
         setTelegramCredentials(_userDataManager->getTelegramCredentials());
     
-    qDebug() << "f12f";
     qDebug() << isCredentialsAccepted() << isAuthorized();
     if (isCredentialsAccepted() && isAuthorized())
         return;
@@ -153,7 +157,7 @@ void AbstractTelegramParser::processResponse(td::ClientManager::Response respons
 void AbstractTelegramParser::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
     if (_isWaiting)
         return;
-    qDebug() << "auth update";
+
     td::td_api::downcast_call(
         *update, Telegram::overloaded(
             [this](td::td_api::updateAuthorizationState& update_authorization_state) {

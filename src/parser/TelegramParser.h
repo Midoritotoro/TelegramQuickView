@@ -3,8 +3,11 @@
 #include "AbstractTelegramParser.h"
 #include "data/PostSqlManager.h"
 
+#include <QMutex>
+#include <QWaitCondition>
 
 class TelegramParser: public AbstractTelegramParser {
+	Q_OBJECT
 private:
 	std::map<int64_t, td::td_api::object_ptr<td::td_api::user>> users_;
 	std::map<int64_t, std::string> chat_title_;
@@ -14,6 +17,12 @@ private:
 
 	QStringList _targetChannelsList;
 	std::vector<long long> _chatIdsVector;
+	
+	QMutex _mutex;
+	QWaitCondition _waitCondition;
+
+	int _downloadedFiles = 0;
+	int _totalFilesToDownload = 0;
 
 	int _countOfLatestDownloadingMessages = 1;
 	bool _downloadSensitiveContent;
@@ -22,6 +31,8 @@ public:
 	~TelegramParser();
 
 	[[nodiscard]] Telegram::Message loadMessage();
+Q_SIGNALS:
+	void messagesLoaded();
 protected:
 	void processResponse(td::ClientManager::Response response) override;
 private:
@@ -37,8 +48,5 @@ private:
     std::string getChatTitle(std::int64_t chat_id) const;
 
 	void on_NewMessageUpdate(td::td_api::object_ptr <td::td_api::Object> update);
-
-	std::uint64_t nextDownloadQueryId();
-
 	std::string convertTdMessageTimestamp(int64_t time);
 };
