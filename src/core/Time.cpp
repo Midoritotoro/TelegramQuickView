@@ -130,4 +130,10 @@ namespace Time {
 		return details::adjustTime();
 	}
 
+	QString formattedUnixTime(int64_t time) {
+		char buffer[20];
+		strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&time));
+
+		return buffer;
+	}
 } // namespace Time

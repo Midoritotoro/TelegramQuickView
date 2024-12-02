@@ -142,9 +142,8 @@ void TelegramPostQuickView::addContent() {
 		if (message.isNull())
 			continue;
 
-		if (message.attachments.isEmpty() == false)
-			makeMessage(message.text, message.attachments);
-		else
-			makeMessage(message.text);
+		message.attachments.isEmpty()
+			? makeMessage(message.text)
+			: makeMessage(message.text, message.attachments);
 	}
 }

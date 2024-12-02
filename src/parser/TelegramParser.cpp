@@ -1,15 +1,10 @@
 #include "TelegramParser.h"
 
-#include <iostream>
-#include <future>
-#include <xutility>
-#include <ctime>
-
-#include <QString>
-#include <QDebug>
-
 #include <QMutex>
 #include "../media/ffmpeg/Guard.h"
+
+#include "../core/Time.h"
+
 
 TelegramParser::TelegramParser():
     AbstractTelegramParser()
@@ -25,15 +20,10 @@ TelegramParser::TelegramParser():
                 if (object == nullptr)
                     return;
 
-                if (object->get_id() == td::td_api::error::ID) {
-                    auto error = td::move_tl_object_as<td::td_api::error>(object);
-                    std::cout << "Error: " << to_string(error) << std::flush;
+                if (object->get_id() == td::td_api::error::ID)
+                    handleError(td::move_tl_object_as<td::td_api::error>(object));
 
-                    handleError(error);
-                }
-
-                const auto chat = td::move_tl_object_as<td::td_api::chat>(object);
-                if (chat)
+                if (const auto chat = td::move_tl_object_as<td::td_api::chat>(object))
                     _userDataManager->setTargetChannelsChatIds(QList<qint64>({ chat->id_ }));
             }
         );
@@ -46,7 +36,7 @@ TelegramParser::TelegramParser():
     });
 
     foreach(const auto& id, _userDataManager->getIdsOfTargetChannels())
-        _chatIdsVector.push_back(id.toLongLong());
+        _chats.emplace(id.toLongLong());
 
     moveToThread(_thread);
     if (!_thread->isRunning())
@@ -69,13 +59,10 @@ auto TelegramParser::createFileDownloadQueryHandler(const int index) {
         auto it = _downloadingMessages.find(file->id_);
 
         if (it != _downloadingMessages.end()) {
-            qDebug() << "file->local_->is_downloading_completed_: " << file->local_->is_downloading_completed_ << " File size: " << file->size_ / (1024 * 1024) << " Mb";
-            qDebug() << "Path to file: " << file->local_->path_.c_str();
-
             if (file->local_->is_downloading_completed_) {
                 it->second.attachments.append(file->local_->path_.c_str());
 
-                if (!_downloadedMessages.empty()) {
+                if (!_downloadedMessages.empty() && index < _downloadedMessages.size()) {
                     _downloadedMessages[index].
                         attachments.append(file->local_->path_.c_str());
                 }
@@ -92,53 +79,32 @@ auto TelegramParser::createFileDownloadQueryHandler(const int index) {
 
 auto TelegramParser::createHistoryRequestHandler() {
     return [this](Object object) {
-        if (object == nullptr || object->get_id() == td::td_api::error::ID) {
-            qDebug() << "object == nullptr || object->get_id() != td::td_api::messages::ID";
+        if (object == nullptr || object->get_id() == td::td_api::error::ID)
             return checkFileDownloadError(std::move(object));
-        }
-
+        
         auto messages = td::move_tl_object_as<td::td_api::messages>(object);
         if (messages == nullptr || messages->total_count_ == 0)
             return;
 
         qDebug() << "messages->total_count_: " << messages->total_count_;
-
         _downloadedMessages.clear();
 
-        for (auto index = 0; index < messages->total_count_; ++index) {
-           if (index >= _countOfLatestDownloadingMessages * Telegram::maximumMessageAttachmentsCount)
+        for (auto index = 0, countOfDownloadedMessages = 0; index < messages->total_count_; ++index) {
+           if (index > _countOfLatestDownloadingMessages * Telegram::maximumMessageAttachmentsCount)
                 break;
 
-            auto chatMessage = std::move(messages->messages_[index]);
-            std::string sender = "";
+            auto message = std::move(messages->messages_[index]);
+            const auto messageId = message->id_;
 
-            std::string text = "";
-            int64_t mediaId = 0;
-
-            td::td_api::downcast_call(*chatMessage->sender_id_,
-                Telegram::overloaded(
-                    [this, &sender](td::td_api::messageSenderUser& user) {
-                        sender = getUserName(user.user_id_);
-                    },
-                    [this, &sender](td::td_api::messageSenderChat& chat) {
-                        sender = getChatTitle(chat.chat_id_);
-                    }
-                )
-            );
+            if (_parsedMessages.find(messageId) != _parsedMessages.end())
+                continue;
 
             if (_downloadedMessages.empty())
                 _downloadedMessages.push_back(Telegram::Message());
 
-            Telegram::Message currentMessage;
+            int64_t mediaId = 0;
 
-            currentMessage.sender = sender.c_str();
-            currentMessage.date = convertTdMessageTimestamp(chatMessage->date_).c_str();
-            currentMessage.mediaAlbumId = chatMessage->media_album_id_;
-
-            parseMessageContent(std::exchange(chatMessage, {}), text, mediaId);
-
-            currentMessage.text = text.c_str();
-
+            auto currentMessage = parseMessageContent(std::exchange(message, {}), mediaId);
             _downloadedMessages[_downloadedMessages.size() - 1] = currentMessage;
 
             if (mediaId != 0) {
@@ -154,23 +120,40 @@ auto TelegramParser::createHistoryRequestHandler() {
                     processResponse(_clientManager->receive(10));
                 }
             }
+
+            _parsedMessages.emplace(messageId);
+            ++countOfDownloadedMessages;
         }
+
+        auto iterator = _chats.find(_nextRawChat);
+
+        if (_nextRawChat != 0)
+            if (iterator != _chats.end()) {
+                ++iterator;
+                _nextRawChat = (iterator != _chats.end() ? *iterator : 0);
+            }
+            else
+                _nextRawChat = 0;
+        else
+            _nextRawChat = _chats.empty() ? 0 : *_chats.begin();
+
         emit messagesLoaded(); 
     };
 }
 
 Telegram::Message TelegramParser::loadMessage() {
-    const auto test = Guard::finally([] { qDebug() << "message successfully returned";  });
     if (!_downloadedMessages.empty()) {
-        qDebug() << "!_downloadedMessages.empty(): return prepared message";
         auto message = _downloadedMessages.back();
         _downloadedMessages.pop_back();
 
         return message;
     }
+    
+    if (_nextRawChat == 0)
+        _nextRawChat = *_chats.begin();
 
     sendQuery(
-        td::td_api::make_object<td::td_api::getChatHistory>(_chatIdsVector[0], 0, 
+        td::td_api::make_object<td::td_api::getChatHistory>(*_chats.find(_nextRawChat), 0,
         -Telegram::maximumMessageAttachmentsCount * _countOfLatestDownloadingMessages, 100, false),
         createHistoryRequestHandler()
     );
@@ -192,24 +175,48 @@ Telegram::Message TelegramParser::loadMessage() {
     return message;
 }
 
-void TelegramParser::parseMessageContent(td::td_api::object_ptr<td::td_api::message>&& message, std::string& text, int64_t& mediaId) {
-    switch (message->content_->get_id()) {
+Telegram::Message TelegramParser::parseMessageContent(
+    td::td_api::object_ptr<td::td_api::message>&& sourceMessage,
+    int64_t& destinationMediaId) 
+{
+    Telegram::Message message;
+
+    message.mediaAlbumId = sourceMessage->media_album_id_;
+    message.date = Time::formattedUnixTime(sourceMessage->date_);
+
+    td::td_api::downcast_call(*sourceMessage->sender_id_,
+        Telegram::overloaded(
+            [this, &message](td::td_api::messageSenderUser& user) {
+                message.sender = getUserName(user.user_id_).c_str();
+            },
+            [this, &message](td::td_api::messageSenderChat& chat) {
+                message.sender = getChatTitle(chat.chat_id_).c_str();
+            }
+        )
+    );
+
+    switch (sourceMessage->content_->get_id()) {
         case td::td_api::messageText::ID:
-            text = static_cast<td::td_api::messageText&>(*message->content_).text_->text_;
+            message.text = static_cast<td::td_api::messageText&>(*sourceMessage->content_).text_->text_.c_str();
             break;
 
         case td::td_api::messagePhoto::ID:
-            mediaId = static_cast<td::td_api::messagePhoto&>(*message->content_).photo_->sizes_.back()->photo_->id_;
+            destinationMediaId = static_cast<td::td_api::messagePhoto&>(*sourceMessage->content_).photo_->sizes_.back()->photo_->id_;
+            message.text = static_cast<td::td_api::messagePhoto&>(*sourceMessage->content_).caption_->text_.c_str();
             break;
 
         case td::td_api::messageVideo::ID:
-            mediaId = static_cast<td::td_api::messageVideo&>(*message->content_).video_->video_->id_;
+            destinationMediaId = static_cast<td::td_api::messageVideo&>(*sourceMessage->content_).video_->video_->id_;
+            message.text = static_cast<td::td_api::messageVideo&>(*sourceMessage->content_).caption_->text_.c_str();
             break;
 
         case td::td_api::messageDocument::ID:
-            mediaId = static_cast<td::td_api::messageDocument&>(*message->content_).document_->document_->id_;
+            destinationMediaId = static_cast<td::td_api::messageDocument&>(*sourceMessage->content_).document_->document_->id_;
+            message.text = static_cast<td::td_api::messageDocument&>(*sourceMessage->content_).caption_->text_.c_str();
             break;
     }
+
+    return message;
 }
 
 void TelegramParser::startChatsChecking() {
@@ -222,7 +229,7 @@ void TelegramParser::checkFileDownloadError(Object object) {
         return;
 
     auto error = td::move_tl_object_as<td::td_api::error>(object);
-    std::cout << "Error: " << to_string(error) << std::flush;
+    qDebug() << "Error: " << to_string(error);
 
     handleError(error);
     on_NewMessageUpdate(std::move(object));
@@ -279,19 +286,15 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                     return;
                 }
 
-                auto chatId = update_new_message.message_->chat_id_;
-                bool isTarget = false;
-                QString sender = "";
-
-                for (int index = 0; index < _chatIdsVector.size(); ++index) 
-                    if (_chatIdsVector[index] == chatId) {
-                        isTarget = true;
-                        break;
-                    }
-
-                if (isTarget == false)
+                if (_chats.find(update_new_message.message_->chat_id_) == _chats.end())
                     return;
 
+                if (_parsedMessages.find(update_new_message.message_->id_) != _parsedMessages.end())
+                    return;
+
+                _parsedMessages.emplace(update_new_message.message_->id_);
+
+                auto sender = QString();
                 td::td_api::downcast_call(*update_new_message.message_->sender_id_,
                     Telegram::overloaded(
                         [this, &sender](td::td_api::messageSenderUser& user) {
@@ -303,22 +306,12 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                     )
                 );
 
-                std::string text;
                 int64_t mediaId = 0;
-
-                parseMessageContent(std::move(update_new_message.message_), text, mediaId);
-
-                Telegram::Message message;
-
-                message.date = convertTdMessageTimestamp(update_new_message.message_->date_).c_str();
-                message.sender = sender;
-                message.text = text.c_str();
-                message.mediaAlbumId = update_new_message.message_->media_album_id_;
+                auto message = parseMessageContent(std::move(update_new_message.message_), mediaId);
 
                 if (mediaId == 0) {
                     _downloadedMessages.push_back(message);
-                    emit messagesLoaded();
-                    return;
+                    return emit messagesLoaded();
                 }
 
                 if (!_downloadingMessages.empty()) {
@@ -346,16 +339,4 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
     );
 
     processUpdate(std::move(update));
-}
-
-std::string TelegramParser::convertTdMessageTimestamp(int64_t time) {
-    char buffer[20];
-
-    time_t _time = static_cast<time_t>(time);
-    tm* localTime = localtime(&_time);
-
-    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localTime);
-    std::string formattedDate = buffer;
-
-    return formattedDate;
 }

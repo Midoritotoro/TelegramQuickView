@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <QString>
 
 namespace Time {
 	using time = std::int64_t;
@@ -25,5 +26,7 @@ namespace Time {
 	[[nodiscard]] profile_time profile();
 
 	bool adjustTime();
+
+	[[nodiscard]] QString formattedUnixTime(int64_t time);
 
 } // namespace Time

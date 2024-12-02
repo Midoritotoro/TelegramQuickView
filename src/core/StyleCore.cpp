@@ -236,15 +236,6 @@ namespace style {
 
 		auto thumbnailImage = QImage();
 
-		//if (QMimeDatabase().mimeTypeForFile(path).name().contains("image"))
-		//	thumbnailImage.loadFromData(mediaData);
-		//else {
-		//	auto pixmap = QPixmap(size);
-		//	pixmap.fill(Qt::black);
-		//	
-		//	return pixmap;
-		//}
-
 		switch (MediaPlayer::detectMediaType(path)) {
 			case MediaPlayer::MediaType::Image:
 				thumbnailImage.loadFromData(mediaData);
