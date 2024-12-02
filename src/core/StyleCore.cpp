@@ -1,7 +1,7 @@
 #include "StyleCore.h"
 
-//#include "../media/ffmpeg/FrameGenerator.h"
-//#include "../media/player/MediaPlayer.h"
+#include "../media/ffmpeg/FrameGenerator.h"
+#include "../media/player/MediaPlayer.h"
 
 #include <QMimeDataBase>
 
@@ -236,16 +236,16 @@ namespace style {
 
 		auto thumbnailImage = QImage();
 
-		if (QMimeDatabase().mimeTypeForFile(path).name().contains("image"))
-			thumbnailImage.loadFromData(mediaData);
-		else {
-			auto pixmap = QPixmap(size);
-			pixmap.fill(Qt::black);
-			
-			return pixmap;
-		}
+		//if (QMimeDatabase().mimeTypeForFile(path).name().contains("image"))
+		//	thumbnailImage.loadFromData(mediaData);
+		//else {
+		//	auto pixmap = QPixmap(size);
+		//	pixmap.fill(Qt::black);
+		//	
+		//	return pixmap;
+		//}
 
-		/*switch (MediaPlayer::detectMediaType(path)) {
+		switch (MediaPlayer::detectMediaType(path)) {
 			case MediaPlayer::MediaType::Image:
 				thumbnailImage.loadFromData(mediaData);
 				break;
@@ -260,7 +260,7 @@ namespace style {
 
 			case MediaPlayer::MediaType::Unknown:
 				return QPixmap();
-		}*/
+		}
 
 		if (thumbnailImage.isNull())
 			return QPixmap();

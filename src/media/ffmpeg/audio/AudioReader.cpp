@@ -7,27 +7,27 @@ extern "C" {
 #include <qDebug>
 
 namespace FFmpeg {
-	namespace {
-		ALuint CreateSource() {
-			auto source = ALuint(0);
-			alGenSources(1, &source);
-
-			alSourcef(source, AL_PITCH, 1.f);
-			alSourcef(source, AL_GAIN, 1.f);
-
-			alSource3f(source, AL_POSITION, 0, 0, 0);
-			alSource3f(source, AL_VELOCITY, 0, 0, 0);
-			
-			return source;
-		}
-
-		ALuint CreateBuffer() {
-			auto buffer = ALuint(0);
-			alGenBuffers(1, &buffer);
-
-			return buffer;
-		}
-	} // namespace
+//	namespace {
+//		ALuint CreateSource() {
+//			auto source = ALuint(0);
+//			alGenSources(1, &source);
+//
+//			alSourcef(source, AL_PITCH, 1.f);
+//			alSourcef(source, AL_GAIN, 1.f);
+//
+//			alSource3f(source, AL_POSITION, 0, 0, 0);
+//			alSource3f(source, AL_VELOCITY, 0, 0, 0);
+//			
+//			return source;
+//		}
+//
+//		ALuint CreateBuffer() {
+//			auto buffer = ALuint(0);
+//			alGenBuffers(1, &buffer);
+//
+//			return buffer;
+//		}
+//	} // namespace
 
 	AudioReader::AudioReader(const QByteArray& data):
 		AbstractAudioFFmpegReader(data) 
@@ -66,7 +66,7 @@ namespace FFmpeg {
 			_samples.insert(_samples.end(), sampleBytes.data(), sampleBytes.data() + sampleBytes.size());
 		} while (true);
 
-		qDebug() << "using al...";
+		/*qDebug() << "using al...";
 		qDebug() << _samples.data() << _samples.size();
 		qDebug() << "_samplesCount: " << _samplesCount;
 
@@ -101,7 +101,7 @@ namespace FFmpeg {
 		alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
 		qDebug() << (state == AL_PLAYING);
 
-		alGetError();
+		alGetError();*/
 	}
 
 	bool AudioReader::open(Time::time positionMs, float speed) {

@@ -72,9 +72,49 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/data/SqlReader.cpp
 	src/panel/data/SqlReader.h
 
+	src/media/ffmpeg/Utility.cpp
+	src/media/ffmpeg/Utility.h 
+	src/media/ffmpeg/FrameGenerator.h
+    src/media/ffmpeg/FrameGenerator.cpp
+        
+    src/media/ffmpeg/HardwareAcceleration.cpp
+    src/media/ffmpeg/HardwareAcceleration.h
+        
+    src/media/player/MediaPlayer.h 
+    src/media/player/MediaPlayer.cpp
+    src/media/Manager.cpp
+    src/media/Manager.h
+
+    src/media/player/EnhancedSlider.cpp
+    src/media/player/EnhancedSlider.h
+    src/media/player/FullScreenButton.cpp
+    src/media/player/FullScreenButton.h
+    src/media/player/MediaPlayerPanel.cpp
+    src/media/player/MediaPlayerPanel.h
+    src/media/player/VideoStateWidget.cpp
+    src/media/player/VideoStateWidget.h
+    src/media/player/VolumeController.cpp
+    src/media/player/VolumeController.h
+    src/media/player/SpeedButton.cpp
+    src/media/player/SpeedButton.h
+
+    src/media/ClickableLabel.cpp
+    src/media/ClickableLabel.h
+   
+    src/media/ffmpeg/audio/AudioReader.cpp
+    src/media/ffmpeg/audio/AudioReader.h
+    src/media/ffmpeg/Scale.cpp
+    src/media/ffmpeg/Scale.h 
+    src/media/ffmpeg/audio/AbstractAudioLoader.cpp
+    src/media/ffmpeg/audio/AbstractAudioLoader.h
+    src/media/ffmpeg/audio/AbstractAudioReader.cpp
+    src/media/ffmpeg/audio/AbstractAudioReader.h
+    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
+    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
+
     src/parser/effects/shaders/dual_kawase_down.frag
-	src/parser/effects/shaders/dual_kawase_up.frag
-	src/parser/effects/shaders/simple.vert
+    src/parser/effects/shaders/dual_kawase_up.frag
+    src/parser/effects/shaders/simple.vert
 
 	src/parser/effects/vertex.h
     src/parser/effects/OpenGLBlur.cpp
@@ -98,8 +138,8 @@ SET(MAIN_SOURCES main.cpp
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-   # set_target_properties(${PROJECT_NAME} PROPERTIES
-      #  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+   set_target_properties(${PROJECT_NAME} PROPERTIES
+       MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
     target_compile_options(${PROJECT_NAME}
     INTERFACE
@@ -130,11 +170,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         /Zc:__cplusplus
     )
 
-#    target_link_options(${PROJECT_NAME}
-#    INTERFACE
- #       $<IF:$<CONFIG:Debug>,/NODEFAULTLIB:LIBCMT,/DEBUG;/OPT:REF>
-  #      /INCREMENTAL:NO
- #   )
+    target_link_options(${PROJECT_NAME}
+    INTERFACE
+        $<IF:$<CONFIG:Debug>,/NODEFAULTLIB:LIBCMT, /NODEFAULTLIB:LIBCMTD,/DEBUG;/OPT:REF>
+       /INCREMENTAL:NO
+    )
 
     if (WIN32)
         target_link_libraries(${PROJECT_NAME}
@@ -156,6 +196,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 			Qt6::MultimediaWidgets
 			Qt6::Sql
             Qt6::OpenGL
+        #   app::external_openal
+            app::external_ffmpeg
             Td::TdStatic
 )
 
