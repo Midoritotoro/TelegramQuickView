@@ -11,6 +11,8 @@
 #include "MessageAttachment.h"
 #include "History.h"
 
+#include "MessageMediaViewer.h"
+
 #include <QShowEvent>
 #include <QElapsedTimer>
 #include <QScrollBar>
@@ -44,7 +46,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	_chatScrollArea->setOpacity(0.1);
 	_chatScrollArea->setTrackingContent(true);
 
-	//_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
 
 	_chatScrollArea->setWidgetResizable(true);
 
@@ -86,8 +88,8 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
-	//connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
-	//connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
+	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
+	connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
 
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
 }
@@ -121,11 +123,11 @@ void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMed
 void TelegramPostQuickView::attachmentCliked() {
 	auto attachment = (MessageAttachment*)sender();
 
-	//if (_messageMediaViewer == nullptr)
-	//	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+	if (_messageMediaViewer == nullptr)
+		_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
 
-	//_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
-	//_messageMediaViewer->show();
+	_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
+	_messageMediaViewer->show();
 
 	showMinimized();
 }

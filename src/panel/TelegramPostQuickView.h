@@ -18,8 +18,10 @@ private:
 	MessageWidget::MessageMediaDisplayMode _displayMode;
 
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;
-//	std::unique_ptr<MessageMediaViewer> _messageMediaViewer = nullptr;
+
+	std::unique_ptr<MessageMediaViewer> _messageMediaViewer = nullptr;
 	std::unique_ptr<TelegramParser> _telegramParser = nullptr;
+
 	ContinuousScroll* _chatScrollArea = nullptr;
 
 	std::shared_ptr<History> _messagesHistory;

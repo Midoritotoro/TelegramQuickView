@@ -2,8 +2,10 @@
 
 #include "NavigationButton.h"
 #include "../media/player/WidgetsHider.h"
+
 #include "MessageTextView.h"
 #include "MessageAttachment.h"
+
 #include "MessageWidget.h"
 #include "History.h"
 

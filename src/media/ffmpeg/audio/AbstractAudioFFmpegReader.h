@@ -3,6 +3,7 @@
 //#include <al.h>
 //#include <alc.h>
 
+/** Unsigned 8-bit mono buffer format. */
 #define AL_FORMAT_MONO8                          0x1100
 /** Signed 16-bit mono buffer format. */
 #define AL_FORMAT_MONO16                         0x1101
@@ -10,6 +11,7 @@
 #define AL_FORMAT_STEREO8                        0x1102
 /** Signed 16-bit stereo buffer format. */
 #define AL_FORMAT_STEREO16                       0x1103
+
 
 namespace FFmpeg {
 	class AbstractAudioFFmpegReader : public AbstractAudioReader {

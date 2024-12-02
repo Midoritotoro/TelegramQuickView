@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "AbstractTelegramParser.h"
-#include "data/PostSqlManager.h"
 
 #include <QMutex>
 #include <QWaitCondition>

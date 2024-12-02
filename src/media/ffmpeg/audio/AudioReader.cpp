@@ -7,27 +7,27 @@ extern "C" {
 #include <qDebug>
 
 namespace FFmpeg {
-//	namespace {
-//		ALuint CreateSource() {
-//			auto source = ALuint(0);
-//			alGenSources(1, &source);
-//
-//			alSourcef(source, AL_PITCH, 1.f);
-//			alSourcef(source, AL_GAIN, 1.f);
-//
-//			alSource3f(source, AL_POSITION, 0, 0, 0);
-//			alSource3f(source, AL_VELOCITY, 0, 0, 0);
-//			
-//			return source;
-//		}
-//
-//		ALuint CreateBuffer() {
-//			auto buffer = ALuint(0);
-//			alGenBuffers(1, &buffer);
-//
-//			return buffer;
-//		}
-//	} // namespace
+	//namespace {
+	//	ALuint CreateSource() {
+	//		auto source = ALuint(0);
+	//		alGenSources(1, &source);
+
+	//		alSourcef(source, AL_PITCH, 1.f);
+	//		alSourcef(source, AL_GAIN, 1.f);
+
+	//		alSource3f(source, AL_POSITION, 0, 0, 0);
+	//		alSource3f(source, AL_VELOCITY, 0, 0, 0);
+	//		
+	//		return source;
+	//	}
+
+	//	ALuint CreateBuffer() {
+	//		auto buffer = ALuint(0);
+	//		alGenBuffers(1, &buffer);
+
+	//		return buffer;
+	//	}
+	//} // namespace
 
 	AudioReader::AudioReader(const QByteArray& data):
 		AbstractAudioFFmpegReader(data) 
@@ -66,42 +66,42 @@ namespace FFmpeg {
 			_samples.insert(_samples.end(), sampleBytes.data(), sampleBytes.data() + sampleBytes.size());
 		} while (true);
 
-		/*qDebug() << "using al...";
-		qDebug() << _samples.data() << _samples.size();
-		qDebug() << "_samplesCount: " << _samplesCount;
+		//qDebug() << "using al...";
+		//qDebug() << _samples.data() << _samples.size();
+		//qDebug() << "_samplesCount: " << _samplesCount;
 
-		alGetError();
+		//alGetError();
 
-		ALuint _alSource = CreateSource();
-		ALuint _alBuffer = CreateBuffer();
+		//ALuint _alSource = CreateSource();
+		//ALuint _alBuffer = CreateBuffer();
 
-		alGetError();
+		//alGetError();
 
-		alBufferData(_alBuffer, format(), _samples.data(), _samples.size(), samplesFrequency());
-		alSourcei(_alSource, AL_BUFFER, _alBuffer);
+		//alBufferData(_alBuffer, format(), _samples.data(), _samples.size(), samplesFrequency());
+		//alSourcei(_alSource, AL_BUFFER, _alBuffer);
 
-		alGetError();
+		//alGetError();
 
-		alSourcei(_alSource, AL_LOOPING, 1);
-		alSourcef(_alSource, AL_GAIN, _volume);
-		alSourcei(_alSource, AL_SAMPLE_OFFSET, static_cast<ALint>(_position));
-		
-		alGetError();
+		//alSourcei(_alSource, AL_LOOPING, 1);
+		//alSourcef(_alSource, AL_GAIN, _volume);
+		//alSourcei(_alSource, AL_SAMPLE_OFFSET, static_cast<ALint>(_position));
+		//
+		//alGetError();
 
-		ALint state;
-		alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
+		//ALint state;
+		//alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
 
-		alGetError();
+		//alGetError();
 
-		if (state != AL_PLAYING)
-			alSourcePlay(_alSource);
+		//if (state != AL_PLAYING)
+		//	alSourcePlay(_alSource);
 
-		alGetError();
+		//alGetError();
 
-		alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
-		qDebug() << (state == AL_PLAYING);
+		//alGetSourcei(_alSource, AL_SOURCE_STATE, &state);
+		//qDebug() << (state == AL_PLAYING);
 
-		alGetError();*/
+		//alGetError();
 	}
 
 	bool AudioReader::open(Time::time positionMs, float speed) {

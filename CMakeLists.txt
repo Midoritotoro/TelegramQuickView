@@ -36,10 +36,13 @@ SET(MAIN_SOURCES main.cpp
 
 	src/core/AutoRunUtils.cpp
 	src/core/AutoRunUtils.h
+
 	src/core/MouseDetector.cpp
 	src/core/MouseDetector.h
+
 	src/core/StyleCore.cpp
 	src/core/StyleCore.h
+
 	src/core/Time.cpp
 	src/core/Time.h
 
@@ -54,26 +57,34 @@ SET(MAIN_SOURCES main.cpp
 
 	src/panel/MessageWidget.cpp
 	src/panel/MessageWidget.h
+
 	src/panel/TelegramPostQuickView.cpp
 	src/panel/TelegramPostQuickView.h
+
+    src/panel/MessageMediaViewer.cpp
+	src/panel/MessageMediaViewer.h
+
 	src/panel/MessageAttachment.cpp
 	src/panel/MessageAttachment.h
 
 	src/panel/History.cpp
 	src/panel/History.h
+
 	src/panel/NavigationButton.cpp
 	src/panel/NavigationButton.h
+
 	src/panel/MessageTextView.cpp
 	src/panel/MessageTextView.h
+
 	src/panel/ContinuousScroll.cpp
 	src/panel/ContinuousScroll.h
+
 	src/panel/ScrollArea.cpp
 	src/panel/ScrollArea.h
-	src/panel/data/SqlReader.cpp
-	src/panel/data/SqlReader.h
 
 	src/media/ffmpeg/Utility.cpp
 	src/media/ffmpeg/Utility.h 
+
 	src/media/ffmpeg/FrameGenerator.h
     src/media/ffmpeg/FrameGenerator.cpp
         
@@ -82,19 +93,25 @@ SET(MAIN_SOURCES main.cpp
         
     src/media/player/MediaPlayer.h 
     src/media/player/MediaPlayer.cpp
+
     src/media/Manager.cpp
     src/media/Manager.h
 
     src/media/player/EnhancedSlider.cpp
     src/media/player/EnhancedSlider.h
+
     src/media/player/FullScreenButton.cpp
     src/media/player/FullScreenButton.h
+
     src/media/player/MediaPlayerPanel.cpp
     src/media/player/MediaPlayerPanel.h
+
     src/media/player/VideoStateWidget.cpp
     src/media/player/VideoStateWidget.h
+
     src/media/player/VolumeController.cpp
     src/media/player/VolumeController.h
+
     src/media/player/SpeedButton.cpp
     src/media/player/SpeedButton.h
 
@@ -103,12 +120,16 @@ SET(MAIN_SOURCES main.cpp
    
     src/media/ffmpeg/audio/AudioReader.cpp
     src/media/ffmpeg/audio/AudioReader.h
+
     src/media/ffmpeg/Scale.cpp
     src/media/ffmpeg/Scale.h 
+
     src/media/ffmpeg/audio/AbstractAudioLoader.cpp
     src/media/ffmpeg/audio/AbstractAudioLoader.h
+
     src/media/ffmpeg/audio/AbstractAudioReader.cpp
     src/media/ffmpeg/audio/AbstractAudioReader.h
+
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
 
@@ -117,22 +138,23 @@ SET(MAIN_SOURCES main.cpp
     src/parser/effects/shaders/simple.vert
 
 	src/parser/effects/vertex.h
+
     src/parser/effects/OpenGLBlur.cpp
 	src/parser/effects/OpenGLBlur.h
 
 	src/parser/data/UserDataManager.cpp
 	src/parser/data/UserDataManager.h
+
 	src/parser/AuthenticationDialog.cpp
 	src/parser/AuthenticationDialog.h
 
 	src/parser/utils.h
+
 	src/parser/AbstractTelegramParser.cpp
 	src/parser/AbstractTelegramParser.h
+
 	src/parser/TelegramParser.cpp
 	src/parser/TelegramParser.h
-
-	src/parser/data/PostSqlManager.cpp
-	src/parser/data/PostSqlManager.h
 )
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
@@ -172,7 +194,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
     target_link_options(${PROJECT_NAME}
     INTERFACE
-        $<IF:$<CONFIG:Debug>,/NODEFAULTLIB:LIBCMT, /NODEFAULTLIB:LIBCMTD,/DEBUG;/OPT:REF>
+        $<IF:$<CONFIG:Debug>, /NODEFAULTLIB:LIBCMT, /DEBUG;/OPT:REF>
        /INCREMENTAL:NO
     )
 
@@ -196,9 +218,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 			Qt6::MultimediaWidgets
 			Qt6::Sql
             Qt6::OpenGL
-        #   app::external_openal
+            #app::external_openal
             app::external_ffmpeg
-            Td::TdStatic
+            Td::tdclient
 )
 
 
