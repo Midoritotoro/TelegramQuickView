@@ -90,7 +90,7 @@ auto TelegramParser::createHistoryRequestHandler() {
         _downloadedMessages.clear();
 
         for (auto index = 0, countOfDownloadedMessages = 0; index < messages->total_count_; ++index) {
-           if (index > _countOfLatestDownloadingMessages * Telegram::maximumMessageAttachmentsCount)
+           if (countOfDownloadedMessages > _countOfLatestDownloadingMessages)
                 break;
 
             auto message = std::move(messages->messages_[index]);
@@ -99,13 +99,10 @@ auto TelegramParser::createHistoryRequestHandler() {
             if (_parsedMessages.find(messageId) != _parsedMessages.end())
                 continue;
 
-            if (_downloadedMessages.empty())
-                _downloadedMessages.push_back(Telegram::Message());
-
             int64_t mediaId = 0;
 
             auto currentMessage = parseMessageContent(std::exchange(message, {}), mediaId);
-            _downloadedMessages[_downloadedMessages.size() - 1] = currentMessage;
+            _downloadedMessages.push_back(currentMessage);
 
             if (mediaId != 0) {
                 _downloadingMessages[mediaId] = currentMessage;
@@ -127,15 +124,12 @@ auto TelegramParser::createHistoryRequestHandler() {
 
         auto iterator = _chats.find(_nextRawChat);
 
-        if (_nextRawChat != 0)
-            if (iterator != _chats.end()) {
-                ++iterator;
-                _nextRawChat = (iterator != _chats.end() ? *iterator : 0);
-            }
-            else
-                _nextRawChat = 0;
-        else
-            _nextRawChat = _chats.empty() ? 0 : *_chats.begin();
+        _nextRawChat != 0
+            ? iterator != _chats.end()
+                ? _nextRawChat = (++iterator != _chats.end() ? *iterator : 0)
+                : _nextRawChat = 0
+            :
+              _nextRawChat = _chats.empty() ? 0 : *_chats.begin();
 
         emit messagesLoaded(); 
     };
@@ -228,7 +222,7 @@ void TelegramParser::checkFileDownloadError(Object object) {
     if (object == nullptr || object->get_id() != td::td_api::error::ID)
         return;
 
-    auto error = td::move_tl_object_as<td::td_api::error>(object);
+    const auto error = td::move_tl_object_as<td::td_api::error>(object);
     qDebug() << "Error: " << to_string(error);
 
     handleError(error);
