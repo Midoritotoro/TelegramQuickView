@@ -41,10 +41,9 @@ Q_SIGNALS:
 protected:
 	void processResponse(td::ClientManager::Response response) override;
 private:
-
 	[[nodiscard]] bool isMediaGrouped(td::td_api::object_ptr<td::td_api::message>&& message);
 	[[nodiscard]] Telegram::Message parseMessageContent(
-		td::td_api::object_ptr<td::td_api::message>&& sourceMessage, 
+		td::td_api::message& sourceMessage, 
 		int64_t& destinationMediaId);
 
 	void startChatsChecking();

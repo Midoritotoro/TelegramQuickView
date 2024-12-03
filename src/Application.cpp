@@ -14,13 +14,13 @@ Application::Application(int& argc, char** argv) :
     QString videoPath = "C:\\Users\\danya\\Downloads\\2024-11-22_22-56-37.png";
 
     _postsView = std::make_unique<TelegramPostQuickView>();
-    _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::Stack);
+    _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
     _postsView->show();
      auto list = QStringList({ videoPath });
 
-     for (int i = 0; i < 5; ++i)
-        _postsView->makeMessage(text, list);
+  /*   for (int i = 0; i < 5; ++i)
+        _postsView->makeMessage(text, list);*/
 }
 
 Application::~Application() {

@@ -95,6 +95,9 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 
 	//connect(_mouseDetector.get(), &MouseDetector::needsToShow, this, &TelegramPostQuickView::show);
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
+	addContent();
+	addContent();
+	addContent();
 }
 
 void TelegramPostQuickView::makeMessage(const QString& messageText, const QStringList& attachmentsPaths) {

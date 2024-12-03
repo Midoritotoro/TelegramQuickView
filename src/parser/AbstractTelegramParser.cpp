@@ -47,9 +47,9 @@ AbstractTelegramParser::AbstractTelegramParser() :
     _databaseDirectory = dir.absolutePath().toStdString();
     _filesDirectory = dir.absolutePath().toStdString() + "\\test";
    
-   /* _userDataManager->setDownloadSensitiveContentAbility(false);
-    _userDataManager->setTargetChannels(QStringList({ "fksfhsfierw3irh", "antifishechki" }));
-    _userDataManager->setLastPostsCountForChannels(3);*/
+   // _userDataManager->setDownloadSensitiveContentAbility(false);
+    _userDataManager->setTargetChannels(QStringList({ "fksfhsfierw3irh" }));
+   //  _userDataManager->setLastPostsCountForChannels(3);
 
     authorizationCheck();
 }
