@@ -10,6 +10,7 @@
 
 class TelegramParser;
 class MessageMediaViewer;
+class MouseDetector;
 
 
 class TelegramPostQuickView: public QWidget {
@@ -22,9 +23,10 @@ private:
 	std::unique_ptr<MessageMediaViewer> _messageMediaViewer = nullptr;
 	std::unique_ptr<TelegramParser> _telegramParser = nullptr;
 
-	ContinuousScroll* _chatScrollArea = nullptr;
-
+	std::unique_ptr<MouseDetector> _mouseDetector = nullptr;
 	std::shared_ptr<History> _messagesHistory;
+
+	ContinuousScroll* _chatScrollArea = nullptr;
 
 	int _currentPostIndex;
 public:

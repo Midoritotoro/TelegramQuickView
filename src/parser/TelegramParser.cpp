@@ -5,6 +5,9 @@
 
 #include "../core/Time.h"
 
+#include <QMutexLocker>
+#include <QMutex>
+
 
 TelegramParser::TelegramParser():
     AbstractTelegramParser()
@@ -104,7 +107,11 @@ auto TelegramParser::createHistoryRequestHandler() {
             auto currentMessage = parseMessageContent(std::exchange(message, {}), mediaId);
             _downloadedMessages.push_back(currentMessage);
 
+            const auto mediaGrouped = isMediaGrouped(std::exchange(message, {}));
+
             if (mediaId != 0) {
+                if (mediaGrouped)
+                   --countOfDownloadedMessages;
                 _downloadingMessages[mediaId] = currentMessage;
 
                 const auto attachmentsSize = currentMessage.attachments.size();
@@ -147,8 +154,10 @@ Telegram::Message TelegramParser::loadMessage() {
         _nextRawChat = *_chats.begin();
 
     sendQuery(
-        td::td_api::make_object<td::td_api::getChatHistory>(*_chats.find(_nextRawChat), 0,
-        -Telegram::maximumMessageAttachmentsCount * _countOfLatestDownloadingMessages, 100, false),
+        td::td_api::make_object<td::td_api::getChatHistory>(
+            *_chats.find(_nextRawChat), 0,
+            -Telegram::maximumMessageAttachmentsCount * _countOfLatestDownloadingMessages,
+            Telegram::maximumMessageAttachmentsCount * _countOfLatestDownloadingMessages, false),
         createHistoryRequestHandler()
     );
 
@@ -167,6 +176,42 @@ Telegram::Message TelegramParser::loadMessage() {
     _downloadedMessages.pop_back();
 
     return message;
+}
+
+bool TelegramParser::isMediaGrouped(td::td_api::object_ptr<td::td_api::message>&& message) {
+    if (message->media_album_id_ == 0)
+        return false;
+
+    QMutexLocker locker(&_mutex);
+
+    bool mediaGrouped = false;
+
+    const auto handler = [=, &message, &mediaGrouped] (Object object) {
+        if (object == nullptr || object->get_id() == td::td_api::error::ID)
+            return checkFileDownloadError(std::move(object));
+
+        const auto messages = td::move_tl_object_as<td::td_api::messages>(object);
+        if (messages == nullptr || messages->total_count_ == 0)
+            return;
+
+        for (auto index = 0; index < messages->total_count_; ++index) {
+            if (messages->messages_[index]->media_album_id_ == message->media_album_id_) {
+                mediaGrouped = true;
+                return _waitCondition.wakeOne();
+            }
+        }
+    };
+
+    sendQuery(
+        td::td_api::make_object<td::td_api::getChatHistory>(
+            message->chat_id_, 0, -Telegram::maximumMessageAttachmentsCount,
+            Telegram::maximumMessageAttachmentsCount, false),
+        handler
+    );
+
+    _waitCondition.wait(&_mutex, 5000);
+
+    return mediaGrouped;
 }
 
 Telegram::Message TelegramParser::parseMessageContent(
@@ -191,22 +236,22 @@ Telegram::Message TelegramParser::parseMessageContent(
 
     switch (sourceMessage->content_->get_id()) {
         case td::td_api::messageText::ID:
-            message.text = static_cast<td::td_api::messageText&>(*sourceMessage->content_).text_->text_.c_str();
+            message.text += static_cast<td::td_api::messageText&>(*sourceMessage->content_).text_->text_.c_str();
             break;
 
         case td::td_api::messagePhoto::ID:
             destinationMediaId = static_cast<td::td_api::messagePhoto&>(*sourceMessage->content_).photo_->sizes_.back()->photo_->id_;
-            message.text = static_cast<td::td_api::messagePhoto&>(*sourceMessage->content_).caption_->text_.c_str();
+            message.text += static_cast<td::td_api::messagePhoto&>(*sourceMessage->content_).caption_->text_.c_str();
             break;
 
         case td::td_api::messageVideo::ID:
             destinationMediaId = static_cast<td::td_api::messageVideo&>(*sourceMessage->content_).video_->video_->id_;
-            message.text = static_cast<td::td_api::messageVideo&>(*sourceMessage->content_).caption_->text_.c_str();
+            message.text += static_cast<td::td_api::messageVideo&>(*sourceMessage->content_).caption_->text_.c_str();
             break;
 
         case td::td_api::messageDocument::ID:
             destinationMediaId = static_cast<td::td_api::messageDocument&>(*sourceMessage->content_).document_->document_->id_;
-            message.text = static_cast<td::td_api::messageDocument&>(*sourceMessage->content_).caption_->text_.c_str();
+            message.text += static_cast<td::td_api::messageDocument&>(*sourceMessage->content_).caption_->text_.c_str();
             break;
     }
 
@@ -261,7 +306,7 @@ std::string TelegramParser::getChatTitle(std::int64_t chat_id) const {
         : it->second;
 }
 
-void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Object> update) {
+void TelegramParser::on_NewMessageUpdate(Object update) {
     td::td_api::downcast_call(
         *update, Telegram::overloaded(
             [this](td::td_api::updateNewChat& update_new_chat) {  
@@ -287,18 +332,6 @@ void TelegramParser::on_NewMessageUpdate(td::td_api::object_ptr<td::td_api::Obje
                     return;
 
                 _parsedMessages.emplace(update_new_message.message_->id_);
-
-                auto sender = QString();
-                td::td_api::downcast_call(*update_new_message.message_->sender_id_,
-                    Telegram::overloaded(
-                        [this, &sender](td::td_api::messageSenderUser& user) {
-                            sender = getUserName(user.user_id_).c_str();
-                        },
-                        [this, &sender](td::td_api::messageSenderChat& chat) {
-                            sender = getChatTitle(chat.chat_id_).c_str();
-                        }
-                    )
-                );
 
                 int64_t mediaId = 0;
                 auto message = parseMessageContent(std::move(update_new_message.message_), mediaId);

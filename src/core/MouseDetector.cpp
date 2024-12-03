@@ -8,14 +8,12 @@ MouseDetector::MouseDetector()
 }
 
 void MouseDetector::trackMouse() {
-	_lpThreadParameters->running = TRUE;
-#ifdef _WIN32	
-	_thread = CreateThread(NULL, 0, checkMousePosition, (LPVOID)this, 0, 0);
-#endif // _WIN32
+	_lpThreadParameters->running = true;
+	_thread = CreateThread(nullptr, 0, checkMousePosition, static_cast<LPVOID>(this), 0, nullptr);
 }
 
 bool MouseDetector::killThread() {
-	_lpThreadParameters->running = FALSE;
+	_lpThreadParameters->running = false;
 	return CloseHandle(_thread);
 }
 
@@ -29,18 +27,25 @@ DWORD WINAPI MouseDetector::checkMousePositionMember() {
 	while (_lpThreadParameters->running)
 	{
 		Sleep(10);
-		BOOL isSuccessfullyGetCursorPos = GetCursorPos(&lpCursorPointParameters);
-		if (isSuccessfullyGetCursorPos == FALSE)
+		const auto isSuccessfullyGetCursorPos = GetCursorPos(&lpCursorPointParameters);
+		if (isSuccessfullyGetCursorPos == false)
 			continue;
 
-		int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-		int menuThresholdWidthRatio = screenWidth / 64;
+		const auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
+		const auto menuThresholdWidthRatio = screenWidth / 64.;
 
-		if (_lpThreadParameters->direction == Direction::Right && (screenWidth - lpCursorPointParameters.x) <= menuThresholdWidthRatio && (screenWidth - lpCursorPointParameters.x) > EDGE_OF_SCREEN_POSITION) {
-			;
-		}
-		else if (_lpThreadParameters->direction == Direction::Left && lpCursorPointParameters.x <= menuThresholdWidthRatio && lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION) {
-			;
+		switch (_lpThreadParameters->direction) {
+			case Direction::Right:
+				if (screenWidth - lpCursorPointParameters.x <= menuThresholdWidthRatio
+					&& (screenWidth - lpCursorPointParameters.x) > EDGE_OF_SCREEN_POSITION)
+					emit needsToShow();
+				break;
+
+			case Direction::Left:
+				if (lpCursorPointParameters.x <= menuThresholdWidthRatio && 
+					lpCursorPointParameters.x > EDGE_OF_SCREEN_POSITION)
+					emit needsToShow();
+				break;
 		}
 	}
 	return 0;

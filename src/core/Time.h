@@ -27,6 +27,9 @@ namespace Time {
 
 	bool adjustTime();
 
-	[[nodiscard]] QString formattedUnixTime(int64_t time);
+	[[nodiscard]] QString formattedUnixTime(int64_t unixTime);
 
+	[[nodiscard]] int unixTimeMinutes(int64_t unixTime);
+	[[nodiscard]] int unixTimeHours(int64_t unixTime);
+	[[nodiscard]] int unixTimeSeconds(int64_t unixTime);
 } // namespace Time

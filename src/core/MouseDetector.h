@@ -2,15 +2,14 @@
 
 #define EDGE_OF_SCREEN_POSITION -1
 
-#ifdef _WIN32
-	#include <Windows.h>
-#endif // _WIN32
+#include <Windows.h>
+#include <QObject>
 
 #include "../panel/TelegramPostQuickView.h"
 
 
-class MouseDetector
-{	
+class MouseDetector: public QObject {
+	Q_OBJECT
 public:
 	enum class Direction {
 		Left,
@@ -25,6 +24,8 @@ public:
 private:
 	HANDLE _thread = nullptr;
 	ThreadParameters* _lpThreadParameters = nullptr;
+Q_SIGNALS:
+	void needsToShow();
 public:
 	MouseDetector();
 
@@ -35,9 +36,8 @@ public:
 
 	[[nodiscard]] inline Direction getDirection() { return _lpThreadParameters->direction; }
 	[[nodiscard]] inline BOOL isRunning() { return _lpThreadParameters->running; }
-	
-	[[nodiscard]] static DWORD WINAPI checkMousePosition(LPVOID lpSelf);
 protected:
+	[[nodiscard]] static DWORD WINAPI checkMousePosition(LPVOID lpSelf);
 	DWORD WINAPI checkMousePositionMember();
 };
 

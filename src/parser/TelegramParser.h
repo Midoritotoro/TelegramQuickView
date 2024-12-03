@@ -18,6 +18,9 @@ private:
 	std::map<int32_t, Telegram::Message> _downloadingMessages;
 	std::vector<Telegram::Message> _downloadedMessages;
 
+	QWaitCondition _waitCondition;
+	QMutex _mutex;
+
 	int64_t _nextRawChat = 0;
 
 	QStringList _targetChannelsList;
@@ -38,6 +41,8 @@ Q_SIGNALS:
 protected:
 	void processResponse(td::ClientManager::Response response) override;
 private:
+
+	[[nodiscard]] bool isMediaGrouped(td::td_api::object_ptr<td::td_api::message>&& message);
 	[[nodiscard]] Telegram::Message parseMessageContent(
 		td::td_api::object_ptr<td::td_api::message>&& sourceMessage, 
 		int64_t& destinationMediaId);
@@ -51,5 +56,5 @@ private:
 	std::string getUserName(std::int64_t user_id) const;
     std::string getChatTitle(std::int64_t chat_id) const;
 
-	void on_NewMessageUpdate(td::td_api::object_ptr <td::td_api::Object> update);
+	void on_NewMessageUpdate(Object update);
 };

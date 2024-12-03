@@ -6,6 +6,7 @@
 #include "../core/StyleCore.h"
 #include "../core/Time.h"
 
+#include "../core/MouseDetector.h"
 #include "../parser/TelegramParser.h"
 
 #include "MessageAttachment.h"
@@ -22,6 +23,7 @@
 TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	QWidget(parent)
 	, _telegramParser(std::make_unique<TelegramParser>())
+//	, _mouseDetector(std::make_unique<MouseDetector>())
 	, _displayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount)
 	, _currentPostIndex(1)
 {
@@ -91,6 +93,7 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
 	connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
 
+	//connect(_mouseDetector.get(), &MouseDetector::needsToShow, this, &TelegramPostQuickView::show);
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
 }
 

@@ -12,8 +12,8 @@ include(cmake/lib_openh264.cmake)
 include(cmake/lib_opus.cmake)
 include(cmake/lib_ffmpeg.cmake)
 
-include(cmake/lib_openal.cmake)
-#include(cmake/lib_td.cmake)
+#include(cmake/lib_openal.cmake)
+include(cmake/lib_td.cmake)
 
 set(Td_DIR "D:/Libraries/win64//td/tdlib/lib/cmake/Td/")
 
@@ -220,6 +220,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
             Qt6::OpenGL
             #app::external_openal
             app::external_ffmpeg
+            #app::external_td
             Td::tdclient
 )
 
