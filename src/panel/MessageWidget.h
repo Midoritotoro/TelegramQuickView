@@ -6,6 +6,8 @@
 #include <QList>
 
 class MessageAttachment;
+class FlatLabel;
+
 typedef QList<MessageAttachment*> MessageAttachmentsList;
 
 
@@ -37,8 +39,10 @@ public:
 	[[nodiscard]] bool hasAttachments() const noexcept;
 	[[nodiscard]] bool hasText() const noexcept;
 private:
-	QString _text;
 	MessageAttachmentsList _attachments;
+
 	QGridLayout* _messageLayout = nullptr;
 	MessageMediaDisplayMode _mediaDisplayMode;
+
+	FlatLabel* _textLabel = nullptr;
 };

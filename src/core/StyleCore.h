@@ -13,8 +13,15 @@ namespace style {
 	inline constexpr QMargins mediaPlayerPanelMargins = { 
 		10, 5, 10, 5 
 	};
+
 	inline constexpr auto mediaPlayerPanelBorderRadius = 10;
+
 	inline auto maximumMessageWidth = 0;
+	inline auto minimumMessageWidth = 0;
+
+	inline auto maximumTextHeight = 0;
+	inline auto maximumTextWidth = 0;
+
 	inline constexpr auto sliderHeight = 20;
 
 	inline constexpr QMargins messageTextViewMargins = { 8, 5, 8, 8 };
@@ -33,7 +40,9 @@ namespace style {
 	[[nodiscard]] QSize TextSize(const QString& text, const QFontMetrics& metrics);
 	[[nodiscard]] QSize TextSize(const QString& text, const QFont& font);
 
-	[[nodicard]] QString SliderStyle();
+	[[nodiscard]] int FontHeight(const QFont& font);
+
+	[[nodiscard]] QString SliderStyle();
 	[[nodiscard]] QString ScrollAreaStyle();
 
 	[[nodiscard]] QImage Opaque(QImage&& image);
@@ -44,6 +53,8 @@ namespace style {
 	void RoundCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
 	void RoundTopCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
 	void RoundBottomCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
+
+	[[nodiscard]] bool IsRgbNull(QRgb rgb);
 
 	template <typename T>
 	[[nodiscard]] inline T ConvertScale(T value, int scale) {

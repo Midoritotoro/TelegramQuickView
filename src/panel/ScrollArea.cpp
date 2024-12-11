@@ -6,6 +6,9 @@
 #include <QPainter>
 
 #include "../core/StyleCore.h"
+#include "../media/ffmpeg/Guard.h"
+
+#include "../core/Time.h"
 
 
 ScrollArea::ScrollArea(QWidget* parent):
@@ -142,6 +145,9 @@ void ScrollArea::setOpacity(double opacity) {
 }
 
 void ScrollArea::paintEvent(QPaintEvent* event) {
+	const auto ms = Time::now();
+	const auto timer = Guard::finally([=] { qDebug() << "ScrollArea::paintEvent: " << Time::now() - ms << " ms"; });
+
 	QPainter painter(viewport());
 
 	painter.setPen(Qt::black);

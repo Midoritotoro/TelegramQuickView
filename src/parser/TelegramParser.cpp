@@ -32,17 +32,17 @@ TelegramParser::TelegramParser() :
     }
 
     connect(this, &AbstractTelegramParser::userAuthorized, [this]() {
-        moveToThread(_thread);
-        if (!_thread->isRunning())
-            _thread->start();
+      //  moveToThread(_thread);
+      //  if (!_thread->isRunning())
+      //      _thread->start();
         });
 
     foreach(const auto & id, _userDataManager->getIdsOfTargetChannels())
         _chats.emplace(id.toLongLong());
 
-    moveToThread(_thread);
-    if (!_thread->isRunning())
-        _thread->start();
+  //  moveToThread(_thread);
+  //  if (!_thread->isRunning())
+   //     _thread->start();
 }
 
 TelegramParser::~TelegramParser() {
@@ -106,9 +106,11 @@ auto TelegramParser::createHistoryRequestHandler() {
             int64_t mediaId = 0;
 
             const auto currentMessage = parseMessageContent(*message, mediaId);
-            const auto mediaGrouped = isMediaGrouped(std::exchange(message, {}));
+            const auto mediaGrouped = false;
+                //isMediaGrouped(std::exchange(message, {}));
 
-            _downloadedMessages.push_back(currentMessage);
+            if (!mediaGrouped)
+                _downloadedMessages.push_back(currentMessage);
 
             qDebug() << "messageId: " << messageId << "messageMediaAlbumId: " << currentMessage.mediaAlbumId << " from: " << currentMessage.sender
                 << "isMediaGrouped: " << mediaGrouped;
@@ -119,15 +121,12 @@ auto TelegramParser::createHistoryRequestHandler() {
                     --countOfDownloadedMessages;
                 _downloadingMessages[mediaId] = currentMessage;
 
-                const auto attachmentsSize = currentMessage.attachments.size();
                 sendQuery(
-                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, true),
+                    td::td_api::make_object<td::td_api::downloadFile>(mediaId, 32, 0, 0, false),
                     createFileDownloadQueryHandler(_downloadedMessages.size() - 1)
                 );
 
-                while (_downloadedMessages[_downloadedMessages.size() - 1].attachments.size() == attachmentsSize) {
-                    processResponse(_clientManager->receive(10));
-                }
+                processResponse(_clientManager->receive(10));
             }
 
             _parsedMessages.emplace(messageId);
@@ -144,7 +143,7 @@ auto TelegramParser::createHistoryRequestHandler() {
               _nextRawChat = _chats.empty() ? 0 : *_chats.begin();
 
         emit messagesLoaded();
-        };
+    };
 }
 
 Telegram::Message TelegramParser::loadMessage() {
@@ -185,34 +184,24 @@ bool TelegramParser::isMediaGrouped(td::td_api::object_ptr<td::td_api::message>&
     if (message == nullptr || message->media_album_id_ == 0)
         return false;
 
-    qDebug() << "isMediaGrouped is called";
-    QMutexLocker locker(&_mutex);
     bool mediaGrouped = false;
+    bool isExecuted = false;
 
     const auto targetAlbumId = message->media_album_id_;
 
-    const auto handler = [=, &mediaGrouped](Object object) {
-        qDebug() << "handler called";
-        if (object == nullptr || object->get_id() == td::td_api::error::ID) {
-            qDebug() << "handler: messages == nullptr || messages->total_count_ == 0";
+    const auto handler = [=, &mediaGrouped, &isExecuted](Object object) {
+        isExecuted = true;
+
+        if (object == nullptr || object->get_id() == td::td_api::error::ID)
             return checkFileDownloadError(std::move(object));
-        }
 
         auto messages = td::move_tl_object_as<td::td_api::messages>(object);
-        if (messages == nullptr || messages->total_count_ == 0) {
-            qDebug() << "handler: messages == nullptr || messages->total_count_ == 0";
+        if (messages == nullptr || messages->total_count_ == 0)
             return;
-        }
-
-        qDebug() << "TelegramParser::isMediaGrouped: messages->count: " << messages->total_count_;
-
+        
         for (auto index = 0; index < messages->total_count_; ++index) {
-            qDebug() << "messages->messages_[index]->media_album_id_: " << messages->messages_[index]->media_album_id_
-                << "targetAlbumId: " << targetAlbumId;
-
             if (messages->messages_[index]->media_album_id_ == targetAlbumId) {
                 mediaGrouped = true;
-                qDebug() << "TelegramParser::isMediaGrouped: " << mediaGrouped;
                 return;
             }
         }
@@ -221,15 +210,13 @@ bool TelegramParser::isMediaGrouped(td::td_api::object_ptr<td::td_api::message>&
     sendQuery(
         td::td_api::make_object<td::td_api::getChatHistory>(
             message->chat_id_, 0, -Telegram::maximumMessageAttachmentsCount,
-            100, false),
+            Telegram::maximumMessageAttachmentsCount * 2, false),
         handler
     );
 
-    auto index = 0;
-
-    while (index < 50 && mediaGrouped == false) {
+    while (isExecuted == false) {
+        qDebug() << "process...///";
         processResponse(_clientManager->receive(10));
-        ++index;
     }
 
     return mediaGrouped;

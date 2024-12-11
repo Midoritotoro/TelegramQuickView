@@ -28,8 +28,8 @@ AbstractTelegramParser::AbstractTelegramParser() :
     if (_thread->isRunning())
         _thread->quit();
 
-    moveToThread(_thread);
-    _thread->start();
+   // moveToThread(_thread);
+  //  _thread->start();
 
     td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(0));
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});

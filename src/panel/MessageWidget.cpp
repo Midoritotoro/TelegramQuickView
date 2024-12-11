@@ -1,6 +1,8 @@
 ﻿#include "MessageWidget.h"
 #include "MessageAttachment.h"
 
+#include "FlatLabel.h"
+
 #include <QElapsedTimer>
 
 
@@ -11,6 +13,7 @@ MessageWidget::MessageWidget(
 	, _mediaDisplayMode(MessageMediaDisplayMode::Stack)
 {
 	_messageLayout = new QGridLayout(this);
+	_textLabel = new FlatLabel(this);
 
 	setContentsMargins(0, 0, 0, 0);
 
@@ -29,31 +32,21 @@ void MessageWidget::addMessageText(const QString& text) {
 	if (text.length() == 0)
 		return;
 
-	QLabel* textLabel = new QLabel();
+	_textLabel->setText(text);
+	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	textLabel->setWordWrap(true);
-	textLabel->setAlignment(Qt::AlignLeft);
-	textLabel->setContentsMargins(8, 5, 20, 10);
-
-	textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	textLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-
-	textLabel->setText(text);
-	_text = text;
-
+	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
-		textLabel->setStyleSheet("QLabel{\n"
+		_textLabel->setStyleSheet("QLabel{\n"
 			"color: white;\n"
 			"border-bottom-left-radius: 10px;\n"
 			"border-bottom-right-radius: 10px;\n"
 		"}");
 	else
-		textLabel->setStyleSheet("QLabel{\n"
+		_textLabel->setStyleSheet("QLabel{\n"
 			"color: white;\n"
 			"border-radius: 10px;\n"
 		"}");
-
-	_messageLayout->addWidget(textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 }
 
 void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths) {
@@ -97,7 +90,7 @@ MessageWidget::MessageMediaDisplayMode MessageWidget::messsageMediaDisplayMode()
 }
 
 QString MessageWidget::messageText() const noexcept {
-	return _text; 
+	return _textLabel->text(); 
 }
 
 const MessageAttachmentsList& MessageWidget::messageAttachments() const noexcept { 
@@ -123,5 +116,5 @@ bool MessageWidget::hasAttachments() const noexcept {
 }
 
 bool MessageWidget::hasText() const noexcept {
-	return !_text.isEmpty();
+	return !_textLabel->text().isEmpty();
 }

@@ -1,6 +1,6 @@
 ﻿#include "MessageMediaViewer.h"
 
-#include "NavigationButton.h"
+#include "FlatButton.h"
 #include "../media/player/WidgetsHider.h"
 
 #include "MessageTextView.h"
@@ -61,13 +61,19 @@ MessageMediaViewer::MessageMediaViewer(
 	QTransform transform;
 	transform.rotate(180);
 
-	_nextAttachment = new NavigationButton(this);
-	_previousAttachment = new NavigationButton(this);
+	_nextAttachment = new FlatButton(this);
+	_previousAttachment = new FlatButton(this);
 	_messageTextView = new MessageTextView(this);
 
-	_nextAttachment->setFixedSize(50, 50);
-	_previousAttachment->setFixedSize(50, 50);
-	
+	_nextAttachment->setFixedSize(38, 38);
+	_previousAttachment->setFixedSize(38, 38);
+
+	_previousAttachment->setButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
+	_nextAttachment->setButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
+
+	_nextAttachment->setIconSize(QSize(38, 38));
+	_previousAttachment->setIconSize(QSize(38, 38));
+
 	_nextAttachment->setIcon(QIcon(arrowPath));
 	_nextAttachment->setCursor(Qt::PointingHandCursor);
 
@@ -102,8 +108,8 @@ MessageMediaViewer::MessageMediaViewer(
 		_mediaPlayer->cleanUp();
 		});
 
-	connect(_nextAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
-	connect(_previousAttachment, &NavigationButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
+	connect(_nextAttachment, &QAbstractButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
+	connect(_previousAttachment, &QAbstractButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
 
 	connect(_mediaPlayer.get(), &MediaPlayer::mediaGeometryChanged, this, &MessageMediaViewer::updateMessageTextView);
 	connect(_mediaPlayer.get(), &MediaPlayer::needScrollToMessage, [this]() {

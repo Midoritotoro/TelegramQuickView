@@ -15,6 +15,8 @@
 #include "../media/ffmpeg/Guard.h"
 #include "../core/Time.h"
 
+#include <QPaintEvent>
+
 
 MessageAttachment::MessageAttachment(
 	MessageWidget* parentMessage, 
@@ -32,24 +34,30 @@ MessageAttachment::MessageAttachment(
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
+	const auto ms = Time::now();
+	const auto timer = Guard::finally([=] { qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms"; });
+
 	const auto _preview = style::GenerateThumbnail(_attachmentPath, size());
 	if (_preview.isNull())
 		return;
 
 	QPainter painter(this);
-
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
 	switch (_parentMessage->messsageMediaDisplayMode()) {
 		case MessageWidget::MessageMediaDisplayMode::Stack:
-			if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
+			if (_parentMessage->attachmentsLength() == 1 && _parentMessage->hasText() == false)
+				style::RoundCorners(painter, size(), 15);
+			else if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
 				style::RoundTopCorners(painter, size(), 15);
 
 			painter.drawPixmap(0, 0, _preview);
 			break;
 
 		case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
-			style::RoundTopCorners(painter, size(), 15);
+			_parentMessage->hasText()
+				? style::RoundTopCorners(painter, size(), 15)
+				: style::RoundCorners(painter, size(), 15);
 
 			if (_parentMessage->attachmentsLength() > 1) {
 				painter.drawPixmap(0, 0, _preview);

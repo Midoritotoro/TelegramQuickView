@@ -15,15 +15,13 @@ include(cmake/lib_ffmpeg.cmake)
 #include(cmake/lib_openal.cmake)
 include(cmake/lib_td.cmake)
 
-set(Td_DIR "D:/Libraries/win64//td/tdlib/lib/cmake/Td/")
+set(Td_DIR "D:/Libraries/win64/td/tdlib/lib/cmake/Td/")
 
-find_package(Td 1.8.40 REQUIRED)
+find_package(Td 1.8.41 REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS 
 			Core
 			Widgets
 			Multimedia
-			MultimediaWidgets
-			Sql
 			OpenGL
 )
 
@@ -70,14 +68,20 @@ SET(MAIN_SOURCES main.cpp
 	src/panel/History.cpp
 	src/panel/History.h
 
-	src/panel/NavigationButton.cpp
-	src/panel/NavigationButton.h
+	src/panel/AbstractFlatButton.cpp
+	src/panel/AbstractFlatButton.h
+    
+    src/panel/FlatButton.cpp
+	src/panel/FlatButton.h
 
 	src/panel/MessageTextView.cpp
 	src/panel/MessageTextView.h
 
 	src/panel/ContinuousScroll.cpp
 	src/panel/ContinuousScroll.h
+
+    src/panel/FlatLabel.cpp
+	src/panel/FlatLabel.h
 
 	src/panel/ScrollArea.cpp
 	src/panel/ScrollArea.h
@@ -215,8 +219,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 			Qt6::Core
 			Qt6::Widgets
 			Qt6::Multimedia
-			Qt6::MultimediaWidgets
-			Qt6::Sql
             Qt6::OpenGL
             #app::external_openal
             app::external_ffmpeg

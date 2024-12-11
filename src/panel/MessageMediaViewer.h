@@ -13,7 +13,7 @@
 #include <memory>
 #include "History.h"
 
-class NavigationButton;
+class FlatButton;
 class MessageTextView;
 class WidgetsHider;
 
@@ -26,8 +26,8 @@ private:
 	std::unique_ptr<MediaPlayer> _mediaPlayer = nullptr;
 	std::unique_ptr<WidgetsHider> _widgetsHider = nullptr;
 
-	NavigationButton* _nextAttachment = nullptr;
-	NavigationButton* _previousAttachment = nullptr;
+	FlatButton* _nextAttachment = nullptr;
+	FlatButton* _previousAttachment = nullptr;
 
 	MessageWidget* _currentMessage = nullptr;
 	History* _messagesHistory;

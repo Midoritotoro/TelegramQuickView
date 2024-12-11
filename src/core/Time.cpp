@@ -80,7 +80,7 @@ namespace Time {
 				return time(AdjustSeconds.load()) * 1000;
 			}
 
-			profile_time computeProfileAdjustment() {
+			profileTime computeProfileAdjustment() {
 				return computeAdjustment() * 1000;
 			}
 		} // namespace 
@@ -92,24 +92,24 @@ namespace Time {
 			ProfileFrequency = 1000000. / double(value.QuadPart);
 		}
 
-		inner_time_type currentValue() {
+		innerTime currentValue() {
 			LARGE_INTEGER value;
 			QueryPerformanceCounter(&value);
 			return value.QuadPart;
 		}
 
-		time convert(inner_time_type value) {
+		time convert(innerTime value) {
 			return time(value * Frequency);
 		}
 
-		inner_profile_type currentProfileValue() {
+		innerProfile currentProfileValue() {
 			LARGE_INTEGER value;
 			QueryPerformanceCounter(&value);
 			return value.QuadPart;
 		}
 
-		profile_time convertProfile(inner_profile_type value) {
-			return profile_time(value * ProfileFrequency);
+		profileTime convertProfile(innerProfile value) {
+			return profileTime(value * ProfileFrequency);
 		}
 
 	} // namespace details
@@ -119,7 +119,7 @@ namespace Time {
 		return details::convert(elapsed) + details::computeAdjustment();
 	}
 
-	profile_time profile() {
+	profileTime profile() {
 		const auto elapsed = details::currentProfileValue()
 			- details::StartProfileValue;
 		return details::convertProfile(elapsed)
@@ -137,15 +137,15 @@ namespace Time {
 		return buffer;
 	}
 
-	int unixTimeMinutes(int64_t unixTime) {
+	int minutes(int64_t unixTime) {
 		return localtime(&unixTime)->tm_min;
 	}
 
-	int unixTimeHours(int64_t unixTime) {
+	int hours(int64_t unixTime) {
 		return localtime(&unixTime)->tm_hour;
 	}
 
-	int unixTimeSeconds(int64_t unixTime) {
+	int seconds(int64_t unixTime) {
 		return localtime(&unixTime)->tm_sec;
 	}
 } // namespace Time

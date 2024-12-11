@@ -171,6 +171,10 @@ namespace style {
 		return text.isEmpty() ? QSize{} : TextSize(text, QFontMetrics(font));
 	}
 
+	int FontHeight(const QFont& font) {
+		return QFontMetrics(font).height();
+	}
+
 	QString SliderStyle() {
 		if (_sliderStyle.isEmpty())
 			loadStyles();
@@ -216,6 +220,9 @@ namespace style {
 	}
 
 	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
+		const auto ms = Time::now();
+		const auto timer = Guard::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
+
 		auto size = targetSize;
 		if (size.width() <= 0)
 			size.setWidth(style::maximumMessageWidth);
@@ -286,6 +293,10 @@ namespace style {
 
 	void RoundBottomCorners(QPainter& painter, const QSize& widgetSize, int borderRadius) {
 		return RoundCorners(painter, widgetSize, borderRadius, Round::Bottom);
+	}
+
+	bool IsRgbNull(QRgb rgb) {
+		return qRed(rgb) == 0 && qGreen(rgb) == 0 && qBlue(rgb) == 0;
 	}
 
 	QImage Prepare(

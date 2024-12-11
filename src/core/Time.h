@@ -5,31 +5,31 @@
 
 namespace Time {
 	using time = std::int64_t;
-	using profile_time = std::int64_t;
+	using profileTime = std::int64_t;
 
 	namespace details {
 
-		using inner_time_type = std::int64_t;
-		using inner_profile_type = std::int64_t;
+		using innerTime = std::int64_t;
+		using innerProfile = std::int64_t;
 
 		void init();
 
-		[[nodiscard]] inner_time_type currentValue();
-		[[nodiscard]] time convert(inner_time_type value);
+		[[nodiscard]] innerTime currentValue();
+		[[nodiscard]] time convert(innerTime value);
 
-		[[nodiscard]] inner_profile_type currentProfileValue();
-		[[nodiscard]] profile_time convertProfile(inner_profile_type);
+		[[nodiscard]] innerProfile currentProfileValue();
+		[[nodiscard]] profileTime convertProfile(innerProfile);
 
 	} // namespace details
 
 	[[nodiscard]] time now();
-	[[nodiscard]] profile_time profile();
+	[[nodiscard]] profileTime profile();
 
 	bool adjustTime();
 
 	[[nodiscard]] QString formattedUnixTime(int64_t unixTime);
 
-	[[nodiscard]] int unixTimeMinutes(int64_t unixTime);
-	[[nodiscard]] int unixTimeHours(int64_t unixTime);
-	[[nodiscard]] int unixTimeSeconds(int64_t unixTime);
+	[[nodiscard]] int minutes(int64_t unixTime);
+	[[nodiscard]] int hours(int64_t unixTime);
+	[[nodiscard]] int seconds(int64_t unixTime);
 } // namespace Time

@@ -37,6 +37,10 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	const auto panelWidth = (screenWidth / 3.5);
 
 	style::maximumMessageWidth = panelWidth - (width() / 12.5);
+	style::minimumMessageWidth = (panelWidth - (width() / 12.5)) / 10.;
+
+	style::maximumTextWidth = style::maximumMessageWidth;
+	style::maximumTextHeight = screenHeight * 2;
 
 	resize(panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
@@ -95,9 +99,9 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 
 	//connect(_mouseDetector.get(), &MouseDetector::needsToShow, this, &TelegramPostQuickView::show);
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
-	addContent();
-	addContent();
-	addContent();
+	//addContent();
+	//addContent();
+	//addContent();
 }
 
 void TelegramPostQuickView::makeMessage(const QString& messageText, const QStringList& attachmentsPaths) {
