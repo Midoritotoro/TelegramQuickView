@@ -32,7 +32,9 @@ private:
 public:
 	TelegramPostQuickView(QWidget* parent = nullptr);
 
-	void makeMessage(const QString& messageText = "", const QStringList& attachmentsPaths = {});
+	void makeMessage(
+		const QString& messageText = "",
+		const QStringList& attachmentsPaths = {});
 	void setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode displayMode);
 public Q_SLOTS:
 	void attachmentCliked();

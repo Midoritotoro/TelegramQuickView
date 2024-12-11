@@ -14,7 +14,7 @@ protected:
 	void mousePressEvent(QMouseEvent* _event) override;
 	void paintEvent(QPaintEvent*) override;
 
-	virtual void showMenu(QMenu* _menu);
+	virtual void showMenu(not_null<QMenu*> _menu);
 private:
 	void drawBackground(
 		QPainter& _painter,

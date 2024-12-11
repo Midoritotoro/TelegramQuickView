@@ -26,8 +26,8 @@ namespace Time {
 			using seconds_type = std::uint32_t;
 			std::atomic<seconds_type> AdjustSeconds;
 
-			inner_time_type StartValue;
-			inner_profile_type StartProfileValue;
+			innerTime StartValue;
+			innerProfile StartProfileValue;
 
 			double Frequency;
 			double ProfileFrequency;

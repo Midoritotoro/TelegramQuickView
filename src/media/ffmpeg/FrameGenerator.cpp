@@ -266,7 +266,10 @@ int64_t FrameGenerator::Seek(void* opaque,
 	return static_cast<FrameGenerator*>(opaque)->seek(offset, whence);
 }
 
-int FrameGenerator::read(uint8_t* buffer, int bufferSize) {
+int FrameGenerator::read(
+	uint8_t* buffer,
+	int bufferSize) 
+{
 	const auto availableBytes = _bytes.size() - _deviceOffset;
 	if (availableBytes <= 0)
 		return AVERROR_EOF;
@@ -278,7 +281,10 @@ int FrameGenerator::read(uint8_t* buffer, int bufferSize) {
 	return fill;
 }
 
-int64_t FrameGenerator::seek(int64_t offset, int whence) {
+int64_t FrameGenerator::seek(
+	int64_t offset,
+	int whence) 
+{
 	const auto size = _bytes.size();
 
 	if (whence == AVSEEK_SIZE)

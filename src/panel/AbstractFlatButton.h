@@ -86,7 +86,7 @@ public:
 	void setAutoRaise(bool on);
 	[[nodiscard]] bool autoRaise() const;
 
-	void setMenu(QMenu* menu);
+	void setMenu(not_null<QMenu*> menu);
 	[[nodiscard]] QMenu* menu() const;
 
 	[[nodiscard]] QSize sizeHint() const override;
@@ -96,7 +96,7 @@ protected:
 	void mousePressEvent(QMouseEvent* _event) override = 0;
 	void paintEvent(QPaintEvent*) override = 0;
 
-	virtual void showMenu(QMenu* _menu) = 0;
+	virtual void showMenu(not_null<QMenu*> _menu) = 0;
 
 	virtual void drawBackground(
 		QPainter& painter,

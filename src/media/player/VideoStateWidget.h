@@ -10,17 +10,15 @@ public:
         Pause,
         Repeat
     };
-private:
-    QString _pauseImagePath, _playImagePath, _repeatImagePath;
-    QPixmap _currentPixmap;
-    State _state;
-public:
+
     VideoStateWidget(QWidget* parent = nullptr);
 
     void setState(State state);
-
     [[nodiscard]] State state() const noexcept;
 protected:
     void paintEvent(QPaintEvent* event) override;
-    void resizeEvent(QResizeEvent* event) override;
+private:
+    QPixmap _pausePixmap, _playPixmap, _repeatPixmap;
+
+    State _state;
 };

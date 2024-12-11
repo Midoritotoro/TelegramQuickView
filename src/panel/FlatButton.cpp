@@ -243,7 +243,7 @@ void FlatButton::paintEvent(QPaintEvent* event) {
     }
 }
 
-void FlatButton::showMenu(QMenu* menu) {
+void FlatButton::showMenu(not_null<QMenu*> menu) {
     if (menu == nullptr)
         return;
 

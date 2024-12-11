@@ -17,40 +17,38 @@ typedef struct _TelegramCredentials {
 
 class UserDataManager final
 {
-private:
-	QFile _jsonFile;
-	TelegramCredentials _telegramCredentials;
 public:
 	UserDataManager();
 
-	[[nodiscard]] QJsonDocument getJsonDocument();
-
-	[[nodiscard]] static QString getUserSettingsPath();
-	[[nodiscard]] TelegramCredentials getTelegramCredentials();
 	[[nodiscard]] std::string getTelegramAuthCode();
 
-	[[nodiscard]] bool getDownloadSensitiveContentAbility();
+	bool setTelegramCredentials(
+		const TelegramCredentials& telegramCredentials);
+	[[nodiscard]] TelegramCredentials getTelegramCredentials();
 
 	[[nodiscard]] bool isTelegramCredentialsValid();
 
-	[[nodiscard]] QVariantList getUsernamesOfTargetChannels();
-	[[nodiscard]] QVariantList getIdsOfTargetChannels();
-
-	[[nodiscard]] int getCountOfLatestDownloadingMessages();
-
-	bool setTelegramCredentials(const TelegramCredentials& telegramCredentials);
+	void setDownloadSensitiveContentAbility(bool ability);
+	[[nodiscard]] bool getDownloadSensitiveContentAbility();
 
 	void setTargetChannels(QStringList usernameList);
+	[[nodiscard]] QVariantList getUsernamesOfTargetChannels();
+
 	void setTargetChannelsChatIds(QList<qint64> idsList);
+	[[nodiscard]] QVariantList getIdsOfTargetChannels();
 
 	void setLastPostsCountForChannels(int count);
-
-	void setDownloadSensitiveContentAbility(bool ability);
+	[[nodiscard]] int getCountOfLatestDownloadingMessages();
 private:
+	[[nodiscard]] QJsonDocument getJsonDocument();
+	[[nodiscard]] static QString getUserSettingsPath() const noexcept;
+
 	void clearUsernamesOfChannels();
 	void clearChatIdsOfChannels();
-
 	void clearTelegramCredentials();
 
 	void write(const QByteArray& data);
+
+	QFile _jsonFile;
+	TelegramCredentials _telegramCredentials;
 };

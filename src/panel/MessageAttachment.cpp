@@ -19,7 +19,7 @@
 
 
 MessageAttachment::MessageAttachment(
-	MessageWidget* parentMessage, 
+	not_null<MessageWidget*> parentMessage,
 	QString attachmentPath
 )
 	: ClickableLabel()
@@ -100,7 +100,7 @@ void MessageAttachment::updateSize() {
 	);
 }
 
-inline void MessageAttachment::setParentMessage(MessageWidget* parentMessage) {
+void MessageAttachment::setParentMessage(not_null<MessageWidget*> parentMessage) {
 	_parentMessage = parentMessage; 
 }
 

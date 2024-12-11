@@ -48,8 +48,12 @@ private:
 		int64_t offset,
 		int whence);
 
-	[[nodiscard]] int read(uint8_t* buffer, int bufferSize);
-	[[nodiscard]] int64_t seek(int64_t offset, int whence);
+	[[nodiscard]] int read(
+		uint8_t* buffer,
+		int bufferSize);
+	[[nodiscard]] int64_t seek(
+		int64_t offset,
+		int whence);
 
 	FormatPointer _format = nullptr;
 	CodecPointer _codec = nullptr;

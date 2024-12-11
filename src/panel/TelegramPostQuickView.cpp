@@ -104,7 +104,10 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	//addContent();
 }
 
-void TelegramPostQuickView::makeMessage(const QString& messageText, const QStringList& attachmentsPaths) {
+void TelegramPostQuickView::makeMessage(
+	const QString& messageText, 
+	const QStringList& attachmentsPaths)
+{
 	auto ms = Time::now();
 	const auto timer = Guard::finally([&ms] { qDebug() << "TelegramPostQuickView::makeMessage: " << Time::now() - ms << " ms";  });
 

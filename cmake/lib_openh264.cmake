@@ -1,8 +1,6 @@
 add_library(external_openh264 STATIC IMPORTED GLOBAL)
 add_library(app::external_openh264 ALIAS external_openh264)
 
-set(libs_loc "D:/Libraries/win64")
-
 target_include_directories(external_openh264 SYSTEM
 INTERFACE
     ${libs_loc}/local/include

@@ -1,8 +1,6 @@
 add_library(external_openal INTERFACE IMPORTED GLOBAL)
 add_library(app::external_openal ALIAS external_openal)
 
-set(libs_loc "D:/Libraries/win64")
-
 target_include_directories(external_openal SYSTEM
 INTERFACE
     ${libs_loc}/openal-soft/include

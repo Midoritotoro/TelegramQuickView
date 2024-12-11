@@ -10,12 +10,12 @@
 VideoStateWidget::VideoStateWidget(QWidget* parent):
     QPushButton(parent)
 {
-    QString currentPath = QCoreApplication::applicationDirPath();
-    QDir assetsDir(currentPath + "/../../assets/images");
+    const auto currentPath = QCoreApplication::applicationDirPath();
+    const auto assetsDir = QDir(currentPath + "/../../assets/images");
 
-    _pauseImagePath = assetsDir.absolutePath() + "/stop.png";
-    _playImagePath = assetsDir.absolutePath() + "/play.png";
-    _repeatImagePath = assetsDir.absolutePath() + "/repeat.png";
+    _pausePixmap = QPixmap(assetsDir.absolutePath() + "/stop.png");
+    _playPixmap = QPixmap(assetsDir.absolutePath() + "/play.png");
+    _repeatPixmap = QPixmap(assetsDir.absolutePath() + "/repeat.png");
 
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
@@ -36,13 +36,13 @@ VideoStateWidget::State VideoStateWidget::state() const noexcept {
 }
 
 void VideoStateWidget::paintEvent(QPaintEvent* event) {
-    QPainter painter(this);
+    auto painter = QPainter(this);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::NoBrush);
 
-    auto image = QImage();
+    auto& image = QImage();
 
     switch (_state) {
         case State::Play:
@@ -65,12 +65,6 @@ void VideoStateWidget::paintEvent(QPaintEvent* event) {
         Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation);
 
-    _currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-    _currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
-
-    painter.drawPixmap(0, 0, _currentPixmap);
-}
-
-void VideoStateWidget::resizeEvent(QResizeEvent* event) {
-    QWidget::resizeEvent(event);
+    image.setDevicePixelRatio(style::DevicePixelRatio());
+    painter.drawPixmap(0, 0, image);
 }

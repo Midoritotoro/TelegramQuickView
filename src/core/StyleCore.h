@@ -31,6 +31,12 @@ namespace style {
 	inline constexpr auto kScaleMax = 300;
 	inline constexpr auto kScaleDefault = 100;
 
+	enum class CornersRoundMode {
+		All,
+		Top,
+		Bottom
+	};
+
 	[[nodiscard]] int DevicePixelRatio();
 	void SetDevicePixelRatio(int ratio);
 
@@ -50,9 +56,22 @@ namespace style {
 
 	[[nodiscard]] QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize = QSize());
 
-	void RoundCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
-	void RoundTopCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
-	void RoundBottomCorners(QPainter& painter, const QSize& widgetSize, int borderRadius);
+	void RoundCorners(
+		QPainter& painter,
+		const QSize& widgetSize,
+		int borderRadius,
+		CornersRoundMode roundType);
+	void RoundCorners(
+		QPainter& painter,
+		const QSize& widgetSize,
+		int borderRadius);
+
+	void RoundTopCorners(QPainter& painter,
+		const QSize& widgetSize,
+		int borderRadius);
+	void RoundBottomCorners(QPainter& painter,
+		const QSize& widgetSize,
+		int borderRadius);
 
 	[[nodiscard]] bool IsRgbNull(QRgb rgb);
 

@@ -317,7 +317,10 @@ void MediaPlayer::changeVolume(int value) {
 		QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 }
 
-void MediaPlayer::paintBackground(QPainter& painter, QPaintEvent* event) {
+void MediaPlayer::paintBackground(
+	QPainter& painter,
+	QPaintEvent* event) 
+{
 	const auto opacity = painter.opacity();
 	painter.setOpacity(0.5);
 

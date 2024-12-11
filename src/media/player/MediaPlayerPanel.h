@@ -29,7 +29,9 @@ private:
 public:
 	MediaPlayerPanel(QWidget* parent = nullptr);
 
-	void updateTimeText(int mediaPosition, int mediaDuration);
+	void updateTimeText(
+		int mediaPosition,
+		int mediaDuration);
 	void updateStateWidget(VideoStateWidget::State state);
 
 	[[nodiscard]] EnhancedSlider* playbackSlider() const noexcept;

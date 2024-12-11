@@ -18,9 +18,11 @@ public:
 		Unknown
 	};
 
-	MessageAttachment(MessageWidget* parentMessage, QString attachmentPath);
+	MessageAttachment(
+		not_null<MessageWidget*> parentMessage,
+		const QString& attachmentPath);
 
-	inline void setParentMessage(MessageWidget* parentMessage);
+	void setParentMessage(not_null<MessageWidget*> parentMessage);
 
 	[[nodiscard]] QString attachmentPath() const noexcept;
 	[[nodiscard]] AttachmentType attachmentType() const noexcept;

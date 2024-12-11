@@ -8,6 +8,8 @@ namespace style {
 		inline constexpr QMargins margins = {
 				8, 5, 20, 10
 		};
+
+		inline constexpr auto defaultColor = QColor(24, 37, 51);
 	}
 } // namespace style
 
@@ -44,6 +46,13 @@ static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };
 class FlatLabel: public QWidget {
 	Q_OBJECT
 public:
+	struct ContextMenuRequest {
+		QMenu* menu;
+		TextSelection selection;
+		bool uponSelection = false;
+		bool fullSelection = false;
+	};
+
 	FlatLabel(QWidget* parent = nullptr);
 
 	[[nodiscard]] QSize sizeHint() const override;
@@ -63,32 +72,58 @@ public:
 	void setTextAlignment(Qt::Alignment alignment);
 	[[nodiscard]] Qt::Alignment alignment() const noexcept;
 
-	void setContextMenu(QMenu* menu);
+	void setContextMenu(not_null<QMenu*> menu);
 	[[nodiscard]] QMenu* contextMenu() const noexcept;
 
+	void setBackgroundColor(const QColor& color);
+	[[nodiscard]] QColor backgroundColor() const noexcept;
+
+	void setCornerRoundMode(style::CornersRoundMode cornersRoundMode);
+	[[nodiscard]] style::CornersRoundMode cornerRoundMode() const noexcept;
+
+	void setContextMenuHook(std::function<void(ContextMenuRequest)> hook);
+
 	void setLink(quint16 index);
+	void fillContextMenu(ContextMenuRequest request);
 protected:
-	void paintEvent(QPaintEvent* e) override;
-	void mouseMoveEvent(QMouseEvent* e) override;
-	void mousePressEvent(QMouseEvent* e) override;
+	void paintEvent(QPaintEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void mousePressEvent(QMouseEvent* event) override;
 
-	void mouseReleaseEvent(QMouseEvent* e) override;
-	void mouseDoubleClickEvent(QMouseEvent* e) override;
+	void mouseReleaseEvent(QMouseEvent* event) override;
+	void mouseDoubleClickEvent(QMouseEvent* event) override;
 	
-	void focusOutEvent(QFocusEvent* e) override;
-	void focusInEvent(QFocusEvent* e) override;
+	void focusOutEvent(QFocusEvent* event) override;
+	void focusInEvent(QFocusEvent* event) override;
 
-	void keyPressEvent(QKeyEvent* e) override;
-	void contextMenuEvent(QContextMenuEvent* e) override;
+	void keyPressEvent(QKeyEvent* event) override;
+	void contextMenuEvent(QContextMenuEvent* event) override;
 private:
+	enum class ContextMenuReason {
+		FromEvent,
+		FromTouch,
+	};
+	void showContextMenu(QContextMenuEvent* event, ContextMenuReason reason);
+
 	[[nodiscard]] int countTextWidth() const noexcept;
 	[[nodiscard]] int countTextHeight();
 
 	void refreshSize();
 	void textUpdated();
 
+	void copySelectedText();
+
+	enum DragAction {
+		NoDrag = 0x00,
+		PrepareDrag = 0x01,
+		Dragging = 0x02,
+		Selecting = 0x04,
+	};
+
 	QString _text = "";
 	Qt::Alignment _alignment;
+
+	QColor _backgroundColor;
 
 	float _opacity = 1.;
 	bool _selectable;
@@ -100,4 +135,17 @@ private:
 
 	TextSelection _selection, _savedSelection;
 	QMenu* _contextMenu = nullptr;
+
+	std::function<void(ContextMenuRequest)> _contextMenuHook = nullptr;
+	style::CornersRoundMode _cornersRoundMode;
+
+	DragAction _dragAction = NoDrag;
+	QPoint _dragStartPosition;
+	quint16 _dragSymbol = 0;
+	bool _dragWasInactive = false;
+
+	QPoint _lastMousePos;
+
+	QPoint _trippleClickPoint;
+	base::Timer _trippleClickTimer;
 };

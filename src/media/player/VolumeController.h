@@ -8,14 +8,6 @@ class EnhancedSlider;
 class VolumeController: public QPushButton
 {
 	Q_OBJECT
-private:
-	EnhancedSlider* _volumeSlider = nullptr;
-	bool _isSpeakerOn, _isVolumeValueSmall;
-	QString _speakerOnImagePath;
-	QString _speakerSmallOnImagePath;
-	QString _speakerOffImagePath;
-	QPixmap _currentPixmap;
-	int _previousVolume;
 public:
 	VolumeController(QWidget* parent = nullptr);
 
@@ -28,4 +20,10 @@ protected:
 private:
 	void paintSpeakerOff(QPainter& painter);
 	void paintSpeakerOn(QPainter& painter);
+
+	EnhancedSlider* _volumeSlider = nullptr;
+	QPixmap _speakerOnPixmap, _speakerSmallOnPixmap, _speakerOffPixmap;
+
+	bool _isSpeakerOn, _isVolumeValueSmall;
+	int _previousVolume;
 };

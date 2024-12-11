@@ -8,12 +8,16 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 project("TelegramQuickView" LANGUAGES CXX)
 
+
+set(libs_loc "D:/Libraries/win64")
+
 include(cmake/lib_openh264.cmake)
 include(cmake/lib_opus.cmake)
 include(cmake/lib_ffmpeg.cmake)
 
 #include(cmake/lib_openal.cmake)
 include(cmake/lib_td.cmake)
+include(cmake/lib_gsl.cmake)
 
 set(Td_DIR "D:/Libraries/win64/td/tdlib/lib/cmake/Td/")
 
@@ -43,6 +47,9 @@ SET(MAIN_SOURCES main.cpp
 
 	src/core/Time.cpp
 	src/core/Time.h
+
+    src/core/Timer.cpp
+	src/core/Timer.h
 
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h
@@ -223,6 +230,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
             #app::external_openal
             app::external_ffmpeg
             #app::external_td
+            app:external_gsl
             Td::tdclient
 )
 

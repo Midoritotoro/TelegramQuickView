@@ -5,8 +5,8 @@
 
 
 class MessageTextView : public QWidget {
-private:
 	Q_OBJECT
+private:
 	QLabel* _textLabel = nullptr;
 public:
 	MessageTextView(QWidget* parent = nullptr);

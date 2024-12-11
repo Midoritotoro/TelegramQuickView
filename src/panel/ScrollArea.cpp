@@ -81,7 +81,7 @@ void ScrollArea::keyPressEvent(QKeyEvent* event) {
 		QScrollArea::keyPressEvent(event);
 }
 
-void ScrollArea::scrollToWidget(QWidget* widget) {
+void ScrollArea::scrollToWidget(not_null<QWidget*> widget) {
 	if (const auto local = this->widget()) {
 		const auto globalPosition = widget->mapToGlobal(QPoint(0, 0));
 		const auto localPosition = local->mapFromGlobal(globalPosition);

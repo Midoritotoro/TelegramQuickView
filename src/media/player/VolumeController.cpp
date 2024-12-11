@@ -16,36 +16,30 @@ VolumeController::VolumeController(QWidget* parent) :
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
 
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../assets/images");
+	const auto currentPath = QCoreApplication::applicationDirPath();
+	const auto assetsDir = QDir(currentPath + "/../../assets/images");
 
-	_speakerOffImagePath = cssDir.absolutePath() + "/speaker_white_off.png";
-	_speakerOnImagePath = cssDir.absolutePath() + "/speaker_white_on.png";
-	_speakerSmallOnImagePath = cssDir.absolutePath() + "/speaker_white_small_on.png";
+	_speakerOffPixmap = QPixmap(cssDir.absolutePath() + "/speaker_white_off.png");
+	_speakerOnPixmap = QPixmap(cssDir.absolutePath() + "/speaker_white_on.png");
+	_speakerSmallOnPixmap = QPixmap(cssDir.absolutePath() + "/speaker_white_small_on.png");
 }
 
 
 void VolumeController::paintSpeakerOff(QPainter& painter) {
-	auto image = QImage(_speakerOffImagePath);
-	image = style::Prepare(image, size());
-
-	image = std::move(image).scaled(
+	_speakerOffPixmap = std::move(_speakerOffPixmap).scaled(
 		image.width() * style::DevicePixelRatio(),
 		image.height() * style::DevicePixelRatio(),
 		Qt::IgnoreAspectRatio,
 		Qt::SmoothTransformation);
 
-	_currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-
-	_currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
-	painter.drawPixmap(0, 0, _currentPixmap);
+	_speakerOffPixmap.setDevicePixelRatio(style::DevicePixelRatio());
+	painter.drawPixmap(0, 0, _speakerOffPixmap);
 }
 
 void VolumeController::paintSpeakerOn(QPainter& painter) {
-	auto image = QImage(_isVolumeValueSmall
-		? _speakerSmallOnImagePath
-		: _speakerOnImagePath);
-	image = style::Prepare(image, size());
+	auto& image = _isVolumeValueSmall
+		? _speakerSmallOnPixmap
+		: _speakerOnPixmap;
 
 	image = std::move(image).scaled(
 		image.width() * style::DevicePixelRatio(),
@@ -53,10 +47,8 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 		Qt::IgnoreAspectRatio,
 		Qt::SmoothTransformation);
 
-	_currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-
-	_currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
-	painter.drawPixmap(0, 0, _currentPixmap);
+	image.setDevicePixelRatio(style::DevicePixelRatio());
+	painter.drawPixmap(0, 0, image);
 }
 
 void VolumeController::paintEvent(QPaintEvent* event) {

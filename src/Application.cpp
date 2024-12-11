@@ -17,9 +17,9 @@ Application::Application(int& argc, char** argv) :
     _postsView->setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount);
 
     _postsView->show();
-     auto list = QStringList({ videoPath });
+    auto list = QStringList({ videoPath });
 
-     _postsView->makeMessage(text, list);
+    _postsView->makeMessage(text, list);
 }
 
 Application::~Application() {

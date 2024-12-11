@@ -90,7 +90,10 @@ MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
 		});
 }
 
-void MediaPlayerPanel::updateTimeText(int mediaPosition, int mediaDuration) {
+void MediaPlayerPanel::updateTimeText(
+	int mediaPosition,
+	int mediaDuration) 
+{
 	const auto positionSeconds = (mediaPosition / 1000) % 60;
 	const auto positionMinutes = (mediaPosition / 1000) / 60;
 

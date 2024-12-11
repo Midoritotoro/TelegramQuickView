@@ -9,6 +9,7 @@
 
 class SpeedController;
 
+
 class SpeedButtonOverlay: public QWidget {
 	Q_OBJECT
 private:

@@ -37,16 +37,7 @@ void MessageWidget::addMessageText(const QString& text) {
 
 	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
-		_textLabel->setStyleSheet("QLabel{\n"
-			"color: white;\n"
-			"border-bottom-left-radius: 10px;\n"
-			"border-bottom-right-radius: 10px;\n"
-		"}");
-	else
-		_textLabel->setStyleSheet("QLabel{\n"
-			"color: white;\n"
-			"border-radius: 10px;\n"
-		"}");
+		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
 }
 
 void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths) {

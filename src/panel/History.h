@@ -10,11 +10,12 @@ class History {
 private:
 	MessagesList _messagesList;
 public:
-	void makeMessage(MessageWidget* messageWidget);
+	void makeMessage(not_null<MessageWidget*> messageWidget);
 
-	[[nodiscard]] inline int indexOfMessage(MessageWidget* message) const noexcept { return _messagesList.indexOf(message); }
+	[[nodiscard]] int indexOfMessage(not_null<MessageWidget*> message) const noexcept;
+
 	[[nodiscard]] MessageWidget* messageAt(int index) const noexcept;
 
 	[[nodiscard]] int messagesWithAttachmentsCount() const noexcept;
-	[[nodiscard]] inline int count() const noexcept { return _messagesList.length(); }
+	[[nodiscard]] int count() const noexcept;
 };

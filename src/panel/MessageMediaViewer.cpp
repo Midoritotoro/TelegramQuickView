@@ -26,8 +26,8 @@ namespace {
 }
 
 
-MessageMediaViewer::MessageMediaViewer(
-	History* messagesHistory,
+MessageMediaViewer(
+	not_null<History*> messagesHistory,
 	QWidget* parent
 )
 : QWidget(parent)
@@ -182,7 +182,10 @@ void MessageMediaViewer::updateMessageTextView() {
 	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);
 }
 
-void MessageMediaViewer::openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex) {
+void MessageMediaViewer::openMessageAttachment(
+	not_null<MessageWidget*> messageWidget,
+	int triggeredAttachmentIndex)
+{
 	_currentMessage = messageWidget;
 	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
 

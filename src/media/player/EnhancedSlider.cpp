@@ -5,13 +5,20 @@
 #include <QStylePainter>
 
 
-EnhancedSlider::EnhancedSlider(QWidget* parent, Qt::Orientation orientation, uint16_t handleLen)
-    : QSlider(parent), m_HandleLen(handleLen) 
+EnhancedSlider::EnhancedSlider(
+    QWidget* parent, 
+    Qt::Orientation orientation,
+    uint16_t handleLen
+):
+    QSlider(parent)
+    , m_HandleLen(handleLen) 
 {
     setContentsMargins(0, 0, 0, 0);
     setOrientation(orientation);
+
     setTickPosition(QSlider::TicksBelow);
     setCursor(Qt::PointingHandCursor);
+
     setAttribute(Qt::WA_NoSystemBackground);
 }
 

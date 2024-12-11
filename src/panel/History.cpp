@@ -2,8 +2,12 @@
 #include "MessageWidget.h"
 
 
-void History::makeMessage(MessageWidget* messageWidget) {
+void History::makeMessage(not_null<MessageWidget*> messageWidget) {
 	return _messagesList.append(messageWidget);
+}
+
+int History::indexOfMessage(not_null<MessageWidget*> message) const noexcept {
+	return _messagesList.indexOf(message); 
 }
 
 MessageWidget* History::messageAt(int index) const noexcept {
@@ -20,5 +24,9 @@ int History::messagesWithAttachmentsCount() const noexcept {
 			++messagesWithAttachmentsCount;
 
 	return messagesWithAttachmentsCount;
+}
+
+int History::count() const noexcept {
+	return _messagesList.length();
 }
 

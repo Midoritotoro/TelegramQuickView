@@ -19,7 +19,7 @@ public:
 	void scrollToY(int toTop, int toBottom = -1);
 	void scrolled();
 
-	void scrollToWidget(QWidget* widget);
+	void scrollToWidget(not_null<QWidget*> widget);
 
 	void disableScroll(bool dis);
 protected:

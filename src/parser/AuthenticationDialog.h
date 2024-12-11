@@ -39,17 +39,11 @@ public:
 
     void toSecondFrame();
     void toFirstFrame();
-
-    [[nodiscard]] QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int parentWidth) {
-        return QSize(parentWidth, parentWidth * imageSize.height() / imageSize.width());
-    }
 Q_SIGNALS:
     void credentialsAccepted(const TelegramCredentials& credentials);
     void authCodeAccepted(const QString& code);
     void needSendCodeAgain();
 private:
-    void drawRoundedCorners(QPainter& painter, QRect rect, int borderRadius);
-
     void vacillate();
     void hideWidgets();
 

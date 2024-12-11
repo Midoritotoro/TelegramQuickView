@@ -1,5 +1,3 @@
-set(libs_loc "D:/Libraries/win64")
-
 add_library(external_ffmpeg INTERFACE IMPORTED GLOBAL)
 add_library(app::external_ffmpeg ALIAS external_ffmpeg)
 

@@ -15,40 +15,24 @@ UserDataManager::UserDataManager() {
 	_jsonFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 }
 
-QString UserDataManager::getUserSettingsPath()
-{
-#ifdef PROJECT_NAME
-	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
-			.replace(QCoreApplication::applicationName(), PROJECT_NAME);
+bool UserDataManager::setTelegramCredentials(const TelegramCredentials& telegramCredentials) {
+	if (telegramCredentials.apiHash.length() < 32
+		|| QString::number(telegramCredentials.apiId).length() < 5
+		|| telegramCredentials.phoneNumber.length() < 10)
+		return false;
 
-	if (!writeDir.mkpath("."))
-		return "";
+	auto jsonDocument = getJsonDocument();
+	auto jsonObject = jsonDocument.object();
 
-	return writeDir.absolutePath() + "/userData.json";
-#else
-	return "";
-#endif
-}
+	jsonObject.insert("apiHash", telegramCredentials.apiHash.c_str());
+	jsonObject.insert("phoneNumber", telegramCredentials.phoneNumber.c_str());
+	jsonObject.insert("apiId", telegramCredentials.apiId);
 
-QJsonDocument UserDataManager::getJsonDocument() {
-	QJsonDocument jsonDocument;
+	jsonDocument.setObject(jsonObject);
 
-	if (!_jsonFile.open(QIODevice::ReadOnly | QIODevice::Text | QIODevice::ReadWrite))
-		return jsonDocument;
-	
-	const auto jsonData = _jsonFile.readAll();
+	write(jsonDocument.toJson());
 
-	jsonDocument = QJsonDocument::fromJson(jsonData);
-	_jsonFile.close();
-
-	return jsonDocument;
-}
-
-bool UserDataManager::isTelegramCredentialsValid() {
-	const auto credentials = getTelegramCredentials();
-	return QString::number(credentials.apiId).length() >= 5
-			&& credentials.apiHash.length() >= 32
-			&& credentials.phoneNumber.length() >= 10;
+	return true;
 }
 
 TelegramCredentials UserDataManager::getTelegramCredentials() {
@@ -68,6 +52,13 @@ TelegramCredentials UserDataManager::getTelegramCredentials() {
 	return _telegramCredentials;
 }
 
+bool UserDataManager::isTelegramCredentialsValid() {
+	const auto credentials = getTelegramCredentials();
+	return QString::number(credentials.apiId).length() >= 5
+		&& credentials.apiHash.length() >= 32
+		&& credentials.phoneNumber.length() >= 10;
+}
+
 std::string UserDataManager::getTelegramAuthCode() {
 	const auto jsonDocument = getJsonDocument();
 	const auto jsonObject = jsonDocument.object();
@@ -75,6 +66,52 @@ std::string UserDataManager::getTelegramAuthCode() {
 	const auto code = jsonObject.value("code");
 
 	return code.toString().toStdString();
+}
+
+void UserDataManager::setDownloadSensitiveContentAbility(bool ability) {
+	auto jsonDocument = getJsonDocument();
+	auto jsonObject = jsonDocument.object();
+
+	jsonObject.insert("downloadSensitiveContent", ability);
+	jsonDocument.setObject(jsonObject);
+
+	write(jsonDocument.toJson());
+}
+
+bool UserDataManager::getDownloadSensitiveContentAbility() {
+	const auto jsonDocument = getJsonDocument();
+	const auto jsonObject = jsonDocument.object();
+
+	return jsonObject.value("downloadSensitiveContent").toBool();
+}
+
+void UserDataManager::setTargetChannels(QStringList usernameList) {
+	QJsonArray jsonArray;
+	QJsonObject channelsObject;
+
+	auto jsonDocument = getJsonDocument();
+	auto currentDocumentObject = jsonDocument.object();
+
+	if (currentDocumentObject.contains("channels")) 
+		channelsObject = currentDocumentObject.value("channels").toObject();
+	else 
+		channelsObject = QJsonObject();
+
+	if (channelsObject.contains("usernames"))
+		jsonArray = channelsObject.value("usernames").toArray();
+
+	clearUsernamesOfChannels();
+
+	foreach(const auto& channel, usernameList)
+		if (jsonArray.contains(channel) == false)
+			jsonArray.append(channel);
+
+	channelsObject.insert("usernames", jsonArray);
+	currentDocumentObject.insert("channels", channelsObject);
+
+	jsonDocument.setObject(currentDocumentObject);
+
+	write(jsonDocument.toJson());
 }
 
 QVariantList UserDataManager::getUsernamesOfTargetChannels() {
@@ -86,6 +123,36 @@ QVariantList UserDataManager::getUsernamesOfTargetChannels() {
 		toArray().toVariantList();
 }
 
+void UserDataManager::setTargetChannelsChatIds(QList<qint64> idsList) {
+	QJsonArray jsonArray;
+	QJsonObject channelsObject;
+
+	auto jsonDocument = getJsonDocument();
+	auto currentDocumentObject = jsonDocument.object();
+
+	if (currentDocumentObject.contains("channels"))
+		channelsObject = currentDocumentObject.value("channels").toObject();
+	else
+		channelsObject = QJsonObject();
+
+
+	if (channelsObject.contains("ids"))
+		jsonArray = channelsObject.value("ids").toArray();
+
+	clearChatIdsOfChannels();
+
+	foreach(const auto& id, idsList)
+		if (jsonArray.contains(id) == false)
+			jsonArray.append(id);
+
+	channelsObject.insert("ids", jsonArray);
+	currentDocumentObject.insert("channels", channelsObject);
+
+	jsonDocument.setObject(currentDocumentObject);
+
+	write(jsonDocument.toJson());
+}
+
 QVariantList UserDataManager::getIdsOfTargetChannels() {
 	const auto jsonDocument = getJsonDocument();
 	const auto jsonObject = jsonDocument.object();
@@ -93,6 +160,16 @@ QVariantList UserDataManager::getIdsOfTargetChannels() {
 	return jsonObject.value("channels").
 		toObject().value("ids").
 		toArray().toVariantList();
+}
+
+void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
+	auto jsonDocument = getJsonDocument();
+	auto jsonObject = jsonDocument.object();
+
+	jsonObject.insert("lastPostsCount", lastPostsCount);
+	jsonDocument.setObject(jsonObject);
+
+	write(jsonDocument.toJson());
 }
 
 int UserDataManager::getCountOfLatestDownloadingMessages() {
@@ -106,11 +183,34 @@ int UserDataManager::getCountOfLatestDownloadingMessages() {
 		: 1;
 }
 
-bool UserDataManager::getDownloadSensitiveContentAbility() {
-	const auto jsonDocument = getJsonDocument();
-	const auto jsonObject = jsonDocument.object();
 
-	return jsonObject.value("downloadSensitiveContent").toBool();
+QString UserDataManager::getUserSettingsPath()
+{
+#ifdef PROJECT_NAME
+	const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+		.replace(QCoreApplication::applicationName(), PROJECT_NAME);
+
+	if (!writeDir.mkpath("."))
+		return "";
+
+	return writeDir.absolutePath() + "/userData.json";
+#else
+	return "";
+#endif
+}
+
+QJsonDocument UserDataManager::getJsonDocument() {
+	QJsonDocument jsonDocument;
+
+	if (!_jsonFile.open(QIODevice::ReadOnly | QIODevice::Text | QIODevice::ReadWrite))
+		return jsonDocument;
+
+	const auto jsonData = _jsonFile.readAll();
+
+	jsonDocument = QJsonDocument::fromJson(jsonData);
+	_jsonFile.close();
+
+	return jsonDocument;
 }
 
 void UserDataManager::clearUsernamesOfChannels() {
@@ -165,104 +265,6 @@ void UserDataManager::clearTelegramCredentials() {
 	write(jsonDocument.toJson());
 }
 
-bool UserDataManager::setTelegramCredentials(const TelegramCredentials& telegramCredentials) {
-	if (telegramCredentials.apiHash.length() < 32 
-		|| QString::number(telegramCredentials.apiId).length() < 5
-		|| telegramCredentials.phoneNumber.length() < 10)
-		return false;
-
-	auto jsonDocument = getJsonDocument();
-	auto jsonObject = jsonDocument.object();
-
-	jsonObject.insert("apiHash", telegramCredentials.apiHash.c_str());
-	jsonObject.insert("phoneNumber", telegramCredentials.phoneNumber.c_str());
-	jsonObject.insert("apiId", telegramCredentials.apiId);
-
-	jsonDocument.setObject(jsonObject);
-
-	write(jsonDocument.toJson());
-
-	return true;
-}
-
-void UserDataManager::setTargetChannels(QStringList usernameList) {
-	QJsonArray jsonArray;
-	QJsonObject channelsObject;
-
-	auto jsonDocument = getJsonDocument();
-	auto currentDocumentObject = jsonDocument.object();
-
-	if (currentDocumentObject.contains("channels")) 
-		channelsObject = currentDocumentObject.value("channels").toObject();
-	else 
-		channelsObject = QJsonObject();
-
-	if (channelsObject.contains("usernames"))
-		jsonArray = channelsObject.value("usernames").toArray();
-
-	clearUsernamesOfChannels();
-
-	foreach(const auto& channel, usernameList)
-		if (jsonArray.contains(channel) == false)
-			jsonArray.append(channel);
-
-	channelsObject.insert("usernames", jsonArray);
-	currentDocumentObject.insert("channels", channelsObject);
-
-	jsonDocument.setObject(currentDocumentObject);
-
-	write(jsonDocument.toJson());
-}
-
-void UserDataManager::setTargetChannelsChatIds(QList<qint64> idsList) {
-	QJsonArray jsonArray;
-	QJsonObject channelsObject;
-
-	auto jsonDocument = getJsonDocument();
-	auto currentDocumentObject = jsonDocument.object();
-
-	if (currentDocumentObject.contains("channels"))
-		channelsObject = currentDocumentObject.value("channels").toObject();
-	else
-		channelsObject = QJsonObject();
-
-
-	if (channelsObject.contains("ids"))
-		jsonArray = channelsObject.value("ids").toArray();
-
-	clearChatIdsOfChannels();
-
-	foreach(const auto& id, idsList)
-		if (jsonArray.contains(id) == false)
-			jsonArray.append(id);
-
-	channelsObject.insert("ids", jsonArray);
-	currentDocumentObject.insert("channels", channelsObject);
-
-	jsonDocument.setObject(currentDocumentObject);
-
-	write(jsonDocument.toJson());
-}
-
-void UserDataManager::setLastPostsCountForChannels(int lastPostsCount) {
-	auto jsonDocument = getJsonDocument();
-	auto jsonObject = jsonDocument.object();
-
-	jsonObject.insert("lastPostsCount", lastPostsCount);
-	jsonDocument.setObject(jsonObject);
-
-	write(jsonDocument.toJson());
-}
-
-void UserDataManager::setDownloadSensitiveContentAbility(bool ability) {
-	auto jsonDocument = getJsonDocument();
-	auto jsonObject = jsonDocument.object();
-
-	jsonObject.insert("downloadSensitiveContent", ability);
-	jsonDocument.setObject(jsonObject);
-
-	write(jsonDocument.toJson());
-}
 
 void UserDataManager::write(const QByteArray& data) {
 	_jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);

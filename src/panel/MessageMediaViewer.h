@@ -35,11 +35,16 @@ private:
 
 	int _currentMessageAttachmentIndex = 0;
 public:
-	MessageMediaViewer(History* messagesHistory, QWidget* parent = nullptr);
+	MessageMediaViewer(
+		not_null<History*> messagesHistory,
+		QWidget* parent = nullptr);
 
 	void updateMediaNavigationButtons();
 	void updateMessageTextView();
-	void openMessageAttachment(MessageWidget* messageWidget, int triggeredAttachmentIndex);
+
+	void openMessageAttachment(
+		not_null<MessageWidget*> messageWidget,
+		int triggeredAttachmentIndex);
 
 	[[nodiscard]] int nextMessageWithAttachmentsIndex(int currentIndex) const noexcept;
 	[[nodiscard]] int previousMessageWithAttachmentsIndex(int currentIndex) const noexcept;

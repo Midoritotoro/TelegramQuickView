@@ -1,8 +1,6 @@
 add_library(external_opus STATIC IMPORTED GLOBAL)
 add_library(app::external_opus ALIAS external_opus)
 
-set(libs_loc "D:/Libraries/win64")
-
 target_include_directories(external_opus SYSTEM
 INTERFACE
     ${libs_loc}/opus/include

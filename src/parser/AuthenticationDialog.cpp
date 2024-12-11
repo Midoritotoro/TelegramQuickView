@@ -1,5 +1,7 @@
 ﻿#include "AuthenticationDialog.h"
 
+#include "../core/StyleCore.h"
+
 #include <QFontMetrics>
 #include <QApplication>
 
@@ -217,7 +219,7 @@ void AuthenticationDialog::resizeEvent(QResizeEvent* event) {
     if (_background.size() == size())
         return;
 
-    _background = _background.scaled(getMinimumSizeWithAspectRatio(_background.size(), _background.size().width() / 4.),
+    _background = _background.scaled(style::getMinimumSizeWithAspectRatio(_background.size(), _background.size().width() / 4.),
                     Qt::KeepAspectRatio, Qt::SmoothTransformation);
     resize(_background.size());
 
@@ -245,7 +247,7 @@ void AuthenticationDialog::paintEvent(QPaintEvent* event) {
 
     QRect rect((width() - authFrameWidth) / 2., (height() - authFrameHeight) / 2., authFrameWidth, authFrameHeight);
 
-    drawRoundedCorners(painter, rect, 10);
+    style::RoundCorners(painter, rect, 10);
     paintErrorMessage(painter);
 }
 
@@ -305,32 +307,6 @@ void AuthenticationDialog::paintErrorMessage(QPainter& painter) {
     painter.setOpacity(1.0);
     painter.setFont(font);
     painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, text);
-}
-
-void AuthenticationDialog::drawRoundedCorners(QPainter& painter, QRect rect, int borderRadius) {
-    QPainterPath path;
-
-    path.moveTo(rect.x() + borderRadius, rect.y());
-
-    path.lineTo(rect.x() + rect.width() - borderRadius, rect.y());
-    path.quadTo(rect.x() + rect.width(), rect.y(),
-        rect.x() + rect.width(), rect.y() + borderRadius);
-
-    path.lineTo(rect.x() + rect.width(), 
-        rect.y() + rect.height() - borderRadius);
-    path.quadTo(rect.x() + rect.width(), rect.y() + rect.height(),
-        rect.x() + rect.width() - borderRadius, rect.y() + rect.height());
-
-    path.lineTo(rect.x() + borderRadius, 
-        rect.y() + rect.height());
-    path.quadTo(rect.x(), rect.y() + rect.height(), 
-        rect.x(), rect.y() + rect.height() - borderRadius);
-
-    path.lineTo(rect.x(), rect.y() + borderRadius);
-    path.quadTo(rect.x(), rect.y(), 
-        rect.x() + borderRadius, rect.y());
-
-    painter.drawPath(path);
 }
 
 void AuthenticationDialog::updateWidgetsGeometry() {

@@ -1,4 +1,5 @@
 #include "FlatLabel.h"
+#include "../core/StyleCore.h"
 
 #include <QString>
 #include <QMouseEvent>
@@ -6,7 +7,7 @@
 #include <QDesktopServices>
 
 #include <QPainter>
-#include "../core/StyleCore.h"
+#include <QClipboard>
 
 
 FlatLabel::FlatLabel(QWidget* parent):
@@ -14,6 +15,9 @@ FlatLabel::FlatLabel(QWidget* parent):
 {
 	setSelectable(true);
 	setMouseTracking(true);
+
+	setBackgroundColor(style::flatLabel::defaultColor);
+	setCornerRoundMode(style::CornersRoundMode::All);
 }
 
 QSize FlatLabel::sizeHint() const {
@@ -67,7 +71,7 @@ Qt::Alignment FlatLabel::alignment() const noexcept {
 	return _alignment;
 }
 
-void FlatLabel::setContextMenu(QMenu* menu) {
+void FlatLabel::setContextMenu(not_null<QMenu*> menu) {
 	_contextMenu = menu;
 }
 
@@ -75,17 +79,39 @@ QMenu* FlatLabel::contextMenu() const noexcept {
 	return _contextMenu;
 }
 
+void FlatLabel::setBackgroundColor(const QColor& color) {
+	_backgroundColor = color;
+}
+
+QColor FlatLabel::backgroundColor() const noexcept {
+	return _backgroundColor;
+}
+
+void FlatLabel::setCornerRoundMode(style::CornersRoundMode cornersRoundMode) {
+	_cornersRoundMode = cornersRoundMode;
+}
+
+style::CornersRoundMode FlatLabel::cornerRoundMode() const noexcept {
+	return _cornersRoundMode;
+}
+
+void FlatLabel::setContextMenuHook(std::function<void(ContextMenuRequest)> hook) {
+	_contextMenuHook = std::move(hook);
+}
+
 void FlatLabel::setLink(quint16 index) {
 
 }
 
-void FlatLabel::paintEvent(QPaintEvent* e) {
+void FlatLabel::paintEvent(QPaintEvent* event) {
 	auto painter = QPainter(this);
 
-	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 	painter.setOpacity(_opacity);
 
 	painter.setPen(Qt::white);
+
+	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
 
 	const auto textWidth = _textWidth
 		? _textWidth
@@ -109,64 +135,83 @@ void FlatLabel::paintEvent(QPaintEvent* e) {
 
 	const auto heightExceeded = style::maximumTextHeight < _fullTextHeight || textWidth < style::maximumTextWidth;
 
-	const auto lineHeight = qMax(_st.style.lineHeight, QFontMetrics(font()).height());
-	const auto elisionHeight = !renderElided
+	const auto lineHeight = QFontMetrics(font()).height();
+	const auto elisionHeight = !heightExceeded
 		? 0
-		: _st.maxHeight
-		? qMax(_st.maxHeight, lineHeight)
+		: style::maximumTextHeight
+		? qMax(style::maximumTextHeight, lineHeight)
 		: height();
-	const auto paused = _animationsPausedCallback
-		? _animationsPausedCallback()
-		: WhichAnimationsPaused::None;
-	_text.draw(p, {
-		.position = { textLeft, _st.margin.top() },
-		.availableWidth = textWidth,
-		.align = _st.align,
-		.clip = e->rect(),
-		.palette = &_st.palette,
-		.spoiler = Text::DefaultSpoilerCache(),
-		.now = crl::now(),
-		.pausedEmoji = (paused == WhichAnimationsPaused::CustomEmoji
-			|| paused == WhichAnimationsPaused::All),
-		.pausedSpoiler = (paused == WhichAnimationsPaused::Spoiler
-			|| paused == WhichAnimationsPaused::All),
-		.selection = selection,
-		.elisionHeight = elisionHeight,
-		.elisionBreakEverywhere = renderElided && _breakEverywhere,
-		});
+
+	const auto _rect = QRect(
+		QPoint(textLeft, style::flatLabel::margins.top()),
+		QSize(textWidth, elisionHeight));
+
+	painter.fillRect(_rect, _backgroundColor);
+	painter.drawText(_rect, _text);
 }
 
-void FlatLabel::mouseMoveEvent(QMouseEvent* e) {
+void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
 
 }
 
-void FlatLabel::mousePressEvent(QMouseEvent* e) {
+void FlatLabel::mousePressEvent(QMouseEvent* event) {
 
 }
 
-void FlatLabel::mouseReleaseEvent(QMouseEvent* e) {
+void FlatLabel::mouseReleaseEvent(QMouseEvent* event) {
 
 }
 
-void FlatLabel::mouseDoubleClickEvent(QMouseEvent* e) {
+void FlatLabel::mouseDoubleClickEvent(QMouseEvent* event) {
 
 }
 
-void FlatLabel::focusOutEvent(QFocusEvent* e) {
-
+void FlatLabel::focusOutEvent(QFocusEvent* event) {
+	if (!_selection.empty()) {
+		if (_contextMenu) {
+			_savedSelection = _selection;
+		}
+		_selection = { 0, 0 };
+		update();
+	}
 }
 
-void FlatLabel::focusInEvent(QFocusEvent* e) {
-
+void FlatLabel::focusInEvent(QFocusEvent* event) {
+	if (!_savedSelection.empty()) {
+		_selection = _savedSelection;
+		_savedSelection = { 0, 0 };
+		update();
+	}
 }
 
-void FlatLabel::keyPressEvent(QKeyEvent* e) {
-
+void FlatLabel::keyPressEvent(QKeyEvent* event) {
+	event->ignore();
+	if (event->key() == Qt::Key_Copy || (event->key() == Qt::Key_C 
+		&& event->modifiers().testFlag(Qt::ControlModifier))) 
+		if (!_selection.empty()) {
+			copySelectedText();
+			event->accept();
+		}
 }
 
-void FlatLabel::contextMenuEvent(QContextMenuEvent* e) {
+void FlatLabel::contextMenuEvent(QContextMenuEvent* event) {
+	if (!_contextMenuHook && !_selectable && !hasLinks())
+		return;
 
+	//showContextMenu(event, ContextMenuReason::FromEvent);
 }
+
+void FlatLabel::copySelectedText() {
+	const auto selection = _selection.empty() 
+		? (_contextMenu 
+			? _savedSelection 
+			: _selection) 
+		: _selection;
+
+	if (!selection.empty())
+		QGuiApplication::clipboard()->setText(_text);
+}
+
 
 int FlatLabel::countTextWidth() const noexcept {
 	const auto available = _allowedWidth
