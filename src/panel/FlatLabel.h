@@ -3,7 +3,7 @@
 #include "../core/StyleCore.h"
 #include "../core/Timer.h"
 
-#include "../core/Types.h"
+#include "../core/InvokeQueued.h"
 
 #include <QWidget>
 
@@ -15,6 +15,7 @@ namespace style {
 		};
 
 		inline constexpr auto defaultColor = QColor(24, 37, 51);
+		inline constexpr auto phraseContextCopySelected = "Скопировать текст";
 	}
 } // namespace style
 
@@ -33,6 +34,11 @@ struct TextSelection {
 	[[nodiscard]] constexpr bool empty() const noexcept {
 		return from == to;
 	}
+
+	[[nodiscard]] bool isFullSelection(const QString& text) const {
+		return (from == 0) && (to >= text.size());
+	}
+
 	quint16 from = 0;
 	quint16 to = 0;
 };
@@ -58,6 +64,12 @@ public:
 		bool fullSelection = false;
 	};
 
+	struct TextState {
+		bool uponSymbol = false;
+		bool afterSymbol = false;
+		uint16 symbol = 0;
+	};
+
 	FlatLabel(QWidget* parent = nullptr);
 
 	[[nodiscard]] QSize sizeHint() const override;
@@ -70,6 +82,9 @@ public:
 
 	void setSelectable(bool selectable);
 	[[nodiscard]] bool selectable() const noexcept;
+
+	void setDoubleClickSelectsParagraph(bool doubleClickSelectsParagraph);
+	[[nodiscard]] bool doubleClickSelectsParagraph() const noexcept;
 
 	void setOpacity(float opacity);
 	[[nodiscard]] float opacity() const noexcept;
@@ -89,7 +104,6 @@ public:
 	void setContextMenuHook(Fn<void(ContextMenuRequest)> hook);
 
 	void setLink(quint16 index);
-	void fillContextMenu(ContextMenuRequest request);
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
@@ -108,15 +122,33 @@ private:
 		FromEvent,
 		FromTouch,
 	};
-	void showContextMenu(QContextMenuEvent* event, ContextMenuReason reason);
+
+	void showContextMenu(
+		QContextMenuEvent* event, 
+		ContextMenuReason reason);
+	void fillContextMenu(ContextMenuRequest request);
 
 	[[nodiscard]] int countTextWidth() const noexcept;
 	[[nodiscard]] int countTextHeight();
 
 	void refreshSize();
+	void refreshCursor(bool uponSymbol);
+
 	void textUpdated();
 
+	void copyContextText();
 	void copySelectedText();
+
+	TextState dragActionUpdate();
+
+	TextState dragActionStart(const QPoint& p, Qt::MouseButton button);
+	TextState dragActionFinish(const QPoint& p, Qt::MouseButton button);
+
+	void updateHover(const TextState& state);
+	TextState getTextState(const QPoint& m) const;
+
+	void touchSelect();
+	void executeDrag();
 
 	enum DragAction {
 		NoDrag = 0x00,
@@ -138,18 +170,27 @@ private:
 
 	int _fullTextHeight = 0;
 
+	style::cursor _cursor = style::cursorDefault;
+
 	TextSelection _selection, _savedSelection;
+	TextSelection::Type _selectionType = TextSelection::Type::Letters;
+
 	QMenu* _contextMenu = nullptr;
 
 	Fn<void(ContextMenuRequest)> _contextMenuHook = nullptr;
 	style::CornersRoundMode _cornersRoundMode;
 
 	DragAction _dragAction = NoDrag;
+
 	QPoint _dragStartPosition;
-	quint16 _dragSymbol = 0;
+	uint16 _dragSymbol = 0;
+
 	bool _dragWasInactive = false;
+	bool _doubleClickSelectsParagraph = true;
+	bool _touchSelect = false;
 
 	QPoint _lastMousePos;
+	QPoint _touchStart, _touchPrevPos, _touchPos;
 
 	QPoint _trippleClickPoint;
 	core::Timer _trippleClickTimer;

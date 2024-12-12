@@ -53,7 +53,10 @@ SET(MAIN_SOURCES main.cpp
     src/core/Timer.cpp
 	src/core/Timer.h
 
+    src/core/StyleTypes.h
     src/core/Types.h
+
+    src/core/InvokeQueued.h
 
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h
@@ -176,6 +179,8 @@ add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
    set_target_properties(${PROJECT_NAME} PROPERTIES
        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -cxx_std_20")
 
     target_compile_options(${PROJECT_NAME}
     INTERFACE

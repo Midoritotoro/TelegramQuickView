@@ -1,5 +1,7 @@
 #pragma once
 
+#include "StyleTypes.h"
+
 #include <QImage>
 #include <QSize>
 
@@ -9,7 +11,9 @@
 #include <QFontMetrics>
 #include <QPixmapCache>
 
+
 namespace style {
+
 	inline constexpr QMargins mediaPlayerPanelMargins = { 
 		10, 5, 10, 5 
 	};
