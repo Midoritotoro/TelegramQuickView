@@ -66,7 +66,13 @@ SET(MAIN_SOURCES main.cpp
 
 	src/media/player/WidgetsHider.h
 
-	src/panel/MessageWidget.cpp
+	src/panel/ClickHandler.cpp
+	src/panel/ClickHandler.h
+
+    src/panel/BasicClickHandlers.cpp
+	src/panel/BasicClickHandlers.h
+
+    src/panel/MessageWidget.cpp
 	src/panel/MessageWidget.h
 
 	src/panel/TelegramPostQuickView.cpp

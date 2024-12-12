@@ -1,7 +1,8 @@
 #pragma once 
 
-#include <QObject>
+#include <QString>
 #include <gsl/gsl>
+
 
 using gsl::not_null;
 
@@ -20,5 +21,18 @@ using uint32 = quint32;
 using int64 = qint64;
 using uint64 = quint64;
 
-using float32 = float;
-using float64 = double;
+[[nodiscard]] inline QByteArray operator""_q(
+	const char* data,
+	std::size_t size)
+{
+	return QByteArray::fromRawData(data, size);
+}
+
+[[nodiscard]] inline QString operator""_q(
+	const char16_t* data,
+	std::size_t size) 
+{
+	return QString::fromRawData(
+		reinterpret_cast<const QChar*>(data),
+		size);
+}

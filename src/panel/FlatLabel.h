@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "../core/StyleCore.h"
 #include "../core/Timer.h"
@@ -15,7 +15,7 @@ namespace style {
 		};
 
 		inline constexpr auto defaultColor = QColor(24, 37, 51);
-		inline constexpr auto phraseContextCopySelected = "Скопировать текст";
+		inline constexpr auto phraseContextCopySelected = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ";
 	}
 } // namespace style
 
@@ -54,7 +54,7 @@ inline bool operator!=(TextSelection a, TextSelection b) {
 static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };
 
 
-class FlatLabel: public QWidget {
+class FlatLabel : public QWidget {
 	Q_OBJECT
 public:
 	struct ContextMenuRequest {
@@ -111,7 +111,7 @@ protected:
 
 	void mouseReleaseEvent(QMouseEvent* event) override;
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
-	
+
 	void focusOutEvent(QFocusEvent* event) override;
 	void focusInEvent(QFocusEvent* event) override;
 
@@ -124,7 +124,7 @@ private:
 	};
 
 	void showContextMenu(
-		QContextMenuEvent* event, 
+		QContextMenuEvent* event,
 		ContextMenuReason reason);
 	void fillContextMenu(ContextMenuRequest request);
 

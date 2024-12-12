@@ -13,8 +13,8 @@
 #include <QDrag>
 
 
-FlatLabel::FlatLabel(QWidget* parent):
-	QWidget(parent) 
+FlatLabel::FlatLabel(QWidget* parent) :
+	QWidget(parent)
 {
 	setSelectable(true);
 	setMouseTracking(true);
@@ -65,7 +65,7 @@ float FlatLabel::opacity() const noexcept {
 }
 
 int FlatLabel::textMaxWidth() const noexcept {
-	return style::maximumMessageWidth 
+	return style::maximumMessageWidth
 		- style::flatLabel::margins.left()
 		- style::flatLabel::margins.right();
 }
@@ -126,8 +126,8 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 
 	const auto textWidth = _textWidth
 		? _textWidth
-		: (width() 
-			- style::flatLabel::margins.left() 
+		: (width()
+			- style::flatLabel::margins.left()
 			- style::flatLabel::margins.right());
 
 	const auto textLeft = _textWidth
@@ -169,7 +169,7 @@ void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
 void FlatLabel::mousePressEvent(QMouseEvent* event) {
 	if (_contextMenu)
 		return event->accept();
-	
+
 	dragActionStart(event->globalPos(), event->button());
 }
 
@@ -208,7 +208,7 @@ void FlatLabel::focusOutEvent(QFocusEvent* event) {
 
 	if (_contextMenu)
 		_savedSelection = _selection;
-		
+
 	_selection = TextSelection(0, 0);
 	update();
 }
@@ -223,8 +223,8 @@ void FlatLabel::focusInEvent(QFocusEvent* event) {
 
 void FlatLabel::keyPressEvent(QKeyEvent* event) {
 	event->ignore();
-	if (event->key() == Qt::Key_Copy || (event->key() == Qt::Key_C 
-		&& event->modifiers().testFlag(Qt::ControlModifier))) 
+	if (event->key() == Qt::Key_Copy || (event->key() == Qt::Key_C
+		&& event->modifiers().testFlag(Qt::ControlModifier)))
 		if (!_selection.empty()) {
 			copySelectedText();
 			event->accept();
@@ -243,10 +243,10 @@ void FlatLabel::copyContextText() {
 }
 
 void FlatLabel::copySelectedText() {
-	const auto selection = _selection.empty() 
-		? (_contextMenu 
-			? _savedSelection 
-			: _selection) 
+	const auto selection = _selection.empty()
+		? (_contextMenu
+			? _savedSelection
+			: _selection)
 		: _selection;
 
 	if (!selection.empty())
@@ -432,7 +432,7 @@ void FlatLabel::executeDrag() {
 			return TextForMimeData::Simple(pressedHandler->dragText());
 		}
 		return TextForMimeData();
-	}();
+		}();
 
 	if (auto mimeData = TextUtilities::MimeDataFromText(selectedText)) {
 		auto drag = new QDrag(window());
@@ -462,9 +462,9 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 	auto request = ContextMenuRequest();
 
 	request.menu = _contextMenu,
-	request.selection = _selectable ? _selection : TextSelection(),
-	request.uponSelection = uponSelection,
-	request.fullSelection = _selectable && _selection.isFullSelection(text());
+		request.selection = _selectable ? _selection : TextSelection(),
+		request.uponSelection = uponSelection,
+		request.fullSelection = _selectable && _selection.isFullSelection(text());
 
 	if (_contextMenuHook)
 		_contextMenuHook(request);
@@ -472,7 +472,7 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 		fillContextMenu(request);
 
 	if (_contextMenu)
-		_contextMenu = nullptr;	
+		_contextMenu = nullptr;
 	else {
 		_contextMenu->popup(e->globalPos());
 		e->accept();
@@ -503,12 +503,12 @@ void FlatLabel::refreshSize() {
 	const auto textWidth = countTextWidth();
 	const auto textHeight = countTextHeight();
 
-	const auto fullWidth = textWidth 
+	const auto fullWidth = textWidth
 		+ style::flatLabel::margins.right()
 		+ style::flatLabel::margins.left();
 
-	const auto fullHeight = textHeight 
-		+ style::flatLabel::margins.top() 
+	const auto fullHeight = textHeight
+		+ style::flatLabel::margins.top()
 		+ style::flatLabel::margins.bottom();
 
 	resize(fullWidth, fullHeight);
@@ -517,13 +517,13 @@ void FlatLabel::refreshSize() {
 void FlatLabel::refreshCursor(bool uponSymbol) {
 	if (_dragAction != NoDrag)
 		return;
-	
+
 	const auto needTextCursor = _selectable && uponSymbol;
 	auto newCursor = needTextCursor ? style::cursorText : style::cursorDefault;
 
 	if (ClickHandler::getActive())
 		newCursor = style::cursorPointer;
-	
+
 	if (newCursor != _cursor) {
 		_cursor = newCursor;
 		setCursor(_cursor);
