@@ -61,58 +61,55 @@ SET(MAIN_SOURCES main.cpp
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h
 
-	src/media/ClickableLabel.h
-	src/media/ClickableLabel.cpp
+	src/ui/WidgetsHider.h
 
-	src/media/player/WidgetsHider.h
+	src/ui/ClickHandler.cpp
+	src/ui/ClickHandler.h
 
-	src/panel/ClickHandler.cpp
-	src/panel/ClickHandler.h
+    src/ui/BasicClickHandlers.cpp
+	src/ui/BasicClickHandlers.h
 
-    src/panel/BasicClickHandlers.cpp
-	src/panel/BasicClickHandlers.h
+    src/view/MessageWidget.cpp
+	src/view/MessageWidget.h
 
-    src/panel/MessageWidget.cpp
-	src/panel/MessageWidget.h
+	src/view/TelegramPostQuickView.cpp
+	src/view/TelegramPostQuickView.h
 
-	src/panel/TelegramPostQuickView.cpp
-	src/panel/TelegramPostQuickView.h
+    src/view/MessageMediaViewer.cpp
+	src/view/MessageMediaViewer.h
 
-    src/panel/MessageMediaViewer.cpp
-	src/panel/MessageMediaViewer.h
+	src/view/MessageAttachment.cpp
+	src/view/MessageAttachment.h
 
-	src/panel/MessageAttachment.cpp
-	src/panel/MessageAttachment.h
+	src/view/History.cpp
+	src/view/History.h
 
-	src/panel/History.cpp
-	src/panel/History.h
-
-	src/panel/AbstractFlatButton.cpp
-	src/panel/AbstractFlatButton.h
+	src/ui/AbstractFlatButton.cpp
+	src/ui/AbstractFlatButton.h
     
-    src/panel/FlatButton.cpp
-	src/panel/FlatButton.h
+    src/ui/FlatButton.cpp
+	src/ui/FlatButton.h
 
-	src/panel/MessageTextView.cpp
-	src/panel/MessageTextView.h
+	src/view/MessageTextView.cpp
+	src/view/MessageTextView.h
 
-	src/panel/ContinuousScroll.cpp
-	src/panel/ContinuousScroll.h
+	src/ui/ContinuousScroll.cpp
+	src/ui/ContinuousScroll.h
 
-    src/panel/FlatLabel.cpp
-	src/panel/FlatLabel.h
+    src/ui/FlatLabel.cpp
+	src/ui/FlatLabel.h
 
-	src/panel/ScrollArea.cpp
-	src/panel/ScrollArea.h
+	src/ui/ScrollArea.cpp
+	src/ui/ScrollArea.h
 
 	src/media/ffmpeg/Utility.cpp
 	src/media/ffmpeg/Utility.h 
 
-	src/media/ffmpeg/FrameGenerator.h
-    src/media/ffmpeg/FrameGenerator.cpp
+	src/media/ffmpeg/video/FrameGenerator.h
+    src/media/ffmpeg/video/FrameGenerator.cpp
         
-    src/media/ffmpeg/HardwareAcceleration.cpp
-    src/media/ffmpeg/HardwareAcceleration.h
+    src/media/ffmpeg/video/HardwareAcceleration.cpp
+    src/media/ffmpeg/video/HardwareAcceleration.h
         
     src/media/player/MediaPlayer.h 
     src/media/player/MediaPlayer.cpp
@@ -120,8 +117,8 @@ SET(MAIN_SOURCES main.cpp
     src/media/Manager.cpp
     src/media/Manager.h
 
-    src/media/player/EnhancedSlider.cpp
-    src/media/player/EnhancedSlider.h
+    src/ui/EnhancedSlider.cpp
+    src/ui/EnhancedSlider.h
 
     src/media/player/FullScreenButton.cpp
     src/media/player/FullScreenButton.h
@@ -137,15 +134,12 @@ SET(MAIN_SOURCES main.cpp
 
     src/media/player/SpeedButton.cpp
     src/media/player/SpeedButton.h
-
-    src/media/ClickableLabel.cpp
-    src/media/ClickableLabel.h
    
     src/media/ffmpeg/audio/AudioReader.cpp
     src/media/ffmpeg/audio/AudioReader.h
 
-    src/media/ffmpeg/Scale.cpp
-    src/media/ffmpeg/Scale.h 
+    src/media/ffmpeg/video/Scale.cpp
+    src/media/ffmpeg/video/Scale.h 
 
     src/media/ffmpeg/audio/AbstractAudioLoader.cpp
     src/media/ffmpeg/audio/AbstractAudioLoader.h
@@ -156,14 +150,14 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
     src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
 
-    src/parser/effects/shaders/dual_kawase_down.frag
-    src/parser/effects/shaders/dual_kawase_up.frag
-    src/parser/effects/shaders/simple.vert
+    src/ui/effects/shaders/dual_kawase_down.frag
+    src/ui/effects/shaders/dual_kawase_up.frag
+    src/ui/effects/shaders/simple.vert
 
-	src/parser/effects/vertex.h
+	src/ui/effects/vertex.h
 
-    src/parser/effects/OpenGLBlur.cpp
-	src/parser/effects/OpenGLBlur.h
+    src/ui/effects/OpenGLBlur.cpp
+	src/ui/effects/OpenGLBlur.h
 
 	src/parser/data/UserDataManager.cpp
 	src/parser/data/UserDataManager.h

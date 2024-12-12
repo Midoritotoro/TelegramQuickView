@@ -10,13 +10,13 @@
 
 
 class FlatButton;
-class MessageTextView;
+class TextView;
 
 class WidgetsHider;
 class MediaPlayer;
 
 
-class MessageMediaViewer: public QWidget {
+class MediaViewer : public QWidget {
 	Q_OBJECT
 private:
 	QGridLayout* _grid = nullptr;
@@ -29,11 +29,11 @@ private:
 
 	MessageWidget* _currentMessage = nullptr;
 	History* _messagesHistory;
-	MessageTextView* _messageTextView = nullptr;
+	TextView* _messageTextView = nullptr;
 
 	int _currentMessageAttachmentIndex = 0;
 public:
-	MessageMediaViewer(
+	MediaViewer(
 		not_null<History*> messagesHistory,
 		QWidget* parent = nullptr);
 

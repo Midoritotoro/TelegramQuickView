@@ -4,12 +4,12 @@
 #include <QLabel>
 
 
-class MessageTextView : public QWidget {
+class TextView : public QWidget {
 	Q_OBJECT
 private:
 	QLabel* _textLabel = nullptr;
 public:
-	MessageTextView(QWidget* parent = nullptr);
+	TextView(QWidget* parent = nullptr);
 
 	void setText(const QString& text);
 protected:

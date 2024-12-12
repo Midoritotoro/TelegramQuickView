@@ -1,7 +1,7 @@
 #include "MediaPlayerPanel.h"
 
-#include "VolumeController.h"
-#include "FullScreenButton.h"
+#include "buttons/VolumeController.h"
+#include "buttons/FullScreenButton.h"
 
 #include <QPaintEvent>
 #include <QMargins>

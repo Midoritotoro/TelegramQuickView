@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "ffmpeg/FrameGenerator.h"
+#include "ffmpeg/video/FrameGenerator.h"
 #include "ffmpeg/audio/AudioReader.h"
 
 #include <QThread>

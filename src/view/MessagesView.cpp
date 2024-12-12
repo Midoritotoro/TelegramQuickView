@@ -19,7 +19,7 @@
 #include <QDir>
 
 
-TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
+MessagesView::MessagesView(QWidget* parent):
 	QWidget(parent)
 	, _telegramParser(std::make_unique<TelegramParser>())
 //	, _mouseDetector(std::make_unique<MouseDetector>())
@@ -103,18 +103,19 @@ TelegramPostQuickView::TelegramPostQuickView(QWidget* parent):
 	//addContent();
 }
 
-void TelegramPostQuickView::makeMessage(
+void MessagesView::makeMessage(
 	const QString& messageText, 
 	const QStringList& attachmentsPaths)
 {
 	auto ms = Time::now();
 	const auto timer = gsl::finally([&ms] { qDebug() << "TelegramPostQuickView::makeMessage: " << Time::now() - ms << " ms";  });
 
-	auto message = new MessageWidget();
+	auto message = new Message();
 
-	message->setMessageMediaDisplayMode(_displayMode);
-	message->addMessageAttachments(attachmentsPaths);
-	message->addMessageText(messageText);
+	message->setMediaDisplayMode(_displayMode);
+	message->setAttachments(attachmentsPaths);
+
+	message->setText(messageText);
 
 	_chatScrollAreaLayout->addWidget(message, 0, Qt::AlignLeft | Qt::AlignTop);
 	_messagesHistory->makeMessage(message);
@@ -125,14 +126,14 @@ void TelegramPostQuickView::makeMessage(
 	const auto& messageAttachmentsList = message->messageAttachments();
 
 	foreach(auto attachment, messageAttachmentsList)
-		connect(attachment, &MessageAttachment::clicked, this, &TelegramPostQuickView::attachmentCliked);
+		connect(attachment, &QAbstractButton::clicked, this, &TelegramPostQuickView::attachmentCliked);
 }
 
-void TelegramPostQuickView::setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode displayMode) {
+void MessagesView::setMessageMediaDisplayMode(Message::MediaDisplayMode displayMode) {
 	_displayMode = displayMode;
 }
 
-void TelegramPostQuickView::attachmentCliked() {
+void MessagesView::attachmentCliked() {
 	auto attachment = (MessageAttachment*)sender();
 
 	if (_messageMediaViewer == nullptr)
@@ -144,7 +145,7 @@ void TelegramPostQuickView::attachmentCliked() {
 	showMinimized();
 }
 
-void TelegramPostQuickView::addContent() {
+void MessagesView::addContent() {
 	const auto guard = gsl::finally([this] { _chatScrollArea->disableScroll(false); });
 	_chatScrollArea->disableScroll(true);
 

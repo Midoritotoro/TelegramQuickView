@@ -1,5 +1,5 @@
 #include "MessageAttachment.h"
-#include "MessageWidget.h"
+#include "Message.h"
 
 #include <QMimeDatabase>
 #include <QPainter>
@@ -11,10 +11,10 @@
 
 
 MessageAttachment::MessageAttachment(
-	not_null<MessageWidget*> parentMessage,
+	not_null<Message*> parentMessage,
 	const QString& attachmentPath
 )
-	: ClickableLabel()
+	: QAbstractButton()
 	, _attachmentPath(attachmentPath)
 	, _attachmentType(detectMediaType(attachmentPath))
 	, _parentMessage(parentMessage)
@@ -36,8 +36,8 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
-	switch (_parentMessage->messsageMediaDisplayMode()) {
-		case MessageWidget::MessageMediaDisplayMode::Stack:
+	switch (_parentMessage->mediaDisplayMode()) {
+		case Message::MessageMediaDisplayMode::Stack:
 			if (_parentMessage->attachmentsLength() == 1 && _parentMessage->hasText() == false)
 				style::RoundCorners(painter, size(), 15);
 			else if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
@@ -46,7 +46,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			painter.drawPixmap(0, 0, _preview);
 			break;
 
-		case MessageWidget::MessageMediaDisplayMode::PreviewWithCount:
+		case Message::MessageMediaDisplayMode::PreviewWithCount:
 			_parentMessage->hasText()
 				? style::RoundTopCorners(painter, size(), 15)
 				: style::RoundCorners(painter, size(), 15);

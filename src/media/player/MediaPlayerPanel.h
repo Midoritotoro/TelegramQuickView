@@ -3,10 +3,10 @@
 #include <QWidget>
 #include <QLabel>
 
-#include "VideoStateWidget.h"
-#include "EnhancedSlider.h"
+#include "buttons/VideoStateWidget.h"
+#include "../../ui/widgets/EnhancedSlider.h"
 
-#include "SpeedButton.h"
+#include "buttons/SpeedButton.h"
 
 class VolumeController;
 class FullScreenButton;

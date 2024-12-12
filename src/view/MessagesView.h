@@ -1,22 +1,23 @@
 #pragma once
 
-#include "MessageWidget.h"
+#include "Message.h"
 #include <QVBoxLayout>
 
 #include "History.h"
 #include <memory>
 
-#include "ContinuousScroll.h"
+#include "../ui/widgets/ContinuousScroll.h"
+
 
 class TelegramParser;
 class MessageMediaViewer;
 class MouseDetector;
 
 
-class TelegramPostQuickView: public QWidget {
+class MessagesView: public QWidget {
 	Q_OBJECT
 private:
-	MessageWidget::MessageMediaDisplayMode _displayMode;
+	Message::MediaDisplayMode _displayMode;
 
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;
 
@@ -30,12 +31,12 @@ private:
 
 	int _currentPostIndex;
 public:
-	TelegramPostQuickView(QWidget* parent = nullptr);
+	MessagesView(QWidget* parent = nullptr);
 
 	void makeMessage(
 		const QString& messageText = "",
 		const QStringList& attachmentsPaths = {});
-	void setMessageMediaDisplayMode(MessageWidget::MessageMediaDisplayMode displayMode);
+	void setMessageMediaDisplayMode(Message::MediaDisplayMode displayMode);
 public Q_SLOTS:
 	void attachmentCliked();
 protected:

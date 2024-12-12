@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../media/ClickableLabel.h"
+#include <QAbstractButton>
 #include "../core/Types.h"
 
 #include <QPixmap>
@@ -10,7 +10,7 @@ class QPaintEvent;
 class QResizeEvent;
 
 
-class MessageAttachment final: public ClickableLabel {
+class MessageAttachment final: public QAbstractButton {
 	Q_OBJECT
 public:
 	enum class AttachmentType {

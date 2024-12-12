@@ -1,12 +1,10 @@
-﻿#include "MessageWidget.h"
+﻿#include "Message.h"
 #include "MessageAttachment.h"
 
-#include "FlatLabel.h"
-
-#include <QElapsedTimer>
+#include "../ui/widgets/FlatLabel.h"
 
 
-MessageWidget::MessageWidget(
+Message::Message(
 	QWidget* parent
 ):
 	QWidget(parent)
@@ -28,7 +26,7 @@ MessageWidget::MessageWidget(
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
-void MessageWidget::addMessageText(const QString& text) {
+void Message::setText(const QString& text) {
 	if (text.length() == 0)
 		return;
 
@@ -40,7 +38,12 @@ void MessageWidget::addMessageText(const QString& text) {
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
 }
 
-void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths) {
+QString Message::text() const noexcept {
+	return _textLabel->text();
+}
+
+
+void Message::setAttachments(const QStringList& attachmentsPaths) {
 	if (attachmentsPaths.length() == 0)
 		return;
 
@@ -72,40 +75,37 @@ void MessageWidget::addMessageAttachments(const QStringList& attachmentsPaths) {
 	}
 }
 
-void MessageWidget::setMessageMediaDisplayMode(MessageMediaDisplayMode displayMode) {
+const MessageAttachmentsList& Message::attachments() const noexcept {
+	return _attachments;
+}
+
+
+void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {
 	_mediaDisplayMode = displayMode;
 }
 
-MessageWidget::MessageMediaDisplayMode MessageWidget::messsageMediaDisplayMode() const noexcept {
+Message::MediaDisplayMode Message::mediaDisplayMode() const noexcept {
 	return _mediaDisplayMode; 
 }
 
-QString MessageWidget::messageText() const noexcept {
-	return _textLabel->text(); 
-}
-
-const MessageAttachmentsList& MessageWidget::messageAttachments() const noexcept { 
-	return _attachments; 
-}
-
-int MessageWidget::indexOfAttachment(MessageAttachment* messageAttachment) const noexcept {
+int Message::indexOfAttachment(not_null<MessageAttachment*> messageAttachment) const noexcept {
 	return _attachments.indexOf(messageAttachment); 
 }
 
-MessageAttachment* MessageWidget::attachmentAt(int index) const noexcept {
+MessageAttachment* Message::attachmentAt(int index) const noexcept {
 	if (index >= 0 && attachmentsLength() > index)
 		return _attachments.at(index);
 	return nullptr;
 }
 
-int MessageWidget::attachmentsLength() const noexcept {
+int Message::attachmentsLength() const noexcept {
 	return _attachments.length();
 }
 
-bool MessageWidget::hasAttachments() const noexcept {
+bool Message::hasAttachments() const noexcept {
 	return !_attachments.isEmpty();
 }
 
-bool MessageWidget::hasText() const noexcept {
+bool Message::hasText() const noexcept {
 	return !_textLabel->text().isEmpty();
 }

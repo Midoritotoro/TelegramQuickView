@@ -1,12 +1,12 @@
 ﻿#include "MessageMediaViewer.h"
 
-#include "FlatButton.h"
-#include "../media/player/WidgetsHider.h"
+#include "../ui/widgets/FlatButton.h"
+#include "../ui/widgets/WidgetsHider.h"
 
 #include "../media/player/MediaPlayer.h"
-#include "MessageWidget.h"
+#include "Message.h"
 
-#include "MessageTextView.h"
+#include "TextView.h"
 #include "MessageAttachment.h"
 
 #include "MessageWidget.h"
@@ -23,7 +23,7 @@ namespace {
 }
 
 
-MessageMediaViewer::MessageMediaViewer(
+MediaViewer::MediaViewer(
 	not_null<History*> messagesHistory,
 	QWidget* parent
 )
@@ -60,7 +60,7 @@ MessageMediaViewer::MessageMediaViewer(
 
 	_nextAttachment = new FlatButton(this);
 	_previousAttachment = new FlatButton(this);
-	_messageTextView = new MessageTextView(this);
+	_messageTextView = new TextView(this);
 
 	_nextAttachment->setFixedSize(38, 38);
 	_previousAttachment->setFixedSize(38, 38);
@@ -117,7 +117,7 @@ MessageMediaViewer::MessageMediaViewer(
 	});
 }
 
-void MessageMediaViewer::updateMediaNavigationButtons() {
+void MediaViewer::updateMediaNavigationButtons() {
 	if (!_currentMessage)
 		return;
 
@@ -132,7 +132,7 @@ void MessageMediaViewer::updateMediaNavigationButtons() {
 		_previousAttachment->hide();
 }
 
-void MessageMediaViewer::updateMessageTextView() {
+void MediaViewer::updateMessageTextView() {
 	if (!_currentMessage)
 		return;
 
@@ -179,7 +179,7 @@ void MessageMediaViewer::updateMessageTextView() {
 	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);
 }
 
-void MessageMediaViewer::openMessageAttachment(
+void MediaViewer::openMessageAttachment(
 	not_null<MessageWidget*> messageWidget,
 	int triggeredAttachmentIndex)
 {
@@ -198,21 +198,21 @@ void MessageMediaViewer::openMessageAttachment(
 	updateMessageTextView();
 }
 
-int MessageMediaViewer::nextMessageWithAttachmentsIndex(int currentIndex) const noexcept {
+int MediaViewer::nextMessageWithAttachmentsIndex(int currentIndex) const noexcept {
 	for (int i = currentIndex + 1; i < _messagesHistory->count(); ++i)
 		if (_messagesHistory->messageAt(i)->hasAttachments())
 			return i;
 	return -1;
 }
 
-int MessageMediaViewer::previousMessageWithAttachmentsIndex(int currentIndex) const noexcept {
+int MediaViewer::previousMessageWithAttachmentsIndex(int currentIndex) const noexcept {
 	for (int i = currentIndex - 1; i >= 0; --i)
 		if (_messagesHistory->messageAt(i)->hasAttachments())
 			return i;
 	return -1;
 }
 
-void MessageMediaViewer::goToPreviousMessage() {
+void MediaViewer::goToPreviousMessage() {
 	const auto previousMessageIndex = previousMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage));
 
 	if (previousMessageIndex < 0)
@@ -229,7 +229,7 @@ void MessageMediaViewer::goToPreviousMessage() {
 	}
 }
 
-void MessageMediaViewer::goToNextMessage() {
+void MediaViewer::goToNextMessage() {
 	const auto nextMessageIndex = nextMessageWithAttachmentsIndex(_messagesHistory->indexOfMessage(_currentMessage));
 
 	if (nextMessageIndex < 0)
@@ -246,7 +246,7 @@ void MessageMediaViewer::goToNextMessage() {
 	}
 }
 
-void MessageMediaViewer::nextAttachmentButton_clicked() {
+void MediaViewer::nextAttachmentButton_clicked() {
 	const auto attachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = 0; index < attachmentsCount; ++index) {
@@ -274,7 +274,7 @@ void MessageMediaViewer::nextAttachmentButton_clicked() {
 	updateMessageTextView();
 }
 
-void MessageMediaViewer::previousAttachmentButton_clicked() {
+void MediaViewer::previousAttachmentButton_clicked() {
 	const auto attachmentsCount = _currentMessage->attachmentsLength();
 
 	for (int index = attachmentsCount; index >= 0; --index) {
@@ -302,14 +302,14 @@ void MessageMediaViewer::previousAttachmentButton_clicked() {
 	updateMessageTextView();
 }
 
-void MessageMediaViewer::resizeEvent(QResizeEvent* event) {
+void MediaViewer::resizeEvent(QResizeEvent* event) {
 	_previousAttachment->move(_nextAttachment->width(), height() / 2);
 	_nextAttachment->move(width() - (_previousAttachment->width() * 2), height() / 2);
 
 	updateMessageTextView();
 }
 
-void MessageMediaViewer::closeEvent(QCloseEvent* event) {
+void MediaViewer::closeEvent(QCloseEvent* event) {
 	emit escaped();
 	_mediaPlayer->cleanUp();
 

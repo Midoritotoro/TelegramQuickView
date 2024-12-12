@@ -3,7 +3,7 @@
 #include "../Manager.h"
 #include "MediaPlayerPanel.h"
 
-#include "WidgetsHider.h"
+#include "../../ui/WidgetsHider.h"
 
 #include <QWidget>
 

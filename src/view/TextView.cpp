@@ -9,7 +9,7 @@
 #include "../core/StyleCore.h"
 
 
-MessageTextView::MessageTextView(QWidget* parent):
+TextView::TextView(QWidget* parent):
 	QWidget(parent)
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -33,7 +33,7 @@ MessageTextView::MessageTextView(QWidget* parent):
 	gridLayout->addWidget(_textLabel, 0, 0, 1, 1);
 }
 
-void MessageTextView::setText(const QString& text) {
+void TextView::setText(const QString& text) {
 	_textLabel->setText(text);
 
 	_textLabel->adjustSize();
@@ -57,7 +57,7 @@ void MessageTextView::setText(const QString& text) {
 	_textLabel->resize(size());
 }
 
-void MessageTextView::paintEvent(QPaintEvent* event) {
+void TextView::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 

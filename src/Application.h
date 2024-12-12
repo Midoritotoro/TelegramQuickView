@@ -3,12 +3,13 @@
 #include <iostream>
 #include <QApplication>
 
-class TelegramPostQuickView;
+class MessagesView;
 class MediaPlayer;
+
 
 class Application final: public QApplication {
 private:
-	std::unique_ptr<TelegramPostQuickView> _postsView = nullptr;
+	std::unique_ptr<MessagesView> _messagesView = nullptr;
 public:
 	Application(int& argc, char** argv);
 	~Application();
