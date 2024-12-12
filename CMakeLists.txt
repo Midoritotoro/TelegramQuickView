@@ -47,6 +47,9 @@ SET(MAIN_SOURCES main.cpp
 	src/core/StyleCore.cpp
 	src/core/StyleCore.h
 
+    src/core/String.cpp
+    src/core/String.h
+
 	src/core/Time.cpp
 	src/core/Time.h
 

@@ -14,7 +14,6 @@ struct ClickContext {
 
 enum class EntityType: uchar {
 	Invalid = 0,
-
 	Url,
 	CustomUrl,
 	Email,
@@ -28,6 +27,7 @@ protected:
 	}
 	virtual void clickHandlerPressedChanged(const ClickHandlerPtr& action, bool pressed) {
 	}
+
 	virtual ~ClickHandlerHost() = 0;
 	friend class ClickHandler;
 

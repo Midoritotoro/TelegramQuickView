@@ -15,6 +15,7 @@
 
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)
+	, ClickHandlerHost()
 {
 	setSelectable(true);
 	setMouseTracking(true);
@@ -275,10 +276,7 @@ FlatLabel::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton
 
 	ClickHandler::pressed();
 	_dragAction = NoDrag;
-	_dragWasInactive = WasInactivePress(window());
-	if (_dragWasInactive) {
-		MarkInactivePress(window(), false);
-	}
+	_dragWasInactive = true;
 
 	if (ClickHandler::getPressed()) {
 		_dragStartPosition = mapFromGlobal(_lastMousePos);
@@ -294,13 +292,13 @@ FlatLabel::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton
 			_savedSelection = { 0, 0 };
 			_dragSymbol = state.symbol;
 			_dragAction = Selecting;
-			_selectionType = TextSelectType::Paragraphs;
+			_selectionType = TextSelection::Type::Paragraphs;
 			updateHover(state);
 			_trippleClickTimer.callOnce(QApplication::doubleClickInterval());
 			update();
 		}
 	}
-	if (_selectionType != TextSelectType::Paragraphs) {
+	if (_selectionType != TextSelection::Type::Paragraphs) {
 		_dragSymbol = state.symbol;
 		bool uponSelected = state.uponSymbol;
 		if (uponSelected) {
@@ -383,7 +381,7 @@ void FlatLabel::updateHover(const TextState& state) {
 			if (state.afterSymbol && _selectionType == TextSelection::Type::Letters) {
 				++second;
 			}
-			auto selection = _text.adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
+			auto selection = adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
 			if (_selection != selection) {
 				_selection = selection;
 				_savedSelection = { 0, 0 };

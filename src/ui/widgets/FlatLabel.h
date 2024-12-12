@@ -4,6 +4,7 @@
 #include "../../core/Timer.h"
 
 #include "../../core/InvokeQueued.h"
+#include "../ClickHandler.h"
 
 #include <QWidget>
 
@@ -20,51 +21,19 @@ namespace style {
 } // namespace style
 
 
-struct TextSelection {
-	enum class Type {
-		Letters = 0x01,
-		Words = 0x02,
-		Paragraphs = 0x03,
-	};
-
-	constexpr TextSelection() = default;
-	constexpr TextSelection(uint16 from, uint16 to) : from(from), to(to) {
-	}
-
-	[[nodiscard]] constexpr bool empty() const noexcept {
-		return from == to;
-	}
-
-	[[nodiscard]] bool isFullSelection(const QString& text) const {
-		return (from == 0) && (to >= text.size());
-	}
-
-	quint16 from = 0;
-	quint16 to = 0;
-};
-
-inline bool operator==(TextSelection a, TextSelection b) {
-	return a.from == b.from && a.to == b.to;
-}
-
-inline bool operator!=(TextSelection a, TextSelection b) {
-	return !(a == b);
-}
-
-static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };
-
-
-class FlatLabel : public QWidget {
+class FlatLabel : public QWidget, public ClickHandlerHost {
 	Q_OBJECT
 public:
 	struct ContextMenuRequest {
 		QMenu* menu;
 		TextSelection selection;
+		ClickHandlerPtr link;
 		bool uponSelection = false;
 		bool fullSelection = false;
 	};
 
 	struct TextState {
+		ClickHandlerPtr link;
 		bool uponSymbol = false;
 		bool afterSymbol = false;
 		uint16 symbol = 0;
