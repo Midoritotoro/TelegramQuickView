@@ -226,8 +226,8 @@ bool AbstractFlatButton::autoRaise() const {
     return _autoRaise;
 }
 
-void AbstractFlatButton::setMenu(QMenu* menu) {
-    if (_menu == menu)
+void AbstractFlatButton::setMenu(not_null<QMenu*> menu) {
+    if (_menu == menu.get())
         return;
 
     _menu = menu;

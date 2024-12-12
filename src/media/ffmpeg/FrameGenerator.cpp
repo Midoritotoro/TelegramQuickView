@@ -182,7 +182,7 @@ FrameGenerator::Frame FrameGenerator::renderNext(
 	Qt::AspectRatioMode mode,
 	bool fullScreen) {
 	//	const auto ms = Time::now();
-	//  const auto time = Guard::finally([&ms] { qDebug() << "renderNext: " << Time::now() - ms << " ms"; });
+	//  const auto time = gsl::finally([&ms] { qDebug() << "renderNext: " << Time::now() - ms << " ms"; });
 
 	if (!_codec)
 		return {};
@@ -309,7 +309,7 @@ int64_t FrameGenerator::seek(
 
 void FrameGenerator::readNextFrame() {
 	//	const auto milliseconds = Time::now();
-	//	const auto time = Guard::finally([&milliseconds] { qDebug() << "readNextFrame: " << Time::now() - milliseconds << " ms";  });
+	//	const auto time = gsl::finally([&milliseconds] { qDebug() << "readNextFrame: " << Time::now() - milliseconds << " ms";  });
 
 	auto frame = _next.frame 
 		? std::exchange(_next.frame, {}) 
@@ -361,7 +361,7 @@ void FrameGenerator::readNextFrame() {
 			result = avcodec_send_packet(_codec.get(), nullptr);
 		else {
 			const auto native = &packet.fields();
-			const auto guard = Guard::finally([
+			const auto guard = gsl::finally([
 				&,
 					size = native->size,
 					data = native->data

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../media/ClickableLabel.h"
+#include "../core/Types.h"
+
 #include <QPixmap>
 
 class MessageWidget;

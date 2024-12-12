@@ -13,9 +13,9 @@ VideoStateWidget::VideoStateWidget(QWidget* parent):
     const auto currentPath = QCoreApplication::applicationDirPath();
     const auto assetsDir = QDir(currentPath + "/../../assets/images");
 
-    _pausePixmap = QPixmap(assetsDir.absolutePath() + "/stop.png");
-    _playPixmap = QPixmap(assetsDir.absolutePath() + "/play.png");
-    _repeatPixmap = QPixmap(assetsDir.absolutePath() + "/repeat.png");
+    _pause = QImage(assetsDir.absolutePath() + "/stop.png");
+    _play = QImage(assetsDir.absolutePath() + "/play.png");
+    _repeat = QImage(assetsDir.absolutePath() + "/repeat.png");
 
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);
@@ -42,19 +42,19 @@ void VideoStateWidget::paintEvent(QPaintEvent* event) {
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::NoBrush);
 
-    auto& image = QImage();
+    auto image = QImage();
 
     switch (_state) {
         case State::Play:
-            image = QImage(_playImagePath);
+            image = _play;
             break;
 
         case State::Pause:
-            image = QImage(_pauseImagePath);
+            image = _pause;
             break;
 
         case State::Repeat:
-            image = QImage(_repeatImagePath);
+            image = _repeat;
             break;
     }
 
@@ -66,5 +66,5 @@ void VideoStateWidget::paintEvent(QPaintEvent* event) {
         Qt::SmoothTransformation);
 
     image.setDevicePixelRatio(style::DevicePixelRatio());
-    painter.drawPixmap(0, 0, image);
+    painter.drawImage(0, 0, image);
 }

@@ -19,27 +19,27 @@ VolumeController::VolumeController(QWidget* parent) :
 	const auto currentPath = QCoreApplication::applicationDirPath();
 	const auto assetsDir = QDir(currentPath + "/../../assets/images");
 
-	_speakerOffPixmap = QPixmap(cssDir.absolutePath() + "/speaker_white_off.png");
-	_speakerOnPixmap = QPixmap(cssDir.absolutePath() + "/speaker_white_on.png");
-	_speakerSmallOnPixmap = QPixmap(cssDir.absolutePath() + "/speaker_white_small_on.png");
+	_speakerOff = QImage(assetsDir.absolutePath() + "/speaker_white_off.png");
+	_speakerOn = QImage(assetsDir.absolutePath() + "/speaker_white_on.png");
+	_speakerSmallOn = QImage(assetsDir.absolutePath() + "/speaker_white_small_on.png");
 }
 
 
 void VolumeController::paintSpeakerOff(QPainter& painter) {
-	_speakerOffPixmap = std::move(_speakerOffPixmap).scaled(
-		image.width() * style::DevicePixelRatio(),
-		image.height() * style::DevicePixelRatio(),
+	_speakerOff = std::move(_speakerOff).scaled(
+		_speakerOff.width() * style::DevicePixelRatio(),
+		_speakerOff.height() * style::DevicePixelRatio(),
 		Qt::IgnoreAspectRatio,
 		Qt::SmoothTransformation);
 
-	_speakerOffPixmap.setDevicePixelRatio(style::DevicePixelRatio());
-	painter.drawPixmap(0, 0, _speakerOffPixmap);
+	_speakerOff.setDevicePixelRatio(style::DevicePixelRatio());
+	painter.drawImage(0, 0, _speakerOff);
 }
 
 void VolumeController::paintSpeakerOn(QPainter& painter) {
 	auto& image = _isVolumeValueSmall
-		? _speakerSmallOnPixmap
-		: _speakerOnPixmap;
+		? _speakerSmallOn
+		: _speakerOn;
 
 	image = std::move(image).scaled(
 		image.width() * style::DevicePixelRatio(),
@@ -48,7 +48,7 @@ void VolumeController::paintSpeakerOn(QPainter& painter) {
 		Qt::SmoothTransformation);
 
 	image.setDevicePixelRatio(style::DevicePixelRatio());
-	painter.drawPixmap(0, 0, image);
+	painter.drawImage(0, 0, image);
 }
 
 void VolumeController::paintEvent(QPaintEvent* event) {

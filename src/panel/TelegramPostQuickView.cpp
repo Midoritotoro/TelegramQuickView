@@ -1,7 +1,6 @@
 ﻿#include "TelegramPostQuickView.h"
 
 #include "../media/player/WidgetsHider.h"
-#include "../media/ffmpeg/Guard.h"
 
 #include "../core/StyleCore.h"
 #include "../core/Time.h"
@@ -109,7 +108,7 @@ void TelegramPostQuickView::makeMessage(
 	const QStringList& attachmentsPaths)
 {
 	auto ms = Time::now();
-	const auto timer = Guard::finally([&ms] { qDebug() << "TelegramPostQuickView::makeMessage: " << Time::now() - ms << " ms";  });
+	const auto timer = gsl::finally([&ms] { qDebug() << "TelegramPostQuickView::makeMessage: " << Time::now() - ms << " ms";  });
 
 	auto message = new MessageWidget();
 
@@ -146,7 +145,7 @@ void TelegramPostQuickView::attachmentCliked() {
 }
 
 void TelegramPostQuickView::addContent() {
-	const auto guard = Guard::finally([this] { _chatScrollArea->disableScroll(false); });
+	const auto guard = gsl::finally([this] { _chatScrollArea->disableScroll(false); });
 	_chatScrollArea->disableScroll(true);
 
 	for (int count = 0; count < 5; ++count) {

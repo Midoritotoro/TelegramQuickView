@@ -32,9 +32,7 @@ class SpeedController: public QPushButton {
 	Q_OBJECT
 private:
 	SpeedButtonOverlay* _overlay = nullptr;
-
-	QString _speedButtonImagePath;
-	QPixmap _currentPixmap;
+	QImage _speedButtonImage;
 public:
 	SpeedController(QWidget* parent = nullptr);
 Q_SIGNALS:

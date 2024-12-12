@@ -1,9 +1,6 @@
 #include "FlatLabel.h"
-#include "../core/StyleCore.h"
 
-#include <QString>
 #include <QMouseEvent>
-
 #include <QDesktopServices>
 
 #include <QPainter>
@@ -95,7 +92,7 @@ style::CornersRoundMode FlatLabel::cornerRoundMode() const noexcept {
 	return _cornersRoundMode;
 }
 
-void FlatLabel::setContextMenuHook(std::function<void(ContextMenuRequest)> hook) {
+void FlatLabel::setContextMenuHook(Fn<void(ContextMenuRequest)> hook) {
 	_contextMenuHook = std::move(hook);
 }
 

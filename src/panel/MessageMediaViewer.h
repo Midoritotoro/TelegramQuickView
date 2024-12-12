@@ -1,21 +1,19 @@
 ﻿#pragma once
 
-#include <QWidget>
-#include <QGridLayout>
-
-#include "../media/player/MediaPlayer.h"
-#include "../media/ClickableLabel.h"
-
-#include "MessageWidget.h"
-#include <QResizeEvent>
-#include <QCloseEvent>
-#include <QPainter>
 #include <memory>
 #include "History.h"
 
+#include "../core/Types.h"
+#include <QWidget>
+
+#include <QGridLayout>
+
+
 class FlatButton;
 class MessageTextView;
+
 class WidgetsHider;
+class MediaPlayer;
 
 
 class MessageMediaViewer: public QWidget {

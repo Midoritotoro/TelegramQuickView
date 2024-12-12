@@ -1,7 +1,12 @@
 #pragma once
 
 #include "../core/StyleCore.h"
+#include "../core/Timer.h"
+
+#include "../core/Types.h"
+
 #include <QWidget>
+
 
 namespace style {
 	namespace flatLabel {
@@ -81,7 +86,7 @@ public:
 	void setCornerRoundMode(style::CornersRoundMode cornersRoundMode);
 	[[nodiscard]] style::CornersRoundMode cornerRoundMode() const noexcept;
 
-	void setContextMenuHook(std::function<void(ContextMenuRequest)> hook);
+	void setContextMenuHook(Fn<void(ContextMenuRequest)> hook);
 
 	void setLink(quint16 index);
 	void fillContextMenu(ContextMenuRequest request);
@@ -136,7 +141,7 @@ private:
 	TextSelection _selection, _savedSelection;
 	QMenu* _contextMenu = nullptr;
 
-	std::function<void(ContextMenuRequest)> _contextMenuHook = nullptr;
+	Fn<void(ContextMenuRequest)> _contextMenuHook = nullptr;
 	style::CornersRoundMode _cornersRoundMode;
 
 	DragAction _dragAction = NoDrag;
@@ -147,5 +152,5 @@ private:
 	QPoint _lastMousePos;
 
 	QPoint _trippleClickPoint;
-	base::Timer _trippleClickTimer;
+	core::Timer _trippleClickTimer;
 };

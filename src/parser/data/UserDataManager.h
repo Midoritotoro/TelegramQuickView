@@ -41,7 +41,7 @@ public:
 	[[nodiscard]] int getCountOfLatestDownloadingMessages();
 private:
 	[[nodiscard]] QJsonDocument getJsonDocument();
-	[[nodiscard]] static QString getUserSettingsPath() const noexcept;
+	[[nodiscard]] static QString getUserSettingsPath();
 
 	void clearUsernamesOfChannels();
 	void clearChatIdsOfChannels();

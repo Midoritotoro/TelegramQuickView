@@ -1,11 +1,13 @@
 ﻿#pragma once
 
 #include "AbstractTelegramParser.h"
+#include "../core/Types.h"
 
 #include <QMutex>
 #include <QWaitCondition>
 
 #include <set>
+
 
 class TelegramParser: public AbstractTelegramParser {
 	Q_OBJECT

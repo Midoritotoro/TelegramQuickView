@@ -127,7 +127,7 @@ bool AbstractTelegramParser::sendTelegramAuthCode() {
     return true;
 }
 
-void AbstractTelegramParser::sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler) {
+void AbstractTelegramParser::sendQuery(td::td_api::object_ptr<td::td_api::Function> f, Fn<void(Object)> handler) {
     const auto queryId = nextQueryId();
 
     if (handler)

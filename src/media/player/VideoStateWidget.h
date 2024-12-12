@@ -18,7 +18,7 @@ public:
 protected:
     void paintEvent(QPaintEvent* event) override;
 private:
-    QPixmap _pausePixmap, _playPixmap, _repeatPixmap;
+    QImage _pause, _play, _repeat;
 
     State _state;
 };

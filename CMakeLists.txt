@@ -28,6 +28,8 @@ find_package(Qt6 REQUIRED COMPONENTS
 			Multimedia
 			OpenGL
 )
+find_package(Microsoft.GSL CONFIG REQUIRED)
+
 
 qt_standard_project_setup()
 
@@ -51,13 +53,14 @@ SET(MAIN_SOURCES main.cpp
     src/core/Timer.cpp
 	src/core/Timer.h
 
+    src/core/Types.h
+
 	src/settings/MainWindow.cpp
 	src/settings/MainWindow.h
 
 	src/media/ClickableLabel.h
 	src/media/ClickableLabel.cpp
 
-	src/media/ffmpeg/Guard.h
 	src/media/player/WidgetsHider.h
 
 	src/panel/MessageWidget.cpp
@@ -227,13 +230,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 			Qt6::Widgets
 			Qt6::Multimedia
             Qt6::OpenGL
-            #app::external_openal
             app::external_ffmpeg
-            #app::external_td
-            app:external_gsl
+            Microsoft.GSL::GSL
             Td::tdclient
 )
-
 
 SET_SOURCE_FILES_PROPERTIES(
   ${OBJS}

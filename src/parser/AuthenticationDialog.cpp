@@ -247,7 +247,9 @@ void AuthenticationDialog::paintEvent(QPaintEvent* event) {
 
     QRect rect((width() - authFrameWidth) / 2., (height() - authFrameHeight) / 2., authFrameWidth, authFrameHeight);
 
-    style::RoundCorners(painter, rect, 10);
+    style::RoundCorners(painter, size(), 10);
+
+    painter.drawRect(rect);
     paintErrorMessage(painter);
 }
 

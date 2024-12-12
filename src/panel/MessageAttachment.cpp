@@ -1,18 +1,10 @@
 #include "MessageAttachment.h"
 #include "MessageWidget.h"
 
-#include <QFontMetrics>
-#include <QImage>
-
 #include <QMimeDatabase>
 #include <QPainter>
 
-#include <QUrl>
-#include <QPixmapCache>
-
 #include "../core/StyleCore.h"
-
-#include "../media/ffmpeg/Guard.h"
 #include "../core/Time.h"
 
 #include <QPaintEvent>
@@ -20,7 +12,7 @@
 
 MessageAttachment::MessageAttachment(
 	not_null<MessageWidget*> parentMessage,
-	QString attachmentPath
+	const QString& attachmentPath
 )
 	: ClickableLabel()
 	, _attachmentPath(attachmentPath)
@@ -35,7 +27,7 @@ MessageAttachment::MessageAttachment(
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	const auto ms = Time::now();
-	const auto timer = Guard::finally([=] { qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms"; });
+	const auto timer = gsl::finally([=] { qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms"; });
 
 	const auto _preview = style::GenerateThumbnail(_attachmentPath, size());
 	if (_preview.isNull())

@@ -367,7 +367,7 @@ namespace FFmpeg {
 				return false;
 			}
 			avfilter_graph_free(&_filterGraph);
-			const auto guard = Guard::finally([&] {
+			const auto guard = gsl::finally([&] {
 				if (!_filterGraph) {
 					_filteredFrame = nullptr;
 					_filterSpeed = 1.;
@@ -395,7 +395,7 @@ namespace FFmpeg {
 
 				return;
 			}
-			const auto guard = Guard::finally([&] {
+			const auto guard = gsl::finally([&] {
 				avfilter_graph_free(&graph);
 				});
 
@@ -562,7 +562,7 @@ namespace FFmpeg {
 
 			const auto was = frame->nb_samples;
 			frame->nb_samples = samplesOverride;
-			const auto guard = Guard::finally([&] {
+			const auto guard = gsl::finally([&] {
 				frame->nb_samples = was;
 				});
 

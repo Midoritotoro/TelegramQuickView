@@ -161,7 +161,7 @@ namespace style {
 
 	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
 		const auto ms = Time::now();
-		const auto timer = Guard::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
+		const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
 
 		auto size = targetSize;
 		if (size.width() <= 0)

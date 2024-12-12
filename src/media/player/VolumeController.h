@@ -22,7 +22,7 @@ private:
 	void paintSpeakerOn(QPainter& painter);
 
 	EnhancedSlider* _volumeSlider = nullptr;
-	QPixmap _speakerOnPixmap, _speakerSmallOnPixmap, _speakerOffPixmap;
+	QImage _speakerOn, _speakerSmallOn, _speakerOff;
 
 	bool _isSpeakerOn, _isVolumeValueSmall;
 	int _previousVolume;

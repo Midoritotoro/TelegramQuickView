@@ -14,8 +14,8 @@ FullScreenButton::FullScreenButton(QWidget* parent) :
 	const auto currentPath = QCoreApplication::applicationDirPath();
 	const auto assetsDir = QDir(currentPath + "/../../assets/images");
 
-	_fullScreenToPixmap = QPixmap(assetsDir.absolutePath() + "/player_fullscreen.png");
-	_fullScreenFromPixmap = QPixmap(assetsDir.absolutePath() + "/player_minimize.png");
+	_fullScreenTo = QImage(assetsDir.absolutePath() + "/player_fullscreen.png");
+	_fullScreenFrom = QImage(assetsDir.absolutePath() + "/player_minimize.png");
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
@@ -31,11 +31,12 @@ void FullScreenButton::paintEvent(QPaintEvent* event) {
 
 	painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::NoPen);
+	
+	auto& image = _state == State::FullScreenTo
+		? _fullScreenTo
+		: _fullScreenFrom;
 
-	if (_currentPixmap.size() != size()) {
-		auto& image = _state == State::FullScreenTo
-			? _fullScreenToPixmap
-			: _fullScreenFromPixmap;
+	if (image.size() != size()) {
 		image = style::Prepare(image, size());
 
 		image = std::move(image).scaled(
@@ -47,7 +48,7 @@ void FullScreenButton::paintEvent(QPaintEvent* event) {
 		image.setDevicePixelRatio(style::DevicePixelRatio());
 	}
 
-	painter.drawPixmap(0, 0, image);
+	painter.drawImage(0, 0, image);
 }
 
 void FullScreenButton::mousePressEvent(QMouseEvent* event) {

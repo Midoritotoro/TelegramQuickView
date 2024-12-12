@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../core/Types.h"
+
 #include <QWidget>
 #include <QGridLayout>
 

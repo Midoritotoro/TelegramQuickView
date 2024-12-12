@@ -119,7 +119,8 @@ FormatPointer MakeFormatPointer(
 	result->flags |= AVFMT_FLAG_CUSTOM_IO;
 
 	auto options = (AVDictionary*)nullptr;
-	const auto guard = Guard::finally([&] { av_dict_free(&options); });
+	const auto guard = gsl::finally([&] { av_dict_free(&options); });
+
 	av_dict_set(&options, "usetoc", "1", 0);
 
 	const auto error = AvErrorWrap(avformat_open_input(

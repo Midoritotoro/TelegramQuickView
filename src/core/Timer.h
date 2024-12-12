@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QTimer>
-#include "Time.h"
 
+#include "Time.h"
+#include "Types.h"
 
 namespace core {
 
@@ -10,66 +11,42 @@ namespace core {
 	public:
 		explicit Timer(
 			not_null<QThread*> thread,
-			std::function<void()> callback = nullptr);
-		explicit Timer(std::function<void()> callback = nullptr);
+			Fn<void()> callback = nullptr);
+		explicit Timer(Fn<void()> callback = nullptr);
 
-		static Qt::TimerType DefaultType(Time::time timeout) {
-			constexpr auto kThreshold = Time::time(240);
-			return (timeout > kThreshold) ? Qt::CoarseTimer : Qt::PreciseTimer;
-		}
+		static Qt::TimerType DefaultType(Time::time timeout);
 
-		void setCallback(std::function<void()> callback) {
-			_callback = std::move(callback);
-		}
+		void setCallback(Fn<void()> callback);
 
-		void callOnce(Time::time timeout) {
-			callOnce(timeout, DefaultType(timeout));
-		}
+		void callOnce(Time::time timeout);
+		void callOnce(Time::time timeout, Qt::TimerType type);
 
-		void callEach(Time::time timeout) {
-			callEach(timeout, DefaultType(timeout));
-		}
-
-		void callOnce(Time::time timeout, Qt::TimerType type) {
-			start(timeout, type, Repeat::SingleShot);
-		}
-
-		void callEach(Time::time timeout, Qt::TimerType type) {
-			start(timeout, type, Repeat::Interval);
-		}
-
-		bool isActive() const {
-			return (_timerId != 0);
-		}
+		void callEach(Time::time timeout);
+		void callEach(Time::time timeout, Qt::TimerType type);
 
 		void cancel();
-		Time::time remainingTime() const;
-
 		static void Adjust();
 
+		[[nodiscard]] bool isActive() const noexcept;
+		[[nodiscard]] Time::time remainingTime() const noexcept;
 	protected:
 		void timerEvent(QTimerEvent* e) override;
-
 	private:
 		enum class Repeat : unsigned {
 			Interval = 0,
 			SingleShot = 1,
 		};
+
 		void start(Time::time timeout, Qt::TimerType type, Repeat repeat);
 		void adjust();
 
 		void setTimeout(Time::time timeout);
 		int timeout() const;
 
-		void setRepeat(Repeat repeat) {
-			_repeat = static_cast<unsigned>(repeat);
-		}
+		void setRepeat(Repeat repeat);
+		Repeat repeat() const;
 
-		Repeat repeat() const {
-			return static_cast<Repeat>(_repeat);
-		}
-
-		std::function<void()> _callback;
+		Fn<void()> _callback;
 		Time::time _next = 0;
 
 		int _timeout = 0;

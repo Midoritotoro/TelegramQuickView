@@ -1,10 +1,7 @@
 #include "TelegramParser.h"
-
-#include <QMutex>
-#include "../media/ffmpeg/Guard.h"
-
 #include "../core/Time.h"
 
+#include <QMutex>
 #include <future>
 
 

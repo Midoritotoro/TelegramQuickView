@@ -66,10 +66,12 @@ namespace style {
 		const QSize& widgetSize,
 		int borderRadius);
 
-	void RoundTopCorners(QPainter& painter,
+	void RoundTopCorners(
+		QPainter& painter,
 		const QSize& widgetSize,
 		int borderRadius);
-	void RoundBottomCorners(QPainter& painter,
+	void RoundBottomCorners(
+		QPainter& painter,
 		const QSize& widgetSize,
 		int borderRadius);
 

@@ -19,7 +19,7 @@ protected:
 	void paintEvent(QPaintEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
 private:
-	QPixmap _fullScreenToPixmap, _fullScreenFromPixmap;
+	QImage _fullScreenTo, _fullScreenFrom;
 	State _state;
 };
 

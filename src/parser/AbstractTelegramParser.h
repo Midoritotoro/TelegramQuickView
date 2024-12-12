@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "../core/Types.h"
+
 #include <td/telegram/Client.h>
 #include <td/telegram/td_api.h>
 
@@ -23,7 +25,7 @@ protected:
     std::int32_t _clientId;
 
     td::td_api::object_ptr<td::td_api::AuthorizationState> _authorizationState;
-    std::map<std::uint64_t, std::function<void(Object)>> _handlers;
+    std::map<std::uint64_t, Fn<void(Object)>> _handlers;
 
     std::unique_ptr<UserDataManager> _userDataManager = nullptr;
 
@@ -60,7 +62,7 @@ protected:
     virtual void processResponse(td::ClientManager::Response response);
     void processUpdate(td::td_api::object_ptr<td::td_api::Object> update);
 
-    void sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler);
+    void sendQuery(td::td_api::object_ptr<td::td_api::Function> f, Fn<void(Object)> handler);
 
     auto createAuthenticationQueryHandler();
     void on_authorizationStateUpdate();

@@ -63,7 +63,7 @@ SpeedController::SpeedController(QWidget* parent):
 	connect(_overlay->_speedSlider, &QAbstractSlider::valueChanged, [this](int value) {
 		_overlay->_speed = value / 10.;
 		emit speedChanged(_overlay->_speed);
-		});
+	});
 
 	_overlay->_speedSlider->setValue(_overlay->_speed * 10.);
 	_overlay->hide();
@@ -75,8 +75,7 @@ SpeedController::SpeedController(QWidget* parent):
 	QString currentPath = QCoreApplication::applicationDirPath();
 	QDir assetsDir(currentPath + "/../../assets/images");
 
-	_speedButtonImagePath = assetsDir.absolutePath() + "/speed_button.png";
-	qDebug() << _speedButtonImagePath;
+	_speedButtonImage = QImage(assetsDir.absolutePath() + "/speed_button.png");
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
@@ -89,21 +88,19 @@ void SpeedController::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);
 
-	if (_currentPixmap.size() != size()) {
-		auto image = QImage(_speedButtonImagePath);
-		image = style::Prepare(image, size());
+	if (_speedButtonImage.size() != size()) {
+		_speedButtonImage = style::Prepare(_speedButtonImage, size());
 
-		image = std::move(image).scaled(
-			image.width() * style::DevicePixelRatio(),
-			image.height() * style::DevicePixelRatio(),
+		_speedButtonImage = std::move(_speedButtonImage).scaled(
+			_speedButtonImage.width() * style::DevicePixelRatio(),
+			_speedButtonImage.height() * style::DevicePixelRatio(),
 			Qt::IgnoreAspectRatio,
 			Qt::SmoothTransformation);
 
-		_currentPixmap = QPixmap::fromImage(std::move(image), Qt::ColorOnly);
-		_currentPixmap.setDevicePixelRatio(style::DevicePixelRatio());
+		_speedButtonImage.setDevicePixelRatio(style::DevicePixelRatio());
 	}
 
-	painter.drawPixmap(0, 0, _currentPixmap);
+	painter.drawImage(0, 0, _speedButtonImage);
 }
 
 void SpeedController::mousePressEvent(QMouseEvent* event) {

@@ -3,21 +3,18 @@
 #include "FlatButton.h"
 #include "../media/player/WidgetsHider.h"
 
+#include "../media/player/MediaPlayer.h"
+#include "MessageWidget.h"
+
 #include "MessageTextView.h"
 #include "MessageAttachment.h"
 
 #include "MessageWidget.h"
-#include "History.h"
 
-#include <QToolButton>
-#include <QDir>
-#include <QFile>
-#include <QApplication>
-#include <QStyle>
 #include <QShortcut>
 #include <QKeySequence>
-#include <QPoint>
-#include <utility>
+
+#include <QDir>
 #include <QApplication>
 
 
@@ -26,7 +23,7 @@ namespace {
 }
 
 
-MessageMediaViewer(
+MessageMediaViewer::MessageMediaViewer(
 	not_null<History*> messagesHistory,
 	QWidget* parent
 )

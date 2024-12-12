@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../core/StyleCore.h"
+#include "../core/Types.h"
 
 #include <QAbstractButton>
 #include <QStyleOptionComplex>

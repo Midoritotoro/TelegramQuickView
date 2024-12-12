@@ -2,8 +2,15 @@
 
 
 namespace core {
+	namespace {
+		[[nodiscard]] QObject* TimersAdjuster() {
+			static QObject adjuster;
+			return &adjuster;
+		}
+	} // namespace
+
 	Timer::Timer(
-		QThread* thread,
+		not_null<QThread*> thread,
 		Fn<void()> callback)
 		: Timer(std::move(callback)) {
 		moveToThread(thread);
@@ -20,6 +27,51 @@ namespace core {
 			this,
 			[this] { adjust(); },
 			Qt::QueuedConnection);
+	}
+
+	Qt::TimerType Timer::DefaultType(Time::time timeout) {
+		constexpr auto kThreshold = Time::time(240);
+		return (timeout > kThreshold) ? Qt::CoarseTimer : Qt::PreciseTimer;
+	}
+
+	void Timer::setCallback(Fn<void()> callback) {
+		_callback = std::move(callback);
+	}
+
+	void Timer::callOnce(Time::time timeout) {
+		callOnce(timeout, DefaultType(timeout));
+	}
+
+	void Timer::callOnce(Time::time timeout, Qt::TimerType type) {
+		start(timeout, type, Repeat::SingleShot);
+	}
+
+	void Timer::callEach(Time::time timeout) {
+		callEach(timeout, DefaultType(timeout));
+	}
+
+	void Timer::callEach(Time::time timeout, Qt::TimerType type) {
+		start(timeout, type, Repeat::Interval);
+	}
+
+	bool Timer::isActive() const noexcept {
+		return (_timerId != 0);
+	}
+
+	Time::time Timer::remainingTime() const noexcept {
+		if (!isActive()) {
+			return -1;
+		}
+		const auto now = Time::now();
+		return (_next > now) ? (_next - now) : Time::time(0);
+	}
+
+	void Timer::setRepeat(Timer::Repeat repeat) {
+		_repeat = static_cast<unsigned>(repeat);
+	}
+
+	Timer::Repeat Timer::repeat() const {
+		return static_cast<Timer::Repeat>(_repeat);
 	}
 
 	void Timer::start(Time::time timeout, Qt::TimerType type, Repeat repeat) {
@@ -44,13 +96,6 @@ namespace core {
 		}
 	}
 
-	Time::time Timer::remainingTime() const {
-		if (!isActive()) {
-			return -1;
-		}
-		const auto now = Time::now();
-		return (_next > now) ? (_next - now) : Time::time(0);
-	}
 
 	void Timer::Adjust() {
 		QObject emitter;
