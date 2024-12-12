@@ -5,7 +5,7 @@
 
 #include <QPixmap>
 
-class MessageWidget;
+class Message;
 class QPaintEvent;
 class QResizeEvent;
 
@@ -21,15 +21,15 @@ public:
 	};
 
 	MessageAttachment(
-		not_null<MessageWidget*> parentMessage,
+		not_null<Message*> parentMessage,
 		const QString& attachmentPath);
 
-	void setParentMessage(not_null<MessageWidget*> parentMessage);
+	void setParentMessage(not_null<Message*> parentMessage);
 
 	[[nodiscard]] QString attachmentPath() const noexcept;
 	[[nodiscard]] AttachmentType attachmentType() const noexcept;
 
-	[[nodiscard]] MessageWidget* parentMessage() const noexcept;
+	[[nodiscard]] Message* parentMessage() const noexcept;
 	[[nodiscard]] static AttachmentType detectMediaType(const QString& filePath) noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
@@ -41,5 +41,5 @@ private:
 	QString _attachmentPath;
 	AttachmentType _attachmentType;
 
-	MessageWidget* _parentMessage = nullptr;
+	Message* _parentMessage = nullptr;
 };

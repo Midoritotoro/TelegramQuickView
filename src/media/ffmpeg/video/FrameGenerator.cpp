@@ -1,6 +1,5 @@
 #include "FrameGenerator.h"
 
-#include "Scale.h"
 
 #include <functional>
 #include <QApplication>

@@ -1,6 +1,6 @@
 #include "VolumeController.h"
 
-#include "../../core/StyleCore.h"
+#include "../../../core/StyleCore.h"
 
 #include <QCoreApplication>
 #include <QDir>

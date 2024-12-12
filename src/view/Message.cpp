@@ -8,7 +8,7 @@ Message::Message(
 	QWidget* parent
 ):
 	QWidget(parent)
-	, _mediaDisplayMode(MessageMediaDisplayMode::Stack)
+	, _mediaDisplayMode(MediaDisplayMode::Stack)
 {
 	_messageLayout = new QGridLayout(this);
 	_textLabel = new FlatLabel(this);
@@ -49,7 +49,7 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 
 	switch (_mediaDisplayMode) {
 
-	case MessageMediaDisplayMode::PreviewWithCount:
+	case MediaDisplayMode::PreviewWithCount:
 		foreach(const auto& path, attachmentsPaths) {
 			auto messageAttachment = new MessageAttachment(this, path);
 
@@ -61,7 +61,7 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 
 		break;
 
-	case MessageMediaDisplayMode::Stack:
+	case MediaDisplayMode::Stack:
 		foreach(const auto& path, attachmentsPaths) {
 			auto messageAttachment = new MessageAttachment(this, path);
 
@@ -70,7 +70,7 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 		}
 		break;
 
-	case MessageMediaDisplayMode::Album:
+	case MediaDisplayMode::Album:
 		break;
 	}
 }

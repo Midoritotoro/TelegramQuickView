@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "../core/StyleCore.h"
-#include "../core/Timer.h"
+#include "../../core/StyleCore.h"
+#include "../../core/Timer.h"
 
-#include "../core/InvokeQueued.h"
+#include "../../core/InvokeQueued.h"
 
 #include <QWidget>
 
@@ -15,7 +15,7 @@ namespace style {
 		};
 
 		inline constexpr auto defaultColor = QColor(24, 37, 51);
-		inline constexpr auto phraseContextCopySelected = "����������� �����";
+		inline constexpr auto phraseContextCopySelected = "Копировать текст";
 	}
 } // namespace style
 
@@ -28,7 +28,7 @@ struct TextSelection {
 	};
 
 	constexpr TextSelection() = default;
-	constexpr TextSelection(quint16 from, quint16 to) : from(from), to(to) {
+	constexpr TextSelection(uint16 from, uint16 to) : from(from), to(to) {
 	}
 
 	[[nodiscard]] constexpr bool empty() const noexcept {

@@ -1,6 +1,6 @@
-﻿#include "TelegramPostQuickView.h"
+﻿#include "MessagesView.h"
 
-#include "../media/player/WidgetsHider.h"
+#include "../ui/WidgetsHider.h"
 
 #include "../core/StyleCore.h"
 #include "../core/Time.h"
@@ -11,7 +11,7 @@
 #include "MessageAttachment.h"
 #include "History.h"
 
-#include "MessageMediaViewer.h"
+#include "MediaViewer.h"
 
 #include <QShowEvent>
 #include <QElapsedTimer>
@@ -23,7 +23,7 @@ MessagesView::MessagesView(QWidget* parent):
 	QWidget(parent)
 	, _telegramParser(std::make_unique<TelegramParser>())
 //	, _mouseDetector(std::make_unique<MouseDetector>())
-	, _displayMode(MessageWidget::MessageMediaDisplayMode::PreviewWithCount)
+	, _displayMode(Message::MediaDisplayMode::PreviewWithCount)
 	, _currentPostIndex(1)
 {
 	setMouseTracking(true);
@@ -51,7 +51,7 @@ MessagesView::MessagesView(QWidget* parent):
 	_chatScrollArea->setOpacity(0.1);
 	_chatScrollArea->setTrackingContent(true);
 
-	_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+	_messageMediaViewer = std::make_unique<MediaViewer>(_messagesHistory.get());
 
 	_chatScrollArea->setWidgetResizable(true);
 
@@ -93,11 +93,11 @@ MessagesView::MessagesView(QWidget* parent):
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);
 
-	connect(_messageMediaViewer.get(), &MessageMediaViewer::escaped, this, &TelegramPostQuickView::showNormal);
-	connect(_messageMediaViewer.get(), &MessageMediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
+	connect(_messageMediaViewer.get(), &MediaViewer::escaped, this, &MessagesView::showNormal);
+	connect(_messageMediaViewer.get(), &MediaViewer::needScrollToMessage, _chatScrollArea, &ScrollArea::scrollToWidget);
 
-	//connect(_mouseDetector.get(), &MouseDetector::needsToShow, this, &TelegramPostQuickView::show);
-	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &TelegramPostQuickView::addContent);
+	//connect(_mouseDetector.get(), &MouseDetector::needsToShow, this, &MessagesView::show);
+	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &MessagesView::addContent);
 	//addContent();
 	//addContent();
 	//addContent();
@@ -123,10 +123,10 @@ void MessagesView::makeMessage(
 	if (!message->hasAttachments())
 		return;
 
-	const auto& messageAttachmentsList = message->messageAttachments();
+	const auto& messageAttachmentsList = message->attachments();
 
 	foreach(auto attachment, messageAttachmentsList)
-		connect(attachment, &QAbstractButton::clicked, this, &TelegramPostQuickView::attachmentCliked);
+		connect(attachment, &QAbstractButton::clicked, this, &MessagesView::attachmentCliked);
 }
 
 void MessagesView::setMessageMediaDisplayMode(Message::MediaDisplayMode displayMode) {
@@ -137,7 +137,7 @@ void MessagesView::attachmentCliked() {
 	auto attachment = (MessageAttachment*)sender();
 
 	if (_messageMediaViewer == nullptr)
-		_messageMediaViewer = std::make_unique<MessageMediaViewer>(_messagesHistory.get());
+		_messageMediaViewer = std::make_unique<MediaViewer>(_messagesHistory.get());
 
 	_messageMediaViewer->openMessageAttachment(attachment->parentMessage(), attachment->parentMessage()->indexOfAttachment(attachment));
 	_messageMediaViewer->show();

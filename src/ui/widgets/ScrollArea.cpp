@@ -5,8 +5,8 @@
 #include <QWheelEvent>
 #include <QPainter>
 
-#include "../core/StyleCore.h"
-#include "../core/Time.h"
+#include "../../core/Time.h"
+#include "../../core/StyleCore.h"
 
 
 ScrollArea::ScrollArea(QWidget* parent):

@@ -5,7 +5,7 @@ extern "C" {
 	#include <libavutil/opt.h>
 } // extern "C"
 
-#include "HardwareAcceleration.h"
+#include "video/HardwareAcceleration.h"
 
 #if defined Q_OS_WIN
 	#include <Windows.h>

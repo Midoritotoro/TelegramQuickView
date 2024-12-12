@@ -5,7 +5,7 @@
 
 #include <functional>
 
-#include "EnhancedSlider.h"
+#include "../../../ui/widgets/EnhancedSlider.h"
 
 class SpeedController;
 

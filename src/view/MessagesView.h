@@ -10,7 +10,8 @@
 
 
 class TelegramParser;
-class MessageMediaViewer;
+
+class MediaViewer;
 class MouseDetector;
 
 
@@ -21,7 +22,7 @@ private:
 
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;
 
-	std::unique_ptr<MessageMediaViewer> _messageMediaViewer = nullptr;
+	std::unique_ptr<MediaViewer> _messageMediaViewer = nullptr;
 	std::unique_ptr<TelegramParser> _telegramParser = nullptr;
 
 	std::unique_ptr<MouseDetector> _mouseDetector = nullptr;

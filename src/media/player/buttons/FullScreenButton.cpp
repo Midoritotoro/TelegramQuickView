@@ -1,6 +1,6 @@
 #include "FullScreenButton.h"
 
-#include "../../core/StyleCore.h"
+#include "../../../core/StyleCore.h"
 
 #include <QDir>
 #include <QApplication>

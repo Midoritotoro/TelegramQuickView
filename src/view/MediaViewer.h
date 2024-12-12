@@ -27,7 +27,7 @@ private:
 	FlatButton* _nextAttachment = nullptr;
 	FlatButton* _previousAttachment = nullptr;
 
-	MessageWidget* _currentMessage = nullptr;
+	Message* _currentMessage = nullptr;
 	History* _messagesHistory;
 	TextView* _messageTextView = nullptr;
 
@@ -41,7 +41,7 @@ public:
 	void updateMessageTextView();
 
 	void openMessageAttachment(
-		not_null<MessageWidget*> messageWidget,
+		not_null<Message*> message,
 		int triggeredAttachmentIndex);
 
 	[[nodiscard]] int nextMessageWithAttachmentsIndex(int currentIndex) const noexcept;
@@ -50,7 +50,7 @@ public:
 	void goToPreviousMessage();
 	void goToNextMessage();
 Q_SIGNALS:
-	void needScrollToMessage(MessageWidget* message);
+	void needScrollToMessage(Message* message);
 	void escaped();
 public Q_SLOTS:
 	void nextAttachmentButton_clicked();

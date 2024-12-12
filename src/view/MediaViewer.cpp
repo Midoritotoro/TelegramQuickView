@@ -1,7 +1,7 @@
-﻿#include "MessageMediaViewer.h"
+﻿#include "MediaViewer.h"
 
 #include "../ui/widgets/FlatButton.h"
-#include "../ui/widgets/WidgetsHider.h"
+#include "../ui/WidgetsHider.h"
 
 #include "../media/player/MediaPlayer.h"
 #include "Message.h"
@@ -9,7 +9,7 @@
 #include "TextView.h"
 #include "MessageAttachment.h"
 
-#include "MessageWidget.h"
+#include "Message.h"
 
 #include <QShortcut>
 #include <QKeySequence>
@@ -26,9 +26,9 @@ namespace {
 MediaViewer::MediaViewer(
 	not_null<History*> messagesHistory,
 	QWidget* parent
-)
-: QWidget(parent)
-, _messagesHistory(messagesHistory)
+): 
+	QWidget(parent)
+	, _messagesHistory(messagesHistory)
 {
 	setMouseTracking(true);
 
@@ -95,20 +95,20 @@ MediaViewer::MediaViewer(
 	QShortcut* previousAttachmentShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
 	QShortcut* showMinimizedShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);
 
-	connect(_widgetsHider.get(), &WidgetsHider::widgetsShowed, this, &MessageMediaViewer::updateMediaNavigationButtons);
+	connect(_widgetsHider.get(), &WidgetsHider::widgetsShowed, this, &MediaViewer::updateMediaNavigationButtons);
 
-	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::nextAttachmentButton_clicked);
-	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MessageMediaViewer::previousAttachmentButton_clicked);
+	connect(nextAttachmentShortcut, &QShortcut::activated, this, &MediaViewer::nextAttachmentButton_clicked);
+	connect(previousAttachmentShortcut, &QShortcut::activated, this, &MediaViewer::previousAttachmentButton_clicked);
 	connect(showMinimizedShortcut, &QShortcut::activated, this, [this]() {
 		showMinimized();
 		emit escaped();
 		_mediaPlayer->cleanUp();
 		});
 
-	connect(_nextAttachment, &QAbstractButton::clicked, this, &MessageMediaViewer::nextAttachmentButton_clicked);
-	connect(_previousAttachment, &QAbstractButton::clicked, this, &MessageMediaViewer::previousAttachmentButton_clicked);
+	connect(_nextAttachment, &QAbstractButton::clicked, this, &MediaViewer::nextAttachmentButton_clicked);
+	connect(_previousAttachment, &QAbstractButton::clicked, this, &MediaViewer::previousAttachmentButton_clicked);
 
-	connect(_mediaPlayer.get(), &MediaPlayer::mediaGeometryChanged, this, &MessageMediaViewer::updateMessageTextView);
+	connect(_mediaPlayer.get(), &MediaPlayer::mediaGeometryChanged, this, &MediaViewer::updateMessageTextView);
 	connect(_mediaPlayer.get(), &MediaPlayer::needScrollToMessage, [this]() {
 		showMinimized();
 
@@ -148,7 +148,7 @@ void MediaViewer::updateMessageTextView() {
 	//	_messageTextView->show();
 
 	//_widgetsHider->addWidget(_messageTextView);
-	_messageTextView->setText(_currentMessage->messageText());
+	_messageTextView->setText(_currentMessage->text());
 
 	auto yCoordinate = 0;
 	
@@ -180,10 +180,10 @@ void MediaViewer::updateMessageTextView() {
 }
 
 void MediaViewer::openMessageAttachment(
-	not_null<MessageWidget*> messageWidget,
+	not_null<Message*> message,
 	int triggeredAttachmentIndex)
 {
-	_currentMessage = messageWidget;
+	_currentMessage = message;
 	_currentMessageAttachmentIndex = triggeredAttachmentIndex;
 
 	_mediaPlayer->showFullScreen();
@@ -192,7 +192,7 @@ void MediaViewer::openMessageAttachment(
 	if (_mediaPlayer->isHidden())
 		_mediaPlayer->setVisible(true);
 
-	_mediaPlayer->setMedia(messageWidget->attachmentAt(triggeredAttachmentIndex)->attachmentPath());
+	_mediaPlayer->setMedia(message->attachmentAt(triggeredAttachmentIndex)->attachmentPath());
 
 	updateMediaNavigationButtons();
 	updateMessageTextView();

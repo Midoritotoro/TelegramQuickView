@@ -69,14 +69,14 @@ SET(MAIN_SOURCES main.cpp
     src/ui/BasicClickHandlers.cpp
 	src/ui/BasicClickHandlers.h
 
-    src/view/MessageWidget.cpp
-	src/view/MessageWidget.h
+    src/view/Message.cpp
+	src/view/Message.h
 
-	src/view/TelegramPostQuickView.cpp
-	src/view/TelegramPostQuickView.h
+	src/view/MessagesView.cpp
+	src/view/MessagesView.h
 
-    src/view/MessageMediaViewer.cpp
-	src/view/MessageMediaViewer.h
+    src/view/MediaViewer.cpp
+	src/view/MediaViewer.h
 
 	src/view/MessageAttachment.cpp
 	src/view/MessageAttachment.h
@@ -84,23 +84,23 @@ SET(MAIN_SOURCES main.cpp
 	src/view/History.cpp
 	src/view/History.h
 
-	src/ui/AbstractFlatButton.cpp
-	src/ui/AbstractFlatButton.h
+	src/ui/widgets/AbstractFlatButton.cpp
+	src/ui/widgets/AbstractFlatButton.h
     
-    src/ui/FlatButton.cpp
-	src/ui/FlatButton.h
+    src/ui/widgets/FlatButton.cpp
+	src/ui/widgets/FlatButton.h
 
-	src/view/MessageTextView.cpp
-	src/view/MessageTextView.h
+	src/view/TextView.cpp
+	src/view/TextView.h
 
-	src/ui/ContinuousScroll.cpp
-	src/ui/ContinuousScroll.h
+	src/ui/widgets/ContinuousScroll.cpp
+	src/ui/widgets/ContinuousScroll.h
 
-    src/ui/FlatLabel.cpp
-	src/ui/FlatLabel.h
+    src/ui/widgets/FlatLabel.cpp
+	src/ui/widgets/FlatLabel.h
 
-	src/ui/ScrollArea.cpp
-	src/ui/ScrollArea.h
+	src/ui/widgets/ScrollArea.cpp
+	src/ui/widgets/ScrollArea.h
 
 	src/media/ffmpeg/Utility.cpp
 	src/media/ffmpeg/Utility.h 
@@ -117,23 +117,23 @@ SET(MAIN_SOURCES main.cpp
     src/media/Manager.cpp
     src/media/Manager.h
 
-    src/ui/EnhancedSlider.cpp
-    src/ui/EnhancedSlider.h
+    src/ui/widgets/EnhancedSlider.cpp
+    src/ui/widgets/EnhancedSlider.h
 
-    src/media/player/FullScreenButton.cpp
-    src/media/player/FullScreenButton.h
+    src/media/player/buttons/FullScreenButton.cpp
+    src/media/player/buttons/FullScreenButton.h
 
     src/media/player/MediaPlayerPanel.cpp
     src/media/player/MediaPlayerPanel.h
 
-    src/media/player/VideoStateWidget.cpp
-    src/media/player/VideoStateWidget.h
+    src/media/player/buttons/VideoStateWidget.cpp
+    src/media/player/buttons/VideoStateWidget.h
 
-    src/media/player/VolumeController.cpp
-    src/media/player/VolumeController.h
+    src/media/player/buttons/VolumeController.cpp
+    src/media/player/buttons/VolumeController.h
 
-    src/media/player/SpeedButton.cpp
-    src/media/player/SpeedButton.h
+    src/media/player/buttons/SpeedButton.cpp
+    src/media/player/buttons/SpeedButton.h
    
     src/media/ffmpeg/audio/AudioReader.cpp
     src/media/ffmpeg/audio/AudioReader.h
@@ -179,8 +179,6 @@ add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
    set_target_properties(${PROJECT_NAME} PROPERTIES
        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -cxx_std_20")
 
     target_compile_options(${PROJECT_NAME}
     INTERFACE

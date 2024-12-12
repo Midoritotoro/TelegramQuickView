@@ -1,6 +1,6 @@
 #include "StyleCore.h"
 
-#include "../media/ffmpeg/FrameGenerator.h"
+#include "../media/ffmpeg/video/FrameGenerator.h"
 #include "../media/player/MediaPlayer.h"
 
 #include <QMimeDataBase>
@@ -24,22 +24,22 @@ namespace style {
 
 		struct Shifted {
 			Shifted() = default;
-			Shifted(quint32 value) : value(value) {
+			Shifted(uint32 value) : value(value) {
 			}
-			Shifted(quint64 value) : value(value) {
+			Shifted(uint64 value) : value(value) {
 			}
-			quint64 value = 0;
+			uint64 value = 0;
 		};
 
 		inline Shifted operator+(Shifted a, Shifted b) {
 			return Shifted(a.value + b.value);
 		}
 
-		inline Shifted operator*(Shifted shifted, quint64 multiplier) {
+		inline Shifted operator*(Shifted shifted, uint64 multiplier) {
 			return Shifted(shifted.value * multiplier);
 		}
 
-		inline Shifted operator*(quint64 multiplier, Shifted shifted) {
+		inline Shifted operator*(uint64 multiplier, Shifted shifted) {
 			return Shifted(shifted.value * multiplier);
 		}
 
@@ -47,24 +47,24 @@ namespace style {
 			return (components.value >> 8) & 0x00FF00FF00FF00FFULL;
 		}
 
-		inline quint32 unshifted(Shifted components) {
-			return static_cast<quint32>((components.value & 0x000000000000FF00ULL) >> 8)
-				| static_cast<quint32>((components.value & 0x00000000FF000000ULL) >> 16)
-				| static_cast<quint32>((components.value & 0x0000FF0000000000ULL) >> 24)
-				| static_cast<quint32>((components.value & 0xFF00000000000000ULL) >> 32);
+		inline uint32 unshifted(Shifted components) {
+			return static_cast<uint32>((components.value & 0x000000000000FF00ULL) >> 8)
+				| static_cast<uint32>((components.value & 0x00000000FF000000ULL) >> 16)
+				| static_cast<uint32>((components.value & 0x0000FF0000000000ULL) >> 24)
+				| static_cast<uint32>((components.value & 0xFF00000000000000ULL) >> 32);
 		}
 
-		inline quint32 getAlpha(Shifted components) {
+		inline uint32 getAlpha(Shifted components) {
 			return (components.value & 0x00FF000000000000ULL) >> 48;
 		}
 
 		Shifted shifted(QColor color) {
 			// Make it premultiplied.
-			auto alpha = static_cast<quint64>((color.alpha() & 0xFF) + 1);
-			auto components = static_cast<quint64>(color.blue() & 0xFF)
-				| (static_cast<quint64>(color.green() & 0xFF) << 16)
-				| (static_cast<quint64>(color.red() & 0xFF) << 32)
-				| (static_cast<quint64>(255) << 48);
+			auto alpha = static_cast<uint64>((color.alpha() & 0xFF) + 1);
+			auto components = static_cast<uint64>(color.blue() & 0xFF)
+				| (static_cast<uint64>(color.green() & 0xFF) << 16)
+				| (static_cast<uint64>(color.red() & 0xFF) << 32)
+				| (static_cast<uint64>(255) << 48);
 			return reshifted(components * alpha);
 		}
 
@@ -132,13 +132,13 @@ namespace style {
 			image = std::move(image).convertToFormat(
 				QImage::Format_ARGB32_Premultiplied);
 
-			auto ints = reinterpret_cast<quint32*>(image.bits());
+			auto ints = reinterpret_cast<uint32*>(image.bits());
 			const auto bg = shifted(QColor(Qt::white));
 
 			const auto width = image.width();
 			const auto height = image.height();
 
-			const auto addPerLine = (image.bytesPerLine() / sizeof(quint32)) - width;
+			const auto addPerLine = (image.bytesPerLine() / sizeof(uint32)) - width;
 
 			for (auto y = 0; y != height; ++y) {
 				for (auto x = 0; x != width; ++x) {

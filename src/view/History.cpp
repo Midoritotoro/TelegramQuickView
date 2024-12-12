@@ -1,16 +1,16 @@
 #include "History.h"
-#include "MessageWidget.h"
+#include "Message.h"
 
 
-void History::makeMessage(not_null<MessageWidget*> messageWidget) {
+void History::makeMessage(not_null<Message*> messageWidget) {
 	return _messagesList.append(messageWidget);
 }
 
-int History::indexOfMessage(not_null<MessageWidget*> message) const noexcept {
+int History::indexOfMessage(not_null<Message*> message) const noexcept {
 	return _messagesList.indexOf(message); 
 }
 
-MessageWidget* History::messageAt(int index) const noexcept {
+Message* History::messageAt(int index) const noexcept {
 	if (count() > 0)
 		return _messagesList.at(index);
 	return nullptr;

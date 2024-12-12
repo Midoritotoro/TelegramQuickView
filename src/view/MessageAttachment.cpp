@@ -37,7 +37,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
 	switch (_parentMessage->mediaDisplayMode()) {
-		case Message::MessageMediaDisplayMode::Stack:
+		case Message::MediaDisplayMode::Stack:
 			if (_parentMessage->attachmentsLength() == 1 && _parentMessage->hasText() == false)
 				style::RoundCorners(painter, size(), 15);
 			else if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
@@ -46,7 +46,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			painter.drawPixmap(0, 0, _preview);
 			break;
 
-		case Message::MessageMediaDisplayMode::PreviewWithCount:
+		case Message::MediaDisplayMode::PreviewWithCount:
 			_parentMessage->hasText()
 				? style::RoundTopCorners(painter, size(), 15)
 				: style::RoundCorners(painter, size(), 15);
@@ -92,7 +92,7 @@ void MessageAttachment::updateSize() {
 	);
 }
 
-void MessageAttachment::setParentMessage(not_null<MessageWidget*> parentMessage) {
+void MessageAttachment::setParentMessage(not_null<Message*> parentMessage) {
 	_parentMessage = parentMessage; 
 }
 
@@ -104,7 +104,7 @@ MessageAttachment::AttachmentType MessageAttachment::attachmentType() const noex
 	return _attachmentType;
 }
 
-MessageWidget* MessageAttachment::parentMessage() const noexcept {
+Message* MessageAttachment::parentMessage() const noexcept {
 	return _parentMessage; 
 }
 

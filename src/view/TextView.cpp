@@ -1,4 +1,4 @@
-#include "MessageTextView.h"
+#include "TextView.h"
 
 #include <QGridLayout>
 #include <QApplication>

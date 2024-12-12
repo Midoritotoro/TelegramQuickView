@@ -5,8 +5,6 @@
 #include <Windows.h>
 #include <QObject>
 
-#include "../panel/TelegramPostQuickView.h"
-
 
 class MouseDetector: public QObject {
 	Q_OBJECT

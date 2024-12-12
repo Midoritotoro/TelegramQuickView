@@ -1,6 +1,7 @@
 #include "HardwareAcceleration.h"
 #include <qDebug>
 
+
 bool InitHw(AVCodecContext* context, AVHWDeviceType type) {
 	AVCodecContext* parent = static_cast<AVCodecContext*>(context->opaque);
 
