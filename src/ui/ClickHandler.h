@@ -12,14 +12,7 @@ struct ClickContext {
 	QVariant other;
 };
 
-enum class EntityType: uchar {
-	Invalid = 0,
-	Url,
-	CustomUrl,
-	Email,
-	Phone
-};
-
+enum class EntityType : uchar;
 
 class ClickHandlerHost {
 protected:

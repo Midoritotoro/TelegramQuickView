@@ -254,7 +254,7 @@ void FlatLabel::copySelectedText() {
 		QGuiApplication::clipboard()->setText(_text);
 }
 
-FlatLabel::TextState FlatLabel::dragActionUpdate() {
+TextState FlatLabel::dragActionUpdate() {
 	auto m = mapFromGlobal(_lastMousePos);
 	auto state = getTextState(m);
 	updateHover(state);
@@ -268,7 +268,7 @@ FlatLabel::TextState FlatLabel::dragActionUpdate() {
 }
 
 
-FlatLabel::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton button) {
+TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton button) {
 	_lastMousePos = p;
 	auto state = dragActionUpdate();
 
@@ -321,31 +321,25 @@ FlatLabel::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton
 	return state;
 }
 
-FlatLabel::TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton button) {
+TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton button) {
 	_lastMousePos = p;
 	auto state = dragActionUpdate();
 
-	//auto activated = ClickHandler::unpressed();
-	auto activated = NoDrag;
-	if (_dragAction == Dragging) {
+	auto activated = ClickHandler::unpressed();
+
+	if (_dragAction == Dragging)
 		activated = nullptr;
-	}
 	else if (_dragAction == PrepareDrag) {
 		_selection = { 0, 0 };
 		_savedSelection = { 0, 0 };
 		update();
 	}
+
 	_dragAction = NoDrag;
 	_selectionType = TextSelection::Type::Letters;
 
 	if (activated) {
-		/*crl::on_main(this, [=] {
-			const auto guard = window();
-			if (!_clickHandlerFilter
-				|| _clickHandlerFilter(activated, button)) {
-				ActivateClickHandler(guard, activated, button);
-			}
-			});*/
+		// ActivateClickHandler(activated, button);
 	}
 
 	if (QGuiApplication::clipboard()->supportsSelection()
@@ -381,7 +375,7 @@ void FlatLabel::updateHover(const TextState& state) {
 			if (state.afterSymbol && _selectionType == TextSelection::Type::Letters) {
 				++second;
 			}
-			auto selection = adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
+			auto selection = _text.adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
 			if (_selection != selection) {
 				_selection = selection;
 				_savedSelection = { 0, 0 };
@@ -400,7 +394,7 @@ void FlatLabel::updateHover(const TextState& state) {
 	}
 }
 
-FlatLabel::TextState FlatLabel::getTextState(const QPoint& m) const {
+TextState FlatLabel::getTextState(const QPoint& m) const {
 	TextState state;
 	return state;
 }
@@ -423,16 +417,15 @@ void FlatLabel::executeDrag() {
 
 	const auto pressedHandler = ClickHandler::getPressed();
 	const auto selectedText = [&] {
-		if (uponSelected) {
+		if (uponSelected)
 			return _text.toTextForMimeData(_selection);
-		}
-		else if (pressedHandler) {
+		else if (pressedHandler)
 			return TextForMimeData::Simple(pressedHandler->dragText());
-		}
+		
 		return TextForMimeData();
-		}();
+	}();
 
-	if (auto mimeData = TextUtilities::MimeDataFromText(selectedText)) {
+	if (auto mimeData = string::MimeDataFromText(selectedText)) {
 		auto drag = new QDrag(window());
 		drag->setMimeData(mimeData.release());
 		drag->exec(Qt::CopyAction);

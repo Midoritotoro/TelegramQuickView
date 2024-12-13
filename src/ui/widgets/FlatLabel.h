@@ -6,6 +6,8 @@
 #include "../../core/InvokeQueued.h"
 #include "../ClickHandler.h"
 
+#include "../../core/String.h"
+
 #include <QWidget>
 
 
@@ -30,13 +32,6 @@ public:
 		ClickHandlerPtr link;
 		bool uponSelection = false;
 		bool fullSelection = false;
-	};
-
-	struct TextState {
-		ClickHandlerPtr link;
-		bool uponSymbol = false;
-		bool afterSymbol = false;
-		uint16 symbol = 0;
 	};
 
 	FlatLabel(QWidget* parent = nullptr);

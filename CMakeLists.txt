@@ -15,7 +15,6 @@ include(cmake/lib_openh264.cmake)
 include(cmake/lib_opus.cmake)
 include(cmake/lib_ffmpeg.cmake)
 
-#include(cmake/lib_openal.cmake)
 include(cmake/lib_td.cmake)
 include(cmake/lib_gsl.cmake)
 
@@ -30,8 +29,12 @@ find_package(Qt6 REQUIRED COMPONENTS
 )
 find_package(Microsoft.GSL CONFIG REQUIRED)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 qt_standard_project_setup()
+
 
 SET(MAIN_SOURCES main.cpp
 
@@ -47,8 +50,17 @@ SET(MAIN_SOURCES main.cpp
 	src/core/StyleCore.cpp
 	src/core/StyleCore.h
 
+    src/core/TextEntities.cpp
+    src/core/TextEntities.h
+
     src/core/String.cpp
     src/core/String.h
+
+    src/core/TextBlock.cpp
+    src/core/TextBlock.h
+
+    src/core/CoreUtility.h
+    src/core/CoreUtility.cpp
 
 	src/core/Time.cpp
 	src/core/Time.h
@@ -236,6 +248,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 			Qt6::Widgets
 			Qt6::Multimedia
             Qt6::OpenGL
+            Qt6::WidgetsPrivate
             app::external_ffmpeg
             Microsoft.GSL::GSL
             Td::tdclient

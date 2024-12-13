@@ -1,48 +1,156 @@
 #pragma once 
 
+
 #include "Types.h"
+#include "../ui/ClickHandler.h"
 
-struct TextSelection {
-	enum class Type {
-		Letters = 0x01,
-		Words = 0x02,
-		Paragraphs = 0x03,
-	};
+#include "TextEntities.h"
+#include "CoreUtility.h"
 
-	constexpr TextSelection() = default;
-	constexpr TextSelection(uint16 from, uint16 to) : from(from), to(to) {
-	}
+#include <QString>
+#include <QPainter>
 
-	[[nodiscard]] constexpr bool empty() const noexcept {
-		return from == to;
-	}
+#include <xutility>
+#include <private/qfixed_p.h>
 
-	[[nodiscard]] bool isFullSelection(const QString& text) const {
-		return (from == 0) && (to >= text.size());
-	}
+class Block;
 
-	uint16 from = 0;
-	uint16 to = 0;
-};
-
-inline bool operator==(TextSelection a, TextSelection b) {
-	return a.from == b.from && a.to == b.to;
-}
-
-inline bool operator!=(TextSelection a, TextSelection b) {
-	return !(a == b);
-}
-
-static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };
 
 namespace string {
+	[[nodiscard]] Qt::LayoutDirection StringDirection(
+		const QString& str,
+		int from,
+		int to);
+
 	[[nodiscard]] bool IsParagraphSeparator(QChar ch);
 	[[nodiscard]] bool IsWordSeparator(QChar ch);
-
 	[[nodiscard]] bool IsSpace(QChar ch);
 
-	[[nodiscard]] TextSelection adjustSelection(
-		const QString& text,
+
+} // namespace string
+
+struct LineGeometry {
+	int left = 0;
+	int width = 0;
+	bool elided = false;
+};
+
+struct GeometryDescriptor {
+	Fn<LineGeometry(int line)> layout;
+	bool breakEverywhere = false;
+	bool* outElided = nullptr;
+};
+
+
+
+class String {
+public:
+	struct LineWidthsOptions {
+		bool breakEverywhere = false;
+		int reserve = 0;
+	};
+
+	struct DimensionsResult {
+		int width = 0;
+		int height = 0;
+		std::vector<int> lineWidths;
+	};
+
+	struct DimensionsRequest {
+		bool breakEverywhere = false;
+		bool lineWidths = false;
+		int reserve = 0;
+	};
+
+	String(String&& other);
+	String(const QString& string);
+
+	String& operator=(String&& other);
+
+	~String();
+
+	[[nodiscard]] int countWidth(
+		int width,
+		bool breakEverywhere = false) const;
+	[[nodiscard]] int countHeight(
+		int width,
+		bool breakEverywhere = false) const;
+
+	[[nodiscard]] DimensionsResult countDimensions(
+		GeometryDescriptor geometry) const;
+	[[nodiscard]] DimensionsResult countDimensions(
+		GeometryDescriptor geometry,
+		DimensionsRequest request) const;
+
+	[[nodiscard]] std::vector<int> countLineWidths(int width) const;
+	[[nodiscard]] std::vector<int> countLineWidths(
+		int width,
+		LineWidthsOptions options) const;
+
+	void setText(const QString& text);
+	
+	[[nodiscard]] bool hasLinks() const;
+	void setLink(uint16 index, const ClickHandlerPtr& lnk);
+
+	[[nodiscard]] int maxWidth() const {
+		return _maxWidth;
+	}
+	[[nodiscard]] int minHeight() const {
+		return _minHeight;
+	}
+
+	[[nodiscard]] int countMaxMonospaceWidth() const;
+
+	void draw(
+		QPainter& painter,
+		int32 left,
+		int32 top,
+		int32 width,
+		int32 yFrom = 0,
+		int32 yTo = -1,
+		TextSelection selection = { 0, 0 },
+		bool fullWidthSelection = true) const;
+
+	[[nodiscard]] bool isEmpty() const;
+	[[nodiscard]] int length() const {
+		return _text.size();
+	}
+
+	[[nodiscard]] QString toString(
+		TextSelection selection = AllTextSelection) const;
+
+	[[nodiscard]] int lineHeight() const;
+
+	TextSelection adjustSelection(
 		TextSelection selection,
 		TextSelection::Type selectType);
-} // namespace string
+	void clear();
+private:
+	void recountNaturalSize(
+		bool initial,
+		Qt::LayoutDirection optionsDirection);
+
+	QString _text;
+
+	int _maxWidth = 0;
+	int _minHeight = 0;
+
+	std::vector<Block> _blocks;
+	std::vector<QString> _words;
+
+	int _minResizeWidth = 0;
+
+	int _maxWidth = 0;
+	int _minHeight = 0;
+
+	uint16 _startQuoteIndex = 0;
+
+	bool _startParagraphLTR : 1;
+	bool _startParagraphRTL : 1;
+	bool _hasCustomEmoji : 1;
+	bool _isIsolatedEmoji : 1;
+	bool _isOnlyCustomEmoji : 1;
+	bool _hasNotEmojiAndSpaces : 1;
+	bool _skipBlockAddedNewline : 1;
+	bool _endsWithQuoteOrOtherDirection : 1;
+};
