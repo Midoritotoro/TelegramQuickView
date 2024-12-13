@@ -1,13 +1,16 @@
 #pragma once
 
-#include "StyleCore.h"
-#include "Time.h"
+#include "../style/StyleCore.h"
+#include "../style/StyleFont.h"
 
-#include "Types.h"
+#include "../../core/Time.h"
+
+#include "../../core/Types.h"
 #include <private/qfixed_p.h>
 
 
-namespace string {
+
+namespace text {
 	enum class TextBlockType : uint16 {
 		Newline = 0x01,
 		Text = 0x02,
@@ -21,7 +24,7 @@ namespace string {
 		Italic = 0x002,
 		Underline = 0x004,
 		StrikeOut = 0x008,
-		Tilde = 0x010, // Tilde fix in OpenSans.
+		Tilde = 0x010,
 		Semibold = 0x020,
 		Code = 0x040,
 		Pre = 0x080,
@@ -29,9 +32,19 @@ namespace string {
 		Blockquote = 0x200,
 	};
 
-	Q_DECLARE_FLAGS(TextBlockFlags, TextBlockFlag);
+	Q_DECLARE_FLAGS(TextBlockFlags, TextBlockFlag)
 
-	inline constexpr bool is_flag_type(TextBlockFlag) { return true; }
+	class Block;
+	using Blocks = std::vector<Block>;
+
+	inline constexpr bool is_flag_type(TextBlockFlag) { 
+		return true; 
+	}
+
+	[[nodiscard]] style::font WithFlags(
+		const style::font& font,
+		TextBlockFlags flags,
+		style::FontFlags fontFlags) ;
 
 	[[nodiscard]] Qt::LayoutDirection UnpackParagraphDirection(
 		bool ltr,
@@ -174,8 +187,6 @@ namespace string {
 
 		std::aligned_storage_t<sizeof(SkipBlock), alignof(void*)> _data;
 	};
-
-	using Blocks = std::vector<Block>;
 
 	[[nodiscard]] inline uint16 CountPosition(Blocks::const_iterator i) {
 		return (*i)->position();

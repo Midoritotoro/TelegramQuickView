@@ -47,17 +47,23 @@ SET(MAIN_SOURCES main.cpp
 	src/core/MouseDetector.cpp
 	src/core/MouseDetector.h
 
-	src/core/StyleCore.cpp
-	src/core/StyleCore.h
+	src/ui/style/StyleCore.cpp
+	src/ui/style/StyleCore.h
 
-    src/core/TextEntities.cpp
-    src/core/TextEntities.h
+    src/ui/text/TextEntities.cpp
+    src/ui/text/TextEntities.h
 
-    src/core/String.cpp
-    src/core/String.h
+    src/ui/text/TextWord.h
+    src/ui/text/TextWord.h
 
-    src/core/TextBlock.cpp
-    src/core/TextBlock.h
+    src/ui/text/String.cpp
+    src/ui/text/String.h
+
+    src/ui/text/TextUtility.cpp
+    src/ui/text/TextUtility.h
+
+    src/ui/text/TextBlock.cpp
+    src/ui/text/TextBlock.h
 
     src/core/CoreUtility.h
     src/core/CoreUtility.cpp
@@ -68,7 +74,9 @@ SET(MAIN_SOURCES main.cpp
     src/core/Timer.cpp
 	src/core/Timer.h
 
-    src/core/StyleTypes.h
+    src/ui/style/StyleTypes.h
+    src/ui/style/StyleFont.h
+
     src/core/Types.h
 
     src/core/InvokeQueued.h
