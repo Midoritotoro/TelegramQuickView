@@ -75,3 +75,23 @@ private:
 	QString _originalUrl, _readable;
 
 };
+
+class HiddenUrlClickHandler : public UrlClickHandler {
+public:
+	HiddenUrlClickHandler(QString url) : UrlClickHandler(url, false) {
+	}
+	QString copyToClipboardText() const override;
+	QString copyToClipboardContextItemText() const override;
+	QString dragText() const override;
+
+	static void Open(QString url, QVariant context = {});
+	void onClick(ClickContext context) const override {
+		const auto button = context.button;
+		if (button == Qt::LeftButton || button == Qt::MiddleButton) {
+			Open(url(), context.other);
+		}
+	}
+
+	TextEntity getTextEntity() const override;
+
+};

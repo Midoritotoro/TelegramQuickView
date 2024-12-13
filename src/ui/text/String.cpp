@@ -55,6 +55,32 @@ namespace text {
 		return result;
 	}
 
+	void String::setText(const QString& text) {
+		clear();
+
+		BlockParser block(this, textWithEntities, options, context);
+		WordParser word(this);
+
+		recountNaturalSize(true, options.dir);
+	}
+
+	std::vector<int> String::countLineWidths(int width) const {
+		return countLineWidths(width, {});
+	}
+
+	std::vector<int> String::countLineWidths(
+		int width,
+		LineWidthsOptions options) const {
+		auto result = std::vector<int>();
+		if (options.reserve) {
+			result.reserve(options.reserve);
+		}
+		enumerateLines(width, options.breakEverywhere, [&](QFixed lineWidth, int) {
+			result.push_back(lineWidth.ceil().toInt());
+			});
+		return result;
+	}
+
 	void String::recountNaturalSize(
 		bool initial,
 		Qt::LayoutDirection optionsDirection) 
@@ -204,6 +230,11 @@ namespace text {
 		}
 	}
 
+	const std::vector<Modification>& String::modifications() const {
+		static const auto kEmpty = std::vector<Modification>();
+		return _extended ? _extended->modifications : kEmpty;
+	}
+
 
 	TextSelection String::adjustSelection(
 		TextSelection selection,
@@ -221,8 +252,8 @@ namespace text {
 						continue;
 					}
 
-					const auto& entities = toTextWithEntities().entities;
-					const auto eIt = ranges::find_if(entities, [&](
+					const auto& entities = EntitiesInText(); //  toTextWithEntities().entities;
+					const auto eIt = std::ranges::find_if(entities, [&](
 						const EntityInText& e) {
 							return (e.type() == EntityType::Pre
 								|| e.type() == EntityType::Code)

@@ -2,7 +2,7 @@
 
 
 #include "../../core/Types.h"
-#include "../ClickHandler.h"
+#include "TextClickHandlers.h"
 
 #include "TextEntities.h"
 #include "../../core/CoreUtility.h"
@@ -56,9 +56,55 @@ namespace text {
 		Fn<void(int index, bool expanded)> expandCallback;
 	};
 
+
+	struct Modification {
+		int position = 0;
+		uint16 skipped = 0;
+		bool added = false;
+	};
+
 	struct ExtendedData {
 		std::vector<ClickHandlerPtr> links;
 		std::unique_ptr<QuotesData> quotes;
+		std::vector<Modification> modifications;
+	};
+
+	struct TextParseOptions {
+		int32 flags;
+		int32 maxw;
+		int32 maxh;
+		Qt::LayoutDirection dir;
+	};
+
+	enum {
+		TextParseMultiline = 0x001,
+		TextParseLinks = 0x002,
+		TextParseMentions = 0x004,
+		TextParseHashtags = 0x008,
+		TextParseBotCommands = 0x010,
+		TextParseMarkdown = 0x020,
+		TextParseColorized = 0x040,
+	};
+
+	const TextParseOptions kDefaultTextOptions = {
+		TextParseLinks | TextParseMultiline, // flags
+		0, // maxw
+		0, // maxh
+		Qt::LayoutDirectionAuto, // dir
+	};
+
+	const TextParseOptions kMarkupTextOptions = {
+		TextParseLinks | TextParseMultiline | TextParseMarkdown, // flags
+		0, // maxw
+		0, // maxh
+		Qt::LayoutDirectionAuto, // dir
+	};
+
+	const TextParseOptions kPlainTextOptions = {
+		TextParseMultiline, // flags
+		0, // maxw
+		0, // maxh
+		Qt::LayoutDirectionAuto, // dir
 	};
 
 
@@ -148,6 +194,7 @@ namespace text {
 			bool initial,
 			Qt::LayoutDirection optionsDirection);
 
+		[[nodiscard]] const std::vector<Modification>& modifications() const;
 	private:
 		class ExtendedWrap : public std::unique_ptr<ExtendedData> {
 		public:
@@ -234,6 +281,8 @@ namespace text {
 		Words _words;
 		ExtendedWrap _extended;
 
+		style::font _font;
+
 		int _minResizeWidth = 0;
 		int _maxWidth = 0;
 		int _minHeight = 0;
@@ -249,8 +298,5 @@ namespace text {
 
 		friend class BlockParser;
 		friend class WordParser;
-		friend class Renderer;
-		friend class BidiAlgorithm;
-		friend class StackEngine;
 	};
 } // namespace text

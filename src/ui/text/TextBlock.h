@@ -29,7 +29,7 @@ namespace text {
 		Code = 0x040,
 		Pre = 0x080,
 		Spoiler = 0x100,
-		Blockquote = 0x200,
+		Blockquote = 0x200
 	};
 
 	Q_DECLARE_FLAGS(TextBlockFlags, TextBlockFlag)

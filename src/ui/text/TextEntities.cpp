@@ -1,4 +1,5 @@
 #include "TextEntities.h"
+#include <ranges>
 
 
 namespace text {
@@ -172,4 +173,21 @@ namespace text {
 		return type() != EntityType::Invalid;
 	}
 
-}
+	int EntityInText::FirstMonospaceOffset(
+		const EntitiesInText& entities,
+		int textLength) {
+		auto&& monospace = std::ranges::subrange(
+			entities.begin(),
+			entities.end()
+		) | std::ranges::views::filter([](const EntityInText& entity) {
+			return (entity.type() == EntityType::Pre)
+				|| (entity.type() == EntityType::Code);
+			});
+		const auto i = std::ranges::max_element(
+			monospace,
+			std::greater<>(),
+			&EntityInText::offset);
+		return (i == monospace.end()) ? textLength : i->offset();
+	}
+
+} // namespace text

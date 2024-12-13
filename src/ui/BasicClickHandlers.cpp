@@ -7,6 +7,9 @@
 #include <QGuiApplication>
 
 #include <QString>
+#include "text/TextEntities.h"
+#include "../core/CoreUtility.h"
+
 
 namespace {
 	namespace details {
@@ -187,6 +190,32 @@ QString UrlClickHandler::ShowEncoded(const QString& url) {
 }
 
 auto UrlClickHandler::getTextEntity() const -> TextEntity {
-	const auto type = isEmail() ? EntityType::Email : EntityType::Url;
+	const auto type = isEmail() ? text::EntityType::Email : text::EntityType::Url;
 	return { type, _originalUrl };
 }
+
+QString HiddenUrlClickHandler::copyToClipboardText() const {
+	return url().startsWith(u"internal:url:"_q)
+		? url().mid(u"internal:url:"_q.size())
+		: url();
+}
+
+QString HiddenUrlClickHandler::copyToClipboardContextItemText() const {
+	return url().isEmpty()
+		? QString()
+		: !url().startsWith(u"internal:"_q)
+		? UrlClickHandler::copyToClipboardContextItemText()
+		: url().startsWith(u"internal:url:"_q)
+		? UrlClickHandler::copyToClipboardContextItemText()
+		: QString();
+}
+
+QString HiddenUrlClickHandler::dragText() const {
+	const auto result = HiddenUrlClickHandler::copyToClipboardText();
+	return result.startsWith(u"internal:"_q) ? QString() : result;
+}
+
+void HiddenUrlClickHandler::Open(QString url, QVariant context) {
+	UrlClickHandler::Open(url, context);
+}
+

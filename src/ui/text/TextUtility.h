@@ -43,28 +43,15 @@ namespace text {
 
 	[[nodiscard]] bool IsParagraphSeparator(QChar ch);
 	[[nodiscard]] bool IsWordSeparator(QChar ch);
+
 	[[nodiscard]] bool IsSpace(QChar ch);
+	[[nodiscard]] bool IsNewline(QChar ch);
 
-	[[nodiscard]] int SerializeTagsSize(const TextWithTags::Tags& tags);
-	[[nodiscard]] QByteArray SerializeTags(const TextWithTags::Tags& tags);
-	[[nodiscard]] TextWithTags::Tags DeserializeTags(
-		QByteArray data,
-		int textLength);
-	[[nodiscard]] QString TagsMimeType();
-	[[nodiscard]] QString TagsTextMimeType();
+	[[nodiscard]] bool IsBad(QChar ch);
+	[[nodiscard]] bool IsTrimmed(QChar ch);
 
-	inline const auto kMentionTagStart = qstr("mention://");
 
-	[[nodiscard]] bool IsMentionLink(QStringView link);
-	[[nodiscard]] QString MentionEntityData(QStringView link);
-	[[nodiscard]] bool IsSeparateTag(QStringView tag);
-	[[nodiscard]] QString JoinTag(const QList<QStringView>& list);
-	[[nodiscard]] QList<QStringView> SplitTags(QStringView tag);
-	[[nodiscard]] QString TagWithRemoved(
-		const QString& tag,
-		const QString& removed);
-	[[nodiscard]] QString TagWithAdded(const QString& tag, const QString& added);
-	[[nodiscard]] TextWithTags::Tags SimplifyTags(TextWithTags::Tags tags);
+	[[nodiscard]] bool IsDiacritic(QChar ch);
 
 	EntitiesInText ConvertTextTagsToEntities(const TextWithTags::Tags& tags);
 	TextWithTags::Tags ConvertEntitiesToTextTags(
@@ -72,7 +59,7 @@ namespace text {
 
 	std::unique_ptr<QMimeData> MimeDataFromText(
 		TextWithTags&& text,
-		const QString& expanded)
+		const QString& expanded);
 	std::unique_ptr<QMimeData> MimeDataFromText(const TextForMimeData& text);
 	std::unique_ptr<QMimeData> MimeDataFromText(TextWithTags&& text);
 

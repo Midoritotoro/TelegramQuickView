@@ -12,7 +12,9 @@ struct ClickContext {
 	QVariant other;
 };
 
-enum class EntityType : uchar;
+namespace text {
+	enum class EntityType : uchar;
+}
 
 class ClickHandlerHost {
 protected:
@@ -58,7 +60,7 @@ public:
 
 	// Entities in text support.
 	struct TextEntity {
-		EntityType type = EntityType();
+		text::EntityType type = text::EntityType();
 		QString data;
 	};
 	virtual TextEntity getTextEntity() const;

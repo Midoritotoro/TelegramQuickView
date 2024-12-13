@@ -29,7 +29,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 )
 find_package(Microsoft.GSL CONFIG REQUIRED)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
@@ -61,6 +61,9 @@ SET(MAIN_SOURCES main.cpp
 
     src/ui/text/String.cpp
     src/ui/text/String.h
+
+    src/ui/text/BlockParser.cpp
+    src/ui/text/BlockParser.h
 
     src/ui/text/TextUtility.cpp
     src/ui/text/TextUtility.h

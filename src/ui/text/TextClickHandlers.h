@@ -15,9 +15,9 @@ public:
 
 private:
 	not_null<text::String*> _text;
+
 	uint16 _offset = 0;
 	uint16 _length = 0;
-
 };
 
 class BlockquoteClickHandler final : public ClickHandler {
@@ -32,5 +32,4 @@ public:
 private:
 	not_null<text::String*> _text;
 	uint16 _quoteIndex = 0;
-
 };

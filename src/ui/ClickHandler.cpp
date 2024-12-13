@@ -1,5 +1,6 @@
 #include "ClickHandler.h"
 
+#include "text/TextEntities.h"
 #include <QPointer>
 
 namespace {
@@ -143,7 +144,7 @@ void ClickHandler::hostDestroyed(ClickHandlerHost* host) {
 }
 
 auto ClickHandler::getTextEntity() const -> TextEntity {
-	return { EntityType::Invalid };
+	return { text::EntityType::Invalid };
 }
 
 void ActivateClickHandler(

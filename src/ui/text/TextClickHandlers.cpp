@@ -54,7 +54,7 @@ void BlockquoteClickHandler::onClick(ClickContext context) const {
 	if (context.button != Qt::LeftButton) {
 		return;
 	}
-	//_text->setBlockquoteExpanded(
-	//	_quoteIndex,
-	//	!_text->blockquoteExpanded(_quoteIndex));
+	_text->setBlockquoteExpanded(
+		_quoteIndex,
+		!_text->blockquoteExpanded(_quoteIndex));
 }

@@ -1,5 +1,7 @@
 #include "TextUtility.h"
 
+#include "../../core/CoreUtility.h"
+
 
 Qt::LayoutDirection text::Direction(
 	const QString& str,
@@ -95,6 +97,31 @@ bool text::IsSpace(QChar ch) {
 		|| (ch == QChar::Tabulation);
 }
 
+bool text::IsNewline(QChar ch) {
+	return (ch == QChar::LineFeed)
+		|| (ch.unicode() == 156);
+}
+
+bool text::IsBad(QChar ch) {
+	return (ch.unicode() == 0)
+		|| (ch.unicode() >= 8232 && ch.unicode() < 8237)
+		|| (ch.unicode() >= 65024 && ch.unicode() < 65040 && ch.unicode() != 65039)
+		|| (ch.unicode() >= 127 && ch.unicode() < 160 && ch.unicode() != 156);
+}
+
+bool text::IsTrimmed(QChar ch) {
+	return IsSpace(ch)
+		|| IsBad(ch)
+		|| (ch == QChar(8203));
+}
+
+bool IsDiacritic(QChar ch) {
+	return (ch.category() == QChar::Mark_NonSpacing)
+		|| (ch.unicode() == 1652)
+		|| (ch.unicode() >= 64606 && ch.unicode() <= 64611);
+}
+
+
 text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& tags) {
 	auto result = EntitiesInText();
 	if (tags.isEmpty()) {
@@ -139,7 +166,7 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 			offset - entity.offset(),
 			entity.data(),
 		};
-		if (std::contains(kInMaskTypesInline, type)
+		if (std::ranges::contains(kInMaskTypesInline, type)
 			|| ranges::contains(kInMaskTypesBlock, type)) {
 			state.remove(entity.type());
 		}
@@ -197,7 +224,7 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 		const auto openLink = linkChanged && !nextState.link.isEmpty();
 		const auto openCustomEmoji = openLink
 			&& Ui::InputField::IsCustomEmojiLink(nextState.link);
-		for (const auto type : kInMaskTypesBlock | ranges::views::reverse) {
+		for (const auto type : kInMaskTypesBlock | std::ranges::view::reverse) {
 			if (nextState.has(type) && !state.has(type)) {
 				openType(type, (type == EntityType::Pre)
 					? nextState.language

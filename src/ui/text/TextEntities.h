@@ -7,16 +7,36 @@
 
 
 namespace text {
-	enum class EntityType : uchar
-	{
+	enum class EntityType: uchar {
 		Invalid = 0,
+
 		Url,
 		CustomUrl,
 		Email,
+		Hashtag,
+		Cashtag,
+		Mention,
+		MentionName,
+		CustomEmoji,
+		BotCommand,
+		MediaTimestamp,
+		Colorized,
 		Phone,
-		Pre,
-		Code,
-		Blockquote
+
+		Bold,
+		Semibold,
+		Italic,
+		Underline,
+		StrikeOut,
+		Code, // inline
+		Pre,  // block
+		Blockquote,
+		Spoiler
+	};
+
+	enum class EntityLinkShown: uchar {
+		Full,
+		Partial,
 	};
 
 	struct TextSelection {
@@ -113,6 +133,9 @@ namespace text {
 			int length,
 			const QString& data = QString());
 
+		static [[nodiscard]] int FirstMonospaceOffset(
+			const EntitiesInText& entities,
+			int textLength);
 		[[nodiscard]] EntityType type() const;
 		[[nodiscard]] int offset() const;
 
@@ -134,5 +157,19 @@ namespace text {
 		int _length = 0;
 
 		QString _data;
+	};
+
+	struct EntityLinkData {
+		QString text;
+		QString data;
+		EntityType type = EntityType::Invalid;
+		EntityLinkShown shown = EntityLinkShown::Full;
+
+		friend inline auto operator<=>(
+			const EntityLinkData&,
+			const EntityLinkData&) = default;
+		friend inline bool operator==(
+			const EntityLinkData&,
+			const EntityLinkData&) = default;
 	};
 } // namespace text
