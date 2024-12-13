@@ -53,8 +53,11 @@ SET(MAIN_SOURCES main.cpp
     src/ui/text/TextEntities.cpp
     src/ui/text/TextEntities.h
 
+    src/ui/text/TextWord.cpp
     src/ui/text/TextWord.h
-    src/ui/text/TextWord.h
+
+    src/ui/text/TextClickHandlers.cpp
+    src/ui/text/TextClickHandlers.h
 
     src/ui/text/String.cpp
     src/ui/text/String.h

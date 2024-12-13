@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../style/StyleCore.h"
+#include "../style/StyleTypes.h"
 #include "../style/StyleFont.h"
 
 #include "../../core/Time.h"
@@ -192,7 +192,9 @@ namespace text {
 		return (*i)->position();
 	}
 
-	[[nodiscard]] int CountBlockHeight(const AbstractBlock* block);
+	[[nodiscard]] int CountBlockHeight(
+		const AbstractBlock* block,
+		const style::font& font);
 
 	[[nodiscard]] inline bool IsMono(TextBlockFlags flags) {
 		return (flags & TextBlockFlag::Pre) || (flags & TextBlockFlag::Code);

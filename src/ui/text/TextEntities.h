@@ -15,7 +15,8 @@ namespace text {
 		Email,
 		Phone,
 		Pre,
-		Code
+		Code,
+		Blockquote
 	};
 
 	struct TextSelection {

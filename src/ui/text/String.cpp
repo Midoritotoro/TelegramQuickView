@@ -57,13 +57,15 @@ namespace text {
 
 	void String::recountNaturalSize(
 		bool initial,
-		Qt::LayoutDirection optionsDirection) {
+		Qt::LayoutDirection optionsDirection) 
+	{
 		auto lastNewlineBlock = begin(_blocks);
 		auto lastNewlineStart = 0;
+
 		const auto computeParagraphDirection = [&](int paragraphEnd) {
 			const auto direction = (optionsDirection != Qt::LayoutDirectionAuto)
 				? optionsDirection
-				: string::Direction(_text, lastNewlineStart, paragraphEnd);
+				: text::Direction(_text, lastNewlineStart, paragraphEnd);
 
 			if (paragraphEnd) {
 				while (blockPosition(lastNewlineBlock) < lastNewlineStart) {
@@ -82,44 +84,56 @@ namespace text {
 					_startParagraphRTL = (direction == Qt::RightToLeft);
 				}
 			}
-			};
+		};
 
 		auto qindex = quoteIndex(nullptr);
 		auto quote = quoteByIndex(qindex);
+
 		auto qpadding = quotePadding(quote);
 		auto qminwidth = quoteMinWidth(quote);
+
 		auto qlinesleft = quoteLinesLimit(quote);
-		auto qmaxwidth = qminwidth;
+		auto qmaxwidth = QFixed(qminwidth);
 		auto qoldheight = 0;
 
 		_maxWidth = 0;
 		_minHeight = qpadding.top();
+
 		const auto lineHeight = this->lineHeight();
 		auto maxWidth = QFixed();
+
 		auto width = QFixed(qminwidth);
 		auto last_rBearing = QFixed();
 		auto last_rPadding = QFixed();
+
 		for (const auto& word : _words) {
 			if (word.newline()) {
 				const auto block = word.newlineBlockIndex();
 				const auto index = quoteIndex(_blocks[block].get());
+
 				const auto changed = (qindex != index);
 				const auto hidden = !qlinesleft;
+
 				core::utility::accumulateMax(maxWidth, width);
 				core::utility::accumulateMax(qmaxwidth, width);
 
 				if (changed) {
 					_minHeight += qpadding.bottom();
+
 					if (quote) {
 						quote->maxWidth = qmaxwidth.ceil().toInt();
 						quote->minHeight = _minHeight - qoldheight;
 					}
+
 					qoldheight = _minHeight;
 					qindex = index;
+
 					quote = quoteByIndex(qindex);
 					qpadding = quotePadding(quote);
+
 					qminwidth = quoteMinWidth(quote);
 					qlinesleft = quoteLinesLimit(quote);
+
 					qmaxwidth = qminwidth;
 					_minHeight += qpadding.top();
 					qpadding.setTop(0);
@@ -135,6 +149,7 @@ namespace text {
 				if (!hidden) {
 					_minHeight += lineHeight;
 				}
+
 				last_rBearing = 0;
 				last_rPadding = word.f_rpadding();
 
@@ -144,8 +159,8 @@ namespace text {
 
 			auto w__f_rbearing = word.f_rbearing();
 
-			accumulate_max(maxWidth, width);
-			accumulate_max(qmaxwidth, width);
+			core::utility::accumulateMax(maxWidth, width);
+			core::utility::accumulateMax(qmaxwidth, width);
 
 			width += last_rBearing + (last_rPadding + word.f_width() - w__f_rbearing);
 
@@ -164,8 +179,8 @@ namespace text {
 					? _blocks.back().unsafe<SkipBlock>().height()
 					: lineHeight;
 			}
-			accumulate_max(maxWidth, width);
-			accumulate_max(qmaxwidth, width);
+			core::utility::accumulateMax(maxWidth, width);
+			core::utility::accumulateMax(qmaxwidth, width);
 		}
 		_maxWidth = maxWidth.ceil().toInt();
 		if (quote) {
@@ -185,7 +200,7 @@ namespace text {
 				? Qt::RightToLeft
 				: Qt::LeftToRight;
 			_endsWithQuoteOrOtherDirection
-				= (lastLineDirection != style::LayoutDirection());
+				= (lastLineDirection != Qt::LeftToRight());
 		}
 	}
 
@@ -217,7 +232,7 @@ namespace text {
 					if (eIt != entities.end()) {
 						from = eIt->offset();
 						to = eIt->offset() + eIt->length();
-						while (to > 0 && string::IsSpace(_text.at(to - 1))) {
+						while (to > 0 && text::IsSpace(_text.at(to - 1))) {
 							--to;
 						}
 						if (to >= from) {
@@ -227,34 +242,34 @@ namespace text {
 					break;
 				}
 
-				if (!string::IsParagraphSeparator(_text.at(from))) {
-					while (from > 0 && !string::IsParagraphSeparator(_text.at(from - 1))) {
+				if (!text::IsParagraphSeparator(_text.at(from))) {
+					while (from > 0 && !text::IsParagraphSeparator(_text.at(from - 1))) {
 						--from;
 					}
 				}
 				if (to < _text.size()) {
-					if (string::IsParagraphSeparator(_text.at(to))) {
+					if (text::IsParagraphSeparator(_text.at(to))) {
 						++to;
 					}
 					else {
-						while (to < _text.size() && !string::IsParagraphSeparator(_text.at(to))) {
+						while (to < _text.size() && !text::IsParagraphSeparator(_text.at(to))) {
 							++to;
 						}
 					}
 				}
 			}
 			else if (selectType == TextSelection::Type::Words) {
-				if (!string::IsWordSeparator(_text.at(from))) {
-					while (from > 0 && !string::IsWordSeparator(_text.at(from - 1))) {
+				if (!text::IsWordSeparator(_text.at(from))) {
+					while (from > 0 && !text::IsWordSeparator(_text.at(from - 1))) {
 						--from;
 					}
 				}
 				if (to < _text.size()) {
-					if (string::IsWordSeparator(_text.at(to))) {
+					if (text::IsWordSeparator(_text.at(to))) {
 						++to;
 					}
 					else {
-						while (to < _text.size() && !string::IsWordSeparator(_text.at(to))) {
+						while (to < _text.size() && !text::IsWordSeparator(_text.at(to))) {
 							++to;
 						}
 					}

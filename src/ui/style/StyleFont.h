@@ -16,7 +16,7 @@ namespace style {
 		Semibold = 0x10,
 		Monospace = 0x20,
 	};
-	
+
 	struct FontResolveResult {
 		QFont font;
 
@@ -34,7 +34,7 @@ namespace style {
 
 	Q_DECLARE_FLAGS(FontFlags, FontFlag)
 
-	void SetFont(const QFont& font);
+		void SetFont(const QFont& font);
 
 	[[nodiscard]] const FontResolveResult* FindAdjustResult(const QFont& font);
 
@@ -179,4 +179,5 @@ namespace style {
 			Font _font;
 
 		};
-}
+	} // namespace internal
+} // namespace style

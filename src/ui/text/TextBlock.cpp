@@ -1,39 +1,41 @@
 #include "TextBlock.h"
 
+#include <private/qfontengine_p.h>
+
 namespace text {
 	style::font WithFlags(
 		const style::font& font,
 		TextBlockFlags flags,
-		style::FontFlags fontFlags) {
-		using Flag = style::FontFlag;
-		if (!flags && !fontFlags) {
+		style::FontFlags fontFlags) 
+	{
+		if (!flags && !fontFlags)
 			return font;
-		}
-		else if (IsMono(flags) || (fontFlags & Flag::Monospace)) {
-			return font.monospace();
-		}
+		else if (IsMono(flags) || (fontFlags & style::FontFlag::Monospace))
+			return font->monospace();
+		
 		auto result = font;
-		if ((flags & TextBlockFlag::Bold) || (fontFlags & Flag::Bold)) {
+
+		if ((flags & TextBlockFlag::Bold) || (fontFlags & style::FontFlag::Bold))
 			result = result->bold();
-		}
+
 		else if ((flags & TextBlockFlag::Semibold)
-			|| (fontFlags & Flag::Semibold)) {
+			|| (fontFlags & style::FontFlag::Semibold))
 			result = result->semibold();
-		}
-		if ((flags & TextBlockFlag::Italic) || (fontFlags & Flag::Italic)) {
+
+		if ((flags & TextBlockFlag::Italic) || (fontFlags & style::FontFlag::Italic))
 			result = result->italic();
-		}
+
 		if ((flags & TextBlockFlag::Underline)
-			|| (fontFlags & Flag::Underline)) {
+			|| (fontFlags & style::FontFlag::Underline))
 			result = result->underline();
-		}
+
 		if ((flags & TextBlockFlag::StrikeOut)
-			|| (fontFlags & Flag::StrikeOut)) {
+			|| (fontFlags & style::FontFlag::StrikeOut))
 			result = result->strikeout();
-		}
-		if (flags & TextBlockFlag::Tilde) { // Tilde fix in OpenSans.
+
+		if (flags & TextBlockFlag::Tilde)
 			result = result->semibold();
-		}
+
 		return result;
 	}
 
@@ -62,7 +64,7 @@ namespace text {
 	}
 
 	TextBlockFlags AbstractBlock::flags() const {
-		return TextBlockFlags::from_raw(_flags);
+		return TextBlockFlags(static_cast<TextBlockFlag>(_flags));
 	}
 
 	int AbstractBlock::objectWidth() const {
@@ -108,7 +110,7 @@ namespace text {
 	}
 
 	Block::Block() {
-		Unexpected("Should not be called.");
+		qDebug() << "Block::Block: Should not be called.";
 	}
 
 	Block::Block(Block&& other) {
@@ -119,18 +121,11 @@ namespace text {
 		case TextBlockType::Text:
 			emplace<TextBlock>(std::move(other.unsafe<TextBlock>()));
 			break;
-		case TextBlockType::Emoji:
-			emplace<EmojiBlock>(std::move(other.unsafe<EmojiBlock>()));
-			break;
-		case TextBlockType::CustomEmoji:
-			emplace<CustomEmojiBlock>(
-				std::move(other.unsafe<CustomEmojiBlock>()));
-			break;
 		case TextBlockType::Skip:
 			emplace<SkipBlock>(std::move(other.unsafe<SkipBlock>()));
 			break;
 		default:
-			Unexpected("Bad text block type in Block(Block&&).");
+			break;;
 		}
 	}
 
@@ -211,11 +206,12 @@ namespace text {
 		}
 	}
 
-	int CountBlockHeight(const AbstractBlock* block) {
+	int CountBlockHeight(
+		const AbstractBlock* block,
+		const style::font& font)
+	{
 		return (block->type() == TextBlockType::Skip)
 			? static_cast<const SkipBlock*>(block)->height()
-			: st->lineHeight
-			? st->lineHeight
-			: st->font->height;
+			: font->height;
 	}
 } // namespace text

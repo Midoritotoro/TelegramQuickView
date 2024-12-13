@@ -10,6 +10,8 @@
 #include "TextUtility.h"
 #include "TextBlock.h"
 
+#include "TextWord.h"
+
 #include <QString>
 #include <QPainter>
 
@@ -29,6 +31,34 @@ namespace text {
 		Fn<LineGeometry(int line)> layout;
 		bool breakEverywhere = false;
 		bool* outElided = nullptr;
+	};
+
+	struct QuoteDetails {
+		QString language;
+
+		std::shared_ptr<PreClickHandler> copy;
+		std::shared_ptr<BlockquoteClickHandler> toggle;
+
+		int copyWidth = 0;
+		int maxWidth = 0;
+
+		int minHeight = 0;
+		int scrollLeft = 0;
+
+		bool blockquote = false;
+		bool collapsed = false;
+		bool expanded = false;
+		bool pre = false;
+	};
+
+	struct QuotesData {
+		std::vector<QuoteDetails> list;
+		Fn<void(int index, bool expanded)> expandCallback;
+	};
+
+	struct ExtendedData {
+		std::vector<ClickHandlerPtr> links;
+		std::unique_ptr<QuotesData> quotes;
 	};
 
 
@@ -114,33 +144,113 @@ namespace text {
 			TextSelection selection,
 			TextSelection::Type selectType);
 		void clear();
-	private:
 		void recountNaturalSize(
 			bool initial,
 			Qt::LayoutDirection optionsDirection);
 
+	private:
+		class ExtendedWrap : public std::unique_ptr<ExtendedData> {
+		public:
+			ExtendedWrap() noexcept;
+			ExtendedWrap(ExtendedWrap&& other) noexcept;
+			ExtendedWrap& operator=(ExtendedWrap&& other) noexcept;
+			~ExtendedWrap();
+
+			ExtendedWrap(
+				std::unique_ptr<ExtendedData>&& other) noexcept;
+			ExtendedWrap& operator=(
+				std::unique_ptr<ExtendedData>&& other) noexcept;
+
+		private:
+			void adjustFrom(const ExtendedWrap* other);
+
+		};
+
+		[[nodiscard]] not_null<ExtendedData*> ensureExtended();
+		[[nodiscard]] not_null<QuotesData*> ensureQuotes();
+
+		[[nodiscard]] uint16 blockPosition(
+			std::vector<Block>::const_iterator i,
+			int fullLengthOverride = -1) const;
+		[[nodiscard]] uint16 blockEnd(
+			std::vector<Block>::const_iterator i,
+			int fullLengthOverride = -1) const;
+		[[nodiscard]] uint16 blockLength(
+			std::vector<Block>::const_iterator i,
+			int fullLengthOverride = -1) const;
+
+		[[nodiscard]] QuoteDetails* quoteByIndex(int index) const;
+		[[nodiscard]] const style::QuoteStyle& quoteStyle(
+			not_null<QuoteDetails*> quote) const;
+		[[nodiscard]] QMargins quotePadding(QuoteDetails* quote) const;
+		[[nodiscard]] int quoteMinWidth(QuoteDetails* quote) const;
+		[[nodiscard]] const QString& quoteHeaderText(QuoteDetails* quote) const;
+
+		// Returns -1 in case there is no limit.
+		[[nodiscard]] int quoteLinesLimit(QuoteDetails* quote) const;
+
+		// Block must be either nullptr or a pointer to a NewlineBlock.
+		[[nodiscard]] int quoteIndex(const AbstractBlock* block) const;
+
+		// Template method for originalText(), originalTextWithEntities().
+		template <
+			typename AppendPartCallback,
+			typename ClickHandlerStartCallback,
+			typename ClickHandlerFinishCallback,
+			typename FlagsChangeCallback>
+		void enumerateText(
+			TextSelection selection,
+			AppendPartCallback appendPartCallback,
+			ClickHandlerStartCallback clickHandlerStartCallback,
+			ClickHandlerFinishCallback clickHandlerFinishCallback,
+			FlagsChangeCallback flagsChangeCallback) const;
+
+		// Template method for countWidth(), countHeight(), countLineWidths().
+		// callback(lineWidth, lineBottom) will be called for all lines with:
+		// QFixed lineWidth, int lineBottom
+		template <typename Callback>
+		void enumerateLines(
+			int w,
+			bool breakEverywhere,
+			Callback&& callback) const;
+		template <typename Callback>
+		void enumerateLines(
+			GeometryDescriptor geometry,
+			Callback&& callback) const;
+
+		void insertModifications(int position, int delta);
+		void removeModificationsAfter(int size);
+		void recountNaturalSize(
+			bool initial,
+			Qt::LayoutDirection optionsDir = Qt::LayoutDirectionAuto);
+
+		[[nodiscard]] TextForMimeData toText(
+			TextSelection selection,
+			bool composeExpanded,
+			bool composeEntities) const;
+
 		QString _text;
-
-		int _maxWidth = 0;
-		int _minHeight = 0;
-
 		Blocks _blocks;
-		std::vector<QString> _words;
+		Words _words;
+		ExtendedWrap _extended;
 
 		int _minResizeWidth = 0;
-
 		int _maxWidth = 0;
 		int _minHeight = 0;
-
 		uint16 _startQuoteIndex = 0;
+		bool _startParagraphLTR : 1 = false;
+		bool _startParagraphRTL : 1 = false;
+		bool _hasCustomEmoji : 1 = false;
+		bool _isIsolatedEmoji : 1 = false;
+		bool _isOnlyCustomEmoji : 1 = false;
+		bool _hasNotEmojiAndSpaces : 1 = false;
+		bool _skipBlockAddedNewline : 1 = false;
+		bool _endsWithQuoteOrOtherDirection : 1 = false;
 
-		bool _startParagraphLTR : 1;
-		bool _startParagraphRTL : 1;
-		bool _hasCustomEmoji : 1;
-		bool _isIsolatedEmoji : 1;
-		bool _isOnlyCustomEmoji : 1;
-		bool _hasNotEmojiAndSpaces : 1;
-		bool _skipBlockAddedNewline : 1;
-		bool _endsWithQuoteOrOtherDirection : 1;
+		friend class BlockParser;
+		friend class WordParser;
+		friend class Renderer;
+		friend class BidiAlgorithm;
+		friend class StackEngine;
 	};
 } // namespace text
