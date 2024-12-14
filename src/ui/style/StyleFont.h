@@ -47,6 +47,15 @@ namespace style {
 	[[nodiscard]] const FontResolveResult* FindAdjustResult(const QFont& font);
 
 	namespace internal {
+		struct ResolvedFont {
+			ResolvedFont(FontResolveResult result, FontVariants* modified):
+				result(std::move(result))
+				, data(this->result, modified) {
+			}
+
+			FontResolveResult result;
+			FontData data;
+		};
 
 		void StartFonts();
 

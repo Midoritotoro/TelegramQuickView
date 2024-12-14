@@ -37,27 +37,14 @@ namespace style {
 	}
 
 	namespace internal {
-
-		struct ResolvedFont {
-			ResolvedFont(FontResolveResult result, FontVariants* modified);
-
-			FontResolveResult result;
-			FontData data;
-		};
-
-		ResolvedFont::ResolvedFont(FontResolveResult result, FontVariants* modified)
-			: result(std::move(result))
-			, data(this->result, modified) {
-		}
-
 		namespace {
 
 			bool Started = false;
 
-			QMap<QString, int> FontFamilyIndices;
+			std::map<QString, int> FontFamilyIndices;
 			QVector<QString> FontFamilies;
-			QMap<uint32, std::unique_ptr<ResolvedFont>> FontsByKey;
-			QMap<uint64, uint32> QtFontsKeys;
+			std::map<uint32, ResolvedFont> FontsByKey;
+			std::map<uint64, uint32> QtFontsKeys;
 
 			[[nodiscard]] uint32 FontKey(int size, FontFlags flags, int family) {
 				return (uint32(family) << 18)
@@ -154,30 +141,7 @@ namespace style {
 
 				static const auto Full = u"bdfghijklpqtyBDFGHIJKLPQTY1234567890[]{}()"_q;
 
-				// I tried to choose height in such way that
-				// - normal fonts won't be too large,
-				// - some exotic fonts, like Symbol (Greek), won't be too small,
-				// - some other exotic fonts, like Segoe Script, won't be too large.
 				const auto Height = [](const QFontMetricsF& metrics) {
-					//static const auto Test = u"acemnorsuvwxz"_q;
-					//return metrics.tightBoundingRect(Test).height();
-
-					//static const auto Test = u"acemnorsuvwxz"_q;
-					//auto result = metrics.boundingRect(Test[0]).height();
-					//for (const auto &ch : Test | ranges::views::drop(1)) {
-					//	const auto single = metrics.boundingRect(ch).height();
-					//	if (result > single) {
-					//		result = single;
-					//	}
-					//}
-					//return result;
-
-					//static const auto Test = u"acemnorsuvwxz"_q;
-					//auto result = 0.;
-					//for (const auto &ch : Test) {
-					//	result -= metrics.boundingRect(ch).y();
-					//}
-					//return result / Test.size();
 
 					static const char16_t Test[] = u"acemnorsuvwxz";
 					constexpr auto kCount = int(std::size(Test)) - 1;
@@ -344,10 +308,10 @@ namespace style {
 		int RegisterFontFamily(const QString& family) {
 			auto i = FontFamilyIndices.find(family);
 			if (i == end(FontFamilyIndices)) {
-				i = FontFamilyIndices.insert(family, FontFamilies.size());
+				i = FontFamilyIndices.emplace(family, FontFamilies.size()).first;
 				FontFamilies.push_back(family);
 			}
-			return i.value();
+			return i->second;
 		}
 
 		FontData::FontData(const FontResolveResult& result, FontVariants* modified)
@@ -432,17 +396,17 @@ namespace style {
 			const auto key = FontKey(size, flags, family);
 			auto i = FontsByKey.find(key);
 			if (i == end(FontsByKey)) {
-				i = FontsByKey.insert(
+				i = FontsByKey.emplace(
 					key,
-					std::make_unique<ResolvedFont>(
+					ResolvedFont(
 						ResolveFont(
 							family ? FontFamilies[family] : Custom,
 							flags,
 							size),
-						modified));
-				QtFontsKeys.insert(QtFontKey(i.value()->data.f), key);
+						modified)).first;
+				QtFontsKeys.emplace(QtFontKey(i->second.data.f), key);
 			}
-			_data = &i.value()->data;
+			_data = &i->second.data;
 		}
 
 		OwnedFont::OwnedFont(const QString& custom, FontFlags flags, int size)
@@ -456,7 +420,7 @@ namespace style {
 		const auto key = internal::QtFontKey(font);
 		const auto i = internal::QtFontsKeys.find(key);
 		return (i != end(internal::QtFontsKeys))
-			? &internal::FontsByKey[i.value()]->result
+			? &internal::FontsByKey[i->second].result
 			: nullptr;
 	}
 
