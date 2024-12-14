@@ -115,7 +115,7 @@ bool text::IsTrimmed(QChar ch) {
 		|| (ch == QChar(8203));
 }
 
-bool IsDiacritic(QChar ch) {
+bool text::IsDiacritic(QChar ch) {
 	return (ch.category() == QChar::Mark_NonSpacing)
 		|| (ch.unicode() == 1652)
 		|| (ch.unicode() >= 64606 && ch.unicode() <= 64611);
@@ -167,7 +167,7 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 			entity.data(),
 		};
 		if (std::ranges::contains(kInMaskTypesInline, type)
-			|| ranges::contains(kInMaskTypesBlock, type)) {
+			|| std::ranges::contains(kInMaskTypesBlock, type)) {
 			state.remove(entity.type());
 		}
 		else {
@@ -442,13 +442,13 @@ std::unique_ptr<QMimeData> text::MimeDataFromText(
 	return result;
 }
 
-std::unique_ptr<QMimeData> MimeDataFromText(const TextForMimeData& text) {
+std::unique_ptr<QMimeData> text::MimeDataFromText(const TextForMimeData& text) {
 	return MimeDataFromText(
 		{ text.rich.text, ConvertEntitiesToTextTags(text.rich.entities) },
 		text.expanded);
 }
 
-std::unique_ptr<QMimeData> MimeDataFromText(TextWithTags&& text) {
+std::unique_ptr<QMimeData> text::MimeDataFromText(TextWithTags&& text) {
 	const auto expanded = ExpandCustomLinks(text);
 	return MimeDataFromText(std::move(text), expanded);
 }

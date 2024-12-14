@@ -4,6 +4,8 @@
 #include <QFontMetrics>
 
 #include "../../core/Types.h"
+#include "../../core/Flags.h"
+
 #include "StyleTypes.h"
 
 
@@ -16,6 +18,8 @@ namespace style {
 		Semibold = 0x10,
 		Monospace = 0x20,
 	};
+
+	DECLARE_FLAGS(FontFlags, FontFlag)
 
 	struct FontResolveResult {
 		QFont font;
@@ -32,9 +36,7 @@ namespace style {
 		FontFlags requestedFlags;
 	};
 
-	Q_DECLARE_FLAGS(FontFlags, FontFlag)
-
-		void SetFont(const QFont& font);
+	void SetFont(const QFont& font);
 
 	[[nodiscard]] const FontResolveResult* FindAdjustResult(const QFont& font);
 
@@ -147,7 +149,6 @@ namespace style {
 
 		inline Font::operator const QFont& () const {
 			Expects(_data != nullptr);
-
 			return _data->f;
 		}
 
@@ -180,4 +181,24 @@ namespace style {
 
 		};
 	} // namespace internal
+
+	struct QuoteStyle {
+		int radius = 10;
+		bool scrollable = false;
+	};
+
+	struct TextStyle {
+		font _font;
+		int lineHeight = 0;
+
+		bool linkUnderLine = true;
+		QuoteStyle blockquote;
+
+		TextStyle(const font& fontStyle, const QuoteStyle& _quote = {}) :
+			_font(fontStyle)
+			, blockquote(_quote)
+		{}
+	};
+
+	const TextStyle defaultTextStyle = TextStyle({ font(14, 0, 0), QuoteStyle() });
 } // namespace style

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TextBlock.h"
-#include "String.h"
+#include "TextEntities.h"
 
 #include "../style/StyleCore.h"
 
@@ -9,6 +9,7 @@
 
 
 namespace text {
+	class String;
 	struct QuoteDetails;
 
 	class BlockParser {

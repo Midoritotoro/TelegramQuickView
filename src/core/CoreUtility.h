@@ -7,6 +7,8 @@
 #include <vector>
 #include <QGuiApplication>
 
+#include <cfenv>
+
 
 namespace core::utility {
 	template <typename T>
@@ -30,5 +32,23 @@ namespace core::utility {
 	[[nodiscard]] inline bool IsShiftPressed() {
 		return (QGuiApplication::keyboardModifiers() == Qt::ShiftModifier);
 	}
+
+	[[nodiscard]] inline double SafeRound(double value) {
+		Expects(!std::isnan(value));
+
+		if (const auto result = std::round(value); !std::isnan(result)) {
+			return result;
+		}
+		const auto errors = std::fetestexcept(FE_ALL_EXCEPT);
+		if (const auto result = std::round(value); !std::isnan(result)) {
+			return result;
+		}
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		if (const auto result = std::round(value); !std::isnan(result)) {
+			return result;
+		}
+	}
+
 
 } // namespace core::utility

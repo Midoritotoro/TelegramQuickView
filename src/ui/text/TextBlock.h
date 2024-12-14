@@ -9,7 +9,6 @@
 #include <private/qfixed_p.h>
 
 
-
 namespace text {
 	enum class TextBlockType : uint16 {
 		Newline = 0x01,
@@ -32,10 +31,7 @@ namespace text {
 		Blockquote = 0x200
 	};
 
-	Q_DECLARE_FLAGS(TextBlockFlags, TextBlockFlag)
-
-	class Block;
-	using Blocks = std::vector<Block>;
+	DECLARE_FLAGS(TextBlockFlags, TextBlockFlag)
 
 	inline constexpr bool is_flag_type(TextBlockFlag) { 
 		return true; 
@@ -68,7 +64,6 @@ namespace text {
 		[[nodiscard]] uint16 linkIndex() const;
 
 		void setLinkIndex(uint16 index);
-
 	protected:
 		AbstractBlock(TextBlockType type, BlockDescriptor descriptor);
 

@@ -1,8 +1,7 @@
 ﻿#include "Application.h"
 
 #include "core/AutoRunUtils.h"
-#include "view/MessagesView.h"
-#include "core/StyleCore.h"
+#include "ui/style/StyleCore.h"
 
 
 Application::Application(int& argc, char** argv) :

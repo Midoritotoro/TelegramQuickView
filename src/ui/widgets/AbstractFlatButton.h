@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../core/StyleCore.h"
+#include "../style/StyleCore.h"
 #include "../../core/Types.h"
 
 #include <QAbstractButton>

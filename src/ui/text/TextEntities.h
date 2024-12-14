@@ -79,8 +79,6 @@ namespace text {
 
 	static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };
 
-	class EntityInText;
-	using EntitiesInText = QVector<EntityInText>;
 
 	struct TextWithEntities {
 		QString text;

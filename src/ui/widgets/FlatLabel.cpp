@@ -159,7 +159,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		QSize(textWidth, elisionHeight));
 
 	painter.fillRect(_rect, _backgroundColor);
-	painter.drawText(_rect, _text);
+	_text.draw(painter, textLeft, style::flatLabel::margins.top(), textWidth);
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
@@ -184,10 +184,10 @@ void FlatLabel::mouseReleaseEvent(QMouseEvent* event) {
 void FlatLabel::mouseDoubleClickEvent(QMouseEvent* event) {
 	auto state = dragActionStart(event->globalPos(), event->button());
 
-	if (((_dragAction == Selecting) || (_dragAction == NoDrag)) && _selectionType == TextSelection::Type::Letters) {
+	if (((_dragAction == Selecting) || (_dragAction == NoDrag)) && _selectionType == text::TextSelection::Type::Letters) {
 		if (state.uponSymbol) {
 			_dragSymbol = state.symbol;
-			_selectionType = _doubleClickSelectsParagraph ? TextSelection::Type::Paragraphs : TextSelection::Type::Words;
+			_selectionType = _doubleClickSelectsParagraph ? text::TextSelection::Type::Paragraphs : text::TextSelection::Type::Words;
 
 			if (_dragAction == NoDrag) {
 				_dragAction = Selecting;
@@ -210,7 +210,7 @@ void FlatLabel::focusOutEvent(QFocusEvent* event) {
 	if (_contextMenu)
 		_savedSelection = _selection;
 
-	_selection = TextSelection(0, 0);
+	_selection = text::TextSelection(0, 0);
 	update();
 }
 
@@ -240,7 +240,7 @@ void FlatLabel::contextMenuEvent(QContextMenuEvent* event) {
 }
 
 void FlatLabel::copyContextText() {
-	QGuiApplication::clipboard()->setText(_text);
+	QGuiApplication::clipboard()->setText(_text.toString());
 }
 
 void FlatLabel::copySelectedText() {
@@ -251,10 +251,10 @@ void FlatLabel::copySelectedText() {
 		: _selection;
 
 	if (!selection.empty())
-		QGuiApplication::clipboard()->setText(_text);
+		QGuiApplication::clipboard()->setText(_text.toString());
 }
 
-TextState FlatLabel::dragActionUpdate() {
+text::TextState FlatLabel::dragActionUpdate() {
 	auto m = mapFromGlobal(_lastMousePos);
 	auto state = getTextState(m);
 	updateHover(state);
@@ -268,7 +268,7 @@ TextState FlatLabel::dragActionUpdate() {
 }
 
 
-TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton button) {
+text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton button) {
 	_lastMousePos = p;
 	auto state = dragActionUpdate();
 
@@ -292,13 +292,13 @@ TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton button) {
 			_savedSelection = { 0, 0 };
 			_dragSymbol = state.symbol;
 			_dragAction = Selecting;
-			_selectionType = TextSelection::Type::Paragraphs;
+			_selectionType = text::TextSelection::Type::Paragraphs;
 			updateHover(state);
 			_trippleClickTimer.callOnce(QApplication::doubleClickInterval());
 			update();
 		}
 	}
-	if (_selectionType != TextSelection::Type::Paragraphs) {
+	if (_selectionType != text::TextSelection::Type::Paragraphs) {
 		_dragSymbol = state.symbol;
 		bool uponSelected = state.uponSymbol;
 		if (uponSelected) {
@@ -321,7 +321,7 @@ TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton button) {
 	return state;
 }
 
-TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton button) {
+text::TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton button) {
 	_lastMousePos = p;
 	auto state = dragActionUpdate();
 
@@ -336,7 +336,7 @@ TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton button) {
 	}
 
 	_dragAction = NoDrag;
-	_selectionType = TextSelection::Type::Letters;
+	_selectionType = text::TextSelection::Type::Letters;
 
 	if (activated) {
 		// ActivateClickHandler(activated, button);
@@ -352,7 +352,7 @@ TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton button) {
 	return state;
 }
 
-void FlatLabel::updateHover(const TextState& state) {
+void FlatLabel::updateHover(const text::TextState& state) {
 	bool lnkChanged = ClickHandler::setActive(state.link, this);
 
 	if (!_selectable) {
@@ -372,7 +372,7 @@ void FlatLabel::updateHover(const TextState& state) {
 	else {
 		if (_dragAction == Selecting) {
 			uint16 second = state.symbol;
-			if (state.afterSymbol && _selectionType == TextSelection::Type::Letters) {
+			if (state.afterSymbol && _selectionType == text::TextSelection::Type::Letters) {
 				++second;
 			}
 			auto selection = _text.adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
@@ -394,8 +394,8 @@ void FlatLabel::updateHover(const TextState& state) {
 	}
 }
 
-TextState FlatLabel::getTextState(const QPoint& m) const {
-	TextState state;
+text::TextState FlatLabel::getTextState(const QPoint& m) const {
+	text::TextState state;
 	return state;
 }
 
@@ -420,12 +420,12 @@ void FlatLabel::executeDrag() {
 		if (uponSelected)
 			return _text.toTextForMimeData(_selection);
 		else if (pressedHandler)
-			return TextForMimeData::Simple(pressedHandler->dragText());
+			return text::TextForMimeData::Simple(pressedHandler->dragText());
 		
-		return TextForMimeData();
+		return text::TextForMimeData();
 	}();
 
-	if (auto mimeData = string::MimeDataFromText(selectedText)) {
+	if (auto mimeData = text::MimeDataFromText(selectedText)) {
 		auto drag = new QDrag(window());
 		drag->setMimeData(mimeData.release());
 		drag->exec(Qt::CopyAction);
@@ -453,7 +453,7 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 	auto request = ContextMenuRequest();
 
 	request.menu = _contextMenu,
-		request.selection = _selectable ? _selection : TextSelection(),
+		request.selection = _selectable ? _selection : text::TextSelection(),
 		request.uponSelection = uponSelection,
 		request.fullSelection = _selectable && _selection.isFullSelection(text());
 
@@ -480,19 +480,35 @@ void FlatLabel::fillContextMenu(ContextMenuRequest request) {
 int FlatLabel::countTextWidth() const noexcept {
 	const auto available = _allowedWidth
 		? _allowedWidth
-		: style::minimumMessageWidth;
+		: _text.maxWidth();
+	if (_allowedWidth > 0
+		&& _allowedWidth < _text.maxWidth()) {
+		auto large = _allowedWidth;
+		auto small = _allowedWidth / 2;
+		const auto largeHeight = _text.countHeight(large, true);
+		while (large - small > 1) {
+			const auto middle = (large + small) / 2;
+			if (largeHeight == _text.countHeight(middle, true)) {
+				large = middle;
+			}
+			else {
+				small = middle;
+			}
+		}
+		return large;
+	}
 	return available;
 }
 
-int FlatLabel::countTextHeight() {
-	_fullTextHeight = style::TextSize(text(), font()).height();
+int FlatLabel::countTextHeight(int textWidth) {
+	_fullTextHeight = _text.countHeight(textWidth, true);
 	return _fullTextHeight;
 }
 
 
 void FlatLabel::refreshSize() {
 	const auto textWidth = countTextWidth();
-	const auto textHeight = countTextHeight();
+	const auto textHeight = countTextHeight(textWidth);
 
 	const auto fullWidth = textWidth
 		+ style::flatLabel::margins.right()

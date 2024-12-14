@@ -120,7 +120,7 @@ namespace text {
 	} // namespace
 
 	BlockParser::StartedEntity::StartedEntity(TextBlockFlags flags)
-		: _value(flags.toInt())
+		: _value(flags.value())
 		, _type(Type::Flags) {
 		Expects(_value >= 0 && _value < int(kStringLinkIndexShift));
 	}

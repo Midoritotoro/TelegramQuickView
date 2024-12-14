@@ -1,4 +1,6 @@
 #include "TextEntities.h"
+
+#include "String.h"
 #include <ranges>
 
 

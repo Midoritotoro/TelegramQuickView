@@ -1,9 +1,10 @@
 #pragma once
 
+#include "view/MessagesView.h"
+
 #include <iostream>
 #include <QApplication>
 
-class MessagesView;
 class MediaPlayer;
 
 

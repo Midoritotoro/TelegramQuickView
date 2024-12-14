@@ -1,7 +1,7 @@
 #include "StyleCore.h"
 
-#include "../media/ffmpeg/video/FrameGenerator.h"
-#include "../media/player/MediaPlayer.h"
+#include "../../media/ffmpeg/video/FrameGenerator.h"
+#include "../../media/player/MediaPlayer.h"
 
 #include <QMimeDataBase>
 

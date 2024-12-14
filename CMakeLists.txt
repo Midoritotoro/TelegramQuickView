@@ -62,6 +62,10 @@ SET(MAIN_SOURCES main.cpp
     src/ui/text/String.cpp
     src/ui/text/String.h
 
+    src/ui/text/TextTypes.h
+
+    src/core/Flags.h
+
     src/ui/text/TextBidiAlgorithm.h
 
     src/ui/text/TextStackEngine.cpp
@@ -89,6 +93,8 @@ SET(MAIN_SOURCES main.cpp
 	src/core/Timer.h
 
     src/ui/style/StyleTypes.h
+
+    src/ui/style/StyleFont.cpp
     src/ui/style/StyleFont.h
 
     src/core/Types.h

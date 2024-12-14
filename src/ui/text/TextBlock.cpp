@@ -64,7 +64,7 @@ namespace text {
 	}
 
 	TextBlockFlags AbstractBlock::flags() const {
-		return TextBlockFlags(static_cast<TextBlockFlag>(_flags));
+		return TextBlockFlags::fromRaw(_flags);
 	}
 
 	int AbstractBlock::objectWidth() const {

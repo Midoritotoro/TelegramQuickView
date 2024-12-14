@@ -1,10 +1,14 @@
 #pragma once 
 
 #include <QCursor>
-#include "StyleFont.h"
 
 
 namespace style {
+	namespace internal {
+		class Font;
+		class OwnedFont;
+	}
+
 	using rect = QRect;
 	using cursor = Qt::CursorShape;
 	using margins = QMargins;

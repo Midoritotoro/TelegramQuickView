@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../core/Types.h"
+#include "TextTypes.h"
 
 #include <cmath>
 #include <private/qfixed_p.h>
@@ -9,10 +10,6 @@
 
 
 namespace text {
-	class Word;
-	using Words = std::vector<Word>;
-
-
 	class Word final {
 	public:
 		Word() = default;

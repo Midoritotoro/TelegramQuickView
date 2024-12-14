@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "../../core/StyleCore.h"
+#include "../style/StyleCore.h"
 #include "../../core/Timer.h"
 
 #include "../../core/InvokeQueued.h"
 #include "../ClickHandler.h"
 
-#include "../../core/String.h"
+#include "../text/String.h"
 
 #include <QWidget>
 
@@ -28,7 +28,7 @@ class FlatLabel : public QWidget, public ClickHandlerHost {
 public:
 	struct ContextMenuRequest {
 		QMenu* menu;
-		TextSelection selection;
+		text::TextSelection selection;
 		ClickHandlerPtr link;
 		bool uponSelection = false;
 		bool fullSelection = false;
@@ -93,7 +93,7 @@ private:
 	void fillContextMenu(ContextMenuRequest request);
 
 	[[nodiscard]] int countTextWidth() const noexcept;
-	[[nodiscard]] int countTextHeight();
+	[[nodiscard]] int countTextHeight(int textWidth);
 
 	void refreshSize();
 	void refreshCursor(bool uponSymbol);
@@ -103,13 +103,13 @@ private:
 	void copyContextText();
 	void copySelectedText();
 
-	TextState dragActionUpdate();
+	text::TextState dragActionUpdate();
 
-	TextState dragActionStart(const QPoint& p, Qt::MouseButton button);
-	TextState dragActionFinish(const QPoint& p, Qt::MouseButton button);
+	text::TextState dragActionStart(const QPoint& p, Qt::MouseButton button);
+	text::TextState dragActionFinish(const QPoint& p, Qt::MouseButton button);
 
-	void updateHover(const TextState& state);
-	TextState getTextState(const QPoint& m) const;
+	void updateHover(const text::TextState& state);
+	text::TextState getTextState(const QPoint& m) const;
 
 	void touchSelect();
 	void executeDrag();
@@ -121,7 +121,7 @@ private:
 		Selecting = 0x04,
 	};
 
-	QString _text = "";
+	text::String _text;
 	Qt::Alignment _alignment;
 
 	QColor _backgroundColor;
@@ -136,8 +136,8 @@ private:
 
 	style::cursor _cursor = style::cursorDefault;
 
-	TextSelection _selection, _savedSelection;
-	TextSelection::Type _selectionType = TextSelection::Type::Letters;
+	text::TextSelection _selection, _savedSelection;
+	text::TextSelection::Type _selectionType = text::TextSelection::Type::Letters;
 
 	QMenu* _contextMenu = nullptr;
 

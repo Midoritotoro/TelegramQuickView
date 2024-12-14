@@ -14,6 +14,8 @@
 #include "TextWord.h"
 #include "BlockParser.h"
 
+#include "../style/StyleFont.h"
+
 #include <QString>
 #include <QPainter>
 
@@ -22,7 +24,6 @@
 
 
 namespace text {
-
 	struct LineGeometry {
 		int left = 0;
 		int width = 0;
@@ -57,7 +58,6 @@ namespace text {
 		std::vector<QuoteDetails> list;
 		Fn<void(int index, bool expanded)> expandCallback;
 	};
-
 
 	struct Modification {
 		int position = 0;
@@ -290,14 +290,13 @@ namespace text {
 
 		void insertModifications(int position, int delta);
 		void removeModificationsAfter(int size);
-		void recountNaturalSize(
-			bool initial,
-			Qt::LayoutDirection optionsDir = Qt::LayoutDirectionAuto);
 
 		[[nodiscard]] TextForMimeData toText(
 			TextSelection selection,
 			bool composeExpanded,
 			bool composeEntities) const;
+
+		const style::TextStyle* _st = nullptr;
 
 		QString _text;
 		Blocks _blocks;

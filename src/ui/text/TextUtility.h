@@ -9,7 +9,6 @@
 #include "TextEntities.h"
 #include "TextWord.h"
 
-
 struct TextWithTags {
 	struct Tag {
 		int offset = 0;
@@ -49,7 +48,6 @@ namespace text {
 
 	[[nodiscard]] bool IsBad(QChar ch);
 	[[nodiscard]] bool IsTrimmed(QChar ch);
-
 
 	[[nodiscard]] bool IsDiacritic(QChar ch);
 

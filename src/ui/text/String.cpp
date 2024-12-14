@@ -3,10 +3,13 @@
 
 
 namespace text {
+	inline constexpr auto kQuoteCollapsedLines = 3;
 
 	String::String(
 		const style::font& font,
-		const QString& text)
+		const QString& text
+	):
+		_st(new style::TextStyle(font))
 	{
 		setText(font, text);
 	}
@@ -209,6 +212,20 @@ namespace text {
 		}
 		return result;
 	}
+
+	void String::draw(
+		QPainter& painter,
+		int32 left,
+		int32 top,
+		int32 width,
+		int32 yFrom,
+		int32 yTo,
+		TextSelection selection = { 0, 0 },
+		bool fullWidthSelection = true) const 
+	{
+		painter.drawText(QRect(left, top, width, yFrom - yTo), _text);
+	}
+
 
 	bool String::isEmpty() const {
 		return _blocks.empty() || _blocks[0]->type() == TextBlockType::Skip;
@@ -826,7 +843,7 @@ namespace text {
 
 	const style::QuoteStyle& String::quoteStyle(
 		not_null<QuoteDetails*> quote) const {
-		return quote->pre ? _st->pre : _st->blockquote;
+		return _st->blockquote;
 	}
 
 	QMargins String::quotePadding(QuoteDetails* quote) const {
@@ -834,9 +851,8 @@ namespace text {
 			return {};
 		}
 		const auto& st = quoteStyle(quote);
-		const auto skip = st.verticalSkip;
-		const auto top = st.header;
-		return st.padding + QMargins(0, top + skip, 0, skip);
+		const auto skip = 5;
+		return QMargins(0, 0, 0, skip);
 	}
 
 	int String::quoteMinWidth(QuoteDetails* quote) const {
@@ -847,31 +863,20 @@ namespace text {
 		const auto& qheader = quoteHeaderText(quote);
 		const auto& qst = quoteStyle(quote);
 		const auto radius = qst.radius;
-		const auto header = qst.header;
-		const auto outline = qst.outline;
-		const auto iconsize = (!qst.icon.empty())
-			? std::max(
-				qst.icon.width() + qst.iconPosition.x(),
-				qst.icon.height() + qst.iconPosition.y())
-			: 0;
-		const auto corner = std::max({ header, radius, outline, iconsize });
+		const auto corner = std::max({ radius });
 		const auto top = qpadding.left()
 			+ (qheader.isEmpty()
 				? 0
-				: (_font->monospace()->width(qheader)
-					+ _st->pre.headerPosition.x()))
+				: (_font->monospace()->width(qheader))
 			+ std::max(
 				qpadding.right(),
-				(!qst.icon.empty()
-					? (qst.iconPosition.x() + qst.icon.width())
-					: 0));
+				0));
 		return std::max(top, 2 * corner);
 	}
 
 	const QString& String::quoteHeaderText(QuoteDetails* quote) const {
 		static const auto kEmptyHeader = QString();
-		static const auto kDefaultHeader
-			= Integration::Instance().phraseQuoteHeaderCopy();
+		static const auto kDefaultHeader = "Copy";
 		return (!quote || !quote->pre)
 			? kEmptyHeader
 			: quote->language.isEmpty()
@@ -994,6 +999,171 @@ namespace text {
 					customEmojiData);
 			}
 		}
+	}
+
+	template <typename Callback>
+	void String::enumerateLines(
+		int w,
+		bool breakEverywhere,
+		Callback&& callback) const {
+		if (isEmpty()) {
+			return;
+		}
+		const auto width = std::max(w, _minResizeWidth);
+		auto g = SimpleGeometry(width, 0, 0, false);
+		g.breakEverywhere = breakEverywhere;
+		enumerateLines(g, std::forward<Callback>(callback));
+	}
+
+	template <typename Callback>
+	void String::enumerateLines(
+		GeometryDescriptor geometry,
+		Callback&& callback) const {
+		if (isEmpty()) {
+			return;
+		}
+
+		const auto withElided = [&](bool elided) {
+			if (geometry.outElided) {
+				*geometry.outElided = elided;
+			}
+			};
+
+		auto qindex = 0;
+		auto quote = (QuoteDetails*)nullptr;
+		auto qlinesleft = -1;
+		auto qpadding = QMargins();
+
+		auto top = 0;
+		auto lineLeft = 0;
+		auto lineWidth = 0;
+		auto lineElided = false;
+		auto widthLeft = QFixed(0);
+		auto lineIndex = 0;
+		const auto initNextLine = [&] {
+			const auto line = geometry.layout(lineIndex++);
+			lineLeft = line.left;
+			lineWidth = line.width;
+			lineElided = line.elided;
+			if (quote && quote->maxWidth < lineWidth) {
+				lineWidth = quote->maxWidth;
+			}
+			widthLeft = lineWidth - qpadding.left() - qpadding.right();
+			};
+		const auto initNextParagraph = [&](int16 paragraphIndex) {
+			if (qindex != paragraphIndex) {
+				//top += qpadding.bottom(); // This was done before callback().
+				qindex = paragraphIndex;
+				quote = quoteByIndex(qindex);
+				qpadding = quotePadding(quote);
+				qlinesleft = quoteLinesLimit(quote);
+				top += qpadding.top();
+				qpadding.setTop(0);
+			}
+			initNextLine();
+			};
+
+		if ((*_blocks.cbegin())->type() != TextBlockType::Newline) {
+			initNextParagraph(_startQuoteIndex);
+		}
+
+		const auto lineHeight = this->lineHeight();
+		auto last_rBearing = QFixed();
+		auto last_rPadding = QFixed();
+		auto longWordLine = true;
+		auto lastWordStart = begin(_words);
+		auto lastWordStart_wLeft = widthLeft;
+		for (auto w = lastWordStart, e = end(_words); w != e; ++w) {
+			if (w->newline()) {
+				const auto block = w->newlineBlockIndex();
+				const auto index = quoteIndex(_blocks[block].get());
+				const auto hidden = !qlinesleft;
+				const auto changed = (qindex != index);
+				if (changed) {
+					top += qpadding.bottom();
+				}
+
+				if (qlinesleft > 0) {
+					--qlinesleft;
+				}
+				if (!hidden) {
+					callback(lineLeft + lineWidth - widthLeft, top += lineHeight);
+				}
+				if (lineElided) {
+					return withElided(true);
+				}
+
+				last_rBearing = 0;// b->f_rbearing(); (0 for newline)
+				last_rPadding = w->f_rpadding();
+
+				initNextParagraph(index);
+				longWordLine = true;
+				lastWordStart = w;
+				lastWordStart_wLeft = widthLeft;
+				continue;
+			}
+			else if (!qlinesleft) {
+				continue;
+			}
+			const auto wordEndsHere = !w->unfinished();
+
+			auto w__f_width = w->f_width();
+			const auto w__f_rbearing = w->f_rbearing();
+			const auto newWidthLeft = widthLeft
+				- last_rBearing
+				- (last_rPadding + w__f_width - w__f_rbearing);
+			if (newWidthLeft >= 0) {
+				last_rBearing = w__f_rbearing;
+				last_rPadding = w->f_rpadding();
+				widthLeft = newWidthLeft;
+
+				if (wordEndsHere) {
+					longWordLine = false;
+				}
+				if (wordEndsHere || longWordLine) {
+					lastWordStart_wLeft = widthLeft;
+					lastWordStart = w + 1;
+				}
+				continue;
+			}
+
+			if (lineElided) {
+			}
+			else if (w != lastWordStart && !geometry.breakEverywhere) {
+				w = lastWordStart;
+				widthLeft = lastWordStart_wLeft;
+				w__f_width = w->f_width();
+			}
+
+			if (qlinesleft > 0) {
+				--qlinesleft;
+			}
+			callback(lineLeft + lineWidth - widthLeft, top += lineHeight);
+			if (lineElided) {
+				return withElided(true);
+			}
+
+			initNextLine();
+
+			last_rBearing = w->f_rbearing();
+			last_rPadding = w->f_rpadding();
+			widthLeft -= w__f_width - last_rBearing;
+
+			longWordLine = !wordEndsHere;
+			lastWordStart = w + 1;
+			lastWordStart_wLeft = widthLeft;
+		}
+		if (widthLeft < lineWidth) {
+			const auto useSkipHeight = (_blocks.back()->type() == TextBlockType::Skip)
+				&& (widthLeft + _words.back().f_width() == lineWidth);
+			const auto useLineHeight = useSkipHeight
+				? _blocks.back().unsafe<SkipBlock>().height()
+				: lineHeight;
+			callback(
+				lineLeft + lineWidth - widthLeft,
+				top + useLineHeight + qpadding.bottom());
+		}
+		return withElided(false);
 	}
 
 } // namespace text
