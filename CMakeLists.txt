@@ -62,6 +62,14 @@ SET(MAIN_SOURCES main.cpp
     src/ui/text/String.cpp
     src/ui/text/String.h
 
+    src/ui/text/TextBidiAlgorithm.h
+
+    src/ui/text/TextStackEngine.cpp
+    src/ui/text/TextStackEngine.h
+
+    src/ui/text/WordParser.cpp
+    src/ui/text/WordParser.h
+
     src/ui/text/BlockParser.cpp
     src/ui/text/BlockParser.h
 

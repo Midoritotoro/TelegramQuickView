@@ -10,7 +10,9 @@
 #include "TextUtility.h"
 #include "TextBlock.h"
 
+#include "WordParser.h"
 #include "TextWord.h"
+#include "BlockParser.h"
 
 #include <QString>
 #include <QPainter>
@@ -128,7 +130,9 @@ namespace text {
 		};
 
 		String(String&& other) = default;
-		String(const QString& string);
+		String(
+			const style::font& font,
+			const QString& string);
 
 		String& operator=(String&& other) = default;
 
@@ -152,10 +156,24 @@ namespace text {
 			int width,
 			LineWidthsOptions options) const;
 
-		void setText(const QString& text);
+		void setText(
+			const style::font& font,
+			const QString& text,
+			const TextParseOptions& options = kDefaultTextOptions);
 
 		[[nodiscard]] bool hasLinks() const;
 		void setLink(uint16 index, const ClickHandlerPtr& lnk);
+
+		[[nodiscard]] bool hasCollapsedBlockquots() const;
+		[[nodiscard]] bool blockquoteCollapsed(int index) const;
+		[[nodiscard]] bool blockquoteExpanded(int index) const;
+		void setBlockquoteExpanded(int index, bool expanded);
+		void setBlockquoteExpandCallback(
+			Fn<void(int index, bool expanded)> callback);
+
+		[[nodiscard]] bool hasSkipBlock() const;
+		bool updateSkipBlock(int width, int height);
+		bool removeSkipBlock();
 
 		[[nodiscard]] int maxWidth() const {
 			return _maxWidth;
@@ -163,6 +181,7 @@ namespace text {
 		[[nodiscard]] int minHeight() const {
 			return _minHeight;
 		}
+
 
 		[[nodiscard]] int countMaxMonospaceWidth() const;
 
@@ -183,6 +202,10 @@ namespace text {
 
 		[[nodiscard]] QString toString(
 			TextSelection selection = AllTextSelection) const;
+		[[nodiscard]] TextWithEntities toTextWithEntities(
+			TextSelection selection = AllTextSelection) const;
+		[[nodiscard]] TextForMimeData toTextForMimeData(
+			TextSelection selection = AllTextSelection) const;
 
 		[[nodiscard]] int lineHeight() const;
 
@@ -192,7 +215,7 @@ namespace text {
 		void clear();
 		void recountNaturalSize(
 			bool initial,
-			Qt::LayoutDirection optionsDirection);
+			Qt::LayoutDirection optionsDirection = Qt::LayoutDirectionAuto);
 
 		[[nodiscard]] const std::vector<Modification>& modifications() const;
 	private:
@@ -298,5 +321,6 @@ namespace text {
 
 		friend class BlockParser;
 		friend class WordParser;
+		friend class StackEngine;
 	};
 } // namespace text

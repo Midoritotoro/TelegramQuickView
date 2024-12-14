@@ -44,7 +44,7 @@ namespace text {
 	[[nodiscard]] style::font WithFlags(
 		const style::font& font,
 		TextBlockFlags flags,
-		style::FontFlags fontFlags) ;
+		style::FontFlags fontFlags = 0) ;
 
 	[[nodiscard]] Qt::LayoutDirection UnpackParagraphDirection(
 		bool ltr,
