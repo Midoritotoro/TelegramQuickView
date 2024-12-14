@@ -9,9 +9,14 @@
 #include "StyleTypes.h"
 
 #include <QMap>
+#include <cmath>
 
 
 namespace style {
+
+	[[nodiscard]] const QString& SystemFontTag();
+	void SetCustomFont(const QString& font);
+
 	enum class FontFlag : uchar {
 		Bold = 0x01,
 		Italic = 0x02,
@@ -29,40 +34,24 @@ namespace style {
 
 	struct FontResolveResult {
 		QFont font;
-
 		double ascent = 0.;
 		double height = 0.;
-
 		int iascent = 0;
 		int iheight = 0;
-
 		int requestedFamily = 0;
 		int requestedSize = 0;
-
 		FontFlags requestedFlags;
 	};
-
-	void SetFont(const QString& font);
-
 	[[nodiscard]] const FontResolveResult* FindAdjustResult(const QFont& font);
 
 	namespace internal {
-		struct ResolvedFont {
-			ResolvedFont(FontResolveResult result, FontVariants* modified):
-				result(std::move(result))
-				, data(this->result, modified) {
-			}
-
-			FontResolveResult result;
-			FontData data;
-		};
 
 		void StartFonts();
 
 		void DestroyFonts();
 		int RegisterFontFamily(const QString& family);
 
-		inline constexpr auto kFontVariants = 64;
+		inline constexpr auto kFontVariants = 0x40;
 
 		class Font;
 		using FontVariants = std::array<Font, kFontVariants>;
@@ -164,6 +153,7 @@ namespace style {
 
 		inline Font::operator const QFont& () const {
 			Expects(_data != nullptr);
+
 			return _data->f;
 		}
 

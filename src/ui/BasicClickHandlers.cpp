@@ -219,3 +219,6 @@ void HiddenUrlClickHandler::Open(QString url, QVariant context) {
 	UrlClickHandler::Open(url, context);
 }
 
+auto HiddenUrlClickHandler::getTextEntity() const -> TextEntity {
+	return { text::EntityType::CustomUrl, url() };
+}

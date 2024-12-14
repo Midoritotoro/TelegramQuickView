@@ -138,7 +138,7 @@ void ClickHandler::hostDestroyed(ClickHandlerHost* host) {
 }
 
 auto ClickHandler::getTextEntity() const -> TextEntity {
-	return { TextEntity() };
+	return { text::EntityType::Invalid };
 }
 
 void ActivateClickHandler(

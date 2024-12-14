@@ -13,7 +13,6 @@
 
 
 void style_InitFontsResource() {
-	// Q_INIT_RESOURCE(win);
 }
 
 namespace style {
@@ -22,10 +21,6 @@ namespace style {
 		QString Custom;
 
 	} // namespace
-
-	void SetFont(const QString& font) {
-		Custom = font;
-	}
 
 	const QString& SystemFontTag() {
 		static const auto result = u"(system)"_q + QChar(0);
@@ -37,13 +32,39 @@ namespace style {
 	}
 
 	namespace internal {
+
+		struct ResolvedFont {
+			ResolvedFont(FontResolveResult result, FontVariants* modified);
+
+			FontResolveResult result;
+			FontData data;
+		};
+
+		ResolvedFont::ResolvedFont(FontResolveResult result, FontVariants* modified)
+			: result(std::move(result))
+			, data(this->result, modified) {
+		}
+
 		namespace {
+
+#ifndef LIB_UI_USE_PACKAGED_FONTS
+			const auto FontTypes = std::array{
+				u"OpenSans-Regular"_q,
+				u"OpenSans-Italic"_q,
+				u"OpenSans-SemiBold"_q,
+				u"OpenSans-SemiBoldItalic"_q,
+			};
+			const auto PersianFontTypes = std::array{
+				u"Vazirmatn-UI-NL-Regular"_q,
+				u"Vazirmatn-UI-NL-SemiBold"_q,
+			};
+#endif // !LIB_UI_USE_PACKAGED_FONTS
 
 			bool Started = false;
 
 			std::map<QString, int> FontFamilyIndices;
-			QVector<QString> FontFamilies;
-			std::map<uint32, ResolvedFont> FontsByKey;
+			std::vector<QString> FontFamilies;
+			std::map<uint32, std::unique_ptr<ResolvedFont>> FontsByKey;
 			std::map<uint64, uint32> QtFontsKeys;
 
 			[[nodiscard]] uint32 FontKey(int size, FontFlags flags, int family) {
@@ -68,6 +89,22 @@ namespace style {
 					| (uint64(font.strikeOut() ? 1 : 0) << 12)
 					| (uint64(font.pixelSize()));
 			}
+
+#ifndef LIB_UI_USE_PACKAGED_FONTS
+			bool LoadCustomFont(const QString& filePath) {
+				auto regularId = QFontDatabase::addApplicationFont(filePath);
+				if (regularId < 0) {
+					qDebug() << QString("Font Error: could not add '%1'.").arg(filePath);
+					return false;
+				}
+
+				for (auto& family : QFontDatabase::applicationFontFamilies(regularId)) {
+					qDebug() << QString("Font: from '%1' loaded '%2'").arg(filePath, family);
+				}
+
+				return true;
+			}
+#endif // !LIB_UI_USE_PACKAGED_FONTS
 
 			[[nodiscard]] QString SystemMonospaceFont() {
 				const auto type = QFontDatabase::FixedFont;
@@ -141,7 +178,30 @@ namespace style {
 
 				static const auto Full = u"bdfghijklpqtyBDFGHIJKLPQTY1234567890[]{}()"_q;
 
+				// I tried to choose height in such way that
+				// - normal fonts won't be too large,
+				// - some exotic fonts, like Symbol (Greek), won't be too small,
+				// - some other exotic fonts, like Segoe Script, won't be too large.
 				const auto Height = [](const QFontMetricsF& metrics) {
+					//static const auto Test = u"acemnorsuvwxz"_q;
+					//return metrics.tightBoundingRect(Test).height();
+
+					//static const auto Test = u"acemnorsuvwxz"_q;
+					//auto result = metrics.boundingRect(Test[0]).height();
+					//for (const auto &ch : Test | ranges::views::drop(1)) {
+					//	const auto single = metrics.boundingRect(ch).height();
+					//	if (result > single) {
+					//		result = single;
+					//	}
+					//}
+					//return result;
+
+					//static const auto Test = u"acemnorsuvwxz"_q;
+					//auto result = 0.;
+					//for (const auto &ch : Test) {
+					//	result -= metrics.boundingRect(ch).y();
+					//}
+					//return result / Test.size();
 
 					static const char16_t Test[] = u"acemnorsuvwxz";
 					constexpr auto kCount = int(std::size(Test)) - 1;
@@ -252,7 +312,9 @@ namespace style {
 				}
 				else {
 					font.setFamily("Open Sans"_q);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
 					font.setFeature("ss03", true);
+#endif // Qt >= 6.7.0
 				}
 				font.setPixelSize(size);
 
@@ -277,7 +339,6 @@ namespace style {
 				font.setStrikeOut(flags & FontFlag::StrikeOut);
 
 				const auto index = (family == Custom) ? 0 : RegisterFontFamily(family);
-
 				return {
 					.font = font,
 					.ascent = metrics.ascent,
@@ -299,6 +360,30 @@ namespace style {
 			Started = true;
 
 			style_InitFontsResource();
+
+#ifndef LIB_UI_USE_PACKAGED_FONTS
+			const auto base = u":/gui/fonts/"_q;
+			const auto name = u"Open Sans"_q;
+
+			for (const auto& file : FontTypes) {
+				LoadCustomFont(base + file + u".ttf"_q);
+			}
+
+			for (const auto& file : PersianFontTypes) {
+				LoadCustomFont(base + file + u".ttf"_q);
+			}
+			QFont::insertSubstitution(name, u"Vazirmatn UI NL"_q);
+
+#ifdef Q_OS_MAC
+			const auto list = QStringList{
+				u"STIXGeneral"_q,
+				u".SF NS Text"_q,
+				u"Helvetica Neue"_q,
+				u"Lucida Grande"_q,
+			};
+			QFont::insertSubstitutions(name, list);
+#endif // Q_OS_MAC
+#endif // !LIB_UI_USE_PACKAGED_FONTS
 		}
 
 		void DestroyFonts() {
@@ -398,15 +483,15 @@ namespace style {
 			if (i == end(FontsByKey)) {
 				i = FontsByKey.emplace(
 					key,
-					ResolvedFont(
+					std::make_unique<ResolvedFont>(
 						ResolveFont(
 							family ? FontFamilies[family] : Custom,
 							flags,
 							size),
 						modified)).first;
-				QtFontsKeys.emplace(QtFontKey(i->second.data.f), key);
+				QtFontsKeys.emplace(QtFontKey(i->second->data.f), key);
 			}
-			_data = &i->second.data;
+			_data = &i->second->data;
 		}
 
 		OwnedFont::OwnedFont(const QString& custom, FontFlags flags, int size)
@@ -420,8 +505,7 @@ namespace style {
 		const auto key = internal::QtFontKey(font);
 		const auto i = internal::QtFontsKeys.find(key);
 		return (i != end(internal::QtFontsKeys))
-			? &internal::FontsByKey[i->second].result
+			? &internal::FontsByKey[i->second]->result
 			: nullptr;
 	}
-
 } // namespace style
