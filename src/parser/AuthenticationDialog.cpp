@@ -64,10 +64,7 @@ AuthenticationDialog::AuthenticationDialog(QWidget* parent) :
 {
     setWindowTitle(PROJECT_NAME);
 
-    QString currentPath = QCoreApplication::applicationDirPath();
-    QDir assetsDir(currentPath + "/../../../assets/images");
-
-    _pathToBackgroundImage = assetsDir.absolutePath() + "/main_screen.jpg";
+    _pathToBackgroundImage = ":/assets/images/main_screen.jpg";
     _background = QPixmap(_pathToBackgroundImage);
 
     setStyleSheet(

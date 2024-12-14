@@ -10,7 +10,7 @@
 #include "MediaViewer.h"
 
 #include "../core/MouseDetector.h"
-#include "../parser/TelegramParser.h"
+//#include "../parser/TelegramParser.h"
 
 
 class MessagesView: public QWidget {
@@ -21,7 +21,7 @@ private:
 	QVBoxLayout* _chatScrollAreaLayout = nullptr;
 
 	std::unique_ptr<MediaViewer> _messageMediaViewer = nullptr;
-	std::unique_ptr<TelegramParser> _telegramParser = nullptr;
+	//std::unique_ptr<TelegramParser> _telegramParser = nullptr;
 
 	std::unique_ptr<MouseDetector> _mouseDetector = nullptr;
 	std::shared_ptr<History> _messagesHistory;

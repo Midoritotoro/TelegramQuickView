@@ -1,9 +1,6 @@
 #include "FullScreenButton.h"
 
 #include "../../../ui/style/StyleCore.h"
-
-#include <QDir>
-#include <QApplication>
 #include <QPainter>
 
 
@@ -11,11 +8,8 @@ FullScreenButton::FullScreenButton(QWidget* parent) :
 	QPushButton(parent)
 	, _state (State::FullScreenFrom)
 {
-	const auto currentPath = QCoreApplication::applicationDirPath();
-	const auto assetsDir = QDir(currentPath + "/../../assets/images");
-
-	_fullScreenTo = QImage(assetsDir.absolutePath() + "/player_fullscreen.png");
-	_fullScreenFrom = QImage(assetsDir.absolutePath() + "/player_minimize.png");
+	_fullScreenTo = QImage(":/assets/images/player_fullscreen.png");
+	_fullScreenFrom = QImage(":/assets/images/player_minimize.png");
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);

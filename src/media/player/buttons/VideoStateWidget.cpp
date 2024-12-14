@@ -3,19 +3,14 @@
 #include "../../../ui/style/StyleCore.h"
 
 #include <QPainter>
-#include <QCoreApplication>
-#include <QDir>
 
 
 VideoStateWidget::VideoStateWidget(QWidget* parent):
     QPushButton(parent)
 {
-    const auto currentPath = QCoreApplication::applicationDirPath();
-    const auto assetsDir = QDir(currentPath + "/../../assets/images");
-
-    _pause = QImage(assetsDir.absolutePath() + "/stop.png");
-    _play = QImage(assetsDir.absolutePath() + "/play.png");
-    _repeat = QImage(assetsDir.absolutePath() + "/repeat.png");
+    _pause = QImage(":/assets/images/stop.png");
+    _play = QImage(":/assets/images/play.png");
+    _repeat = QImage(":/assets/images/repeat.png");
 
     setAttribute(Qt::WA_NoSystemBackground);
     setCursor(Qt::PointingHandCursor);

@@ -16,14 +16,13 @@
 
 MessagesView::MessagesView(QWidget* parent):
 	QWidget(parent)
-	, _telegramParser(std::make_unique<TelegramParser>())
+	//, _telegramParser(std::make_unique<TelegramParser>())
+	, _messagesHistory(std::make_shared<History>())
 //	, _mouseDetector(std::make_unique<MouseDetector>())
 	, _displayMode(Message::MediaDisplayMode::PreviewWithCount)
 	, _currentPostIndex(1)
 {
 	setMouseTracking(true);
-
-	_messagesHistory = std::make_shared<History>();
 
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
@@ -144,14 +143,14 @@ void MessagesView::addContent() {
 	const auto guard = gsl::finally([this] { _chatScrollArea->disableScroll(false); });
 	_chatScrollArea->disableScroll(true);
 
-	for (int count = 0; count < 5; ++count) {
-		const auto message = _telegramParser->loadMessage();
+	//for (int count = 0; count < 5; ++count) {
+	//	//const auto message = _telegramParser->loadMessage();
 
-		if (message.isNull())
-			continue;
+	//	if (message.isNull())
+	//		continue;
 
-		message.attachments.isEmpty()
-			? makeMessage(message.text)
-			: makeMessage(message.text, message.attachments);
-	}
+	//	message.attachments.isEmpty()
+	//		? makeMessage(message.text)
+	//		: makeMessage(message.text, message.attachments);
+	//}
 }

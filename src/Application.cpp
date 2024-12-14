@@ -18,7 +18,7 @@ Application::Application(int& argc, char** argv) :
     _messagesView->show();
     auto list = QStringList({ videoPath });
 
-    _messagesView->makeMessage(text, list);
+    //_messagesView->makeMessage(text, list);
 }
 
 Application::~Application() {
@@ -45,6 +45,8 @@ void Application::init() {
     const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
 
     style::SetDevicePixelRatio(useRatio);
+    style::StartManager();
+
 
     QPixmapCache::setCacheLimit(1024 * 1024); 
     setFont(QFont("OpenSans-SemiBoldItalic", 10));

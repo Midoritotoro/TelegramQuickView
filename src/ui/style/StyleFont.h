@@ -205,5 +205,5 @@ namespace style {
 		{}
 	};
 
-	const TextStyle defaultTextStyle = TextStyle({ font(14, 0, 0), QuoteStyle() });
+	const TextStyle defaultTextStyle = TextStyle({ font(14, style::FontFlag::Semibold, 0), QuoteStyle() });
 } // namespace style

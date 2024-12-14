@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StyleTypes.h"
+#include "StyleFont.h"
 
 #include <QImage>
 #include <QSize>
@@ -13,7 +14,6 @@
 
 
 namespace style {
-
 	inline constexpr QMargins mediaPlayerPanelMargins = { 
 		10, 5, 10, 5 
 	};
@@ -102,4 +102,11 @@ namespace style {
 		const QSize& _outer
 	);
 
+	void StartManager() {
+		internal::RegisterFontFamily("Open Sans");
+	}
+
+	void StopManager() {
+		internal::DestroyFonts();
+	}
 } // namespace style

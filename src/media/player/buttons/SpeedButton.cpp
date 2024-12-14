@@ -2,15 +2,13 @@
 
 #include "../../../ui/style/StyleCore.h"
 
-#include <QDir>
-#include <QCoreApplication>
-
 #include <QApplication>
 #include <QPainter>
 #include <QScreen>
 
 #include <QPainterPath>
 #include <QMouseEvent>
+
 
 SpeedButtonOverlay::SpeedButtonOverlay(QWidget* parent):
 	QWidget(parent)
@@ -71,11 +69,7 @@ SpeedController::SpeedController(QWidget* parent):
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 
 	_overlay->resize(screenWidth / 12., 30);
-
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir assetsDir(currentPath + "/../../assets/images");
-
-	_speedButtonImage = QImage(assetsDir.absolutePath() + "/speed_button.png");
+	_speedButtonImage = QImage(":/assets/images/speed_button.png");
 
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);

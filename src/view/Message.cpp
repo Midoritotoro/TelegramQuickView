@@ -31,7 +31,6 @@ void Message::setText(const QString& text) {
 		return;
 
 	_textLabel->setText(text);
-	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение

@@ -2,8 +2,6 @@
 
 #include "../../../ui/style/StyleCore.h"
 
-#include <QCoreApplication>
-#include <QDir>
 #include <QPainter>
 #include <QMouseEvent>
 
@@ -16,12 +14,9 @@ VolumeController::VolumeController(QWidget* parent) :
 	setAttribute(Qt::WA_NoSystemBackground);
 	setCursor(Qt::PointingHandCursor);
 
-	const auto currentPath = QCoreApplication::applicationDirPath();
-	const auto assetsDir = QDir(currentPath + "/../../assets/images");
-
-	_speakerOff = QImage(assetsDir.absolutePath() + "/speaker_white_off.png");
-	_speakerOn = QImage(assetsDir.absolutePath() + "/speaker_white_on.png");
-	_speakerSmallOn = QImage(assetsDir.absolutePath() + "/speaker_white_small_on.png");
+	_speakerOff = QImage(":/assets/images/speaker_white_off.png");
+	_speakerOn = QImage(":/assets/images/speaker_white_on.png");
+	_speakerSmallOn = QImage(":/assets/images/speaker_white_small_on.png");
 }
 
 

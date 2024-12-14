@@ -7,12 +7,16 @@
 #include <QFontDatabase>
 
 #include <map>
+#include <QResource>
 
 #include "../../core/Types.h"
 #include "../../core/CoreUtility.h"
 
+#include "StyleCore.h"
+
 
 void style_InitFontsResource() {
+	// Q_INIT_RESOURCE(fonts);
 }
 
 namespace style {
@@ -47,7 +51,6 @@ namespace style {
 
 		namespace {
 
-#ifndef LIB_UI_USE_PACKAGED_FONTS
 			const auto FontTypes = std::array{
 				u"OpenSans-Regular"_q,
 				u"OpenSans-Italic"_q,
@@ -58,7 +61,6 @@ namespace style {
 				u"Vazirmatn-UI-NL-Regular"_q,
 				u"Vazirmatn-UI-NL-SemiBold"_q,
 			};
-#endif // !LIB_UI_USE_PACKAGED_FONTS
 
 			bool Started = false;
 
@@ -90,7 +92,7 @@ namespace style {
 					| (uint64(font.pixelSize()));
 			}
 
-#ifndef LIB_UI_USE_PACKAGED_FONTS
+
 			bool LoadCustomFont(const QString& filePath) {
 				auto regularId = QFontDatabase::addApplicationFont(filePath);
 				if (regularId < 0) {
@@ -104,7 +106,6 @@ namespace style {
 
 				return true;
 			}
-#endif // !LIB_UI_USE_PACKAGED_FONTS
 
 			[[nodiscard]] QString SystemMonospaceFont() {
 				const auto type = QFontDatabase::FixedFont;
@@ -361,8 +362,7 @@ namespace style {
 
 			style_InitFontsResource();
 
-#ifndef LIB_UI_USE_PACKAGED_FONTS
-			const auto base = u":/gui/fonts/"_q;
+			const auto base = u":/resources/fonts/"_q;
 			const auto name = u"Open Sans"_q;
 
 			for (const auto& file : FontTypes) {
@@ -373,17 +373,6 @@ namespace style {
 				LoadCustomFont(base + file + u".ttf"_q);
 			}
 			QFont::insertSubstitution(name, u"Vazirmatn UI NL"_q);
-
-#ifdef Q_OS_MAC
-			const auto list = QStringList{
-				u"STIXGeneral"_q,
-				u".SF NS Text"_q,
-				u"Helvetica Neue"_q,
-				u"Lucida Grande"_q,
-			};
-			QFont::insertSubstitutions(name, list);
-#endif // Q_OS_MAC
-#endif // !LIB_UI_USE_PACKAGED_FONTS
 		}
 
 		void DestroyFonts() {

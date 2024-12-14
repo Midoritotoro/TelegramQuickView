@@ -202,19 +202,53 @@ SET(MAIN_SOURCES main.cpp
     src/ui/effects/OpenGLBlur.cpp
 	src/ui/effects/OpenGLBlur.h
 
-	src/parser/data/UserDataManager.cpp
-	src/parser/data/UserDataManager.h
+	# src/parser/data/UserDataManager.cpp
+	# src/parser/data/UserDataManager.h
 
-	src/parser/AuthenticationDialog.cpp
-	src/parser/AuthenticationDialog.h
+	# src/parser/AuthenticationDialog.cpp
+	# src/parser/AuthenticationDialog.h
 
-	src/parser/utils.h
+	# src/parser/utils.h
 
-	src/parser/AbstractTelegramParser.cpp
-	src/parser/AbstractTelegramParser.h
+	# src/parser/AbstractTelegramParser.cpp
+	# src/parser/AbstractTelegramParser.h
 
-	src/parser/TelegramParser.cpp
-	src/parser/TelegramParser.h
+	# src/parser/TelegramParser.cpp
+	# src/parser/TelegramParser.h
+)
+
+qt_add_resources(${PROJECT_NAME}
+    PREFIX "/assets/images"
+    FILES 
+    arrow_right.png
+    auth.png
+    buttton_close.png  
+    button_minimize.png
+    main_screen.jpg
+    play.png
+    player_fullscreen.png
+    player_minimize.png
+    repeat.png
+    settings.png
+    shadow_close.png
+    shadow_minimize.png
+    speaker_white_off.png
+    speaker_white_on.png
+    speaker_white_small_on.png
+    speed_button.png
+    stop.png
+)
+
+qt_add_resources(${PROJECT_NAME}
+    PREFIX "/resources/fonts"
+    FILES 
+    OpenSans-Regular.ttf
+    OpenSans-Italic.ttf
+    OpenSans-SemiBold.ttf
+    OpenSans-SemiBoldItalic.ttf
+    Vazirmatn-UI-NL-Regular.ttf
+    Vazirmatn-UI-NL-SemiBold.ttf
+  
 )
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
@@ -279,7 +313,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
             Qt6::WidgetsPrivate
             app::external_ffmpeg
             Microsoft.GSL::GSL
-            Td::tdclient
+            # Td::tdclient
 )
 
 SET_SOURCE_FILES_PROPERTIES(
