@@ -102,11 +102,6 @@ namespace style {
 		const QSize& _outer
 	);
 
-	void StartManager() {
-		internal::RegisterFontFamily("Open Sans");
-	}
-
-	void StopManager() {
-		internal::DestroyFonts();
-	}
+	void Start();
+	void Stop();
 } // namespace style

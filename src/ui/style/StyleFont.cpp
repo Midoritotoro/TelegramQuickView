@@ -178,32 +178,7 @@ namespace style {
 				const auto basicMetrics = QFontMetricsF(copy);
 
 				static const auto Full = u"bdfghijklpqtyBDFGHIJKLPQTY1234567890[]{}()"_q;
-
-				// I tried to choose height in such way that
-				// - normal fonts won't be too large,
-				// - some exotic fonts, like Symbol (Greek), won't be too small,
-				// - some other exotic fonts, like Segoe Script, won't be too large.
 				const auto Height = [](const QFontMetricsF& metrics) {
-					//static const auto Test = u"acemnorsuvwxz"_q;
-					//return metrics.tightBoundingRect(Test).height();
-
-					//static const auto Test = u"acemnorsuvwxz"_q;
-					//auto result = metrics.boundingRect(Test[0]).height();
-					//for (const auto &ch : Test | ranges::views::drop(1)) {
-					//	const auto single = metrics.boundingRect(ch).height();
-					//	if (result > single) {
-					//		result = single;
-					//	}
-					//}
-					//return result;
-
-					//static const auto Test = u"acemnorsuvwxz"_q;
-					//auto result = 0.;
-					//for (const auto &ch : Test) {
-					//	result -= metrics.boundingRect(ch).y();
-					//}
-					//return result / Test.size();
-
 					static const char16_t Test[] = u"acemnorsuvwxz";
 					constexpr auto kCount = int(std::size(Test)) - 1;
 

@@ -29,7 +29,8 @@ QSize FlatLabel::sizeHint() const {
 }
 
 void FlatLabel::setText(const QString& text) {
-	_text.setText(style::defaultTextStyle._font, text);
+	static const style::TextStyle defaultTextStyle = style::TextStyle({ style::font(14, style::FontFlag::Semibold, 0)});
+	_text.setText(defaultTextStyle._font, text);
 	textUpdated();
 }
 

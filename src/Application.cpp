@@ -22,7 +22,7 @@ Application::Application(int& argc, char** argv) :
 }
 
 Application::~Application() {
-
+    style::Stop();
 }
 
 std::unique_ptr<Application> Application::Create(int argc, char* argv[]) {
@@ -45,7 +45,7 @@ void Application::init() {
     const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
 
     style::SetDevicePixelRatio(useRatio);
-    style::StartManager();
+    style::Start();
 
 
     QPixmapCache::setCacheLimit(1024 * 1024); 

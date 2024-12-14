@@ -363,4 +363,12 @@ namespace style {
 		return image;
 	}
 
+	void Start() {
+		internal::RegisterFontFamily("Open Sans");
+	}
+
+	void Stop() {
+		internal::DestroyFonts();
+	}
+
 } // namespace style

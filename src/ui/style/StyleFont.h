@@ -84,7 +84,7 @@ namespace style {
 			FontData* _data = nullptr;
 
 			void init(int size, FontFlags flags, int family, FontVariants* modified);
-			friend void StartManager();
+			friend void Start();
 
 			explicit Font(FontData* data) : _data(data) {
 			}
@@ -204,6 +204,4 @@ namespace style {
 			, blockquote(_quote)
 		{}
 	};
-
-	const TextStyle defaultTextStyle = TextStyle({ font(14, style::FontFlag::Semibold, 0), QuoteStyle() });
 } // namespace style
