@@ -612,6 +612,10 @@ namespace text {
 		}
 	}
 
+	int String::lineHeight() const {
+		return _font->height;
+	}
+
 	const std::vector<Modification>& String::modifications() const {
 		static const auto kEmpty = std::vector<Modification>();
 		return _extended ? _extended->modifications : kEmpty;
@@ -691,4 +695,305 @@ namespace text {
 		}
 		return { from, to };
 	}
+
+	void String::clear() {
+		_text.clear();
+		_blocks.clear();
+		_extended = nullptr;
+		_maxWidth = _minHeight = 0;
+		_startQuoteIndex = 0;
+		_startParagraphLTR = false;
+		_startParagraphRTL = false;
+	}
+
+	String::ExtendedWrap::ExtendedWrap() noexcept = default;
+
+	String::ExtendedWrap::ExtendedWrap(ExtendedWrap&& other) noexcept
+		: unique_ptr(std::move(other)) {
+		adjustFrom(&other);
+	}
+
+	String::ExtendedWrap& String::ExtendedWrap::operator=(
+		ExtendedWrap&& other) noexcept {
+		*static_cast<unique_ptr*>(this) = std::move(other);
+		adjustFrom(&other);
+		return *this;
+	}
+
+	String::ExtendedWrap::ExtendedWrap(
+		std::unique_ptr<ExtendedData>&& other) noexcept
+		: unique_ptr(std::move(other)) {
+		assert(!get());
+	}
+
+	String::ExtendedWrap& String::ExtendedWrap::operator=(
+		std::unique_ptr<ExtendedData>&& other) noexcept {
+		*static_cast<unique_ptr*>(this) = std::move(other);
+		assert(!get());
+		return *this;
+	}
+
+	String::ExtendedWrap::~ExtendedWrap() = default;
+
+	void String::ExtendedWrap::adjustFrom(const ExtendedWrap* other) {
+		const auto data = get();
+		if (!data) {
+			return;
+		}
+		const auto raw = [](auto pointer) {
+			return reinterpret_cast<quintptr>(pointer);
+			};
+		const auto adjust = [&](auto& link) {
+			const auto otherText = raw(link->text().get());
+			link->setText(
+				reinterpret_cast<String*>(otherText + raw(this) - raw(other)));
+			};
+		if (const auto quotes = data->quotes.get()) {
+			for (auto& quote : quotes->list) {
+				if (quote.copy) {
+					adjust(quote.copy);
+				}
+				if (quote.toggle) {
+					adjust(quote.toggle);
+				}
+			}
+		}
+	}
+
+	not_null<ExtendedData*> String::ensureExtended() {
+		if (!_extended) {
+			_extended = std::make_unique<ExtendedData>();
+		}
+		return _extended.get();
+	}
+
+	not_null<QuotesData*> String::ensureQuotes() {
+		const auto extended = ensureExtended();
+		if (!extended->quotes) {
+			extended->quotes = std::make_unique<QuotesData>();
+		}
+		return extended->quotes.get();
+	}
+
+	uint16 String::blockPosition(
+		std::vector<Block>::const_iterator i,
+		int fullLengthOverride) const {
+		return (i != end(_blocks))
+			? CountPosition(i)
+			: (fullLengthOverride >= 0)
+			? uint16(fullLengthOverride)
+			: uint16(_text.size());
+	}
+
+	uint16 String::blockEnd(
+		std::vector<Block>::const_iterator i,
+		int fullLengthOverride) const {
+		return (i != end(_blocks) && i + 1 != end(_blocks))
+			? CountPosition(i + 1)
+			: (fullLengthOverride >= 0)
+			? uint16(fullLengthOverride)
+			: uint16(_text.size());
+	}
+
+	uint16 String::blockLength(
+		std::vector<Block>::const_iterator i,
+		int fullLengthOverride) const {
+		return (i == end(_blocks))
+			? 0
+			: (i + 1 != end(_blocks))
+			? (CountPosition(i + 1) - CountPosition(i))
+			: (fullLengthOverride >= 0)
+			? (fullLengthOverride - CountPosition(i))
+			: (int(_text.size()) - CountPosition(i));
+	}
+
+	QuoteDetails* String::quoteByIndex(int index) const {
+		Expects(!index
+			|| (_extended
+				&& _extended->quotes
+				&& index <= _extended->quotes->list.size()));
+
+		return index ? &_extended->quotes->list[index - 1] : nullptr;
+	}
+
+	int String::quoteIndex(const AbstractBlock* block) const {
+		Expects(!block || block->type() == TextBlockType::Newline);
+
+		return block
+			? static_cast<const NewlineBlock*>(block)->quoteIndex()
+			: _startQuoteIndex;
+	}
+
+	const style::QuoteStyle& String::quoteStyle(
+		not_null<QuoteDetails*> quote) const {
+		return quote->pre ? _st->pre : _st->blockquote;
+	}
+
+	QMargins String::quotePadding(QuoteDetails* quote) const {
+		if (!quote) {
+			return {};
+		}
+		const auto& st = quoteStyle(quote);
+		const auto skip = st.verticalSkip;
+		const auto top = st.header;
+		return st.padding + QMargins(0, top + skip, 0, skip);
+	}
+
+	int String::quoteMinWidth(QuoteDetails* quote) const {
+		if (!quote) {
+			return 0;
+		}
+		const auto qpadding = quotePadding(quote);
+		const auto& qheader = quoteHeaderText(quote);
+		const auto& qst = quoteStyle(quote);
+		const auto radius = qst.radius;
+		const auto header = qst.header;
+		const auto outline = qst.outline;
+		const auto iconsize = (!qst.icon.empty())
+			? std::max(
+				qst.icon.width() + qst.iconPosition.x(),
+				qst.icon.height() + qst.iconPosition.y())
+			: 0;
+		const auto corner = std::max({ header, radius, outline, iconsize });
+		const auto top = qpadding.left()
+			+ (qheader.isEmpty()
+				? 0
+				: (_font->monospace()->width(qheader)
+					+ _st->pre.headerPosition.x()))
+			+ std::max(
+				qpadding.right(),
+				(!qst.icon.empty()
+					? (qst.iconPosition.x() + qst.icon.width())
+					: 0));
+		return std::max(top, 2 * corner);
+	}
+
+	const QString& String::quoteHeaderText(QuoteDetails* quote) const {
+		static const auto kEmptyHeader = QString();
+		static const auto kDefaultHeader
+			= Integration::Instance().phraseQuoteHeaderCopy();
+		return (!quote || !quote->pre)
+			? kEmptyHeader
+			: quote->language.isEmpty()
+			? kDefaultHeader
+			: quote->language;
+	}
+
+	int String::quoteLinesLimit(QuoteDetails* quote) const {
+		return (quote && quote->collapsed && !quote->expanded)
+			? kQuoteCollapsedLines
+			: -1;
+	}
+
+	template <
+		typename AppendPartCallback,
+		typename ClickHandlerStartCallback,
+		typename ClickHandlerFinishCallback,
+		typename FlagsChangeCallback>
+	void String::enumerateText(
+		TextSelection selection,
+		AppendPartCallback appendPartCallback,
+		ClickHandlerStartCallback clickHandlerStartCallback,
+		ClickHandlerFinishCallback clickHandlerFinishCallback,
+		FlagsChangeCallback flagsChangeCallback) const {
+		if (isEmpty() || selection.empty()) {
+			return;
+		}
+
+		int linkIndex = 0;
+		uint16 linkPosition = 0;
+		int quoteIndex = _startQuoteIndex;
+
+		TextBlockFlags flags = {};
+		for (auto i = _blocks.cbegin(), e = _blocks.cend(); true; ++i) {
+			const auto blockPosition = (i == e)
+				? uint16(_text.size())
+				: (*i)->position();
+			const auto blockFlags = (i == e) ? TextBlockFlags() : (*i)->flags();
+			const auto blockQuoteIndex = (i == e)
+				? 0
+				: ((*i)->type() != TextBlockType::Newline)
+				? quoteIndex
+				: static_cast<const NewlineBlock*>(i->get())->quoteIndex();
+			const auto blockLinkIndex = [&] {
+				if (IsMono(blockFlags) || (i == e)) {
+					return 0;
+				}
+				const auto result = (*i)->linkIndex();
+				return (result && _extended && _extended->links[result - 1])
+					? result
+					: 0;
+				}();
+			if (blockLinkIndex != linkIndex) {
+				if (linkIndex) {
+					auto rangeFrom = qMax(selection.from, linkPosition);
+					auto rangeTo = qMin(selection.to, blockPosition);
+					if (rangeTo > rangeFrom) { // handle click handler
+						const auto r = base::StringViewMid(
+							_text,
+							rangeFrom,
+							rangeTo - rangeFrom);
+						// Ignore links that are partially copied.
+						const auto handler = (linkPosition != rangeFrom
+							|| blockPosition != rangeTo
+							|| !_extended)
+							? nullptr
+							: _extended->links[linkIndex - 1];
+						const auto type = handler
+							? handler->getTextEntity().type
+							: EntityType::Invalid;
+						clickHandlerFinishCallback(r, handler, type);
+					}
+				}
+				linkIndex = blockLinkIndex;
+				if (linkIndex) {
+					linkPosition = blockPosition;
+					const auto handler = _extended
+						? _extended->links[linkIndex - 1]
+						: nullptr;
+					clickHandlerStartCallback(handler
+						? handler->getTextEntity().type
+						: EntityType::Invalid);
+				}
+			}
+
+			const auto checkBlockFlags = (blockPosition >= selection.from)
+				&& (blockPosition <= selection.to);
+			if (checkBlockFlags
+				&& (blockFlags != flags
+					|| ((flags & TextBlockFlag::Pre)
+						&& blockQuoteIndex != quoteIndex))) {
+				flagsChangeCallback(
+					flags,
+					quoteIndex,
+					blockFlags,
+					blockQuoteIndex);
+				flags = blockFlags;
+			}
+			quoteIndex = blockQuoteIndex;
+			if (i == e
+				|| (linkIndex ? linkPosition : blockPosition) >= selection.to) {
+				break;
+			}
+
+			const auto blockType = (*i)->type();
+			if (blockType == TextBlockType::Skip) {
+				continue;
+			}
+
+			auto rangeFrom = qMax(selection.from, blockPosition);
+			auto rangeTo = qMin(
+				selection.to,
+				uint16(blockPosition + blockLength(i)));
+			if (rangeTo > rangeFrom) {
+				const auto customEmojiData = (blockType == TextBlockType::CustomEmoji)
+					? static_cast<const CustomEmojiBlock*>(i->get())->custom()->entityData()
+					: QString();
+				appendPartCallback(
+					base::StringViewMid(_text, rangeFrom, rangeTo - rangeFrom),
+					customEmojiData);
+			}
+		}
+	}
+
 } // namespace text
