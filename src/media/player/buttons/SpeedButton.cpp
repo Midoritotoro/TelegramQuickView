@@ -1,6 +1,6 @@
 #include "SpeedButton.h"
 
-#include "../../../core/StyleCore.h"
+#include "../../../ui/style/StyleCore.h"
 
 #include <QDir>
 #include <QCoreApplication>

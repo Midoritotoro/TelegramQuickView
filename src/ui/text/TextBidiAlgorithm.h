@@ -998,9 +998,7 @@ namespace text {
 				++next;
 			}
 			const auto type = (*_currentBlock)->type();
-			const auto object = (type == TextBlockType::Emoji)
-				|| (type == TextBlockType::CustomEmoji)
-				|| (type == TextBlockType::Skip);
+			const auto object = (type == TextBlockType::Skip);
 
 			constexpr auto kQt5 = (QT_VERSION < QT_VERSION_CHECK(6, 0, 0));
 			using wide = std::conditional_t<kQt5, uint, char32_t>;

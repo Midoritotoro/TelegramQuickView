@@ -79,6 +79,8 @@ namespace text {
 
 	static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };
 
+	class EntityInText;
+	using EntitiesInText = QVector<EntityInText>;
 
 	struct TextWithEntities {
 		QString text;
@@ -87,12 +89,12 @@ namespace text {
 		[[nodiscard]] bool empty() const;
 		void reserve(int size, int entitiesCount = 0);
 
-		[[nodiscard]] TextWithEntities& append(TextWithEntities&& other);
-		[[nodiscard]] TextWithEntities& append(const TextWithEntities& other);
+		TextWithEntities& append(TextWithEntities&& other);
+		TextWithEntities& append(const TextWithEntities& other);
 
-		[[nodiscard]] TextWithEntities& append(const QString& other);
-		[[nodiscard]] TextWithEntities& append(QLatin1String other);
-		[[nodiscard]] TextWithEntities& append(QChar other);
+		TextWithEntities& append(const QString& other);
+		TextWithEntities& append(QLatin1String other);
+		TextWithEntities& append(QChar other);
 
 		[[nodiscard]] static TextWithEntities Simple(const QString& simple);
 
@@ -147,7 +149,9 @@ namespace text {
 		void shiftRight(int shift);
 
 		void updateTextEnd(int textEnd);
-		explicit operator bool() const;
+		explicit operator bool() const {
+			return type() != EntityType::Invalid;
+		}
 	private:
 		EntityType _type = EntityType::Invalid;
 

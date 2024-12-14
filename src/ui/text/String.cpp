@@ -1,9 +1,53 @@
 #include "String.h"
-#include "../BasicClickHandlers.h"
+
+#include "WordParser.h"
+#include "BlockParser.h"
+
+#include "TextClickHandlers.h"
 
 
 namespace text {
-	inline constexpr auto kQuoteCollapsedLines = 3;
+	namespace {
+		inline constexpr auto kQuoteCollapsedLines = 3;
+
+		GeometryDescriptor SimpleGeometry(
+			int availableWidth,
+			int elisionLines,
+			int elisionRemoveFromEnd,
+			bool elisionBreakEverywhere) {
+			constexpr auto wrap = [](
+				Fn<LineGeometry(int line)> layout,
+				bool breakEverywhere = false) {
+					return GeometryDescriptor{ std::move(layout), breakEverywhere };
+				};
+
+			// Try to minimize captured values (to minimize Fn allocations).
+			if (!elisionLines) {
+				return wrap([=](int line) {
+					return LineGeometry{ .width = availableWidth };
+					});
+			}
+			else if (!elisionRemoveFromEnd) {
+				return wrap([=](int line) {
+					return LineGeometry{
+						.width = availableWidth,
+						.elided = (line + 1 >= elisionLines),
+					};
+					}, elisionBreakEverywhere);
+			}
+			else {
+				return wrap([=](int line) {
+					const auto elided = (line + 1 >= elisionLines);
+					const auto removeFromEnd = (elided ? elisionRemoveFromEnd : 0);
+					return LineGeometry{
+						.width = availableWidth - removeFromEnd,
+						.elided = elided,
+					};
+					}, elisionBreakEverywhere);
+			}
+		};
+
+	} // namespace 
 
 	String::String(
 		const style::font& font,
@@ -220,8 +264,8 @@ namespace text {
 		int32 width,
 		int32 yFrom,
 		int32 yTo,
-		TextSelection selection = { 0, 0 },
-		bool fullWidthSelection = true) const 
+		TextSelection selection,
+		bool fullWidthSelection) const 
 	{
 		painter.drawText(QRect(left, top, width, yFrom - yTo), _text);
 	}
@@ -625,7 +669,7 @@ namespace text {
 				? Qt::RightToLeft
 				: Qt::LeftToRight;
 			_endsWithQuoteOrOtherDirection
-				= (lastLineDirection != Qt::LeftToRight());
+				= (lastLineDirection != Qt::LeftToRight);
 		}
 	}
 
@@ -876,7 +920,7 @@ namespace text {
 
 	const QString& String::quoteHeaderText(QuoteDetails* quote) const {
 		static const auto kEmptyHeader = QString();
-		static const auto kDefaultHeader = "Copy";
+		static const auto kDefaultHeader = QString("Copy");
 		return (!quote || !quote->pre)
 			? kEmptyHeader
 			: quote->language.isEmpty()
@@ -934,7 +978,7 @@ namespace text {
 					auto rangeFrom = qMax(selection.from, linkPosition);
 					auto rangeTo = qMin(selection.to, blockPosition);
 					if (rangeTo > rangeFrom) { // handle click handler
-						const auto r = base::StringViewMid(
+						const auto r = StringViewMid(
 							_text,
 							rangeFrom,
 							rangeTo - rangeFrom);
@@ -990,14 +1034,6 @@ namespace text {
 			auto rangeTo = qMin(
 				selection.to,
 				uint16(blockPosition + blockLength(i)));
-			if (rangeTo > rangeFrom) {
-				const auto customEmojiData = (blockType == TextBlockType::CustomEmoji)
-					? static_cast<const CustomEmojiBlock*>(i->get())->custom()->entityData()
-					: QString();
-				appendPartCallback(
-					base::StringViewMid(_text, rangeFrom, rangeTo - rangeFrom),
-					customEmojiData);
-			}
 		}
 	}
 
@@ -1052,7 +1088,6 @@ namespace text {
 			};
 		const auto initNextParagraph = [&](int16 paragraphIndex) {
 			if (qindex != paragraphIndex) {
-				//top += qpadding.bottom(); // This was done before callback().
 				qindex = paragraphIndex;
 				quote = quoteByIndex(qindex);
 				qpadding = quotePadding(quote);
@@ -1087,13 +1122,13 @@ namespace text {
 					--qlinesleft;
 				}
 				if (!hidden) {
-					callback(lineLeft + lineWidth - widthLeft, top += lineHeight);
+					callback(lineLeft + lineWidth - widthLeft.toInt(), top += lineHeight);
 				}
 				if (lineElided) {
 					return withElided(true);
 				}
 
-				last_rBearing = 0;// b->f_rbearing(); (0 for newline)
+				last_rBearing = 0;
 				last_rPadding = w->f_rpadding();
 
 				initNextParagraph(index);
@@ -1138,7 +1173,7 @@ namespace text {
 			if (qlinesleft > 0) {
 				--qlinesleft;
 			}
-			callback(lineLeft + lineWidth - widthLeft, top += lineHeight);
+			callback(lineLeft + lineWidth - widthLeft.toInt(), top += lineHeight);
 			if (lineElided) {
 				return withElided(true);
 			}
@@ -1160,7 +1195,7 @@ namespace text {
 				? _blocks.back().unsafe<SkipBlock>().height()
 				: lineHeight;
 			callback(
-				lineLeft + lineWidth - widthLeft,
+				lineLeft + lineWidth - widthLeft.toInt(),
 				top + useLineHeight + qpadding.bottom());
 		}
 		return withElided(false);

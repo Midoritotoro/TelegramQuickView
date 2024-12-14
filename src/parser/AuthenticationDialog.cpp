@@ -1,6 +1,6 @@
 ﻿#include "AuthenticationDialog.h"
 
-#include "../core/StyleCore.h"
+#include "../ui/style/StyleCore.h"
 
 #include <QFontMetrics>
 #include <QApplication>

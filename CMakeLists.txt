@@ -62,7 +62,7 @@ SET(MAIN_SOURCES main.cpp
     src/ui/text/String.cpp
     src/ui/text/String.h
 
-    src/ui/text/TextTypes.h
+    src/ui/text/Types.h
 
     src/core/Flags.h
 

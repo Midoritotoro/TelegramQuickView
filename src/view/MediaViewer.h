@@ -4,6 +4,9 @@
 #include "History.h"
 
 #include "../core/Types.h"
+#include "../ui/WidgetsHider.h"
+
+#include "../media/player/MediaPlayer.h"
 #include <QWidget>
 
 #include <QGridLayout>
@@ -11,9 +14,6 @@
 
 class FlatButton;
 class TextView;
-
-class WidgetsHider;
-class MediaPlayer;
 
 
 class MediaViewer : public QWidget {

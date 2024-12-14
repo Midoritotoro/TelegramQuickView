@@ -2,16 +2,11 @@
 
 #include "../ui/WidgetsHider.h"
 
-#include "../core/StyleCore.h"
+#include "../ui/style/StyleCore.h"
 #include "../core/Time.h"
-
-#include "../core/MouseDetector.h"
-#include "../parser/TelegramParser.h"
 
 #include "MessageAttachment.h"
 #include "History.h"
-
-#include "MediaViewer.h"
 
 #include <QShowEvent>
 #include <QElapsedTimer>

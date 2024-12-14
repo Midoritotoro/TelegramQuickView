@@ -6,7 +6,7 @@
 #include <QPainter>
 
 #include "../../core/Time.h"
-#include "../../core/StyleCore.h"
+#include "../../ui/style/StyleCore.h"
 
 
 ScrollArea::ScrollArea(QWidget* parent):

@@ -17,7 +17,7 @@
 #include <QScreen>
 
 #include "../../core/Time.h"
-#include "../../core/StyleCore.h"
+#include "../../ui/style/StyleCore.h"
 
 
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :

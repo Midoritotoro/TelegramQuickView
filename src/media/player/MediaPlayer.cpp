@@ -10,7 +10,7 @@
 #include <QAudio>
 #include <QMetaObject>
 
-#include "../../core/StyleCore.h"
+#include "../../ui/style/StyleCore.h"
 
 
 namespace {

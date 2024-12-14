@@ -1,5 +1,6 @@
 #include "BlockParser.h"
 
+#include "String.h"
 #include <QUrl>
 #include <private/qfixed_p.h>
 
@@ -7,6 +8,7 @@
 #include <algorithm>
 
 #include "../BasicClickHandlers.h"
+#include "TextClickHandlers.h"
 
 namespace text {
 	namespace {
@@ -35,19 +37,21 @@ namespace text {
 
 		std::shared_ptr<ClickHandler> createLinkHandler(const EntityLinkData& data) {
 			switch (data.type) {
-			case EntityType::Url:
-				return (!data.data.isEmpty()
-					&& UrlClickHandler::IsSuspicious(data.data))
-					? std::make_shared<HiddenUrlClickHandler>(data.data)
-					: details::createLinkHandler(data);
+				case EntityType::Url:
+					return (!data.data.isEmpty()
+						&& UrlClickHandler::IsSuspicious(data.data))
+						? std::make_shared<HiddenUrlClickHandler>(data.data)
+						: details::createLinkHandler(data);
 
-			case EntityType::CustomUrl:
-				return !data.data.isEmpty()
-					? std::make_shared<HiddenUrlClickHandler>(data.data)
-					: details::createLinkHandler(data);
-				return details::createLinkHandler(data);
+				case EntityType::CustomUrl:
+					return !data.data.isEmpty()
+						? std::make_shared<HiddenUrlClickHandler>(data.data)
+						: details::createLinkHandler(data);
+					return details::createLinkHandler(data);
 			}
+			return nullptr;
 		}
+	
 
 		[[nodiscard]] TextWithEntities PrepareRichFromRich(
 			const TextWithEntities& text,
@@ -139,7 +143,7 @@ namespace text {
 
 	std::optional<TextBlockFlags> BlockParser::StartedEntity::flags() const {
 		if (_value < int(kStringLinkIndexShift) && (_type == Type::Flags)) {
-			return TextBlockFlags(static_cast<uint16>(_value));
+			return TextBlockFlags::fromRaw(uint16(_value));
 		}
 		return std::nullopt;
 	}
@@ -280,10 +284,7 @@ namespace text {
 			_startedEntities.erase(_startedEntities.begin());
 
 			while (!list.empty()) {
-				if (list.back().type() == StartedEntity::Type::CustomEmoji) {
-					createBlock();
-				}
-				else if (const auto flags = list.back().flags()) {
+				if (const auto flags = list.back().flags()) {
 					if (_flags & (*flags)) {
 						createBlock();
 						_flags &= ~(*flags);
@@ -572,7 +573,7 @@ namespace text {
 			}
 			else {
 				if (_flags & TextBlockFlag::Tilde) {
-					_flags &= ~((int)TextBlockFlag::Tilde);
+					_flags &= ~TextBlockFlag::Tilde;
 				}
 			}
 			if (isNewLine) {

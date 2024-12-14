@@ -1,18 +1,12 @@
 #pragma once 
 
-
-#include "../../core/Types.h"
-#include "TextClickHandlers.h"
+#include "../BasicClickHandlers.h"
 
 #include "TextEntities.h"
 #include "../../core/CoreUtility.h"
 
 #include "TextUtility.h"
 #include "TextBlock.h"
-
-#include "WordParser.h"
-#include "TextWord.h"
-#include "BlockParser.h"
 
 #include "../style/StyleFont.h"
 
@@ -22,8 +16,17 @@
 #include <xutility>
 #include <private/qfixed_p.h>
 
+#include "Types.h"
+
 
 namespace text {
+	class WordParser;
+	class TextWord;
+	class BlockParser;
+	class BidiAlgorithm;
+	class PreClickHandler;
+	class BlockquoteClickHandler;
+
 	struct LineGeometry {
 		int left = 0;
 		int width = 0;
@@ -69,13 +72,6 @@ namespace text {
 		std::vector<ClickHandlerPtr> links;
 		std::unique_ptr<QuotesData> quotes;
 		std::vector<Modification> modifications;
-	};
-
-	struct TextParseOptions {
-		int32 flags;
-		int32 maxw;
-		int32 maxh;
-		Qt::LayoutDirection dir;
 	};
 
 	enum {
@@ -129,6 +125,7 @@ namespace text {
 			int reserve = 0;
 		};
 
+		String() = default;
 		String(String&& other) = default;
 		String(
 			const style::font& font,
@@ -321,5 +318,6 @@ namespace text {
 		friend class BlockParser;
 		friend class WordParser;
 		friend class StackEngine;
+		friend class BidiAlgorithm;
 	};
 } // namespace text

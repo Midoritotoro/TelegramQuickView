@@ -34,9 +34,6 @@ bool ClickHandler::setActive(
 		return false;
 	}
 
-	// emit clickHandlerActiveChanged only when there is no
-	// other pressed click handler currently, if there is
-	// this method will be called when it is unpressed
 	if (active) {
 		const auto emitClickHandlerActiveChanged = false
 			|| !pressed
@@ -98,9 +95,6 @@ ClickHandlerPtr ClickHandler::unpressed() {
 			return active;
 		}
 		else if (active && _activeHost) {
-			// emit clickHandlerActiveChanged for current active
-			// click handler, which we didn't emit while we has
-			// a pressed click handler
 			_activeHost->clickHandlerActiveChanged(active, true);
 		}
 	}
@@ -144,7 +138,7 @@ void ClickHandler::hostDestroyed(ClickHandlerHost* host) {
 }
 
 auto ClickHandler::getTextEntity() const -> TextEntity {
-	return { text::EntityType::Invalid };
+	return { TextEntity() };
 }
 
 void ActivateClickHandler(

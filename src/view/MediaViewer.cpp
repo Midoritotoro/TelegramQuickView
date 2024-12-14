@@ -3,7 +3,6 @@
 #include "../ui/widgets/FlatButton.h"
 #include "../ui/WidgetsHider.h"
 
-#include "../media/player/MediaPlayer.h"
 #include "Message.h"
 
 #include "TextView.h"

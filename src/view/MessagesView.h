@@ -7,12 +7,10 @@
 #include <memory>
 
 #include "../ui/widgets/ContinuousScroll.h"
+#include "MediaViewer.h"
 
-
-class TelegramParser;
-
-class MediaViewer;
-class MouseDetector;
+#include "../core/MouseDetector.h"
+#include "../parser/TelegramParser.h"
 
 
 class MessagesView: public QWidget {

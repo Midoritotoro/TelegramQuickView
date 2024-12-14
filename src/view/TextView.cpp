@@ -6,7 +6,7 @@
 #include <QScreen>
 #include <QPainter>
 
-#include "../core/StyleCore.h"
+#include "../ui/style/StyleCore.h"
 
 
 TextView::TextView(QWidget* parent):

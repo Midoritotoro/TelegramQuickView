@@ -9,6 +9,7 @@
 #include <private/qfixed_p.h>
 
 
+
 namespace text {
 	enum class TextBlockType : uint16 {
 		Newline = 0x01,
@@ -31,11 +32,15 @@ namespace text {
 		Blockquote = 0x200
 	};
 
+	inline constexpr bool is_flag_type(TextBlockFlag) {
+		return true;
+	}
+
 	DECLARE_FLAGS(TextBlockFlags, TextBlockFlag)
 
-	inline constexpr bool is_flag_type(TextBlockFlag) { 
-		return true; 
-	}
+	class Block;
+	using Blocks = std::vector<Block>;
+
 
 	[[nodiscard]] style::font WithFlags(
 		const style::font& font,

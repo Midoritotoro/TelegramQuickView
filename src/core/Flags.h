@@ -327,7 +327,7 @@ namespace core {
 
 	template <typename Enum,
 		typename = std::enable_if_t<std::is_enum<Enum>::value>,
-		typename = std::enable_if_t < is_flag_type(Enum{}) >>
+		typename = std::enable_if_t<is_flag_type(Enum{}) >>
 		inline constexpr auto operator|(Enum a, Enum b) noexcept 
 	{
 		return makeFlags(a) | b;

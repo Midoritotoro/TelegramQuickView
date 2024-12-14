@@ -8,6 +8,8 @@
 
 #include "StyleTypes.h"
 
+#include <QMap>
+
 
 namespace style {
 	enum class FontFlag : uchar {
@@ -18,6 +20,10 @@ namespace style {
 		Semibold = 0x10,
 		Monospace = 0x20,
 	};
+
+	inline constexpr bool is_flag_type(FontFlag) { 
+		return true;
+	}
 
 	DECLARE_FLAGS(FontFlags, FontFlag)
 
@@ -36,7 +42,7 @@ namespace style {
 		FontFlags requestedFlags;
 	};
 
-	void SetFont(const QFont& font);
+	void SetFont(const QString& font);
 
 	[[nodiscard]] const FontResolveResult* FindAdjustResult(const QFont& font);
 

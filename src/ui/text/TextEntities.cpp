@@ -171,10 +171,6 @@ namespace text {
 		}
 	}
 
-	explicit EntityInText::operator bool() const {
-		return type() != EntityType::Invalid;
-	}
-
 	int EntityInText::FirstMonospaceOffset(
 		const EntitiesInText& entities,
 		int textLength) {

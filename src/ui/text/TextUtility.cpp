@@ -1,6 +1,10 @@
 #include "TextUtility.h"
 
 #include "../../core/CoreUtility.h"
+#include <QIODevice>
+
+#include <QRegularExpression>
+#include <ranges>
 
 
 Qt::LayoutDirection text::Direction(
@@ -121,6 +125,37 @@ bool text::IsDiacritic(QChar ch) {
 		|| (ch.unicode() >= 64606 && ch.unicode() <= 64611);
 }
 
+bool text::IsMentionLink(QStringView link) {
+	return link.startsWith(kMentionTagStart);
+}
+
+bool text::IsSeparateTag(QStringView tag) {
+	return (tag == kTagCode)
+		|| (tag == kTagPre);
+}
+
+bool text::IsValidMarkdownLink(QStringView link) {
+	return (link.indexOf('.') >= 0) || (link.indexOf(':') >= 0);
+}
+
+QStringView text::StringViewMid(
+	QStringView view,
+	qsizetype pos,
+	qsizetype n) {
+	const auto result = details::ContainerImplHelper::mid(
+		view.size(),
+		&pos,
+		&n);
+	return (result == details::ContainerImplHelper::Null)
+		? QStringView()
+		: view.mid(pos, n);
+}
+
+QString text::MentionEntityData(QStringView link) {
+	const auto match = QRegularExpression("^(\\d+\\.\\d+:\\d+)(/|$)")
+		.match(StringViewMid(link, kMentionTagStart.size()));
+	return match.hasMatch() ? match.captured(1) : QString();
+}
 
 text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& tags) {
 	auto result = EntitiesInText();
@@ -129,7 +164,12 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 	}
 
 	constexpr auto kInMaskTypesInline = std::array{
-		EntityType::Code
+		EntityType::Bold,
+		EntityType::Italic,
+		EntityType::Underline,
+		EntityType::StrikeOut,
+		EntityType::Spoiler,
+		EntityType::Code,
 	};
 	constexpr auto kInMaskTypesBlock = std::array{
 		EntityType::Pre,
@@ -197,17 +237,12 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 	const auto processState = [&](State nextState) {
 		const auto linkChanged = (nextState.link != state.link);
 		const auto closeLink = linkChanged && !state.link.isEmpty();
-		const auto closeCustomEmoji = closeLink
-			&& Ui::InputField::IsCustomEmojiLink(state.link);
-		if (closeCustomEmoji) {
-			closeType(EntityType::CustomEmoji);
-		}
 		for (const auto type : kInMaskTypesInline) {
 			if (state.has(type) && !nextState.has(type)) {
 				closeType(type);
 			}
 		}
-		if (closeLink && !closeCustomEmoji) {
+		if (closeLink) {
 			if (IsMentionLink(state.link)) {
 				closeType(EntityType::MentionName);
 			}
@@ -222,9 +257,7 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 		}
 
 		const auto openLink = linkChanged && !nextState.link.isEmpty();
-		const auto openCustomEmoji = openLink
-			&& Ui::InputField::IsCustomEmojiLink(nextState.link);
-		for (const auto type : kInMaskTypesBlock | std::ranges::view::reverse) {
+		for (const auto type : kInMaskTypesBlock | std::ranges::views::reverse) {
 			if (nextState.has(type) && !state.has(type)) {
 				openType(type, (type == EntityType::Pre)
 					? nextState.language
@@ -233,7 +266,7 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 					: QString());
 			}
 		}
-		if (openLink && !openCustomEmoji) {
+		if (openLink) {
 			if (IsMentionLink(nextState.link)) {
 				const auto data = MentionEntityData(nextState.link);
 				if (!data.isEmpty()) {
@@ -244,66 +277,56 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 				openType(EntityType::CustomUrl, nextState.link);
 			}
 		}
-		for (const auto type : kInMaskTypesInline | ranges::views::reverse) {
+		for (const auto type : kInMaskTypesInline | std::ranges::views::reverse) {
 			if (nextState.has(type) && !state.has(type)) {
 				openType(type);
-			}
-		}
-		if (openCustomEmoji) {
-			const auto data = Ui::InputField::CustomEmojiEntityData(
-				nextState.link);
-			if (!data.isEmpty()) {
-				openType(EntityType::CustomEmoji, data);
 			}
 		}
 		state = nextState;
 		};
 	const auto stateForTag = [&](const QString& tag) {
-		using Tags = Ui::InputField;
 		auto result = State();
-		const auto list = SplitTags(tag);
-		const auto languageStart = Tags::kTagPre.size();
+		const auto list = tag.split(kTagSeparator);
+		const auto languageStart = kTagPre.size();
 		for (const auto& single : list) {
-			if (single == Tags::kTagBold) {
+			if (single == kTagBold) {
 				result.set(EntityType::Bold);
 			}
-			else if (single == Tags::kTagItalic) {
+			else if (single == kTagItalic) {
 				result.set(EntityType::Italic);
 			}
-			else if (single == Tags::kTagUnderline) {
+			else if (single == kTagUnderline) {
 				result.set(EntityType::Underline);
 			}
-			else if (single == Tags::kTagStrikeOut) {
+			else if (single == kTagStrikeOut) {
 				result.set(EntityType::StrikeOut);
 			}
-			else if (single == Tags::kTagCode) {
+			else if (single == kTagCode) {
 				result.set(EntityType::Code);
 			}
-			else if (single == Tags::kTagPre) {
+			else if (single == kTagPre) {
 				result.set(EntityType::Pre);
 			}
 			else if (single.size() > languageStart
-				&& single.startsWith(Tags::kTagPre)) {
+				&& single.startsWith(kTagPre)) {
 				result.set(EntityType::Pre);
-				result.language = single.mid(languageStart).toString();
+				result.language = single.mid(languageStart);
 			}
-			else if (single == Tags::kTagBlockquote) {
+			else if (single == kTagBlockquote) {
 				result.set(EntityType::Blockquote);
 				result.collapsed = 0;
 			}
-			else if (single == Tags::kTagBlockquoteCollapsed) {
+			else if (single == kTagBlockquoteCollapsed) {
 				result.set(EntityType::Blockquote);
 				result.collapsed = 1;
 			}
-			else if (single == Tags::kTagSpoiler) {
-				result.set(EntityType::Spoiler);
-			}
 			else {
-				result.link = single.toString();
+				result.link = single;
 			}
 		}
 		return result;
 		};
+	
 	for (const auto& tag : tags) {
 		if (tag.offset > offset) {
 			processState(State());
@@ -314,14 +337,89 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 	}
 	processState(State());
 
-	result.erase(ranges::remove_if(result, [](const EntityInText& entity) {
+	result.erase(std::ranges::find_if(result, [](const EntityInText& entity) {
 		return (entity.length() <= 0);
 		}), result.end());
 
 	return result;
 }
 
-TextWithTags::Tags text::ConvertEntitiesToTextTags(
+QString text::ExpandCustomLinks(const TextWithTags& text) {
+	const auto entities = ConvertTextTagsToEntities(text.tags);
+	auto&& urls = std::ranges::subrange(
+		entities.begin(),
+		entities.end()
+	) | std::ranges::views::filter([](const EntityInText& entity) {
+		return entity.type() == EntityType::CustomUrl;
+		});
+	const auto& original = text.text;
+	if (urls.begin() == urls.end()) {
+		return original;
+	}
+	auto result = QString();
+	auto offset = 0;
+	for (const auto& entity : urls) {
+		const auto till = entity.offset() + entity.length();
+		if (till > offset) {
+			result.append(StringViewMid(original, offset, till - offset));
+		}
+		result.append(QLatin1String(" (")).append(entity.data()).append(')');
+		offset = till;
+	}
+	if (original.size() > offset) {
+		result.append(StringViewMid(original, offset));
+	}
+	return result;
+}
+
+QString text::JoinTag(const QList<QStringView>& list) {
+	if (list.isEmpty()) {
+		return QString();
+	}
+	auto length = (list.size() - 1);
+	for (const auto& entry : list) {
+		length += entry.size();
+	}
+	auto result = QString();
+	result.reserve(length);
+	result.append(list.front());
+	for (auto i = 1, count = int(list.size()); i != count; ++i) {
+		if (!IsSeparateTag(list[i])) {
+			result.append(kTagSeparator).append(list[i]);
+		}
+	}
+	return result;
+}
+
+QList<QStringView> text::SplitTags(QStringView tag) {
+	return tag.split(kTagSeparator);
+}
+
+QString text::TagWithRemoved(const QString& tag, const QString& removed) {
+	if (tag == removed) {
+		return QString();
+	}
+	auto list = SplitTags(tag);
+	list.erase(std::ranges::find(list, QStringView(removed)), list.end());
+	return JoinTag(list);
+}
+
+QString text::TagWithAdded(const QString& tag, const QString& added) {
+	if (tag.isEmpty() || tag == added) {
+		return added;
+	}
+	auto list = SplitTags(tag);
+	const auto ref = QStringView(added);
+	if (list.contains(ref)) {
+		return tag;
+	}
+	list.push_back(ref);
+	std::sort(list.begin(), list.end());
+	return JoinTag(list);
+}
+
+
+text::TextWithTags::Tags text::ConvertEntitiesToTextTags(
 	const EntitiesInText& entities) {
 	auto result = TextWithTags::Tags();
 	if (entities.isEmpty()) {
@@ -356,7 +454,7 @@ TextWithTags::Tags text::ConvertEntitiesToTextTags(
 			removeTill(entity.offset());
 			updateCurrent(entity.offset(), TagWithAdded(current, tag));
 			toRemove.push_back({ offset + entity.length(), tag });
-			ranges::sort(toRemove);
+			std::ranges::sort(toRemove);
 			};
 		switch (entity.type()) {
 		case EntityType::MentionName: {
@@ -370,46 +468,35 @@ TextWithTags::Tags text::ConvertEntitiesToTextTags(
 		} break;
 		case EntityType::CustomUrl: {
 			const auto url = entity.data();
-			if (Ui::InputField::IsValidMarkdownLink(url)
+			if (IsValidMarkdownLink(url)
 				&& !IsMentionLink(url)) {
 				push(url);
 			}
 		} break;
-		case EntityType::CustomEmoji: {
-			static const auto RegExp = QRegularExpression("^(\\d+)$");
-			const auto match = RegExp.match(entity.data());
-			if (match.hasMatch()) {
-				push(Ui::InputField::CustomEmojiLink(entity.data()));
-			}
-		} break;
-		case EntityType::Bold: push(Ui::InputField::kTagBold); break;
-			//case EntityType::Semibold: // Semibold is for UI parts only.
-			//	push(Ui::InputField::kTagSemibold);
-			//	break;
-		case EntityType::Italic: push(Ui::InputField::kTagItalic); break;
+		case EntityType::Bold: push(kTagBold); break;
+		case EntityType::Italic: push(kTagItalic); break;
 		case EntityType::Underline:
-			push(Ui::InputField::kTagUnderline);
+			push(kTagUnderline);
 			break;
 		case EntityType::StrikeOut:
-			push(Ui::InputField::kTagStrikeOut);
+			push(kTagStrikeOut);
 			break;
-		case EntityType::Code: push(Ui::InputField::kTagCode); break;
+		case EntityType::Code: push(kTagCode); break;
 		case EntityType::Pre: {
 			if (!entity.data().isEmpty()) {
 				static const auto Language = QRegularExpression("^[a-zA-Z0-9\\-\\+]+$");
 				if (Language.match(entity.data()).hasMatch()) {
-					push(Ui::InputField::kTagPre + entity.data());
+					push(kTagPre + entity.data());
 					break;
 				}
 			}
-			push(Ui::InputField::kTagPre);
+			push(kTagPre);
 		} break;
 		case EntityType::Blockquote:
 			push(entity.data().isEmpty()
-				? Ui::InputField::kTagBlockquote
-				: Ui::InputField::kTagBlockquoteCollapsed);
+				? kTagBlockquote
+				: kTagBlockquoteCollapsed);
 			break;
-		case EntityType::Spoiler: push(Ui::InputField::kTagSpoiler); break;
 		}
 	}
 	if (!toRemove.empty()) {
@@ -418,10 +505,34 @@ TextWithTags::Tags text::ConvertEntitiesToTextTags(
 	return result;
 }
 
+QByteArray text::SerializeTags(const TextWithTags::Tags& tags) {
+	if (tags.isEmpty()) {
+		return QByteArray();
+	}
+
+	QByteArray tagsSerialized;
+	{
+		QDataStream stream(&tagsSerialized, QIODevice::WriteOnly);
+		stream.setVersion(QDataStream::Qt_5_1);
+		stream << qint32(tags.size());
+		for (const auto& tag : tags) {
+			stream << qint32(tag.offset) << qint32(tag.length) << tag.id;
+		}
+	}
+	return tagsSerialized;
+}
+
+QString text::TagsMimeType() {
+	return QString::fromLatin1("application/x-td-field-tags");
+}
+
+QString text::TagsTextMimeType() {
+	return QString::fromLatin1("application/x-td-field-text");
+}
+
 std::unique_ptr<QMimeData> text::MimeDataFromText(
 	TextWithTags&& text,
-	const QString& expanded) 
-{
+	const QString& expanded) {
 	if (expanded.isEmpty()) {
 		return nullptr;
 	}
@@ -429,15 +540,13 @@ std::unique_ptr<QMimeData> text::MimeDataFromText(
 	auto result = std::make_unique<QMimeData>();
 	result->setText(expanded);
 	if (!text.tags.isEmpty()) {
-		for (auto& tag : text.tags) {
-			tag.id = tag.id;
-		}
+		// ...
 		result->setData(
-			text::TagsTextMimeType(),
+			TagsTextMimeType(),
 			text.text.toUtf8());
 		result->setData(
-			text::TagsMimeType(),
-			text::SerializeTags(text.tags));
+			TagsMimeType(),
+			SerializeTags(text.tags));
 	}
 	return result;
 }
@@ -451,4 +560,13 @@ std::unique_ptr<QMimeData> text::MimeDataFromText(const TextForMimeData& text) {
 std::unique_ptr<QMimeData> text::MimeDataFromText(TextWithTags&& text) {
 	const auto expanded = ExpandCustomLinks(text);
 	return MimeDataFromText(std::move(text), expanded);
+}
+
+void text::SetClipboardText(
+	const TextForMimeData& text,
+	QClipboard::Mode mode) 
+{
+	if (auto data = MimeDataFromText(text)) {
+		QGuiApplication::clipboard()->setMimeData(data.release(), mode);
+	}
 }

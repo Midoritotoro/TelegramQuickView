@@ -4,10 +4,19 @@
 #include <utility>
 #include <xutility>
 
+#include <variant>
+
 #include <vector>
 #include <QGuiApplication>
 
 #include <cfenv>
+#include <algorithm>
+
+#include <ranges>
+#include <gsl/gsl>
+
+
+using namespace std::ranges;
 
 
 namespace core::utility {
@@ -48,7 +57,7 @@ namespace core::utility {
 		if (const auto result = std::round(value); !std::isnan(result)) {
 			return result;
 		}
+
+		return value;
 	}
-
-
 } // namespace core::utility

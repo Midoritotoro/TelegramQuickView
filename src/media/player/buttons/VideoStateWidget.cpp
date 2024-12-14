@@ -1,6 +1,6 @@
 #include "VideoStateWidget.h"
 
-#include "../../../core/StyleCore.h"
+#include "../../../ui/style/StyleCore.h"
 
 #include <QPainter>
 #include <QCoreApplication>

@@ -4,7 +4,7 @@
 #include <QMimeDatabase>
 #include <QPainter>
 
-#include "../core/StyleCore.h"
+#include "../ui/style/StyleCore.h"
 #include "../core/Time.h"
 
 #include <QPaintEvent>

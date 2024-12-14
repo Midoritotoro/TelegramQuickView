@@ -6,12 +6,14 @@
 #include <QFontInfo>
 #include <QFontDatabase>
 
+#include <map>
+
 #include "../../core/Types.h"
 #include "../../core/CoreUtility.h"
 
 
 void style_InitFontsResource() {
-	Q_INIT_RESOURCE(win);
+	// Q_INIT_RESOURCE(win);
 }
 
 namespace style {
@@ -20,6 +22,10 @@ namespace style {
 		QString Custom;
 
 	} // namespace
+
+	void SetFont(const QString& font) {
+		Custom = font;
+	}
 
 	const QString& SystemFontTag() {
 		static const auto result = u"(system)"_q + QChar(0);
@@ -48,10 +54,10 @@ namespace style {
 
 			bool Started = false;
 
-			std::map<QString, int> FontFamilyIndices;
-			std::vector<QString> FontFamilies;
-			std::map<uint32, std::unique_ptr<ResolvedFont>> FontsByKey;
-			std::map<uint64, uint32> QtFontsKeys;
+			QMap<QString, int> FontFamilyIndices;
+			QVector<QString> FontFamilies;
+			QMap<uint32, std::unique_ptr<ResolvedFont>> FontsByKey;
+			QMap<uint64, uint32> QtFontsKeys;
 
 			[[nodiscard]] uint32 FontKey(int size, FontFlags flags, int family) {
 				return (uint32(family) << 18)
@@ -338,10 +344,10 @@ namespace style {
 		int RegisterFontFamily(const QString& family) {
 			auto i = FontFamilyIndices.find(family);
 			if (i == end(FontFamilyIndices)) {
-				i = FontFamilyIndices.emplace(family, FontFamilies.size()).first;
+				i = FontFamilyIndices.insert(family, FontFamilies.size());
 				FontFamilies.push_back(family);
 			}
-			return i->second;
+			return i.value();
 		}
 
 		FontData::FontData(const FontResolveResult& result, FontVariants* modified)
@@ -426,17 +432,17 @@ namespace style {
 			const auto key = FontKey(size, flags, family);
 			auto i = FontsByKey.find(key);
 			if (i == end(FontsByKey)) {
-				i = FontsByKey.emplace(
+				i = FontsByKey.insert(
 					key,
 					std::make_unique<ResolvedFont>(
 						ResolveFont(
 							family ? FontFamilies[family] : Custom,
 							flags,
 							size),
-						modified)).first;
-				QtFontsKeys.emplace(QtFontKey(i->second->data.f), key);
+						modified));
+				QtFontsKeys.insert(QtFontKey(i.value()->data.f), key);
 			}
-			_data = &i->second->data;
+			_data = &i.value()->data;
 		}
 
 		OwnedFont::OwnedFont(const QString& custom, FontFlags flags, int size)
@@ -450,7 +456,7 @@ namespace style {
 		const auto key = internal::QtFontKey(font);
 		const auto i = internal::QtFontsKeys.find(key);
 		return (i != end(internal::QtFontsKeys))
-			? &internal::FontsByKey[i->second]->result
+			? &internal::FontsByKey[i.value()]->result
 			: nullptr;
 	}
 

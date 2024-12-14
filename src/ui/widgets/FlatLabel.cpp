@@ -29,12 +29,12 @@ QSize FlatLabel::sizeHint() const {
 }
 
 void FlatLabel::setText(const QString& text) {
-	_text = text;
+	_text.setText(style::defaultTextStyle._font, text);
 	textUpdated();
 }
 
 QString FlatLabel::text() const noexcept {
-	return _text;
+	return _text.toString();
 }
 
 void FlatLabel::setSelectable(bool selectable) {

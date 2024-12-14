@@ -4,6 +4,8 @@
 #include "TextEntities.h"
 
 #include "../style/StyleCore.h"
+#include "Types.h"
+
 
 #include <any>
 
