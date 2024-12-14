@@ -16,6 +16,7 @@
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)
 	, ClickHandlerHost()
+	, _text(text::kQFixedMax)
 {
 	setSelectable(true);
 	setMouseTracking(true);
@@ -29,8 +30,7 @@ QSize FlatLabel::sizeHint() const {
 }
 
 void FlatLabel::setText(const QString& text) {
-	static const style::TextStyle defaultTextStyle = style::TextStyle({ style::font(14, style::FontFlag::Semibold, 0)});
-	_text.setText(defaultTextStyle._font, text);
+	_text.setText(style::TextStyle()._font, text);
 	textUpdated();
 }
 
@@ -155,11 +155,8 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		? qMax(style::maximumTextHeight, lineHeight)
 		: height();
 
-	const auto _rect = QRect(
-		QPoint(textLeft, style::flatLabel::margins.top()),
-		QSize(textWidth, elisionHeight));
 
-	painter.fillRect(_rect, _backgroundColor);
+	painter.fillRect(QRect(0, 0, textWidth, elisionHeight), _backgroundColor);
 	_text.draw(painter, textLeft, style::flatLabel::margins.top(), textWidth);
 }
 

@@ -19,7 +19,74 @@
 #include "Types.h"
 
 
+
 namespace text {
+	inline constexpr auto kQFixedMax = (INT_MAX / 256);
+	inline constexpr auto kMaxQuoteOutlines = 3;
+
+	struct QuotePaintCache {
+		QImage corners;
+		QImage outline;
+		QImage expand;
+		QImage collapse;
+		mutable QImage bottomCorner;
+		mutable QImage bottomRounding;
+		mutable QImage collapsedLine;
+
+		std::array<QColor, kMaxQuoteOutlines> outlinesCached;
+		QColor headerCached;
+		QColor bgCached;
+		QColor iconCached;
+
+		std::array<QColor, kMaxQuoteOutlines> outlines;
+		QColor header;
+		QColor bg;
+		QColor icon;
+	};
+
+	struct SpecialColor {
+		const QPen* pen = nullptr;
+		const QPen* penSelected = nullptr;
+	};
+
+	struct HighlightInfoRequest {
+		TextSelection range;
+		QRect interpolateTo;
+		double interpolateProgress = 0.;
+		QPainterPath* outPath = nullptr;
+	};
+
+	struct PaintContext {
+		QPoint position;
+		int outerWidth = 0;
+		int availableWidth = 0;
+		GeometryDescriptor geometry;
+		Qt::Alignment align = Qt::AlignLeft;
+		QRect clip;
+
+		QuotePaintCache* pre = nullptr;
+		QuotePaintCache* blockquote = nullptr;
+		std::span<SpecialColor> colors;
+		Time::time now = 0;
+
+		bool paused = false;
+		bool pausedEmoji = false;
+		bool pausedSpoiler = false;
+
+		bool fullWidthSelection = true;
+		TextSelection selection;
+
+		HighlightInfoRequest* highlight = nullptr;
+
+		int elisionHeight = 0;
+		int elisionLines = 0;
+		int elisionRemoveFromEnd = 0;
+		bool elisionBreakEverywhere = false;
+
+		bool elisionMiddle = false;
+		bool useFullWidth = false; // !(width = min(availableWidth, maxWidth()))
+};
+
 	class WordParser;
 	class TextWord;
 	class BlockParser;
@@ -124,11 +191,11 @@ namespace text {
 			bool lineWidths = false;
 			int reserve = 0;
 		};
-
-		String() = default;
+		String(int32 minResizeWidth = kQFixedMax);
 		String(String&& other) = default;
+		String() = default;
 		String(
-			const style::font& font,
+			const style::TextStyle& font,
 			const QString& string);
 
 		String& operator=(String&& other) = default;
@@ -154,7 +221,7 @@ namespace text {
 			LineWidthsOptions options) const;
 
 		void setText(
-			const style::font& font,
+			const style::TextStyle& style,
 			const QString& text,
 			const TextParseOptions& options = kDefaultTextOptions);
 
@@ -215,6 +282,10 @@ namespace text {
 			Qt::LayoutDirection optionsDirection = Qt::LayoutDirectionAuto);
 
 		[[nodiscard]] const std::vector<Modification>& modifications() const;
+
+		const style::TextStyle* style() const noexcept {
+			return _st;
+		}
 	private:
 		class ExtendedWrap : public std::unique_ptr<ExtendedData> {
 		public:
@@ -299,8 +370,6 @@ namespace text {
 		Blocks _blocks;
 		Words _words;
 		ExtendedWrap _extended;
-
-		style::font _font;
 
 		int _minResizeWidth = 0;
 		int _maxWidth = 0;

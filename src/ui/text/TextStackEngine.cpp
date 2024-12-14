@@ -38,7 +38,7 @@ namespace text {
 		, _analysis(analysis.data())
 		, _offset(offset)
 		, _positionEnd(_offset + _text.size())
-		, _font(_t->_font)
+		, _font(_t->_st->_font)
 		, _engine(_text, _font->f)
 		, _tBlocks(_t->_blocks)
 		, _bStart(begin(_tBlocks) + blockIndexHint)
@@ -168,10 +168,10 @@ namespace text {
 
 	void StackEngine::updateFont(not_null<const AbstractBlock*> block) {
 		const auto flags = block->flags();
-		const auto newFont = WithFlags(_t->_font, flags);
+		const auto newFont = WithFlags(_t->_st->_font, flags);
 		if (_font != newFont) {
-			_font = (newFont->family() == _t->_font->family())
-				? WithFlags(_t->_font, flags, newFont->flags())
+			_font = (newFont->family() == _t->_st->_font->family())
+				? WithFlags(_t->_st->_font, flags, newFont->flags())
 				: newFont;
 			_engine.fnt = _font->f;
 			_engine.resetFontEngineCache();

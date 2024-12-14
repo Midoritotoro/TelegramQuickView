@@ -199,7 +199,7 @@ namespace style {
 		bool linkUnderLine = true;
 		QuoteStyle blockquote;
 
-		TextStyle(const font& fontStyle, const QuoteStyle& _quote = {}) :
+		TextStyle(const font& fontStyle = font(13, style::FontFlag::Semibold, 0), const QuoteStyle& _quote = {}) :
 			_font(fontStyle)
 			, blockquote(_quote)
 		{}

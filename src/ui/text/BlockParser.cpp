@@ -193,7 +193,7 @@ namespace text {
 		, _entitiesEnd(_source.entities.end())
 		, _waitingEntity(_source.entities.begin())
 		, _multiline(options.flags& TextParseMultiline)
-		, _checkTilde(ComputeCheckTilde(_t->_font)) {
+		, _checkTilde(ComputeCheckTilde(_t->_st->_font)) {
 		parse(options);
 	}
 
@@ -792,7 +792,7 @@ namespace text {
 		auto readable = good.isValid()
 			? good.toDisplayString()
 			: linkData;
-		*outLinkText = _t->_font->elided(readable, 360);
+		*outLinkText = _t->_st->_font->elided(readable, 360);
 		*outShown = (*outLinkText == readable)
 			? EntityLinkShown::Full
 			: EntityLinkShown::Partial;

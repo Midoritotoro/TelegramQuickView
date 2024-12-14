@@ -49,13 +49,16 @@ namespace text {
 
 	} // namespace 
 
+	String::String(int32 minResizeWidth)
+		: _minResizeWidth(minResizeWidth) {
+	}
+
 	String::String(
-		const style::font& font,
+		const style::TextStyle& style,
 		const QString& text
-	):
-		_st(new style::TextStyle(font))
+	)
 	{
-		setText(font, text);
+		setText(style, text);
 	}
 
 	int String::countWidth(int width, bool breakEverywhere) const {
@@ -108,10 +111,11 @@ namespace text {
 	}
 
 	void String::setText(
-		const style::font& font,
+		const style::TextStyle& style,
 		const QString& text,
 		const TextParseOptions& options) 
 	{
+		_st = &style;
 		clear();
 
 		BlockParser block(this, { text }, options, {});
@@ -267,7 +271,7 @@ namespace text {
 		TextSelection selection,
 		bool fullWidthSelection) const 
 	{
-		painter.drawText(QRect(left, top, width, yFrom - yTo), _text);
+		painter.drawText(50, 50,  _text);
 	}
 
 
@@ -674,7 +678,7 @@ namespace text {
 	}
 
 	int String::lineHeight() const {
-		return _font->height;
+		return _st->_font->height;
 	}
 
 	const std::vector<Modification>& String::modifications() const {
@@ -911,7 +915,7 @@ namespace text {
 		const auto top = qpadding.left()
 			+ (qheader.isEmpty()
 				? 0
-				: (_font->monospace()->width(qheader))
+				: (_st->_font->monospace()->width(qheader))
 			+ std::max(
 				qpadding.right(),
 				0));
