@@ -50,6 +50,9 @@ public:
 	void setDoubleClickSelectsParagraph(bool doubleClickSelectsParagraph);
 	[[nodiscard]] bool doubleClickSelectsParagraph() const noexcept;
 
+	void setBreakEverywhere(bool breakEverywhere);
+	[[nodiscard]] bool breakEverywhere() const noexcept;
+
 	void setOpacity(float opacity);
 	[[nodiscard]] float opacity() const noexcept;
 
@@ -67,7 +70,19 @@ public:
 
 	void setContextMenuHook(Fn<void(ContextMenuRequest)> hook);
 
-	void setLink(quint16 index);
+	void setLink(
+		quint16 index,
+		const ClickHandlerPtr& lnk);
+	void setLinksTrusted();
+
+	using ClickHandlerFilter = Fn<bool(const ClickHandlerPtr&, Qt::MouseButton)>;
+	void setClickHandlerFilter(ClickHandlerFilter&& filter);
+
+	void overrideLinkClickHandler(Fn<void()> handler);
+	void overrideLinkClickHandler(Fn<void(QString url)> handler);
+
+
+	void init();
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
@@ -122,7 +137,7 @@ private:
 	};
 
 	text::String _text;
-	Qt::Alignment _alignment;
+	Qt::Alignment _alignment = Qt::AlignLeft;
 
 	QColor _backgroundColor;
 
@@ -144,6 +159,9 @@ private:
 	Fn<void(ContextMenuRequest)> _contextMenuHook = nullptr;
 	style::CornersRoundMode _cornersRoundMode;
 
+	ClickHandlerFilter _clickHandlerFilter;
+	QString _contextCopyText;
+
 	DragAction _dragAction = NoDrag;
 
 	QPoint _dragStartPosition;
@@ -151,7 +169,9 @@ private:
 
 	bool _dragWasInactive = false;
 	bool _doubleClickSelectsParagraph = true;
+
 	bool _touchSelect = false;
+	bool _breakEverywhere = false;
 
 	QPoint _lastMousePos;
 	QPoint _touchStart, _touchPrevPos, _touchPos;

@@ -56,6 +56,18 @@ namespace text {
 		QPainterPath* outPath = nullptr;
 	};
 
+	struct LineGeometry {
+		int left = 0;
+		int width = 0;
+		bool elided = false;
+	};
+
+	struct GeometryDescriptor {
+		Fn<LineGeometry(int line)> layout;
+		bool breakEverywhere = false;
+		bool* outElided = nullptr;
+	};
+
 	struct PaintContext {
 		QPoint position;
 		int outerWidth = 0;
@@ -93,18 +105,6 @@ namespace text {
 	class BidiAlgorithm;
 	class PreClickHandler;
 	class BlockquoteClickHandler;
-
-	struct LineGeometry {
-		int left = 0;
-		int width = 0;
-		bool elided = false;
-	};
-
-	struct GeometryDescriptor {
-		Fn<LineGeometry(int line)> layout;
-		bool breakEverywhere = false;
-		bool* outElided = nullptr;
-	};
 
 	struct QuoteDetails {
 		QString language;
@@ -251,13 +251,7 @@ namespace text {
 
 		void draw(
 			QPainter& painter,
-			int32 left,
-			int32 top,
-			int32 width,
-			int32 yFrom = 0,
-			int32 yTo = -1,
-			TextSelection selection = { 0, 0 },
-			bool fullWidthSelection = true) const;
+			const PaintContext& context) const;
 
 		[[nodiscard]] bool isEmpty() const;
 		[[nodiscard]] int length() const {

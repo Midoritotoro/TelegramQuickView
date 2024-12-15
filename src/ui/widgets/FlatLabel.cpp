@@ -18,15 +18,27 @@ FlatLabel::FlatLabel(QWidget* parent) :
 	, ClickHandlerHost()
 	, _text(text::kQFixedMax)
 {
+	init();
+
 	setSelectable(true);
 	setMouseTracking(true);
+	
+	setDoubleClickSelectsParagraph(true);
+	setBreakEverywhere(true);
 
 	setBackgroundColor(style::flatLabel::defaultColor);
 	setCornerRoundMode(style::CornersRoundMode::All);
+
+	setTextAlignment(Qt::AlignLeft);
+	setLinksTrusted();
+}
+
+void FlatLabel::init() {
+	_contextCopyText = style::flatLabel::phraseContextCopySelected;
 }
 
 QSize FlatLabel::sizeHint() const {
-	return QSize(_textWidth, _fullTextHeight);
+	return size();
 }
 
 void FlatLabel::setText(const QString& text) {
@@ -54,6 +66,14 @@ bool FlatLabel::doubleClickSelectsParagraph() const noexcept {
 	return _doubleClickSelectsParagraph;
 }
 
+void FlatLabel::setBreakEverywhere(bool breakEverywhere) {
+	_breakEverywhere = breakEverywhere;
+}
+
+bool FlatLabel::breakEverywhere() const noexcept {
+	return _breakEverywhere;
+}
+
 void FlatLabel::setOpacity(float opacity) {
 	if (_opacity == opacity)
 		return;
@@ -73,7 +93,7 @@ int FlatLabel::textMaxWidth() const noexcept {
 }
 
 bool FlatLabel::hasLinks() const noexcept {
-	return true;
+	return _text.hasLinks();
 }
 
 void FlatLabel::setTextAlignment(Qt::Alignment alignment) {
@@ -112,8 +132,53 @@ void FlatLabel::setContextMenuHook(Fn<void(ContextMenuRequest)> hook) {
 	_contextMenuHook = std::move(hook);
 }
 
-void FlatLabel::setLink(quint16 index) {
+void FlatLabel::setLink(
+	quint16 index,
+	const ClickHandlerPtr& lnk)
+{
+	_text.setLink(index, lnk);
+	textUpdated();
+}
 
+void FlatLabel::setLinksTrusted() {
+	static const auto TrustedLinksFilter = [](
+		const ClickHandlerPtr& link,
+		Qt::MouseButton button) {
+			if (const auto url = dynamic_cast<UrlClickHandler*>(link.get())) {
+				url->UrlClickHandler::onClick({ button });
+				return false;
+			}
+			return true;
+		};
+	setClickHandlerFilter(TrustedLinksFilter);
+}
+
+void FlatLabel::setClickHandlerFilter(ClickHandlerFilter&& filter) {
+	_clickHandlerFilter = std::move(filter);
+}
+
+void FlatLabel::overrideLinkClickHandler(Fn<void()> handler) {
+	setClickHandlerFilter([=](
+		const ClickHandlerPtr& link,
+		Qt::MouseButton button) {
+			if (button != Qt::LeftButton) {
+				return true;
+			}
+			handler();
+			return false;
+		});
+}
+
+void FlatLabel::overrideLinkClickHandler(Fn<void(QString url)> handler) {
+	setClickHandlerFilter([=](
+		const ClickHandlerPtr& link,
+		Qt::MouseButton button) {
+			if (button != Qt::LeftButton) {
+				return true;
+			}
+			handler(link->url());
+			return false;
+		});
 }
 
 void FlatLabel::paintEvent(QPaintEvent* event) {
@@ -128,9 +193,9 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 
 	const auto textWidth = _textWidth
 		? _textWidth
-		: (width()
+		: width()
 			- style::flatLabel::margins.left()
-			- style::flatLabel::margins.right());
+			- style::flatLabel::margins.right();
 
 	const auto textLeft = _textWidth
 		? ((_alignment & Qt::AlignLeft)
@@ -147,8 +212,10 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		: _selection;
 
 	const auto heightExceeded = style::maximumTextHeight < _fullTextHeight || textWidth < style::maximumTextWidth;
-
-	const auto lineHeight = QFontMetrics(font()).height();
+	const auto renderElided = _breakEverywhere || heightExceeded;
+	const auto lineHeight = _text.style()
+		? qMax(_text.style()->lineHeight, 14)
+		: QFontMetrics(font()).height();
 	const auto elisionHeight = !heightExceeded
 		? 0
 		: style::maximumTextHeight
@@ -156,8 +223,17 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		: height();
 
 
-	painter.fillRect(QRect(0, 0, textWidth, elisionHeight), _backgroundColor);
-	_text.draw(painter, textLeft, style::flatLabel::margins.top(), textWidth);
+	painter.fillRect(QRect(0, 0, style::maximumTextWidth, elisionHeight), _backgroundColor);
+	_text.draw(painter, {
+			.position = { textLeft, style::flatLabel::margins.top() },
+			.availableWidth = style::maximumTextWidth,
+			.align = Qt::AlignLeft,
+			.clip = event->rect(),
+			.now = Time::now(),
+			.selection = selection,
+			.elisionHeight = elisionHeight,
+			.elisionBreakEverywhere = renderElided && _breakEverywhere,
+		});
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
@@ -274,7 +350,6 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 
 	ClickHandler::pressed();
 	_dragAction = NoDrag;
-	_dragWasInactive = true;
 
 	if (ClickHandler::getPressed()) {
 		_dragStartPosition = mapFromGlobal(_lastMousePos);
@@ -308,7 +383,7 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 			_dragStartPosition = mapFromGlobal(_lastMousePos);
 			_dragAction = PrepareDrag; // start text drag
 		}
-		else if (!_dragWasInactive) {
+		else {
 			if (state.afterSymbol) ++_dragSymbol;
 			_selection = { _dragSymbol, _dragSymbol };
 			_savedSelection = { 0, 0 };
@@ -332,21 +407,22 @@ text::TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton but
 		_savedSelection = { 0, 0 };
 		update();
 	}
-
 	_dragAction = NoDrag;
 	_selectionType = text::TextSelection::Type::Letters;
 
 	if (activated) {
-		// ActivateClickHandler(activated, button);
+		const auto guard = window();
+		if (!_clickHandlerFilter
+			|| _clickHandlerFilter(activated, button))
+			ActivateClickHandler(guard, activated, button);
 	}
 
 	if (QGuiApplication::clipboard()->supportsSelection()
-		&& !_selection.empty()) {
-		QGuiApplication::clipboard()->setText(
-			text(),
+		&& !_selection.empty())
+		text::SetClipboardText(
+			_text.toTextForMimeData(_selection),
 			QClipboard::Selection);
-	}
-
+	
 	return state;
 }
 
@@ -393,7 +469,28 @@ void FlatLabel::updateHover(const text::TextState& state) {
 }
 
 text::TextState FlatLabel::getTextState(const QPoint& m) const {
-	text::TextState state;
+	Text::StateRequestElided request;
+	request.align = _st.align;
+	if (_selectable) {
+		request.flags |= Text::StateRequest::Flag::LookupSymbol;
+	}
+	int textWidth = width() - _st.margin.left() - _st.margin.right();
+
+	Text::StateResult state;
+	bool heightExceeded = _st.maxHeight && (_st.maxHeight < _fullTextHeight || textWidth < _text.maxWidth());
+	bool renderElided = _breakEverywhere || heightExceeded;
+	if (renderElided) {
+		auto lineHeight = qMax(_st.style.lineHeight, _st.style.font->height);
+		auto lines = _st.maxHeight ? qMax(_st.maxHeight / lineHeight, 1) : ((height() / lineHeight) + 2);
+		request.lines = lines;
+		if (_breakEverywhere) {
+			request.flags |= Text::StateRequest::Flag::BreakEverywhere;
+		}
+		state = _text.getStateElided(m - QPoint(_st.margin.left(), _st.margin.top()), textWidth, request);
+	} else {
+		state = _text.getState(m - QPoint(_st.margin.left(), _st.margin.top()), textWidth, request);
+	}
+
 	return state;
 }
 
@@ -448,12 +545,12 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 				&& (state.symbol < _selection.to)));
 
 	_contextMenu = new QMenu(this);
-	auto request = ContextMenuRequest();
-
-	request.menu = _contextMenu,
-		request.selection = _selectable ? _selection : text::TextSelection(),
-		request.uponSelection = uponSelection,
-		request.fullSelection = _selectable && _selection.isFullSelection(text());
+	auto request = ContextMenuRequest({
+		.menu = _contextMenu,
+		.selection = _selectable ? _selection : text::TextSelection(),
+		.uponSelection = uponSelection,
+		.fullSelection = _selectable && _selection.isFullSelection(text())
+	});
 
 	if (_contextMenuHook)
 		_contextMenuHook(request);
@@ -469,10 +566,33 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 }
 
 void FlatLabel::fillContextMenu(ContextMenuRequest request) {
-	if (request.uponSelection && !request.fullSelection)
+	if (request.fullSelection && !_contextCopyText.isEmpty()) {
 		request.menu->addAction(
-			style::flatLabel::phraseContextCopySelected,
+			_contextCopyText,
+			[=] { copyContextText(); });
+	}
+	else if (request.uponSelection && !request.fullSelection)
+		request.menu->addAction(
+			_contextCopyText,
 			[=] { copySelectedText(); });
+	else if (_selectable
+		&& request.selection.empty()
+		&& !_contextCopyText.isEmpty()) {
+		request.menu->addAction(
+			_contextCopyText,
+			[=] { copyContextText(); });
+	}
+
+	if (request.link) {
+		const auto label = request.link->copyToClipboardContextItemText();
+		if (!label.isEmpty()) {
+			request.menu->addAction(
+				label,
+				[text = request.link->copyToClipboardText()] {
+					QGuiApplication::clipboard()->setText(text);
+				});
+		}
+	}
 }
 
 int FlatLabel::countTextWidth() const noexcept {
@@ -500,9 +620,8 @@ int FlatLabel::countTextWidth() const noexcept {
 
 int FlatLabel::countTextHeight(int textWidth) {
 	_fullTextHeight = _text.countHeight(textWidth, true);
-	return _fullTextHeight;
+	return qMin(_fullTextHeight, style::maximumTextHeight);
 }
-
 
 void FlatLabel::refreshSize() {
 	const auto textWidth = countTextWidth();

@@ -91,3 +91,13 @@ private:
 	static ClickHandlerHost* _activeHost;
 	static ClickHandlerHost* _pressedHost;
 };
+
+void ActivateClickHandler(
+	not_null<QWidget*> guard,
+	ClickHandlerPtr handler,
+	ClickContext context);
+
+void ActivateClickHandler(
+	not_null<QWidget*> guard,
+	ClickHandlerPtr handler,
+	Qt::MouseButton button);

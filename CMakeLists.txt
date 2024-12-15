@@ -77,6 +77,9 @@ SET(MAIN_SOURCES main.cpp
     src/ui/text/BlockParser.cpp
     src/ui/text/BlockParser.h
 
+    src/ui/text/TextRenderer.cpp
+    src/ui/text/TextRenderer.h
+
     src/ui/text/TextUtility.cpp
     src/ui/text/TextUtility.h
 

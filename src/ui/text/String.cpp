@@ -263,15 +263,9 @@ namespace text {
 
 	void String::draw(
 		QPainter& painter,
-		int32 left,
-		int32 top,
-		int32 width,
-		int32 yFrom,
-		int32 yTo,
-		TextSelection selection,
-		bool fullWidthSelection) const 
+		const PaintContext& context) const 
 	{
-		painter.drawText(50, 50,  _text);
+		painter.drawText(QRect(context.position.x(), context.position.y(), context.availableWidth, context.elisionHeight), context.align, _text);
 	}
 
 
@@ -826,6 +820,7 @@ namespace text {
 	}
 
 	not_null<ExtendedData*> String::ensureExtended() {
+		qDebug() << "ensureExtended";
 		if (!_extended) {
 			_extended = std::make_unique<ExtendedData>();
 		}
