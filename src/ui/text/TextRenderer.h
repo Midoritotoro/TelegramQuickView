@@ -12,6 +12,22 @@ struct QScriptItem;
 
 namespace text {
 	inline constexpr auto kQuoteCollapsedLines = 3;
+	struct FixedRange {
+		QFixed from;
+		QFixed till;
+
+		[[nodiscard]] bool empty() const {
+			return (till <= from);
+		}
+	};
+
+
+	struct SkipBlockPaintParts {
+		uint32 skippedTop : 29 = 0;
+		uint32 skipBottom : 1 = 0;
+		uint32 expandIcon : 1 = 0;
+		uint32 collapseIcon : 1 = 0;
+	};
 
 	namespace {
 		void InitTextItemWithScriptItem(
@@ -23,23 +39,7 @@ namespace text {
 	
 	} // namespace
 
-	struct FixedRange {
-		QFixed from;
-		QFixed till;
-
-		[[nodiscard]] bool empty() const {
-			return (till <= from);
-		}
-	};
-
 	class AbstractBlock;
-
-	struct SkipBlockPaintParts {
-		uint32 skippedTop : 29 = 0;
-		uint32 skipBottom : 1 = 0;
-		uint32 expandIcon : 1 = 0;
-		uint32 collapseIcon : 1 = 0;
-	};
 
 	[[nodiscard]] FixedRange Intersected(FixedRange a, FixedRange b);
 	[[nodiscard]] bool Intersects(FixedRange a, FixedRange b);

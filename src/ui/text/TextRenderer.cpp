@@ -627,7 +627,7 @@ namespace text {
 				&& _lookupX >= left
 				&& _lookupX < left + _startLineWidth) {
 				_quoteExpandLinkLookup = false;
-				_quoteExpandLink = std::make_shared<ClickHandler>(_quote->toggle);
+				_quoteExpandLink = _quote->toggle;
 			}
 			if (isTop && st.header > 0) {
 				if (_p) {
@@ -644,7 +644,7 @@ namespace text {
 					&& _lookupY >= top
 					&& _lookupY < top + st.header) {
 					if (_lookupLink) {
-						_lookupResult.link = std::make_shared<ClickHandler>(_quote->copy);
+						_lookupResult.link = _quote->copy;
 					}
 					if (_lookupSymbol) {
 						_lookupResult.symbol = _lineStart;
@@ -1032,125 +1032,18 @@ namespace text {
 					}
 					return false;
 				}
-				else if (_p
-					&& (_type == TextBlockType::Emoji
-						|| _type == TextBlockType::CustomEmoji)) {
-					if (_elisionMiddle && !paintRightToMiddleElision) {
-						if (leftLineLengthLeft - si.width.toReal() < 0) {
-							leftLineLengthLeft = 0;
-							i = -1;
-							lastLeftToMiddleX = (x + si.width);
-							_p->setPen(*_currentPen);
-							rightLineLengthLeft = std::ceil((x).toReal()) - _x.toReal() - _f->elidew;
-						}
-						else {
-							leftLineLengthLeft -= si.width.toReal();
-							leftLineLengthLeft = std::max(0.01, leftLineLengthLeft);
-						}
-					}
-					else if (_elisionMiddle && paintRightToMiddleElision && rightLineLengthLeft) {
-						if (i == 0) {
-							x = _x + _lineWidth;
-						}
-						if (rightLineLengthLeft - si.width.toReal() < 0) {
-							rightLineLengthLeft = 0;
-							i = nItems;
-							{
-								_p->setPen(*_currentPen);
-								const auto bigWidth = x - lastLeftToMiddleX;
-								const auto smallWidth = _f->elidew;
-								const auto left = lastLeftToMiddleX;
-								_p->drawText(
-									(left + (bigWidth - smallWidth) / 2).toReal(),
-									textY,
-									kQEllipsis);
-							}
-							continue;
-						}
-						else {
-							rightLineLengthLeft -= si.width.toReal();
-							rightLineLengthLeft = std::max(0.01, rightLineLengthLeft);
-						}
-						x -= si.width;
-					}
 					const auto fillSelect = _background.selectActiveBlock
 						? FixedRange{ x, x + si.width }
-						: findSelectEmojiRange(
-							si,
-							blockIt,
-							x,
-							_selection);
+						: FixedRange{ x, x };
 					fillSelectRange(fillSelect);
-					if (_highlight) {
-						pushHighlightRange(findSelectEmojiRange(
-							si,
-							blockIt,
-							x,
-							_highlight->range));
-					}
-
+			
 					const auto hasSpoiler = _background.spoiler
 						&& (_spoilerOpacity > 0.);
 					const auto fillSpoiler = hasSpoiler
 						? FixedRange{ x, x + si.width }
 					: FixedRange();
 					const auto opacity = _p->opacity();
-					if (!hasSpoiler || _spoilerOpacity < 1.) {
-						if (hasSpoiler) {
-							_p->setOpacity(opacity * (1. - _spoilerOpacity));
-						}
-						const auto ex = (x + st::emojiPadding).toInt();
-						const auto ey = _y + _yDelta + emojiY;
-						if (_type == TextBlockType::Emoji) {
-							Emoji::Draw(
-								*_p,
-								static_cast<const EmojiBlock*>(block)->emoji(),
-								Emoji::GetSizeNormal(),
-								ex,
-								ey);
-						}
-						else {
-							const auto custom = static_cast<const CustomEmojiBlock*>(block)->custom();
-							const auto selected = (fillSelect.from <= x)
-								&& (fillSelect.till > x);
-							const auto color = (selected
-								? _currentPenSelected
-								: _currentPen)->color();
-							if (!_customEmojiContext) {
-								_customEmojiContext = CustomEmoji::Context{
-									.textColor = color,
-									.now = now(),
-									.paused = _pausedEmoji,
-								};
-								_customEmojiSkip = (st::emojiSize
-									- AdjustCustomEmojiSize(st::emojiSize)) / 2;
-							}
-							else {
-								_customEmojiContext->textColor = color;
-							}
-							_customEmojiContext->position = {
-								ex + _customEmojiSkip,
-								ey + _customEmojiSkip,
-							};
-							custom->paint(*_p, *_customEmojiContext);
-						}
-						if (hasSpoiler) {
-							_p->setOpacity(opacity);
-						}
-					}
-					if (hasSpoiler) {
-						// Elided item should be a text item
-						// with '...' at the end, so this should not be it.
-						const auto isElidedItem = false;
-						pushSpoilerRange(
-							fillSpoiler,
-							fillSelect,
-							isElidedItem,
-							rtl);
-					}
-					//} else if (_p && currentBlock->type() == TextBlockSkip) { // debug
-					//	_p->fillRect(QRect(x.toInt(), _y, currentBlock->width(), static_cast<SkipBlock*>(currentBlock)->height()), QColor(0, 0, 0, 32));
-				}
+				
 				x += si.width;
 				if (paintRightToMiddleElision) {
 					x -= si.width;
@@ -1423,14 +1316,6 @@ namespace text {
 						_p->setOpacity(opacity);
 					}
 				}
-
-				if (hasSpoiler) {
-					pushSpoilerRange(
-						itemRange,
-						fillSelect,
-						isElidedItem,
-						rtl);
-				}
 			}
 
 			x += itemWidth;
@@ -1440,26 +1325,6 @@ namespace text {
 		}
 		fillRectsFromRanges();
 		return !_elidedLine;
-	}
-
-	FixedRange Renderer::findSelectEmojiRange(
-		const QScriptItem& si,
-		std::vector<Block>::const_iterator blockIt,
-		QFixed x,
-		TextSelection selection) const {
-		if (_localFrom + si.position >= selection.to) {
-			return {};
-		}
-		auto chFrom = _str + _t->blockPosition(blockIt);
-		auto chTo = _str + _t->blockEnd(blockIt);
-		while (chTo > chFrom && (chTo - 1)->unicode() == QChar::Space) {
-			--chTo;
-		}
-
-		if (_localFrom + si.position >= selection.from) {
-			return { x, x + si.width };
-		}
-		return {};
 	}
 
 	FixedRange Renderer::findSelectTextRange(
@@ -1540,8 +1405,6 @@ namespace text {
 	}
 
 	void Renderer::fillRectsFromRanges() {
-		fillRectsFromRanges(_spoilerRects, _spoilerRanges);
-		fillRectsFromRanges(_spoilerSelectedRects, _spoilerSelectedRanges);
 		fillRectsFromRanges(_highlightRects, _highlightRanges);
 	}
 
@@ -1607,8 +1470,8 @@ namespace text {
 			auto mutableText = const_cast<String*>(_t);
 			_elideSavedBlock = std::move(mutableText->_blocks[blockIndex]);
 			mutableText->_blocks[blockIndex] = Block::Text({
-				.position = (*_elideSavedBlock)->position(),
 				.flags = (*_elideSavedBlock)->flags(),
+				.position = (*_elideSavedBlock)->position(),
 				.linkIndex = (*_elideSavedBlock)->linkIndex(),
 				.colorIndex = (*_elideSavedBlock)->colorIndex(),
 				});
