@@ -1,8 +1,5 @@
 #pragma once
 
-#include "StyleTypes.h"
-#include "StyleFont.h"
-
 #include <QImage>
 #include <QSize>
 

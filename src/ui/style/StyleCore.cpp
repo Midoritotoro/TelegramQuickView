@@ -12,6 +12,8 @@
 #include <QDir>
 
 #include <QCoreApplication>
+#include "StyleFont.h"
+
 
 namespace style {
 
@@ -370,5 +372,6 @@ namespace style {
 	void Stop() {
 		internal::DestroyFonts();
 	}
+
 
 } // namespace style

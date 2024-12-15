@@ -9,6 +9,8 @@
 #include "../style/StyleCore.h"
 #include <QPainterPath>
 
+#include "TextClickHandlers.h"
+
 
 namespace text {
 	namespace {
@@ -625,7 +627,8 @@ namespace text {
 				&& _lookupY >= start
 				&& _lookupY < _quoteLineTop + _lineHeight + paddingBottom - skip
 				&& _lookupX >= left
-				&& _lookupX < left + _startLineWidth) {
+				&& _lookupX < left + _startLineWidth) 
+			{
 				_quoteExpandLinkLookup = false;
 				_quoteExpandLink = _quote->toggle;
 			}

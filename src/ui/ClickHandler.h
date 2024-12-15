@@ -7,6 +7,7 @@
 class ClickHandler;
 using ClickHandlerPtr = std::shared_ptr<ClickHandler>;
 
+
 struct ClickContext {
 	Qt::MouseButton button = Qt::LeftButton;
 	QVariant other;

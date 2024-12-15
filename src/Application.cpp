@@ -1,7 +1,9 @@
 ﻿#include "Application.h"
 
 #include "core/AutoRunUtils.h"
+
 #include "ui/style/StyleCore.h"
+#include "ui/style/StyleFont.h"
 
 
 Application::Application(int& argc, char** argv) :
@@ -45,9 +47,10 @@ void Application::init() {
     const auto useRatio = std::clamp(qCeil(ratio), 1, 3);
 
     style::SetDevicePixelRatio(useRatio);
+
+    style::SetCustomFont("OpenSans");
     style::Start();
 
 
     QPixmapCache::setCacheLimit(1024 * 1024); 
-    setFont(QFont("OpenSans-SemiBoldItalic", 10));
 }

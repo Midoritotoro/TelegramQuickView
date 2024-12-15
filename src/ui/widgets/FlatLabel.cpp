@@ -480,7 +480,9 @@ text::TextState FlatLabel::getTextState(const QPoint& m) const {
 	bool heightExceeded = (style::maximumTextHeight < _fullTextHeight || textWidth < _text.maxWidth());
 	bool renderElided = _breakEverywhere || heightExceeded;
 	if (renderElided) {
-		auto lineHeight = qMax(1, _text.style()->_font->height);
+		auto lineHeight = _text.style() && _text.style()->_font
+			? qMax(1, _text.style()->_font->height)
+			: 1;
 		auto lines = qMax(style::maximumTextHeight / lineHeight, 1);
 		request.lines = lines;
 		if (_breakEverywhere) {

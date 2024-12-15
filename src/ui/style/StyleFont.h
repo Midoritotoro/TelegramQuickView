@@ -13,10 +13,6 @@
 
 
 namespace style {
-
-	[[nodiscard]] const QString& SystemFontTag();
-	void SetCustomFont(const QString& font);
-
 	enum class FontFlag : uchar {
 		Bold = 0x01,
 		Italic = 0x02,
@@ -26,166 +22,22 @@ namespace style {
 		Monospace = 0x20,
 	};
 
-	inline constexpr bool is_flag_type(FontFlag) { 
-		return true;
-	}
-
 	DECLARE_FLAGS(FontFlags, FontFlag)
 
 	struct FontResolveResult {
 		QFont font;
+
 		double ascent = 0.;
 		double height = 0.;
+
 		int iascent = 0;
 		int iheight = 0;
+
 		int requestedFamily = 0;
 		int requestedSize = 0;
+
 		FontFlags requestedFlags;
 	};
-	[[nodiscard]] const FontResolveResult* FindAdjustResult(const QFont& font);
-
-	namespace internal {
-
-		void StartFonts();
-
-		void DestroyFonts();
-		int RegisterFontFamily(const QString& family);
-
-		inline constexpr auto kFontVariants = 0x40;
-
-		class Font;
-		using FontVariants = std::array<Font, kFontVariants>;
-
-		class FontData;
-		class Font final {
-		public:
-			Font(Qt::Initialization = Qt::Uninitialized) {
-			}
-			Font(int size, FontFlags flags, const QString& family);
-			Font(int size, FontFlags flags, int family);
-
-			[[nodiscard]] FontData* operator->() const {
-				return _data;
-			}
-			[[nodiscard]] FontData* get() const {
-				return _data;
-			}
-
-			[[nodiscard]] operator bool() const {
-				return _data != nullptr;
-			}
-
-			[[nodiscard]] operator const QFont& () const;
-
-		private:
-			friend class FontData;
-			friend class OwnedFont;
-
-			FontData* _data = nullptr;
-
-			void init(int size, FontFlags flags, int family, FontVariants* modified);
-			friend void Start();
-
-			explicit Font(FontData* data) : _data(data) {
-			}
-			Font(int size, FontFlags flags, int family, FontVariants* modified);
-
-		};
-
-		class FontData {
-		public:
-			[[nodiscard]] int width(const QString& text) const {
-				return int(std::ceil(_m.horizontalAdvance(text)));
-			}
-			[[nodiscard]] int width(const QString& text, int from, int to) const {
-				return width(text.mid(from, to));
-			}
-			[[nodiscard]] int width(QChar ch) const {
-				return int(std::ceil(_m.horizontalAdvance(ch)));
-			}
-			[[nodiscard]] QString elided(
-				const QString& str,
-				int width,
-				Qt::TextElideMode mode = Qt::ElideRight) const {
-				return _m.elidedText(str, mode, width);
-			}
-
-			[[nodiscard]] Font bold(bool set = true) const;
-			[[nodiscard]] Font italic(bool set = true) const;
-			[[nodiscard]] Font underline(bool set = true) const;
-			[[nodiscard]] Font strikeout(bool set = true) const;
-			[[nodiscard]] Font semibold(bool set = true) const;
-			[[nodiscard]] Font monospace(bool set = true) const;
-
-			[[nodiscard]] int size() const;
-			[[nodiscard]] FontFlags flags() const;
-			[[nodiscard]] int family() const;
-
-			QFont f;
-			int height = 0;
-			int ascent = 0;
-			int descent = 0;
-			int spacew = 0;
-			int elidew = 0;
-
-		private:
-			friend class OwnedFont;
-			friend struct ResolvedFont;
-
-			mutable FontVariants _modified;
-
-			[[nodiscard]] Font otherFlagsFont(FontFlag flag, bool set) const;
-			FontData(const FontResolveResult& data, FontVariants* modified);
-
-			QFontMetricsF _m;
-			int _size = 0;
-			int _family = 0;
-			FontFlags _flags = 0;
-
-		};
-
-		inline bool operator==(const Font& a, const Font& b) {
-			return a.get() == b.get();
-		}
-		inline bool operator!=(const Font& a, const Font& b) {
-			return a.get() != b.get();
-		}
-
-		inline Font::operator const QFont& () const {
-			Expects(_data != nullptr);
-
-			return _data->f;
-		}
-
-		class OwnedFont final {
-		public:
-			OwnedFont(const QString& custom, FontFlags flags, int size);
-			OwnedFont(const OwnedFont& other)
-				: _data(other._data) {
-				_font._data = &_data;
-			}
-
-			OwnedFont& operator=(const OwnedFont& other) {
-				_data = other._data;
-				return *this;
-			}
-
-			[[nodiscard]] const Font& font() const {
-				return _font;
-			}
-			[[nodiscard]] FontData* operator->() const {
-				return _font.get();
-			}
-			[[nodiscard]] FontData* get() const {
-				return _font.get();
-			}
-
-		private:
-			FontData _data;
-			Font _font;
-
-		};
-	} // namespace internal
 
 	struct QuoteStyle {
 		int radius = 10;
@@ -224,4 +76,137 @@ namespace style {
 			, blockquote(_quote)
 		{}
 	};
+
+	[[nodiscard]] const QString& SystemFontTag();
+	void SetCustomFont(const QString& font);
+
+	[[nodiscard]] QString CustomFont();
+	[[nodiscard]] const FontResolveResult* FindAdjustResult(const QFont& font);
+
+	inline constexpr bool is_flag_type(FontFlag) {
+		return true;
+	}
 } // namespace style
+
+namespace style::internal {
+	inline constexpr auto kFontVariants = 0x40;
+
+	class Font;
+	class FontData;
+
+	using FontVariants = std::array<Font, kFontVariants>;
+
+	void StartFonts();
+
+	void DestroyFonts();
+	int RegisterFontFamily(const QString& family);
+
+	class Font final {
+	public:
+		Font(Qt::Initialization = Qt::Uninitialized);
+
+		Font(
+			int size,
+			FontFlags flags,
+			const QString& family);
+		Font(
+			int size,
+			FontFlags flags,
+			int family);
+
+		[[nodiscard]] FontData* operator->() const;
+		[[nodiscard]] FontData* get() const;
+
+		[[nodiscard]] operator bool() const;
+		[[nodiscard]] operator const QFont&() const;
+	private:
+		FontData* _data = nullptr;
+
+		explicit Font(FontData* data);
+		Font(
+			int size,
+			FontFlags flags,
+			int family,
+			FontVariants* modified);
+
+		void init(
+			int size,
+			FontFlags flags,
+			int family,
+			FontVariants* modified);
+
+		friend void Start();
+
+		friend class FontData;
+		friend class OwnedFont;
+	};
+
+	class FontData {
+	public:
+		[[nodiscard]] int width(const QString& text) const;
+		[[nodiscard]] int width(
+			const QString& text,
+			int from,
+			int to) const;
+		[[nodiscard]] int width(QChar ch) const;
+
+		[[nodiscard]] QString elided(
+			const QString& str,
+			int width,
+			Qt::TextElideMode mode = Qt::ElideRight) const;
+
+		[[nodiscard]] Font bold(bool set = true) const;
+		[[nodiscard]] Font italic(bool set = true) const;
+		[[nodiscard]] Font underline(bool set = true) const;
+
+		[[nodiscard]] Font strikeout(bool set = true) const;
+		[[nodiscard]] Font semibold(bool set = true) const;
+		[[nodiscard]] Font monospace(bool set = true) const;
+
+		[[nodiscard]] int size() const;
+		[[nodiscard]] FontFlags flags() const;
+		[[nodiscard]] int family() const;
+
+		QFont f;
+
+		int height = 0;
+		int ascent = 0;
+
+		int descent = 0;
+		int spacew = 0;
+
+		int elidew = 0;
+	private:
+		[[nodiscard]] Font otherFlagsFont(FontFlag flag, bool set) const;
+		FontData(const FontResolveResult& data, FontVariants* modified);
+
+		QFontMetricsF _m;
+		mutable FontVariants _modified;
+
+		int _size = 0;
+		int _family = 0;
+
+		FontFlags _flags = 0;
+
+		friend class OwnedFont;
+		friend struct ResolvedFont;
+	};
+
+	[[nodiscard]] bool operator==(const Font& a, const Font& b);
+	[[nodiscard]] bool operator!=(const Font& a, const Font& b);
+
+	class OwnedFont final {
+	public:
+		OwnedFont(const QString& custom, FontFlags flags, int size);
+		OwnedFont(const OwnedFont& other);
+
+		OwnedFont& operator=(const OwnedFont& other);
+
+		[[nodiscard]] const Font& font() const;
+		[[nodiscard]] FontData* operator->() const;
+		[[nodiscard]] FontData* get() const;
+	private:
+		FontData _data;
+		Font _font;
+	};
+} // namespace style::internal

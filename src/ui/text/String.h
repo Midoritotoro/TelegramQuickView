@@ -19,6 +19,8 @@
 #include "Types.h"
 
 
+class PreClickHandler;
+class BlockquoteClickHandler;
 
 namespace text {
 	inline constexpr auto kQFixedMax = (INT_MAX / 256);
@@ -103,8 +105,6 @@ namespace text {
 	class TextWord;
 	class BlockParser;
 	class BidiAlgorithm;
-	class PreClickHandler;
-	class BlockquoteClickHandler;
 	class Renderer;
 
 	struct QuoteDetails {
@@ -380,7 +380,7 @@ namespace text {
 			bool composeExpanded,
 			bool composeEntities) const;
 
-		const style::TextStyle* _st = nullptr;
+		const style::TextStyle* _st = new style::TextStyle();
 
 		QString _text;
 		Blocks _blocks;

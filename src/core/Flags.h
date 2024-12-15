@@ -475,4 +475,6 @@ inline constexpr auto operator~(ExtendedEnum b)
 	return ~core::details::extendedFlagsConvert(b);
 }
 
-#define DECLARE_FLAGS(_Flags, _Enum) typedef core::Flags<_Enum> _Flags;
+#define DECLARE_FLAGS(_Flags, _Enum) \
+	typedef core::Flags<_Enum> _Flags;
+

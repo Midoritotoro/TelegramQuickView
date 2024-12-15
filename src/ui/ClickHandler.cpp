@@ -1,7 +1,9 @@
 #include "ClickHandler.h"
 
 #include "text/TextEntities.h"
+
 #include <QPointer>
+
 
 namespace {
 
