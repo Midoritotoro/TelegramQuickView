@@ -1,8 +1,11 @@
 #pragma once
 
 #include "../ClickHandler.h"
+#include "../../core/Flags.h"
 
 #include "../../core/Types.h"
+#include "../style/StyleTypes.h"
+
 #include <QString>
 
 
@@ -70,11 +73,40 @@ namespace text {
 		return !(a == b);
 	}
 
+	struct StateRequest {
+		enum class StateFlag {
+			BreakEverywhere = (1 << 0),
+			LookupSymbol = (1 << 1),
+			LookupLink = (1 << 2),
+			LookupCustomTooltip = (1 << 3),
+		};
+		DECLARE_FLAGS(StateFlags, StateFlag);
+		friend inline constexpr auto is_flag_type(StateFlag) {
+			return true;
+		};
+
+		StateRequest() {
+		}
+
+		style::align align = style::alignLeft;
+		StateFlags flags = StateFlag::LookupLink;
+
+	};
+
 	struct TextState {
 		ClickHandlerPtr link;
 		bool uponSymbol = false;
 		bool afterSymbol = false;
 		uint16 symbol = 0;
+	};
+
+	struct StateRequestElided : StateRequest {
+		StateRequestElided() {
+		}
+		StateRequestElided(const StateRequest& other) : StateRequest(other) {
+		}
+		int lines = 1;
+		int removeFromEnd = 0;
 	};
 
 	static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };

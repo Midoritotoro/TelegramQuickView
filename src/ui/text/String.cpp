@@ -4,51 +4,10 @@
 #include "BlockParser.h"
 
 #include "TextClickHandlers.h"
+#include "TextRenderer.h"
 
 
 namespace text {
-	namespace {
-		inline constexpr auto kQuoteCollapsedLines = 3;
-
-		GeometryDescriptor SimpleGeometry(
-			int availableWidth,
-			int elisionLines,
-			int elisionRemoveFromEnd,
-			bool elisionBreakEverywhere) {
-			constexpr auto wrap = [](
-				Fn<LineGeometry(int line)> layout,
-				bool breakEverywhere = false) {
-					return GeometryDescriptor{ std::move(layout), breakEverywhere };
-				};
-
-			// Try to minimize captured values (to minimize Fn allocations).
-			if (!elisionLines) {
-				return wrap([=](int line) {
-					return LineGeometry{ .width = availableWidth };
-					});
-			}
-			else if (!elisionRemoveFromEnd) {
-				return wrap([=](int line) {
-					return LineGeometry{
-						.width = availableWidth,
-						.elided = (line + 1 >= elisionLines),
-					};
-					}, elisionBreakEverywhere);
-			}
-			else {
-				return wrap([=](int line) {
-					const auto elided = (line + 1 >= elisionLines);
-					const auto removeFromEnd = (elided ? elisionRemoveFromEnd : 0);
-					return LineGeometry{
-						.width = availableWidth - removeFromEnd,
-						.elided = elided,
-					};
-					}, elisionBreakEverywhere);
-			}
-		};
-
-	} // namespace 
-
 	String::String(int32 minResizeWidth)
 		: _minResizeWidth(minResizeWidth) {
 	}
@@ -680,6 +639,36 @@ namespace text {
 		return _extended ? _extended->modifications : kEmpty;
 	}
 
+
+	TextState String::getState(QPoint point, int width, StateRequest request) const {
+		if (isEmpty()) {
+			return {};
+		}
+		return Renderer(*this).getState(
+			point,
+			SimpleGeometry(width, 0, 0, false),
+			request);
+	}
+
+	TextState String::getStateLeft(QPoint point, int width, int outerw, StateRequest request) const {
+		return getState(point, width, request);
+	}
+
+	TextState String::getStateElided(QPoint point, int width, StateRequestElided request) const {
+		if (isEmpty()) {
+			return {};
+		}
+		return Renderer(*this).getState(point, SimpleGeometry(
+			width,
+			request.lines,
+			request.removeFromEnd,
+			request.flags & StateRequest::StateFlag::BreakEverywhere
+		), static_cast<StateRequest>(request));
+	}
+
+	TextState String::getStateElidedLeft(QPoint point, int width, int outerw, StateRequestElided request) const {
+		return getStateElided(point, width, request);
+	}
 
 	TextSelection String::adjustSelection(
 		TextSelection selection,

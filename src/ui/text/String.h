@@ -105,6 +105,7 @@ namespace text {
 	class BidiAlgorithm;
 	class PreClickHandler;
 	class BlockquoteClickHandler;
+	class Renderer;
 
 	struct QuoteDetails {
 		QString language;
@@ -277,6 +278,27 @@ namespace text {
 
 		[[nodiscard]] const std::vector<Modification>& modifications() const;
 
+		[[nodiscard]] TextState getState(
+			QPoint point,
+			int width,
+			StateRequest request) const;
+
+		TextState getStateLeft(
+			QPoint point,
+			int width,
+			int outerw,
+			StateRequest request) const;
+
+		TextState getStateElided(
+			QPoint point,
+			int width,
+			StateRequestElided request) const;
+		TextState getStateElidedLeft(
+			QPoint point,
+			int width,
+			int outerw,
+			StateRequestElided request) const;
+
 		const style::TextStyle* style() const noexcept {
 			return _st;
 		}
@@ -382,5 +404,6 @@ namespace text {
 		friend class WordParser;
 		friend class StackEngine;
 		friend class BidiAlgorithm;
+		friend class Renderer;
 	};
 } // namespace text

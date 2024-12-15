@@ -13,6 +13,16 @@ struct QScriptItem;
 namespace text {
 	inline constexpr auto kQuoteCollapsedLines = 3;
 
+	namespace {
+		void InitTextItemWithScriptItem(
+			QTextItemInt& ti,
+			const QScriptItem& si);
+		void AppendRange(
+			QVarLengthArray<FixedRange>& ranges,
+			FixedRange range);
+	
+	} // namespace
+
 	struct FixedRange {
 		QFixed from;
 		QFixed till;
@@ -22,31 +32,35 @@ namespace text {
 		}
 	};
 
-	struct StateRequest {
-		enum class StateFlag {
-			BreakEverywhere = (1 << 0),
-			LookupSymbol = (1 << 1),
-			LookupLink = (1 << 2),
-			LookupCustomTooltip = (1 << 3),
-		};
-		DECLARE_FLAGS(StateFlags, StateFlag);
-		friend inline constexpr auto is_flag_type(StateFlag) {
-			return true;
-		};
-
-		StateRequest() {
-		}
-
-		style::align align = style::alignLeft;
-		StateFlags flags = StateFlag::LookupLink;
-
-	};
 	class AbstractBlock;
+
+	struct SkipBlockPaintParts {
+		uint32 skippedTop : 29 = 0;
+		uint32 skipBottom : 1 = 0;
+		uint32 expandIcon : 1 = 0;
+		uint32 collapseIcon : 1 = 0;
+	};
 
 	[[nodiscard]] FixedRange Intersected(FixedRange a, FixedRange b);
 	[[nodiscard]] bool Intersects(FixedRange a, FixedRange b);
 	[[nodiscard]] FixedRange United(FixedRange a, FixedRange b);
 	[[nodiscard]] bool Distinct(FixedRange a, FixedRange b);
+
+	[[nodiscard]] GeometryDescriptor SimpleGeometry(
+		int availableWidth,
+		int elisionLines,
+		int elisionRemoveFromEnd,
+		bool elisionBreakEverywhere);
+
+	void ValidateQuotePaintCache(
+		QuotePaintCache& cache,
+		const style::QuoteStyle& st);
+	void FillQuotePaint(
+		QPainter& p,
+		QRect rect,
+		const QuotePaintCache& cache,
+		const style::QuoteStyle& st,
+		SkipBlockPaintParts parts);
 
 	class Renderer final {
 	public:
@@ -76,11 +90,6 @@ namespace text {
 		bool drawLine(
 			uint16 lineEnd,
 			Blocks::const_iterator blocksEnd);
-		[[nodiscard]] FixedRange findSelectEmojiRange(
-			const QScriptItem& si,
-			std::vector<Block>::const_iterator blockIt,
-			QFixed x,
-			TextSelection selection) const;
 		[[nodiscard]] FixedRange findSelectTextRange(
 			const QScriptItem& si,
 			int itemStart,
@@ -91,20 +100,10 @@ namespace text {
 			TextSelection selection) const;
 		void fillSelectRange(FixedRange range);
 		void pushHighlightRange(FixedRange range);
-		void pushSpoilerRange(
-			FixedRange range,
-			FixedRange selected,
-			bool isElidedItem,
-			bool rtl);
 		void fillRectsFromRanges();
 		void fillRectsFromRanges(
 			QVarLengthArray<QRect, kSpoilersRectsSize>& rects,
 			QVarLengthArray<FixedRange>& ranges);
-		void paintSpoilerRects();
-		void paintSpoilerRects(
-			const QVarLengthArray<QRect, kSpoilersRectsSize>& rects,
-			const style::color& color,
-			int index);
 		void composeHighlightPath();
 		[[nodiscard]] const AbstractBlock* markBlockForElisionGetEnd(
 			int blockIndex);
@@ -133,8 +132,7 @@ namespace text {
 		GeometryDescriptor _geometry;
 		QPainter* _p = nullptr;
 		std::span<SpecialColor> _colors;
-		bool _pausedEmoji = false;
-		bool _pausedSpoiler = false;
+
 		style::align _align = style::alignTopLeft;
 		QPen _originalPen;
 		QPen _originalPenSelected;
@@ -153,11 +151,7 @@ namespace text {
 		const QChar* _str = nullptr;
 		mutable Time::time _cachedNow = 0;
 		double _spoilerOpacity = 0.;
-		QVarLengthArray<FixedRange> _spoilerRanges;
-		QVarLengthArray<FixedRange> _spoilerSelectedRanges;
 		QVarLengthArray<FixedRange> _highlightRanges;
-		QVarLengthArray<QRect, kSpoilersRectsSize> _spoilerRects;
-		QVarLengthArray<QRect, kSpoilersRectsSize> _spoilerSelectedRects;
 		QVarLengthArray<QRect, kSpoilersRectsSize> _highlightRects;
 
 		int _customEmojiSkip = 0;
@@ -223,5 +217,4 @@ namespace text {
 		bool _elisionMiddle = false;
 
 	};
-
 } // namespace text

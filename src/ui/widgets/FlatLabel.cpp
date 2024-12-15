@@ -222,8 +222,6 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		? qMax(style::maximumTextHeight, lineHeight)
 		: height();
 
-
-	painter.fillRect(QRect(0, 0, style::maximumTextWidth, elisionHeight), _backgroundColor);
 	_text.draw(painter, {
 			.position = { textLeft, style::flatLabel::margins.top() },
 			.availableWidth = style::maximumTextWidth,
@@ -469,26 +467,28 @@ void FlatLabel::updateHover(const text::TextState& state) {
 }
 
 text::TextState FlatLabel::getTextState(const QPoint& m) const {
-	Text::StateRequestElided request;
-	request.align = _st.align;
+	text::StateRequestElided request;
+	request.align = style::alignLeft;
 	if (_selectable) {
-		request.flags |= Text::StateRequest::Flag::LookupSymbol;
+		request.flags |= text::StateRequest::StateFlag::LookupSymbol;
 	}
-	int textWidth = width() - _st.margin.left() - _st.margin.right();
+	int textWidth = width() 
+		- style::flatLabel::margins.left() 
+		- style::flatLabel::margins.right();
 
-	Text::StateResult state;
-	bool heightExceeded = _st.maxHeight && (_st.maxHeight < _fullTextHeight || textWidth < _text.maxWidth());
+	text::TextState state;
+	bool heightExceeded = (style::maximumTextHeight < _fullTextHeight || textWidth < _text.maxWidth());
 	bool renderElided = _breakEverywhere || heightExceeded;
 	if (renderElided) {
-		auto lineHeight = qMax(_st.style.lineHeight, _st.style.font->height);
-		auto lines = _st.maxHeight ? qMax(_st.maxHeight / lineHeight, 1) : ((height() / lineHeight) + 2);
+		auto lineHeight = qMax(1, _text.style()->_font->height);
+		auto lines = qMax(style::maximumTextHeight / lineHeight, 1);
 		request.lines = lines;
 		if (_breakEverywhere) {
-			request.flags |= Text::StateRequest::Flag::BreakEverywhere;
+			request.flags |= text::StateRequest::StateFlag::BreakEverywhere;
 		}
-		state = _text.getStateElided(m - QPoint(_st.margin.left(), _st.margin.top()), textWidth, request);
+		state = _text.getStateElided(m - QPoint(style::flatLabel::margins.left(), style::flatLabel::margins.top()), textWidth, request);
 	} else {
-		state = _text.getState(m - QPoint(_st.margin.left(), _st.margin.top()), textWidth, request);
+		state = _text.getState(m - QPoint(style::flatLabel::margins.left(), style::flatLabel::margins.top()), textWidth, request);
 	}
 
 	return state;

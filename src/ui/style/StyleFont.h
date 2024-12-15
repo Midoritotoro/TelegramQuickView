@@ -190,6 +190,26 @@ namespace style {
 	struct QuoteStyle {
 		int radius = 10;
 		bool scrollable = false;
+
+		int outlineShift = 2;
+
+		QPoint headerPosition = { 10, 2 };
+
+		QImage corners;
+		QImage expand;
+		QImage collapse;
+
+		mutable QImage bottomCorner;
+		mutable QImage bottomRounding;
+		mutable QImage collapsedLine;
+
+		int outlinesCached = 3;
+		QColor headerCached;
+		QColor bgCached;
+
+		int outline = 3;
+		int header = 20;
+		QColor bg;
 	};
 
 	struct TextStyle {
