@@ -32,6 +32,8 @@ namespace style {
 	inline constexpr auto kScaleMax = 300;
 	inline constexpr auto kScaleDefault = 100;
 
+	inline constexpr auto lineWidth = 1;
+
 	enum class CornersRoundMode {
 		All,
 		Top,

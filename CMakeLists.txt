@@ -58,6 +58,9 @@ SET(MAIN_SOURCES main.cpp
 
     src/ui/text/TextWord.cpp
     src/ui/text/TextWord.h
+    
+    src/ui/text/TextDrawUtility.cpp
+    src/ui/text/TextDrawUtility.h
 
     src/ui/text/TextClickHandlers.cpp
     src/ui/text/TextClickHandlers.h

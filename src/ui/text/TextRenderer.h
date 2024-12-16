@@ -1,14 +1,13 @@
 #pragma once
 
-#include "String.h"
-#include "TextBlock.h"
-
+#include "Types.h"
 #include <private/qtextengine_p.h>
 
 class QTextItemInt;
 struct QScriptAnalysis;
 struct QScriptLine;
 struct QScriptItem;
+
 
 namespace text {
 	inline constexpr auto kQuoteCollapsedLines = 3;
@@ -32,28 +31,10 @@ namespace text {
 	
 	} // namespace
 
-	class AbstractBlock;
-
 	[[nodiscard]] FixedRange Intersected(FixedRange a, FixedRange b);
 	[[nodiscard]] bool Intersects(FixedRange a, FixedRange b);
 	[[nodiscard]] FixedRange United(FixedRange a, FixedRange b);
 	[[nodiscard]] bool Distinct(FixedRange a, FixedRange b);
-
-	[[nodiscard]] GeometryDescriptor SimpleGeometry(
-		int availableWidth,
-		int elisionLines,
-		int elisionRemoveFromEnd,
-		bool elisionBreakEverywhere);
-
-	void ValidateQuotePaintCache(
-		QuotePaintCache& cache,
-		const style::QuoteStyle& st);
-	void FillQuotePaint(
-		QPainter& p,
-		QRect rect,
-		const QuotePaintCache& cache,
-		const style::QuoteStyle& st,
-		SkipBlockPaintParts parts);
 
 	class Renderer final {
 	public:
@@ -65,7 +46,6 @@ namespace text {
 			QPoint point,
 			GeometryDescriptor geometry,
 			StateRequest request);
-
 	private:
 		static constexpr int kSpoilersRectsSize = 512;
 
@@ -122,52 +102,69 @@ namespace text {
 			const AbstractBlock* block) const;
 
 		const String* _t = nullptr;
+
 		GeometryDescriptor _geometry;
 		QPainter* _p = nullptr;
+
 		std::span<SpecialColor> _colors = {};
-		const style::TextPalette* _palette = new style::TextPalette();;
+		const style::TextPalette* _palette = new style::TextPalette();
+
 		style::align _align = style::alignTopLeft;
 		QPen _originalPen;
+
 		QPen _originalPenSelected;
 		QPen _quoteLinkPenOverride;
+
 		const QPen* _currentPen = nullptr;
 		const QPen* _currentPenSelected = nullptr;
+
 		struct {
 			bool spoiler = false;
 			bool selectActiveBlock = false; // For monospace.
 		} _background;
+
 		int _yFrom = 0;
 		int _yTo = 0;
+
 		TextSelection _selection = { 0, 0 };
 		bool _fullWidthSelection = true;
+
 		HighlightInfoRequest* _highlight = nullptr;
 		const QChar* _str = nullptr;
+
 		mutable Time::time _cachedNow = 0;
 		double _spoilerOpacity = 0.;
+
 		QVarLengthArray<FixedRange> _highlightRanges;
 		QVarLengthArray<QRect, kSpoilersRectsSize> _highlightRects;
 
 		int _customEmojiSkip = 0;
-		int _indexOfElidedBlock = -1; // For spoilers.
+		int _indexOfElidedBlock = -1;
 
-		// current paragraph data
 		Blocks::const_iterator _paragraphStartBlock;
 		Qt::LayoutDirection _paragraphDirection = Qt::LayoutDirectionAuto;
+
 		int _paragraphStart = 0;
 		int _paragraphLength = 0;
+
 		QVarLengthArray<QScriptAnalysis, 4096> _paragraphAnalysis;
 
-		// current quote data
 		QuoteDetails* _quote = nullptr;
+
 		Qt::LayoutDirection _quoteDirection = Qt::LayoutDirectionAuto;
+
 		int _quoteShift = 0;
 		int _quoteIndex = 0;
+
 		QMargins _quotePadding;
+
 		int _quoteLinesLeft = -1;
 		int _quoteTop = 0;
 		int _quoteLineTop = 0;
+
 		QuotePaintCache* _quotePreCache = nullptr;
 		QuotePaintCache* _quoteBlockquoteCache = nullptr;
+
 		bool _quotePreValid = false;
 		bool _quoteBlockquoteValid = false;
 
@@ -176,38 +173,46 @@ namespace text {
 
 		// current line data
 		style::font _f;
+
 		int _startLeft = 0;
 		int _startTop = 0;
 		int _startLineWidth = 0;
+
 		QFixed _x, _wLeft, _last_rPadding;
 		int _y = 0;
+
 		int _yDelta = 0;
 		int _lineIndex = 0;
+
 		int _lineHeight = 0;
 		int _fontHeight = 0;
+
 		bool _breakEverywhere = false;
 		bool _elidedLine = false;
 
 		// elided hack support
 		int _blocksSize = 0;
 		int _elideSavedIndex = 0;
+
 		std::optional<Block> _elideSavedBlock;
 
 		int _lineStart = 0;
 		int _localFrom = 0;
 		int _lineStartBlock = 0;
+
 		QFixed _lineStartPadding = 0;
 		QFixed _lineWidth = 0;
 
 		// link and symbol resolve
 		QFixed _lookupX = 0;
 		int _lookupY = 0;
+
 		bool _lookupSymbol = false;
 		bool _lookupLink = false;
+
 		StateRequest _lookupRequest;
 		TextState _lookupResult;
 
 		bool _elisionMiddle = false;
-
 	};
 } // namespace text

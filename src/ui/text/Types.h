@@ -15,6 +15,8 @@ class BlockquoteClickHandler;
 
 
 namespace text {
+	inline constexpr auto kMaxQuoteOutlines = 3;
+
 	enum class EntityType : uchar {
 		Invalid = 0,
 
