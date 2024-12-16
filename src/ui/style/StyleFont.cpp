@@ -13,10 +13,11 @@
 #include "../../core/CoreUtility.h"
 
 #include "StyleCore.h"
+#include <QDir>
 
 
 void style_InitFontsResource() {
-	// Q_INIT_RESOURCE(fonts);
+	Q_INIT_RESOURCE(fonts);
 }
 
 namespace style {
@@ -35,15 +36,6 @@ namespace style {
 
 	QString CustomFont() {
 		return Custom;
-	}
-
-	const FontResolveResult* FindAdjustResult(const QFont& font) {
-		const auto key = internal::QtFontKey(font);
-		const auto i = internal::QtFontsKeys.find(key);
-
-		return (i != end(internal::QtFontsKeys))
-			? &internal::FontsByKey[i->second]->result
-			: nullptr;
 	}
 } // namespace style
 
@@ -415,7 +407,7 @@ namespace style::internal {
 	QString FontData::elided(
 		const QString& str,
 		int width,
-		Qt::TextElideMode mode = Qt::ElideRight) const 
+		Qt::TextElideMode mode) const 
 	{
 		return _m.elidedText(str, mode, width);
 	}
@@ -522,7 +514,7 @@ namespace style::internal {
 	{
 		const auto key = FontKey(size, flags, family);
 		auto i = FontsByKey.find(key);
-
+		qDebug() << "(i == end(FontsByKey)): " << (i == end(FontsByKey));
 		if (i == end(FontsByKey)) {
 			i = FontsByKey.emplace(
 				key,
@@ -579,3 +571,14 @@ namespace style::internal {
 		return _font.get();
 	}
 } // namespace style::internal
+
+namespace style {
+	const FontResolveResult* FindAdjustResult(const QFont& font) {
+		const auto key = internal::QtFontKey(font);
+		const auto i = internal::QtFontsKeys.find(key);
+
+		return (i != end(internal::QtFontsKeys))
+			? &internal::FontsByKey[i->second]->result
+			: nullptr;
+	}
+} // namespace style

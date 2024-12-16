@@ -42,7 +42,7 @@ QSize FlatLabel::sizeHint() const {
 }
 
 void FlatLabel::setText(const QString& text) {
-	_text.setText(style::TextStyle()._font, text);
+	_text.setText(style::TextStyle(), text);
 	textUpdated();
 }
 
@@ -189,7 +189,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 
 	painter.setPen(Qt::white);
 
-	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
+	//style::RoundCorners(painter, size(), 10, _cornersRoundMode);
 
 	const auto textWidth = _textWidth
 		? _textWidth
@@ -223,14 +223,15 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		: height();
 
 	_text.draw(painter, {
-			.position = { textLeft, style::flatLabel::margins.top() },
-			.availableWidth = style::maximumTextWidth,
-			.align = Qt::AlignLeft,
-			.clip = event->rect(),
-			.now = Time::now(),
-			.selection = selection,
-			.elisionHeight = elisionHeight,
-			.elisionBreakEverywhere = renderElided && _breakEverywhere,
+		.position = { textLeft, style::flatLabel::margins.top() },
+		.availableWidth = textWidth,
+		.align = style::alignLeft,
+		.clip = event->rect(),
+		.palette = new style::TextPalette(),
+		.now = Time::now(),
+		.selection = selection,
+		.elisionHeight = elisionHeight,
+		.elisionBreakEverywhere = renderElided && _breakEverywhere,
 		});
 }
 

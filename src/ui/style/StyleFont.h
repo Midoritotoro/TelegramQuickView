@@ -64,18 +64,20 @@ namespace style {
 		QColor bg;
 	};
 
-	struct TextStyle {
-		font _font;
-		int lineHeight = 0;
+	struct TextPalette {
+		QColor linkFg = QColor(132, 220, 240);
+		QColor monoFg = QColor(132, 220, 240);
 
-		bool linkUnderLine = true;
-		QuoteStyle blockquote;
+		QColor selectBg = QColor(46, 112, 165);
+		QColor selectFg = Qt::transparent;
 
-		TextStyle(const font& fontStyle = font(13, style::FontFlag::Semibold, 0), const QuoteStyle& _quote = {}) :
-			_font(fontStyle)
-			, blockquote(_quote)
-		{}
+		QColor selectLinkFg = QColor(46, 112, 165);
+		QColor selectMonoFg = QColor(46, 112, 165);
+		QColor selectOverlay = QColor(46, 112, 165);
+
+		bool linkAlwaysActive = true;
 	};
+
 
 	[[nodiscard]] const QString& SystemFontTag();
 	void SetCustomFont(const QString& font);
@@ -210,3 +212,18 @@ namespace style::internal {
 		Font _font;
 	};
 } // namespace style::internal
+
+namespace style {
+	struct TextStyle {
+		font _font = font(13, style::FontFlag::Semibold, 0);
+		int lineHeight = 0;
+
+		bool linkUnderLine = true;
+		QuoteStyle blockquote;
+
+		TextStyle(const font& font = font(13, style::FontFlag::Semibold, 0)):
+			_font(font)
+		{}
+	};
+
+} // namespace style

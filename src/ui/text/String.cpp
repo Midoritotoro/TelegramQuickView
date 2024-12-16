@@ -224,7 +224,8 @@ namespace text {
 		QPainter& painter,
 		const PaintContext& context) const 
 	{
-		painter.drawText(QRect(context.position.x(), context.position.y(), context.availableWidth, context.elisionHeight), context.align, _text);
+		//painter.drawText(5, 5, _text);
+		Renderer(*this).draw(painter, context);
 	}
 
 
@@ -686,7 +687,7 @@ namespace text {
 						continue;
 					}
 
-					const auto& entities = EntitiesInText(); //  toTextWithEntities().entities;
+					const auto& entities = toTextWithEntities().entities;
 					const auto eIt = std::ranges::find_if(entities, [&](
 						const EntityInText& e) {
 							return (e.type() == EntityType::Pre

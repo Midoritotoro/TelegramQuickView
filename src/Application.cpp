@@ -14,13 +14,17 @@ Application::Application(int& argc, char** argv) :
     QString text = "Test text Click https://google.com ВС РФ ударили по объектам энергетики в Тернополе и Ровенской области.\n. В Тернополе «Герань» атаковала критическую инфраструктуру(видео), сообщил мэр.Часть города осталась без света.Местные власти призывают население запастись водой и зарядить гаджеты \nТакже есть попадание по объекту энергетической инфраструктуры в Ровенской области, отчитались в ОВА(фото).\n 🇺🇦 Взрывы прогремели в Староконстантинове, Винницкой и Киевской областях.";
     QString videoPath = "C:\\Users\\danya\\Downloads\\2024-11-22_22-56-37.png";
 
+
+   // _mediaPlayer = std::make_unique<MediaPlayer>();
     _messagesView = std::make_unique<MessagesView>();
-    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::PreviewWithCount);
+    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::Stack);
 
     _messagesView->show();
     auto list = QStringList({ videoPath });
-
-    _messagesView->makeMessage(text, list);
+    //_mediaPlayer->setMedia("C:/Users/danya/Downloads/videotestvertical.mp4");
+    //_mediaPlayer->show();
+    _messagesView->makeMessage(text);
+    
 }
 
 Application::~Application() {
@@ -48,9 +52,10 @@ void Application::init() {
 
     style::SetDevicePixelRatio(useRatio);
 
-    style::SetCustomFont("OpenSans");
-    style::Start();
+    style::SetCustomFont(u"OpenSans-Regular"_q);
+    style::internal::StartFonts();
 
+    style::Start();
 
     QPixmapCache::setCacheLimit(1024 * 1024); 
 }

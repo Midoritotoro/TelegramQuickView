@@ -38,9 +38,9 @@ void Message::setText(const QString& text) {
 
 	qDebug() << "hasLinks: " << _textLabel->hasLinks();
 
-	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
+	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 }
 
 QString Message::text() const noexcept {

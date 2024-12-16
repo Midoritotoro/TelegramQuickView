@@ -6,6 +6,7 @@ if (POLICY CMP0141)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTORCC ON)
 project("TelegramQuickView" LANGUAGES CXX)
 
 
@@ -37,6 +38,8 @@ qt_standard_project_setup()
 
 
 SET(MAIN_SOURCES main.cpp
+
+    resources/fonts/fonts.qrc
 
 	src/Application.cpp
 	src/Application.h
@@ -240,18 +243,6 @@ qt_add_resources(${PROJECT_NAME}
     speaker_white_small_on.png
     speed_button.png
     stop.png
-)
-
-qt_add_resources(${PROJECT_NAME}
-    PREFIX "/resources/fonts"
-    FILES 
-    OpenSans-Regular.ttf
-    OpenSans-Italic.ttf
-    OpenSans-SemiBold.ttf
-    OpenSans-SemiBoldItalic.ttf
-    Vazirmatn-UI-NL-Regular.ttf
-    Vazirmatn-UI-NL-SemiBold.ttf
-  
 )
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})

@@ -17,6 +17,7 @@
 #include <private/qfixed_p.h>
 
 #include "Types.h"
+#include <span>
 
 
 class PreClickHandler;
@@ -78,9 +79,11 @@ namespace text {
 		Qt::Alignment align = Qt::AlignLeft;
 		QRect clip;
 
+		const style::TextPalette* palette = new style::TextPalette();
+
 		QuotePaintCache* pre = nullptr;
 		QuotePaintCache* blockquote = nullptr;
-		std::span<SpecialColor> colors;
+		std::span<SpecialColor> colors = {};
 		Time::time now = 0;
 
 		bool paused = false;
@@ -105,7 +108,6 @@ namespace text {
 	class TextWord;
 	class BlockParser;
 	class BidiAlgorithm;
-	class Renderer;
 
 	struct QuoteDetails {
 		QString language;
@@ -282,18 +284,17 @@ namespace text {
 			QPoint point,
 			int width,
 			StateRequest request) const;
-
-		TextState getStateLeft(
+		[[nodiscard]] TextState getStateLeft(
 			QPoint point,
 			int width,
 			int outerw,
 			StateRequest request) const;
 
-		TextState getStateElided(
+		[[nodiscard]] TextState getStateElided(
 			QPoint point,
 			int width,
 			StateRequestElided request) const;
-		TextState getStateElidedLeft(
+		[[nodiscard]] TextState getStateElidedLeft(
 			QPoint point,
 			int width,
 			int outerw,

@@ -395,8 +395,15 @@ namespace text {
 
 		_p = &p;
 		_p->setFont(_t->_st->_font);
+
+		qDebug() << (context.palette == nullptr);
+		auto _palette = context.palette;
 		_colors = context.colors;
+
 		_originalPen = _p->pen();
+		_originalPenSelected = (_palette->selectFg.alphaF() == 0)
+			? _originalPen
+			: _palette->selectFg;
 
 		_x = _startLeft = context.position.x();
 		_y = _startTop = context.position.y();

@@ -9,6 +9,7 @@
 #include "../text/String.h"
 
 #include <QWidget>
+#include "../style/StyleFont.h"
 
 
 namespace style {

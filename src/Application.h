@@ -11,6 +11,7 @@ class MediaPlayer;
 class Application final: public QApplication {
 private:
 	std::unique_ptr<MessagesView> _messagesView = nullptr;
+	std::unique_ptr<MediaPlayer> _mediaPlayer = nullptr;
 public:
 	Application(int& argc, char** argv);
 	~Application();

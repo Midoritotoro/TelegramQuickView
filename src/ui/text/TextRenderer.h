@@ -131,8 +131,8 @@ namespace text {
 		const String* _t = nullptr;
 		GeometryDescriptor _geometry;
 		QPainter* _p = nullptr;
-		std::span<SpecialColor> _colors;
-
+		std::span<SpecialColor> _colors = {};
+		const style::TextPalette* _palette = new style::TextPalette();;
 		style::align _align = style::alignTopLeft;
 		QPen _originalPen;
 		QPen _originalPenSelected;

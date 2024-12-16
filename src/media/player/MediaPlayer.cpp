@@ -11,6 +11,7 @@
 #include <QMetaObject>
 
 #include "../../ui/style/StyleCore.h"
+#include <qopenglfunctions_3_3_core.h>
 
 
 namespace {
@@ -34,7 +35,7 @@ MediaPlayer::MediaPlayer(QWidget* parent):
 	_widgetsHider->SetInactivityDuration(3000);
 	_widgetsHider->SetAnimationDuration(3000);
 
-	setFullScreen();
+	setNormal();
 
 	setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -207,7 +208,7 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 
 void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
-	paintBackground(painter, event);
+//	paintBackground(painter, event);
 
 	const auto center = _current.size().width() < size().width()
 		|| _current.size().height() < size().height()
@@ -215,8 +216,10 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 
 	_currentFrameRect = QRect(center, _current.size());
 
-	if (const auto fill = rect().intersected(event->rect()); !fill.isNull())
-		painter.drawImage(center, _current);
+//	if (_current.size().width() <= size().width() && _current.size().height() <= size().height())
+//		painter.drawImage(center, _current);
+//	else
+//		painter.drawImage(QRect(QPoint(0, 0), size()), _current);
 }
 
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {

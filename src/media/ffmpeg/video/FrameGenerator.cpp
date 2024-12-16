@@ -165,15 +165,14 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 		? (_next.position - _current.position)
 		: _current.duration;
 
-	Frame resultFrame;
-	
-	resultFrame.duration = duration;
-	resultFrame.image = storage;
-	resultFrame.last = !_next.frame;
 
 	ClearFrameMemory(frame);
 
-	return resultFrame;
+	return {
+		.duration = duration,
+		.image = storage,
+		.last = !_next.frame 
+	};
 }
 
 FrameGenerator::Frame FrameGenerator::renderNext(
