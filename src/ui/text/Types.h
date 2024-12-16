@@ -3,12 +3,18 @@
 #include "../../core/Types.h"
 #include "../../core/Flags.h"
 
+#include "../../core/Time.h"
+
 #include "../style/StyleFont.h"
+#include "../ClickHandler.h"
 
 #include <private/qfixed_p.h>
 #include <private/qfontengine_p.h>
 
 #include <QImage>
+#include <ranges>
+
+
 
 class PreClickHandler;
 class BlockquoteClickHandler;
@@ -84,6 +90,37 @@ namespace text {
 	DECLARE_FLAGS(TextBlockFlags, TextBlockFlag)
 	inline constexpr bool is_flag_type(TextBlockFlag) {
 		return true;
+	}
+
+	struct TextSelection {
+		enum class Type {
+			Letters = 0x01,
+			Words = 0x02,
+			Paragraphs = 0x03,
+		};
+
+		constexpr TextSelection() = default;
+		constexpr TextSelection(uint16 from, uint16 to) : from(from), to(to) {
+		}
+
+		[[nodiscard]] constexpr bool empty() const noexcept {
+			return from == to;
+		}
+
+		[[nodiscard]] bool isFullSelection(const QString& text) const {
+			return (from == 0) && (to >= text.size());
+		}
+
+		uint16 from = 0;
+		uint16 to = 0;
+	};
+
+	inline bool operator==(TextSelection a, TextSelection b) {
+		return a.from == b.from && a.to == b.to;
+	}
+
+	inline bool operator!=(TextSelection a, TextSelection b) {
+		return !(a == b);
 	}
 
 	struct TextParseOptions {
@@ -184,11 +221,6 @@ namespace text {
 		bool useFullWidth = false; // !(width = min(availableWidth, maxWidth()))
 	};
 
-	class WordParser;
-	class TextWord;
-	class BlockParser;
-	class BidiAlgorithm;
-
 	struct QuoteDetails {
 		QString language;
 
@@ -274,8 +306,4 @@ namespace text {
 	class StackEngine;
 	class BidiAlgorithm;
 	class Renderer;
-
-	using Words = std::vector<Word>;
-	using Blocks = std::vector<Block>;
-	using EntitiesInText = QVector<EntityInText>;
 } // namespace text

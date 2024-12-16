@@ -10,6 +10,8 @@
 
 
 namespace text {
+	using Blocks = std::vector<Block>;
+
 	[[nodiscard]] style::font WithFlags(
 		const style::font& font,
 		TextBlockFlags flags,

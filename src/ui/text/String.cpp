@@ -12,6 +12,8 @@
 #include "TextUtility.h"
 #include "WordParser.h"
 
+#include "TextDrawUtility.h"
+
 
 namespace text {
 	String::String(int32 minResizeWidth)
@@ -648,9 +650,9 @@ namespace text {
 
 
 	TextState String::getState(QPoint point, int width, StateRequest request) const {
-		if (isEmpty()) {
+		if (isEmpty())
 			return {};
-		}
+		
 		return Renderer(*this).getState(
 			point,
 			SimpleGeometry(width, 0, 0, false),
@@ -662,9 +664,9 @@ namespace text {
 	}
 
 	TextState String::getStateElided(QPoint point, int width, StateRequestElided request) const {
-		if (isEmpty()) {
+		if (isEmpty())
 			return {};
-		}
+		
 		return Renderer(*this).getState(point, SimpleGeometry(
 			width,
 			request.lines,

@@ -5,6 +5,8 @@
 
 
 namespace text {
+	using Words = std::vector<Word>;
+
 	class Word final {
 	public:
 		Word() = default;

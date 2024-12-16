@@ -10,6 +10,9 @@
 #include "../BasicClickHandlers.h"
 #include "TextClickHandlers.h"
 
+#include "TextUtility.h"
+
+
 namespace text {
 	namespace {
 

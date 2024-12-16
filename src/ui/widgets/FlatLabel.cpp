@@ -12,6 +12,8 @@
 #include <QMouseEvent>
 #include <QDrag>
 
+#include "../text/TextUtility.h"
+
 
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)

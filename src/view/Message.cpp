@@ -2,7 +2,7 @@
 #include "MessageAttachment.h"
 
 #include "../ui/widgets/FlatLabel.h"
-#include "../ui/ClickHandler.h"
+#include "../ui/BasicClickHandlers.h"
 
 
 Message::Message(
@@ -31,10 +31,10 @@ void Message::setText(const QString& text) {
 	if (text.length() == 0)
 		return;
 
-	auto handler = std::make_shared<UrlClickHandler>("https://google.com");
+	//auto handler = std::make_shared<UrlClickHandler>("https://google.com");
 
 	_textLabel->setText(text);
-	_textLabel->setLink(1, handler);
+	//_textLabel->setLink(1, handler);
 
 	qDebug() << "hasLinks: " << _textLabel->hasLinks();
 

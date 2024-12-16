@@ -4,7 +4,7 @@
 #include "../../core/Timer.h"
 
 #include "../../core/InvokeQueued.h"
-#include "../ClickHandler.h"
+#include "../BasicClickHandlers.h"
 
 #include "../text/String.h"
 

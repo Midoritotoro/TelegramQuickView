@@ -6,7 +6,6 @@
 #include "../style/StyleCore.h"
 #include "Types.h"
 
-
 #include <any>
 
 

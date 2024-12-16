@@ -527,7 +527,7 @@ QByteArray text::SerializeTags(const TextWithTags::Tags& tags) {
 	return tagsSerialized;
 }
 
-text::details::ContainerImplHelper::CutResult text::details::ContainerImplHelper::mid(
+constexpr text::details::ContainerImplHelper::CutResult text::details::ContainerImplHelper::mid(
 	qsizetype originalLength,
 	qsizetype* _position,
 	qsizetype* _length) 
@@ -566,7 +566,7 @@ text::details::ContainerImplHelper::CutResult text::details::ContainerImplHelper
 text::TextWithEntities text::WithSingleEntity(
 	const QString& text,
 	EntityType type,
-	const QString& data = QString()) 
+	const QString& data) 
 {
 	auto result = TextWithEntities{ text };
 	result.entities.push_back({ type, 0, int(text.size()), data });

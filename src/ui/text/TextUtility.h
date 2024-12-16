@@ -97,7 +97,7 @@ namespace text {
 		}
 	};
 
-} // namespace details
+	} // namespace details
 
 	inline constexpr auto Upper = details::ToUpperType{};
 

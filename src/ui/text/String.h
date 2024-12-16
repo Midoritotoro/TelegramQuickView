@@ -1,10 +1,10 @@
 #pragma once 
 
 #include "BlockParser.h"
+#include "TextWord.h"
 
 namespace text {
 	inline constexpr auto kQFixedMax = (INT_MAX / 256);
-	inline constexpr auto kMaxQuoteOutlines = 3;
 
 	const TextParseOptions kDefaultTextOptions = {
 		TextParseLinks | TextParseMultiline, // flags
