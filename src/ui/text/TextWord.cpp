@@ -5,12 +5,13 @@ namespace text {
 		uint16 position,
 		bool unfinished,
 		QFixed width,
-		QFixed rbearing): 
-			_position(position)
-			, _rbearing_modulus(std::min(std::abs(rbearing.value()), 0x7FFF))
-			, _rbearing_positive(rbearing.value() > 0 ? 1 : 0)
-			, _unfinished(unfinished ? 1 : 0)
-			, _qfixedwidth(width.value()) 
+		QFixed rbearing
+	): 
+		_position(position)
+		, _rbearing_modulus(std::min(std::abs(rbearing.value()), 0x7FFF))
+		, _rbearing_positive(rbearing.value() > 0 ? 1 : 0)
+		, _unfinished(unfinished ? 1 : 0)
+		, _qfixedwidth(width.value()) 
 	{}
 
 	Word::Word(uint16 position, int newlineBlockIndex):

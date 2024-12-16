@@ -1,158 +1,10 @@
 #pragma once 
 
-#include "../BasicClickHandlers.h"
-
-#include "TextEntities.h"
-#include "../../core/CoreUtility.h"
-
-#include "TextUtility.h"
-#include "TextBlock.h"
-
-#include "../style/StyleFont.h"
-
-#include <QString>
-#include <QPainter>
-
-#include <xutility>
-#include <private/qfixed_p.h>
-
-#include "Types.h"
-#include <span>
-
-
-class PreClickHandler;
-class BlockquoteClickHandler;
+#include "BlockParser.h"
 
 namespace text {
 	inline constexpr auto kQFixedMax = (INT_MAX / 256);
 	inline constexpr auto kMaxQuoteOutlines = 3;
-
-	struct QuotePaintCache {
-		QImage corners;
-		QImage outline;
-		QImage expand;
-		QImage collapse;
-		mutable QImage bottomCorner;
-		mutable QImage bottomRounding;
-		mutable QImage collapsedLine;
-
-		std::array<QColor, kMaxQuoteOutlines> outlinesCached;
-		QColor headerCached;
-		QColor bgCached;
-		QColor iconCached;
-
-		std::array<QColor, kMaxQuoteOutlines> outlines;
-		QColor header;
-		QColor bg;
-		QColor icon;
-	};
-
-	struct SpecialColor {
-		const QPen* pen = nullptr;
-		const QPen* penSelected = nullptr;
-	};
-
-	struct HighlightInfoRequest {
-		TextSelection range;
-		QRect interpolateTo;
-		double interpolateProgress = 0.;
-		QPainterPath* outPath = nullptr;
-	};
-
-	struct LineGeometry {
-		int left = 0;
-		int width = 0;
-		bool elided = false;
-	};
-
-	struct GeometryDescriptor {
-		Fn<LineGeometry(int line)> layout;
-		bool breakEverywhere = false;
-		bool* outElided = nullptr;
-	};
-
-	struct PaintContext {
-		QPoint position;
-		int outerWidth = 0;
-		int availableWidth = 0;
-		GeometryDescriptor geometry;
-		Qt::Alignment align = Qt::AlignLeft;
-		QRect clip;
-
-		const style::TextPalette* palette = new style::TextPalette();
-
-		QuotePaintCache* pre = nullptr;
-		QuotePaintCache* blockquote = nullptr;
-		std::span<SpecialColor> colors = {};
-		Time::time now = 0;
-
-		bool paused = false;
-		bool pausedEmoji = false;
-		bool pausedSpoiler = false;
-
-		bool fullWidthSelection = true;
-		TextSelection selection;
-
-		HighlightInfoRequest* highlight = nullptr;
-
-		int elisionHeight = 0;
-		int elisionLines = 0;
-		int elisionRemoveFromEnd = 0;
-		bool elisionBreakEverywhere = false;
-
-		bool elisionMiddle = false;
-		bool useFullWidth = false; // !(width = min(availableWidth, maxWidth()))
-};
-
-	class WordParser;
-	class TextWord;
-	class BlockParser;
-	class BidiAlgorithm;
-
-	struct QuoteDetails {
-		QString language;
-
-		std::shared_ptr<PreClickHandler> copy;
-		std::shared_ptr<BlockquoteClickHandler> toggle;
-
-		int copyWidth = 0;
-		int maxWidth = 0;
-
-		int minHeight = 0;
-		int scrollLeft = 0;
-
-		bool blockquote = false;
-		bool collapsed = false;
-		bool expanded = false;
-		bool pre = false;
-	};
-
-	struct QuotesData {
-		std::vector<QuoteDetails> list;
-		Fn<void(int index, bool expanded)> expandCallback;
-	};
-
-	struct Modification {
-		int position = 0;
-		uint16 skipped = 0;
-		bool added = false;
-	};
-
-	struct ExtendedData {
-		std::vector<ClickHandlerPtr> links;
-		std::unique_ptr<QuotesData> quotes;
-		std::vector<Modification> modifications;
-	};
-
-	enum {
-		TextParseMultiline = 0x001,
-		TextParseLinks = 0x002,
-		TextParseMentions = 0x004,
-		TextParseHashtags = 0x008,
-		TextParseBotCommands = 0x010,
-		TextParseMarkdown = 0x020,
-		TextParseColorized = 0x040,
-	};
 
 	const TextParseOptions kDefaultTextOptions = {
 		TextParseLinks | TextParseMultiline, // flags
@@ -194,6 +46,7 @@ namespace text {
 			bool lineWidths = false;
 			int reserve = 0;
 		};
+
 		String(int32 minResizeWidth = kQFixedMax);
 		String(String&& other) = default;
 		String() = default;

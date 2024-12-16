@@ -1,10 +1,16 @@
 #include "String.h"
 
-#include "WordParser.h"
-#include "BlockParser.h"
-
 #include "TextClickHandlers.h"
 #include "TextRenderer.h"
+
+#include "TextWord.h"
+#include "../../core/CoreUtility.h"
+
+#include "../BasicClickHandlers.h"
+#include "TextClickHandlers.h"
+
+#include "TextUtility.h"
+#include "WordParser.h"
 
 
 namespace text {

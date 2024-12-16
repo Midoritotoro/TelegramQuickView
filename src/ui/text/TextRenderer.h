@@ -12,6 +12,7 @@ struct QScriptItem;
 
 namespace text {
 	inline constexpr auto kQuoteCollapsedLines = 3;
+
 	struct FixedRange {
 		QFixed from;
 		QFixed till;
@@ -19,14 +20,6 @@ namespace text {
 		[[nodiscard]] bool empty() const {
 			return (till <= from);
 		}
-	};
-
-
-	struct SkipBlockPaintParts {
-		uint32 skippedTop : 29 = 0;
-		uint32 skipBottom : 1 = 0;
-		uint32 expandIcon : 1 = 0;
-		uint32 collapseIcon : 1 = 0;
 	};
 
 	namespace {

@@ -1,6 +1,9 @@
 #include "WordParser.h"
 
-// #include "ui/text/text_bidi_algorithm.h"
+#include "String.h"
+#include "TextBidiAlgorithm.h"
+
+#include "TextWord.h"
 
 
 namespace text {
@@ -27,53 +30,30 @@ namespace text {
 
 	void WordParser::LineBreakHelper::calculateRightBearing(
 		QFontEngine* engine,
-		glyph_t glyph) {
+		glyph_t glyph) 
+	{
 		qreal rb;
 		engine->getGlyphBearings(glyph, 0, &rb);
-
-		// We only care about negative right bearings, so we limit the range
-		// of the bearing here so that we can assume it's negative in the rest
-		// of the code, as well as use QFixed(1) as a sentinel to represent
-		// the state where we have yet to compute the right bearing.
 		rightBearing = qMin(QFixed::fromReal(rb), QFixed(0));
 	}
 
 	void WordParser::LineBreakHelper::calculateRightBearing() {
 		if (currentPosition > 0
 			&& logClusters[currentPosition - 1] < glyphs.numGlyphs
-			&& !whiteSpaceOrObject) {
+			&& !whiteSpaceOrObject)
 			calculateRightBearing(fontEngine.data(), currentGlyph());
-		}
-		else {
+		else
 			rightBearing = 0;
-		}
 	}
 
 	void WordParser::LineBreakHelper::calculateRightBearingForPreviousGlyph() {
-		if (previousGlyph > 0) {
+		if (previousGlyph > 0)
 			calculateRightBearing(previousGlyphFontEngine.data(), previousGlyph);
-		}
-		else {
+		else
 			rightBearing = 0;
-		}
 	}
 
-	// We always calculate the right bearing right before it is needed.
-	// So we don't need caching / optimizations referred to delayed right bearing calculations.
-
-	//static const QFixed RightBearingNotCalculated;
-
-	//inline void WordParser::LineBreakHelper::resetRightBearing()
-	//{
-	//	rightBearing = RightBearingNotCalculated;
-	//}
-
-	// We express the negative right bearing as an absolute number
-	// so that it can be applied to the width using addition.
 	QFixed WordParser::LineBreakHelper::negativeRightBearing() const {
-		//if (rightBearing == RightBearingNotCalculated)
-		//	return QFixed(0);
-
 		return qAbs(rightBearing);
 	}
 
@@ -90,6 +70,7 @@ namespace text {
 			++pos;
 			++line.length;
 		} while (pos < end && logClusters[pos] == glyphPosition);
+
 		do { // calculate the textWidth for the rest of the current cluster.
 			if (!glyphs.attributes[glyphPosition].dontPrint)
 				line.textWidth += glyphs.advances[glyphPosition];
@@ -104,8 +85,9 @@ namespace text {
 	}
 
 	WordParser::BidiInitedAnalysis::BidiInitedAnalysis(not_null<String*> text)
-		: list(text->_text.size()) {
-		BidiAlgorithm bidi(
+		: list(text->_text.size()) 
+	{
+		auto bidi = BidiAlgorithm(
 			text->_text.constData(),
 			list.data(),
 			text->_text.size(),
@@ -123,41 +105,41 @@ namespace text {
 		, _tWords(_t->_words)
 		, _analysis(_t)
 		, _engine(_t, _analysis.list)
-		, _e(_engine.wrapped()) {
+		, _e(_engine.wrapped()) 
+	{
 		parse();
 	}
 
 	void WordParser::parse() {
 		_tWords.clear();
-		if (_tText.isEmpty()) {
+
+		if (_tText.isEmpty())
 			return;
-		}
+
 		_newItem = _e.findItem(0);
 		_attributes = _e.attributes();
-		if (!_attributes) {
+		if (!_attributes)
 			return;
-		}
+
 		_lbh.logClusters = _e.layoutData->logClustersPtr;
 
 		while (_newItem < _e.layoutData->items.size()) {
 			if (_newItem != _item) {
 				_attributes = moveToNewItemGetAttributes();
-				if (!_attributes) {
+				if (!_attributes)
 					return;
-				}
 			}
 			const auto& current = _e.layoutData->items[_item];
 			const auto atSpaceBreak = [&] {
 				for (auto index = _lbh.currentPosition; index < _itemEnd; ++index) {
-					if (!_attributes[index].whiteSpace) {
+					if (!_attributes[index].whiteSpace)
 						return false;
-					}
-					else if (isSpaceBreak(_attributes, index)) {
+					else if (isSpaceBreak(_attributes, index))
 						return true;
-					}
 				}
 				return false;
 				}();
+
 			if (current.analysis.flags == QScriptAnalysis::LineOrParagraphSeparator) {
 				pushAccumulatedWord();
 				processSingleGlyphItem();
@@ -233,23 +215,27 @@ namespace text {
 
 	const QCharAttributes* WordParser::moveToNewItemGetAttributes() {
 		_item = _newItem;
+
 		auto& si = _e.layoutData->items[_item];
 		auto result = _e.attributes();
+
 		if (!si.num_glyphs) {
 			_engine.shapeGetBlock(_item);
 			result = _e.attributes();
-			if (!result) {
+			if (!result)
 				return nullptr;
-			}
+
 			_lbh.logClusters = _e.layoutData->logClustersPtr;
 		}
+
 		_lbh.currentPosition = si.position;
 		_itemEnd = si.position + _e.length(_item);
 		_lbh.glyphs = _e.shapedGlyphs(&si);
+
 		const auto fontEngine = _e.fontEngine(si);
-		if (_lbh.fontEngine != fontEngine) {
+		if (_lbh.fontEngine != fontEngine)
 			_lbh.fontEngine = fontEngine;
-		}
+
 		return result;
 	}
 
@@ -275,6 +261,7 @@ namespace text {
 
 	void WordParser::wordProcessed(int nextWordStart, bool spaces) {
 		wordContinued(nextWordStart, spaces);
+
 		_addingEachGrapheme = false;
 		_lastGraphemeBoundaryPosition = -1;
 		_lastGraphemeBoundaryLine = ScriptLine();
@@ -337,7 +324,8 @@ namespace text {
 	void WordParser::pushFinishedWord(
 		uint16 position,
 		QFixed width,
-		QFixed rbearing) {
+		QFixed rbearing) 
+	{
 		const auto unfinished = false;
 		_tWords.push_back(Word(position, unfinished, width, rbearing));
 	}
@@ -345,7 +333,8 @@ namespace text {
 	void WordParser::pushUnfinishedWord(
 		uint16 position,
 		QFixed width,
-		QFixed rbearing) {
+		QFixed rbearing) 
+	{
 		const auto unfinished = true;
 		_tWords.push_back(Word(position, unfinished, width, rbearing));
 	}
@@ -356,9 +345,8 @@ namespace text {
 
 	bool WordParser::isLineBreak(
 		const QCharAttributes* attributes,
-		int index) const {
-		// Don't break by '/' or '.' in the middle of the word.
-		// In case of a line break or white space it'll allow break anyway.
+		int index) const 
+	{
 		return attributes[index].lineBreak
 			&& (index <= 0
 				|| (_tText[index - 1] != '/' && _tText[index - 1] != '.'));
@@ -366,8 +354,8 @@ namespace text {
 
 	bool WordParser::isSpaceBreak(
 		const QCharAttributes* attributes,
-		int index) const {
-		// Don't break on &nbsp;
+		int index) const 
+	{
 		return attributes[index].whiteSpace && (_tText[index] != QChar::Nbsp);
 	}
 

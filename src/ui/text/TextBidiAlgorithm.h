@@ -5,8 +5,6 @@
 #include <private/qunicodetables_p.h>
 #include <private/qtextengine_p.h>
 
-#define BIDI_DEBUG if (1) ; else qDebug
-
 namespace text {
 
 	enum { BidiDebugEnabled = false };
@@ -146,7 +144,7 @@ namespace text {
 			bool override = false;
 			stack.push({ level, false, false, -1 });
 
-			BIDI_DEBUG() << "resolving explicit levels";
+			qDebug() << "resolving explicit levels";
 			int runStart = 0;
 			int continuationFrom = -1;
 			int lastRunWithContent = -1;
@@ -166,7 +164,7 @@ namespace text {
 				}
 				if (runHasContent)
 					lastRunWithContent = runs.size();
-				BIDI_DEBUG() << "   appending run start/end" << runStart << runEnd << "level" << level;
+				qDebug() << "   appending run start/end" << runStart << runEnd << "level" << level;
 				runs.append({ runStart, runEnd, -1, level, isContinuation, runHasContent });
 				runHasContent = false;
 				runStart = runEnd + 1;
@@ -195,7 +193,7 @@ namespace text {
 						else
 							runBeforeIsolate = -1;
 						appendRun(isIsolate ? i : i - 1);
-						BIDI_DEBUG() << "pushing new item on stack: level" << (int)newLevel << "isOverride" << isOverride << "isIsolate" << isIsolate << runBeforeIsolate;
+						qDebug() << "pushing new item on stack: level" << (int)newLevel << "isOverride" << isOverride << "isIsolate" << isIsolate << runBeforeIsolate;
 						stack.push({ newLevel, isOverride, isIsolate, runBeforeIsolate });
 						override = isOverride;
 						level = newLevel;
@@ -260,7 +258,7 @@ namespace text {
 						stack.pop();
 						override = stack.top().isOverride;
 						level = stack.top().level;
-						BIDI_DEBUG() << "popped PDF from stack, level now" << (int)stack.top().level;
+						qDebug() << "popped PDF from stack, level now" << (int)stack.top().level;
 					}
 					break;
 				case QChar::DirPDI:
@@ -277,7 +275,7 @@ namespace text {
 						while (!stack.top().isIsolate)
 							stack.pop();
 						continuationFrom = stack.top().runBeforeIsolate;
-						BIDI_DEBUG() << "popped PDI from stack, level now" << (int)stack.top().level << "continuation from" << continuationFrom;
+						qDebug() << "popped PDI from stack, level now" << (int)stack.top().level << "continuation from" << continuationFrom;
 						stack.pop();
 						override = stack.top().isOverride;
 						level = stack.top().level;
@@ -577,7 +575,7 @@ namespace text {
 					else if (dir == QChar::DirLRI || dir == QChar::DirRLI || dir == QChar::DirFSI)
 						++isolateCounter;
 				}
-				BIDI_DEBUG() << "    contained dir for backet pair" << first << "/" << second << "is" << containedDir;
+				qDebug() << "    contained dir for backet pair" << first << "/" << second << "is" << containedDir;
 				return containedDir;
 			}
 		};
@@ -656,9 +654,9 @@ namespace text {
 			}
 
 			if (BidiDebugEnabled && bracketPairs.size()) {
-				BIDI_DEBUG() << "matched bracket pairs:";
+				qDebug() << "matched bracket pairs:";
 				for (int i = 0; i < bracketPairs.size(); ++i)
-					BIDI_DEBUG() << "   " << bracketPairs.at(i).first << bracketPairs.at(i).second;
+					qDebug() << "   " << bracketPairs.at(i).first << bracketPairs.at(i).second;
 			}
 
 			QChar::Direction lastStrong = sos;
@@ -670,13 +668,13 @@ namespace text {
 					continue;
 				QChar::Direction containedDir = pair.containedDirection(analysis, embeddingDir);
 				if (containedDir == QChar::DirON) {
-					BIDI_DEBUG() << "    3: resolve bracket pair" << i << "to DirON";
+					qDebug() << "    3: resolve bracket pair" << i << "to DirON";
 					continue;
 				}
 				else if (containedDir == embeddingDir) {
 					analysis[pair.first].bidiDirection = embeddingDir;
 					analysis[pair.second].bidiDirection = embeddingDir;
-					BIDI_DEBUG() << "    1: resolve bracket pair" << i << "to" << embeddingDir;
+					qDebug() << "    1: resolve bracket pair" << i << "to" << embeddingDir;
 				}
 				else {
 					// case c.
@@ -698,7 +696,7 @@ namespace text {
 					}
 					analysis[pair.first].bidiDirection = lastStrong;
 					analysis[pair.second].bidiDirection = lastStrong;
-					BIDI_DEBUG() << "    2: resolve bracket pair" << i << "to" << lastStrong;
+					qDebug() << "    2: resolve bracket pair" << i << "to" << lastStrong;
 				}
 				for (int i = pair.second + 1; i < length; ++i) {
 					if (infoAt(i).properties->direction == QChar::DirNSM)
@@ -790,11 +788,11 @@ namespace text {
 			QChar::Direction eos = (qMax(level_after, level) & 1) ? QChar::DirR : QChar::DirL;
 
 			if (BidiDebugEnabled) {
-				BIDI_DEBUG() << "Isolated run starting at" << i << "sos/eos" << sos << eos;
-				BIDI_DEBUG() << "before implicit level processing:";
+				qDebug() << "Isolated run starting at" << i << "sos/eos" << sos << eos;
+				qDebug() << "before implicit level processing:";
 				IsolatedRunSequenceIterator it(runs, i);
 				while (!it.atEnd()) {
-					BIDI_DEBUG() << "    " << *it << Qt::hex << text[*it].unicode() << analysis[*it].bidiDirection;
+					qDebug() << "    " << *it << Qt::hex << text[*it].unicode() << analysis[*it].bidiDirection;
 					++it;
 				}
 			}
@@ -804,10 +802,10 @@ namespace text {
 			resolveW5(runs, i);
 
 			if (BidiDebugEnabled) {
-				BIDI_DEBUG() << "after W4/W5";
+				qDebug() << "after W4/W5";
 				IsolatedRunSequenceIterator it(runs, i);
 				while (!it.atEnd()) {
-					BIDI_DEBUG() << "    " << *it << Qt::hex << text[*it].unicode() << analysis[*it].bidiDirection;
+					qDebug() << "    " << *it << Qt::hex << text[*it].unicode() << analysis[*it].bidiDirection;
 					++it;
 				}
 			}
@@ -820,7 +818,7 @@ namespace text {
 			resolveN0(runs, i, sos);
 			resolveN1N2(runs, i, sos, eos);
 
-			BIDI_DEBUG() << "setting levels (run at" << level << ")";
+			qDebug() << "setting levels (run at" << level << ")";
 			// Rules I1 & I2: set correct levels
 			{
 				ushort level = runs.at(i).level;
@@ -845,7 +843,7 @@ namespace text {
 					default:
 						Q_UNREACHABLE();
 					}
-					BIDI_DEBUG() << "    " << pos << current << analysis[pos].bidiLevel;
+					qDebug() << "    " << pos << current << analysis[pos].bidiLevel;
 					++it;
 				}
 			}
@@ -891,9 +889,9 @@ namespace text {
 				return false;
 
 			if (BidiDebugEnabled) {
-				BIDI_DEBUG() << ">>>> start bidi, text length" << length;
+				qDebug() << ">>>> start bidi, text length" << length;
 				for (int i = 0; i < length; ++i)
-					BIDI_DEBUG() << Qt::hex << "    (" << i << ")" << text[i].unicode() << text[i].direction();
+					qDebug() << Qt::hex << "    (" << i << ")" << text[i].unicode() << text[i].direction();
 			}
 
 			{
@@ -901,9 +899,9 @@ namespace text {
 				resolveExplicitLevels(runs);
 
 				if (BidiDebugEnabled) {
-					BIDI_DEBUG() << "resolved explicit levels, nruns" << runs.size();
+					qDebug() << "resolved explicit levels, nruns" << runs.size();
 					for (int i = 0; i < runs.size(); ++i)
-						BIDI_DEBUG() << "    " << i << "start/end" << runs.at(i).start << runs.at(i).end << "level" << (int)runs.at(i).level << "continuation" << runs.at(i).continuation;
+						qDebug() << "    " << i << "start/end" << runs.at(i).start << runs.at(i).end << "level" << (int)runs.at(i).level << "continuation" << runs.at(i).continuation;
 				}
 
 				// now we have a list of isolated run sequences inside the vector of runs, that can be fed
@@ -912,17 +910,17 @@ namespace text {
 				resolveImplicitLevels(runs);
 			}
 
-			BIDI_DEBUG() << "Rule L1:";
+			qDebug() << "Rule L1:";
 			// Rule L1:
 			bool resetLevel = true;
 			for (int i = length - 1; i >= 0; --i) {
 				if (analysis[i].bidiFlags & QScriptAnalysis::BidiResetToParagraphLevel) {
-					BIDI_DEBUG() << "resetting pos" << i << "to baselevel";
+					qDebug() << "resetting pos" << i << "to baselevel";
 					analysis[i].bidiLevel = baseLevel;
 					resetLevel = true;
 				}
 				else if (resetLevel && analysis[i].bidiFlags & QScriptAnalysis::BidiMaybeResetToParagraphLevel) {
-					BIDI_DEBUG() << "resetting pos" << i << "to baselevel (maybereset flag)";
+					qDebug() << "resetting pos" << i << "to baselevel (maybereset flag)";
 					analysis[i].bidiLevel = baseLevel;
 				}
 				else {
@@ -963,9 +961,9 @@ namespace text {
 			}
 
 			if (BidiDebugEnabled) {
-				BIDI_DEBUG() << "final resolved levels:";
+				qDebug() << "final resolved levels:";
 				for (int i = 0; i < length; ++i)
-					BIDI_DEBUG() << "    " << i << Qt::hex << text[i].unicode() << Qt::dec << (int)analysis[i].bidiLevel;
+					qDebug() << "    " << i << Qt::hex << text[i].unicode() << Qt::dec << (int)analysis[i].bidiLevel;
 			}
 
 			return true;
@@ -1025,5 +1023,3 @@ namespace text {
 	};
 
 } // namespace Ui::Text
-
-#undef BIDI_DEBUG

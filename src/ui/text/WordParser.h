@@ -1,25 +1,19 @@
 #pragma once
 
-#include "String.h"
-
-#include "TextBlock.h"
-#include "TextWord.h"
-
+#include "Types.h"
 #include "TextStackEngine.h"
-#include "TextBidiAlgorithm.h"
 
 
 namespace text {
-
 	class WordParser {
 	public:
 		explicit WordParser(not_null<String*> string);
-
 	private:
 		struct ScriptLine {
 			int length = 0;
 			QFixed textWidth;
 		};
+
 		struct LineBreakHelper {
 			ScriptLine tmpData;
 			ScriptLine spaceData;
@@ -41,8 +35,10 @@ namespace text {
 			bool whiteSpaceOrObject = true;
 
 			glyph_t currentGlyph() const;
+
 			void saveCurrentGlyph();
 			void calculateRightBearing(QFontEngine* engine, glyph_t glyph);
+
 			void calculateRightBearing();
 			void calculateRightBearingForPreviousGlyph();
 
@@ -61,11 +57,14 @@ namespace text {
 
 		void pushAccumulatedWord();
 		void processSingleGlyphItem(QFixed added = 0);
+
 		void wordProcessed(int nextWordStart, bool spaces = false);
 		void wordContinued(int nextPartStart, bool spaces = false);
+
 		void accumulateWhitespaces();
 		void ensureWordForRightPadding();
 		void maybeStartUnfinishedWord();
+
 		void pushFinishedWord(uint16 position, QFixed width, QFixed rbearing);
 		void pushUnfinishedWord(uint16 position, QFixed width, QFixed rbearing);
 		void pushNewline(uint16 position, int newlineBlockIndex);
@@ -87,22 +86,29 @@ namespace text {
 			int index) const;
 
 		const not_null<String*> _t;
+
 		QString& _tText;
+
 		std::vector<Block>& _tBlocks;
 		std::vector<Word>& _tWords;
+
 		BidiInitedAnalysis _analysis;
 		StackEngine _engine;
+
 		QTextEngine& _e;
 		LineBreakHelper _lbh;
+
 		const QCharAttributes* _attributes = nullptr;
+
 		int _wordStart = 0;
+
 		bool _addingEachGrapheme = false;
 		int _lastGraphemeBoundaryPosition = -1;
+
 		ScriptLine _lastGraphemeBoundaryLine;
+
 		int _item = -1;
 		int _newItem = -1;
 		int _itemEnd = 0;
-
 	};
-
 } // namespace text

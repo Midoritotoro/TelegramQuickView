@@ -1,25 +1,31 @@
 #pragma once
 
+#include "Types.h"
+#include "TextEntities.h"
+
 #include <QString>
 #include <QMimeData>
 
 #include <QGuiApplication>
 #include <QClipboard>
 
-#include "TextEntities.h"
-#include "TextWord.h"
-
 
 namespace text {
 	const auto kTagBold = u"**"_q;
 	const auto kTagItalic = u"__"_q;
+
 	const auto kTagUnderline = u"^^"_q;
 	const auto kTagStrikeOut = u"~~"_q;
+
 	const auto kTagCode = u"`"_q;
 	const auto kTagPre = u"```"_q;
+
 	const auto kTagBlockquote = u">"_q;
 	const auto kTagBlockquoteCollapsed = u">^"_q;
 	constexpr auto kTagSeparator = '\\';
+
+	inline const auto kMentionTagStart = QLatin1String("mention://");
+
 
 	struct TextWithTags {
 		struct Tag {
@@ -38,6 +44,7 @@ namespace text {
 		[[nodiscard]] bool empty() const {
 			return text.isEmpty();
 		}
+
 		friend inline auto operator<=>(
 			const TextWithTags&,
 			const TextWithTags&) = default;
@@ -67,46 +74,65 @@ namespace text {
 	[[nodiscard]] bool IsValidMarkdownLink(QStringView link);
 
 	namespace details {
-
 		struct ContainerImplHelper {
-			enum CutResult { Null, Empty, Full, Subset };
-			static constexpr CutResult mid(
+			enum CutResult { 
+				Null,
+				Empty,
+				Full,
+				Subset 
+			};
+
+			[[nodiscard]] static constexpr CutResult mid(
 				qsizetype originalLength,
 				qsizetype* _position,
-				qsizetype* _length) {
-				qsizetype& position = *_position;
-				qsizetype& length = *_length;
-				if (position > originalLength) {
-					position = 0;
-					length = 0;
-					return Null;
-				}
-
-				if (position < 0) {
-					if (length < 0 || length + position >= originalLength) {
-						position = 0;
-						length = originalLength;
-						return Full;
-					}
-					if (length + position <= 0) {
-						position = length = 0;
-						return Null;
-					}
-					length += position;
-					position = 0;
-				}
-				else if (size_t(length) > size_t(originalLength - position)) {
-					length = originalLength - position;
-				}
-
-				if (position == 0 && length == originalLength)
-					return Full;
-
-				return length > 0 ? Subset : Empty;
-			}
+				qsizetype* _length);
 		};
 
-	} // namespace details
+	struct ToUpperType {
+		inline QString operator()(const QString& text) const {
+			return text.toUpper();
+		}
+		inline QString operator()(QString&& text) const {
+			return std::move(text).toUpper();
+		}
+	};
+
+} // namespace details
+
+	inline constexpr auto Upper = details::ToUpperType{};
+
+	[[nodiscard]] TextWithEntities WithSingleEntity(
+		const QString& text,
+		EntityType type,
+		const QString& data = QString());
+
+	[[nodiscard]] TextWithEntities Bold(const QString& text);
+	[[nodiscard]] TextWithEntities Semibold(const QString& text);
+	[[nodiscard]] TextWithEntities Italic(const QString& text);
+	[[nodiscard]] TextWithEntities Link(
+		const QString& text,
+		const QString& url = u"internal:action"_q);
+
+	[[nodiscard]] TextWithEntities Link(const QString& text, int index);
+	[[nodiscard]] TextWithEntities Link(
+		TextWithEntities text,
+		const QString& url = u"internal:action"_q);
+	[[nodiscard]] TextWithEntities Link(TextWithEntities text, int index);
+
+	[[nodiscard]] TextWithEntities Colorized(
+		const QString& text,
+		int index = 0);
+	[[nodiscard]] TextWithEntities Colorized(
+		TextWithEntities text,
+		int index = 0);
+
+	[[nodiscard]] TextWithEntities Wrapped(
+		TextWithEntities text,
+		EntityType type,
+		const QString& data = QString());
+
+	[[nodiscard]] TextWithEntities RichLangValue(const QString& text);
+	[[nodiscard]] TextWithEntities WithEntities(const QString& text);
 
 	[[nodiscard]] QString TagsMimeType();
 	[[nodiscard]] QString TagsTextMimeType();
@@ -128,7 +154,6 @@ namespace text {
 
 	[[nodiscard]] QByteArray SerializeTags(const TextWithTags::Tags& tags);
 
-	inline const auto kMentionTagStart = QLatin1String("mention://");
 
 	[[nodiscard]] TextWithTags::Tags ConvertEntitiesToTextTags(
 		const EntitiesInText& entities);

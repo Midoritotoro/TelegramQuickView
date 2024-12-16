@@ -148,12 +148,13 @@ namespace text {
 
 	void EntityInText::shiftLeft(int shift) {
 		_offset -= shift;
+
 		if (_offset < 0) {
 			_length += _offset;
 			_offset = 0;
-			if (_length < 0) {
+
+			if (_length < 0)
 				_length = 0;
-			}
 		}
 	}
 
@@ -166,14 +167,14 @@ namespace text {
 			_offset = textEnd;
 			_length = 0;
 		}
-		else if (_offset + _length > textEnd) {
+		else if (_offset + _length > textEnd)
 			_length = textEnd - _offset;
-		}
 	}
 
 	int EntityInText::FirstMonospaceOffset(
 		const EntitiesInText& entities,
-		int textLength) {
+		int textLength) 
+	{
 		auto&& monospace = std::ranges::subrange(
 			entities.begin(),
 			entities.end()
@@ -181,10 +182,12 @@ namespace text {
 			return (entity.type() == EntityType::Pre)
 				|| (entity.type() == EntityType::Code);
 			});
+
 		const auto i = std::ranges::max_element(
 			monospace,
 			std::greater<>(),
 			&EntityInText::offset);
+
 		return (i == monospace.end()) ? textLength : i->offset();
 	}
 

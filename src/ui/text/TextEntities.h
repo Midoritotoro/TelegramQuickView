@@ -1,47 +1,10 @@
 #pragma once
 
 #include "../ClickHandler.h"
-#include "../../core/Flags.h"
-
-#include "../../core/Types.h"
-#include "../style/StyleTypes.h"
-
-#include <QString>
+#include "Types.h"
 
 
 namespace text {
-	enum class EntityType: uchar {
-		Invalid = 0,
-
-		Url,
-		CustomUrl,
-		Email,
-		Hashtag,
-		Cashtag,
-		Mention,
-		MentionName,
-		CustomEmoji,
-		BotCommand,
-		MediaTimestamp,
-		Colorized,
-		Phone,
-
-		Bold,
-		Semibold,
-		Italic,
-		Underline,
-		StrikeOut,
-		Code, // inline
-		Pre,  // block
-		Blockquote,
-		Spoiler
-	};
-
-	enum class EntityLinkShown: uchar {
-		Full,
-		Partial,
-	};
-
 	struct TextSelection {
 		enum class Type {
 			Letters = 0x01,
@@ -73,46 +36,7 @@ namespace text {
 		return !(a == b);
 	}
 
-	struct StateRequest {
-		enum class StateFlag {
-			BreakEverywhere = (1 << 0),
-			LookupSymbol = (1 << 1),
-			LookupLink = (1 << 2),
-			LookupCustomTooltip = (1 << 3),
-		};
-		DECLARE_FLAGS(StateFlags, StateFlag);
-		friend inline constexpr auto is_flag_type(StateFlag) {
-			return true;
-		};
-
-		StateRequest() {
-		}
-
-		style::align align = style::alignLeft;
-		StateFlags flags = StateFlag::LookupLink;
-
-	};
-
-	struct TextState {
-		ClickHandlerPtr link;
-		bool uponSymbol = false;
-		bool afterSymbol = false;
-		uint16 symbol = 0;
-	};
-
-	struct StateRequestElided : StateRequest {
-		StateRequestElided() {
-		}
-		StateRequestElided(const StateRequest& other) : StateRequest(other) {
-		}
-		int lines = 1;
-		int removeFromEnd = 0;
-	};
-
 	static constexpr TextSelection AllTextSelection = { 0, 0xFFFF };
-
-	class EntityInText;
-	using EntitiesInText = QVector<EntityInText>;
 
 	struct TextWithEntities {
 		QString text;
@@ -156,7 +80,6 @@ namespace text {
 		[[nodiscard]] static TextForMimeData Simple(const QString& simple);
 	};
 
-
 	class EntityInText {
 	public:
 		EntityInText(
@@ -168,6 +91,7 @@ namespace text {
 		static [[nodiscard]] int FirstMonospaceOffset(
 			const EntitiesInText& entities,
 			int textLength);
+
 		[[nodiscard]] EntityType type() const;
 		[[nodiscard]] int offset() const;
 
@@ -196,6 +120,7 @@ namespace text {
 	struct EntityLinkData {
 		QString text;
 		QString data;
+
 		EntityType type = EntityType::Invalid;
 		EntityLinkShown shown = EntityLinkShown::Full;
 

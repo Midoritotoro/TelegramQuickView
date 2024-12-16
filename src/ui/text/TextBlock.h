@@ -6,42 +6,10 @@
 #include "../../core/Time.h"
 
 #include "../../core/Types.h"
-#include <private/qfixed_p.h>
-
+#include "Types.h"
 
 
 namespace text {
-	enum class TextBlockType : uint16 {
-		Newline = 0x01,
-		Text = 0x02,
-		Emoji = 0x03,
-		CustomEmoji = 0x04,
-		Skip = 0x05,
-	};
-
-	enum class TextBlockFlag : uint16 {
-		Bold = 0x001,
-		Italic = 0x002,
-		Underline = 0x004,
-		StrikeOut = 0x008,
-		Tilde = 0x010,
-		Semibold = 0x020,
-		Code = 0x040,
-		Pre = 0x080,
-		Spoiler = 0x100,
-		Blockquote = 0x200
-	};
-
-	inline constexpr bool is_flag_type(TextBlockFlag) {
-		return true;
-	}
-
-	DECLARE_FLAGS(TextBlockFlags, TextBlockFlag)
-
-	class Block;
-	using Blocks = std::vector<Block>;
-
-
 	[[nodiscard]] style::font WithFlags(
 		const style::font& font,
 		TextBlockFlags flags,
@@ -50,13 +18,6 @@ namespace text {
 	[[nodiscard]] Qt::LayoutDirection UnpackParagraphDirection(
 		bool ltr,
 		bool rtl);
-
-	struct BlockDescriptor {
-		TextBlockFlags flags;
-		uint16 position = 0;
-		uint16 linkIndex = 0;
-		uint16 colorIndex = 0;
-	};
 
 	class AbstractBlock {
 	public:

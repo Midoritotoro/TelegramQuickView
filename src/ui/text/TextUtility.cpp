@@ -6,6 +6,8 @@
 #include <QRegularExpression>
 #include <ranges>
 
+#include "TextWord.h"
+
 
 Qt::LayoutDirection text::Direction(
 	const QString& str,
@@ -141,11 +143,13 @@ bool text::IsValidMarkdownLink(QStringView link) {
 QStringView text::StringViewMid(
 	QStringView view,
 	qsizetype pos,
-	qsizetype n) {
+	qsizetype n) 
+{
 	const auto result = details::ContainerImplHelper::mid(
 		view.size(),
 		&pos,
 		&n);
+
 	return (result == details::ContainerImplHelper::Null)
 		? QStringView()
 		: view.mid(pos, n);
@@ -159,9 +163,8 @@ QString text::MentionEntityData(QStringView link) {
 
 text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& tags) {
 	auto result = EntitiesInText();
-	if (tags.isEmpty()) {
+	if (tags.isEmpty())
 		return result;
-	}
 
 	constexpr auto kInMaskTypesInline = std::array{
 		EntityType::Bold,
@@ -171,10 +174,12 @@ text::EntitiesInText text::ConvertTextTagsToEntities(const TextWithTags::Tags& t
 		EntityType::Spoiler,
 		EntityType::Code,
 	};
+
 	constexpr auto kInMaskTypesBlock = std::array{
 		EntityType::Pre,
 		EntityType::Blockquote,
 	};
+
 	struct State {
 		QString link;
 		QString language;
@@ -522,6 +527,134 @@ QByteArray text::SerializeTags(const TextWithTags::Tags& tags) {
 	return tagsSerialized;
 }
 
+text::details::ContainerImplHelper::CutResult text::details::ContainerImplHelper::mid(
+	qsizetype originalLength,
+	qsizetype* _position,
+	qsizetype* _length) 
+{
+	qsizetype& position = *_position;
+	qsizetype& length = *_length;
+
+	if (position > originalLength) {
+		position = 0;
+		length = 0;
+		return Null;
+	}
+
+	if (position < 0) {
+		if (length < 0 || length + position >= originalLength) {
+			position = 0;
+			length = originalLength;
+			return Full;
+		}
+		if (length + position <= 0) {
+			position = length = 0;
+			return Null;
+		}
+		length += position;
+		position = 0;
+	}
+	else if (size_t(length) > size_t(originalLength - position))
+		length = originalLength - position;
+
+	if (position == 0 && length == originalLength)
+		return Full;
+
+	return length > 0 ? Subset : Empty;
+}
+
+text::TextWithEntities text::WithSingleEntity(
+	const QString& text,
+	EntityType type,
+	const QString& data = QString()) 
+{
+	auto result = TextWithEntities{ text };
+	result.entities.push_back({ type, 0, int(text.size()), data });
+
+	return result;
+}
+
+text::TextWithEntities text::Bold(const QString& text) {
+	return WithSingleEntity(text, EntityType::Bold);
+}
+
+text::TextWithEntities text::Semibold(const QString& text) {
+	return WithSingleEntity(text, EntityType::Semibold);
+}
+
+text::TextWithEntities text::Italic(const QString& text) {
+	return WithSingleEntity(text, EntityType::Italic);
+}
+
+text::TextWithEntities text::Link(const QString& text, const QString& url) {
+	return WithSingleEntity(text, EntityType::CustomUrl, url);
+}
+
+text::TextWithEntities text::Link(const QString& text, int index) {
+	return Link(text, u"internal:index"_q + QChar(index));
+}
+
+text::TextWithEntities text::Link(TextWithEntities text, const QString& url) {
+	return Wrapped(std::move(text), EntityType::CustomUrl, url);
+}
+
+text::TextWithEntities text::Link(TextWithEntities text, int index) {
+	return Link(std::move(text), u"internal:index"_q + QChar(index));
+}
+
+text::TextWithEntities text::Colorized(const QString& text, int index) {
+	const auto data = index ? QString(QChar(index)) : QString();
+	return WithSingleEntity(text, EntityType::Colorized, data);
+}
+
+text::TextWithEntities text::Colorized(TextWithEntities text, int index) {
+	const auto data = index ? QString(QChar(index)) : QString();
+	return Wrapped(std::move(text), EntityType::Colorized, data);
+}
+
+text::TextWithEntities text::Wrapped(
+	TextWithEntities text,
+	EntityType type,
+	const QString& data) {
+	text.entities.insert(
+		text.entities.begin(),
+		{ type, 0, int(text.text.size()), data });
+	return text;
+}
+
+text::TextWithEntities text::RichLangValue(const QString & text) {
+	static const auto kStart = QRegularExpression("(\\*\\*|__)");
+
+	auto result = TextWithEntities();
+	auto offset = 0;
+	while (offset < text.size()) {
+		const auto m = kStart.match(text, offset);
+		if (!m.hasMatch()) {
+			result.text.append(StringViewMid(text, offset));
+			break;
+		}
+		const auto position = m.capturedStart();
+		const auto from = m.capturedEnd();
+		const auto tag = m.capturedView();
+		const auto till = text.indexOf(tag, from + 1);
+		if (till <= from) {
+			offset = from;
+			continue;
+		}
+		if (position > offset) {
+			result.text.append(StringViewMid(text, offset, position - offset));
+		}
+		const auto type = (tag == QLatin1String("__"))
+			? EntityType::Italic
+			: EntityType::Bold;
+		result.entities.push_back({ type, int(result.text.size()), int(till - from) });
+		result.text.append(StringViewMid(text, from, till - from));
+		offset = till + tag.size();
+	}
+	return result;
+}
+
+
 QString text::TagsMimeType() {
 	return QString::fromLatin1("application/x-td-field-tags");
 }
@@ -532,15 +665,14 @@ QString text::TagsTextMimeType() {
 
 std::unique_ptr<QMimeData> text::MimeDataFromText(
 	TextWithTags&& text,
-	const QString& expanded) {
-	if (expanded.isEmpty()) {
+	const QString& expanded)
+{
+	if (expanded.isEmpty())
 		return nullptr;
-	}
 
 	auto result = std::make_unique<QMimeData>();
 	result->setText(expanded);
 	if (!text.tags.isEmpty()) {
-		// ...
 		result->setData(
 			TagsTextMimeType(),
 			text.text.toUtf8());
@@ -548,12 +680,16 @@ std::unique_ptr<QMimeData> text::MimeDataFromText(
 			TagsMimeType(),
 			SerializeTags(text.tags));
 	}
+
 	return result;
 }
 
 std::unique_ptr<QMimeData> text::MimeDataFromText(const TextForMimeData& text) {
 	return MimeDataFromText(
-		{ text.rich.text, ConvertEntitiesToTextTags(text.rich.entities) },
+		{ 
+			text.rich.text,
+			ConvertEntitiesToTextTags(text.rich.entities) 
+		},
 		text.expanded);
 }
 
@@ -566,7 +702,6 @@ void text::SetClipboardText(
 	const TextForMimeData& text,
 	QClipboard::Mode mode) 
 {
-	if (auto data = MimeDataFromText(text)) {
+	if (auto data = MimeDataFromText(text))
 		QGuiApplication::clipboard()->setMimeData(data.release(), mode);
-	}
 }

@@ -1,6 +1,7 @@
 #pragma once 
 
-#include "String.h"
+#include "Types.h"
+#include "../ClickHandler.h"
 
 
 class PreClickHandler final : public ClickHandler {
