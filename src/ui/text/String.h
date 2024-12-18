@@ -49,10 +49,9 @@ namespace text {
 
 		String(int32 minResizeWidth = kQFixedMax);
 		String(String&& other) = default;
-		String() = default;
 		String(
-			const style::TextStyle& font,
-			const QString& string);
+			const QString& string,
+			const style::TextStyle* style);
 
 		String& operator=(String&& other) = default;
 
@@ -77,7 +76,7 @@ namespace text {
 			LineWidthsOptions options) const;
 
 		void setText(
-			const style::TextStyle& style,
+			const style::TextStyle* style,
 			const QString& text,
 			const TextParseOptions& options = kDefaultTextOptions);
 
@@ -234,7 +233,7 @@ namespace text {
 			bool composeExpanded,
 			bool composeEntities) const;
 
-		const style::TextStyle* _st = new style::TextStyle();
+		const style::TextStyle* _st = nullptr;
 
 		QString _text;
 		Blocks _blocks;
@@ -242,7 +241,7 @@ namespace text {
 		ExtendedWrap _extended;
 
 		int _minResizeWidth = 0;
-		int _maxWidth = 0;
+		int _maxWidth = style::maximumTextWidth;
 		int _minHeight = 0;
 		uint16 _startQuoteIndex = 0;
 		bool _startParagraphLTR : 1 = false;

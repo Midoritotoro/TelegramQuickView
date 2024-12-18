@@ -111,9 +111,10 @@ Renderer::~Renderer() {
 }
 
 void Renderer::draw(QPainter& p, const PaintContext& context) {
-	if (_t->isEmpty()) {
+	if (_t->isEmpty())
 		return;
-	}
+
+	qDebug() << "_t->_st->_font._data == nullptr: " << (_t->_st->_font.get() == nullptr);
 
 	_p = &p;
 	_p->setFont(_t->_st->_font);

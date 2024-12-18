@@ -18,7 +18,12 @@
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)
 	, ClickHandlerHost()
-	, _text(text::kQFixedMax)
+	, _st(new 
+		style::TextStyle{
+			._font = style::font(13, 0, 0),
+			.lineHeight = 0,
+			.linkUnderLine = true,
+			.blockquote = {}})
 {
 	init();
 
@@ -44,7 +49,7 @@ QSize FlatLabel::sizeHint() const {
 }
 
 void FlatLabel::setText(const QString& text) {
-	_text.setText(style::TextStyle(), text);
+	_text.setText(_st, text);
 	textUpdated();
 }
 
@@ -224,7 +229,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		? qMax(style::maximumTextHeight, lineHeight)
 		: height();
 
-	_text.draw(painter, {
+	auto context = text::PaintContext{
 		.position = { textLeft, style::flatLabel::margins.top() },
 		.availableWidth = textWidth,
 		.align = style::alignLeft,
@@ -234,7 +239,9 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		.selection = selection,
 		.elisionHeight = elisionHeight,
 		.elisionBreakEverywhere = renderElided && _breakEverywhere,
-		});
+	};
+
+	_text.draw(painter, context);
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {

@@ -12,6 +12,12 @@
 #include <cmath>
 
 
+#include <QFontInfo>
+#include <QFontDatabase>
+
+#include <private/qfontengine_p.h>
+
+
 namespace style {
 	enum class FontFlag : uchar {
 		Bold = 0x01,
@@ -227,15 +233,10 @@ namespace style::internal {
 
 namespace style {
 	struct TextStyle {
-		font _font = font(13, style::FontFlag::Semibold, 0);
+		font _font;
 		int lineHeight = 0;
 
 		bool linkUnderLine = true;
-		QuoteStyle blockquote;
-
-		TextStyle(const font& font = font(13, style::FontFlag::Semibold, 0)):
-			_font(font)
-		{}
+		QuoteStyle blockquote = {};
 	};
-
 } // namespace style

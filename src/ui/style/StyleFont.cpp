@@ -3,9 +3,6 @@
 #include <QMap>
 #include <QVector>
 
-#include <QFontInfo>
-#include <QFontDatabase>
-
 #include <map>
 #include <QResource>
 
@@ -527,7 +524,7 @@ namespace style::internal {
 			QtFontsKeys.emplace(QtFontKey(i->second->data.f), key);
 		}
 
-		_data = &i->second->data;
+		_data = new FontData(i->second->data);
 	}
 
 	bool operator==(const Font& a, const Font& b) {

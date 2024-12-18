@@ -20,16 +20,18 @@ Application::Application(int& argc, char** argv) :
     _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::Stack);
 
     _messagesView->show();
+
     auto list = QStringList({ videoPath });
     //QLabel* label = new QLabel;
-    //label->setFont(style::font(13, style::FontFlag::StrikeOut, 0));
     //label->setText(text);
     //label->show();
     //label->adjustSize();
 
-    //_mediaPlayer->setMedia("C:/Users/danya/Downloads/videotestvertical.mp4");
-    //_mediaPlayer->show();
-     _messagesView->makeMessage(text);
+   // qDebug() << fnt->ascent;
+
+ //   _mediaPlayer->setMedia("C:/Users/danya/Downloads/videotestvertical.mp4");
+  //  _mediaPlayer->show();
+    _messagesView->makeMessage(text);
     
 }
 

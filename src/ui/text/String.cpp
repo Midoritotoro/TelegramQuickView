@@ -17,16 +17,15 @@
 
 
 namespace text {
-	String::String(int32 minResizeWidth)
-		: _minResizeWidth(minResizeWidth) {
-	}
+	String::String(int32 minResizeWidth) :
+		_minResizeWidth(minResizeWidth)
+	{}
 
 	String::String(
-		const style::TextStyle& style,
-		const QString& text
-	)
+		const QString& string,
+		const style::TextStyle* style)
 	{
-		setText(style, text);
+		setText(style, string);
 	}
 
 	int String::countWidth(int width, bool breakEverywhere) const {
@@ -79,11 +78,11 @@ namespace text {
 	}
 
 	void String::setText(
-		const style::TextStyle& style,
+		const style::TextStyle* style,
 		const QString& text,
 		const TextParseOptions& options) 
 	{
-		_st = &style;
+		_st = style;
 		clear();
 
 		BlockParser block(this, { text }, options, {});
@@ -233,8 +232,8 @@ namespace text {
 		QPainter& painter,
 		const PaintContext& context) const 
 	{
-		painter.drawText(5, 5, _text);
-		// Renderer(*this).draw(painter, context);
+		//painter.drawText(5, 5, _text);
+		Renderer(*this).draw(painter, context);
 	}
 
 

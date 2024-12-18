@@ -137,6 +137,8 @@ private:
 		Selecting = 0x04,
 	};
 
+	const style::TextStyle* _st = nullptr;
+
 	text::String _text;
 	Qt::Alignment _alignment = Qt::AlignLeft;
 
