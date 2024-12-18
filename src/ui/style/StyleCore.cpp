@@ -24,6 +24,8 @@ namespace style {
 		QString _sliderStyle = "";
 		QString _scrollAreaStyle = "";
 
+		bool rightToLeft = false;
+
 		struct Shifted {
 			Shifted() = default;
 			Shifted(uint32 value) : value(value) {
@@ -88,6 +90,18 @@ namespace style {
 				_scrollAreaStyle = file.readAll();
 		}
 	} // namespace
+
+	bool RightToLeft() {
+		return rightToLeft;
+	}
+
+	void SetRightToLeft(bool _rightToLeft) {
+		rightToLeft = rightToLeft;
+	}
+
+	Qt::LayoutDirection LayoutDirection() {
+		return RightToLeft() ? Qt::RightToLeft : Qt::LeftToRight;
+	}
 
 	int DevicePixelRatio() {
 		return devicePixelRatioValue;

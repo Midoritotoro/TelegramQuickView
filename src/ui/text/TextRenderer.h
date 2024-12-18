@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Types.h"
+#include "TextBlock.h"
+
 #include <private/qtextengine_p.h>
 
 class QTextItemInt;
@@ -28,13 +30,14 @@ namespace text {
 		void AppendRange(
 			QVarLengthArray<FixedRange>& ranges,
 			FixedRange range);
-	
+
 	} // namespace
 
 	[[nodiscard]] FixedRange Intersected(FixedRange a, FixedRange b);
 	[[nodiscard]] bool Intersects(FixedRange a, FixedRange b);
 	[[nodiscard]] FixedRange United(FixedRange a, FixedRange b);
 	[[nodiscard]] bool Distinct(FixedRange a, FixedRange b);
+
 
 	class Renderer final {
 	public:
@@ -47,22 +50,26 @@ namespace text {
 			GeometryDescriptor geometry,
 			StateRequest request);
 	private:
-		static constexpr int kSpoilersRectsSize = 512;
-
+		static constexpr auto kSpoilersRectsSize = 512;
 		struct BidiControl;
 
-		void enumerate();
-
 		[[nodiscard]] Time::time now() const;
+
+		void initParagraphBidi();
 		void initNextParagraph(
 			Blocks::const_iterator i,
 			int16 paragraphIndex,
 			Qt::LayoutDirection direction);
+
 		void initNextLine();
-		void initParagraphBidi();
+
+		void enumerate();
+		void restoreAfterElided();
+
 		bool drawLine(
 			uint16 lineEnd,
 			Blocks::const_iterator blocksEnd);
+
 		[[nodiscard]] FixedRange findSelectTextRange(
 			const QScriptItem& si,
 			int itemStart,
@@ -71,35 +78,40 @@ namespace text {
 			QFixed itemWidth,
 			const QTextItemInt& gf,
 			TextSelection selection) const;
+
 		void fillSelectRange(FixedRange range);
 		void pushHighlightRange(FixedRange range);
-		void fillRectsFromRanges();
-		void fillRectsFromRanges(
-			QVarLengthArray<QRect, kSpoilersRectsSize>& rects,
-			QVarLengthArray<FixedRange>& ranges);
-		void composeHighlightPath();
-		[[nodiscard]] const AbstractBlock* markBlockForElisionGetEnd(
-			int blockIndex);
-		void setElideBidi(int elideStart);
-		void prepareElidedLine(
-			QString& lineText,
-			int lineStart,
-			int& lineLength,
-			const AbstractBlock*& endBlock,
-			int recursed = 0);
-		void prepareElisionAt(
-			QString& lineText,
-			int& lineLength,
-			uint16 position);
-		void restoreAfterElided();
-
-		void fillParagraphBg(int paddingBottom);
 
 		void applyBlockProperties(
 			QTextEngine& e,
 			not_null<const AbstractBlock*> block);
 		[[nodiscard]] ClickHandlerPtr lookupLink(
 			const AbstractBlock* block) const;
+
+		void fillRectsFromRanges();
+		void fillRectsFromRanges(
+			QVarLengthArray<QRect, kSpoilersRectsSize>& rects,
+			QVarLengthArray<FixedRange>& ranges);
+
+		void composeHighlightPath();
+
+		[[nodiscard]] const AbstractBlock* markBlockForElisionGetEnd(
+			int blockIndex);
+		void setElideBidi(int elideStart);
+
+		void prepareElidedLine(
+			QString& lineText,
+			int lineStart,
+			int& lineLength,
+			const AbstractBlock*& endBlock,
+			int recursed = 0);
+
+		void prepareElisionAt(
+			QString& lineText,
+			int& lineLength,
+			uint16 position);
+
+		void fillParagraphBg(int paddingBottom);
 
 		const String* _t = nullptr;
 
@@ -108,6 +120,8 @@ namespace text {
 
 		std::span<SpecialColor> _colors = {};
 		const style::TextPalette* _palette = new style::TextPalette();
+
+		style::font _f;
 
 		style::align _align = style::alignTopLeft;
 		QPen _originalPen;
@@ -171,9 +185,6 @@ namespace text {
 		ClickHandlerPtr _quoteExpandLink;
 		bool _quoteExpandLinkLookup = false;
 
-		// current line data
-		style::font _f;
-
 		int _startLeft = 0;
 		int _startTop = 0;
 		int _startLineWidth = 0;
@@ -190,7 +201,6 @@ namespace text {
 		bool _breakEverywhere = false;
 		bool _elidedLine = false;
 
-		// elided hack support
 		int _blocksSize = 0;
 		int _elideSavedIndex = 0;
 
@@ -203,7 +213,6 @@ namespace text {
 		QFixed _lineStartPadding = 0;
 		QFixed _lineWidth = 0;
 
-		// link and symbol resolve
 		QFixed _lookupX = 0;
 		int _lookupY = 0;
 

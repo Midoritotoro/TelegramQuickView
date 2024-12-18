@@ -40,6 +40,11 @@ namespace style {
 		Bottom
 	};
 
+	[[nodiscard]] bool RightToLeft();
+	void SetRightToLeft(bool _rightToLeft);
+
+	[[nodiscard]] Qt::LayoutDirection LayoutDirection();
+
 	[[nodiscard]] int DevicePixelRatio();
 	void SetDevicePixelRatio(int ratio);
 

@@ -61,23 +61,35 @@ namespace style {
 
 		int outline = 3;
 		int header = 20;
+
+		int verticalSkip = 5;
 		QColor bg;
 	};
 
 	struct TextPalette {
-		QColor linkFg = QColor(132, 220, 240);
-		QColor monoFg = QColor(132, 220, 240);
+		QColor linkFg;
+		QColor monoFg;
 
-		QColor selectBg = QColor(46, 112, 165);
-		QColor selectFg = Qt::transparent;
+		QColor selectBg;
+		QColor selectFg;
 
-		QColor selectLinkFg = QColor(46, 112, 165);
-		QColor selectMonoFg = QColor(46, 112, 165);
-		QColor selectOverlay = QColor(46, 112, 165);
+		QColor selectLinkFg;
+		QColor selectMonoFg;
+		QColor selectOverlay;
 
-		bool linkAlwaysActive = true;
+		bool linkAlwaysActive;
 	};
 
+	const TextPalette defaultTextPalette = TextPalette{
+		.linkFg = QColor(132, 220, 240),
+		.monoFg = QColor(132, 220, 240),
+		.selectBg = QColor(46, 112, 165),
+		.selectFg = Qt::transparent,
+		.selectLinkFg = QColor(46, 112, 165),
+		.selectMonoFg = QColor(46, 112, 165),
+		.selectOverlay = QColor(46, 112, 165),
+		.linkAlwaysActive = true
+	};
 
 	[[nodiscard]] const QString& SystemFontTag();
 	void SetCustomFont(const QString& font);

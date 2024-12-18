@@ -13,6 +13,7 @@
 #include "WordParser.h"
 
 #include "TextDrawUtility.h"
+#include "Types.h"
 
 
 namespace text {
@@ -232,8 +233,8 @@ namespace text {
 		QPainter& painter,
 		const PaintContext& context) const 
 	{
-		//painter.drawText(5, 5, _text);
-		Renderer(*this).draw(painter, context);
+		painter.drawText(5, 5, _text);
+		// Renderer(*this).draw(painter, context);
 	}
 
 
@@ -653,10 +654,11 @@ namespace text {
 		if (isEmpty())
 			return {};
 		
-		return Renderer(*this).getState(
+		return TextState();
+		/*return Renderer(*this).getState(
 			point,
 			SimpleGeometry(width, 0, 0, false),
-			request);
+			request);*/
 	}
 
 	TextState String::getStateLeft(QPoint point, int width, int outerw, StateRequest request) const {
@@ -666,13 +668,14 @@ namespace text {
 	TextState String::getStateElided(QPoint point, int width, StateRequestElided request) const {
 		if (isEmpty())
 			return {};
-		
-		return Renderer(*this).getState(point, SimpleGeometry(
+
+		return TextState();
+		/*return Renderer(*this).getState(point, SimpleGeometry(
 			width,
 			request.lines,
 			request.removeFromEnd,
 			request.flags & StateRequest::StateFlag::BreakEverywhere
-		), static_cast<StateRequest>(request));
+		), static_cast<StateRequest>(request));*/
 	}
 
 	TextState String::getStateElidedLeft(QPoint point, int width, int outerw, StateRequestElided request) const {

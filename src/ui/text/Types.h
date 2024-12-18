@@ -305,5 +305,4 @@ namespace text {
 	class AbstractBlock;
 	class StackEngine;
 	class BidiAlgorithm;
-	class Renderer;
 } // namespace text

@@ -15,15 +15,21 @@ Application::Application(int& argc, char** argv) :
     QString videoPath = "C:\\Users\\danya\\Downloads\\2024-11-22_22-56-37.png";
 
 
-   // _mediaPlayer = std::make_unique<MediaPlayer>();
+   //_mediaPlayer = std::make_unique<MediaPlayer>();
     _messagesView = std::make_unique<MessagesView>();
     _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::Stack);
 
     _messagesView->show();
     auto list = QStringList({ videoPath });
+    //QLabel* label = new QLabel;
+    //label->setFont(style::font(13, style::FontFlag::StrikeOut, 0));
+    //label->setText(text);
+    //label->show();
+    //label->adjustSize();
+
     //_mediaPlayer->setMedia("C:/Users/danya/Downloads/videotestvertical.mp4");
     //_mediaPlayer->show();
-    _messagesView->makeMessage(text);
+     _messagesView->makeMessage(text);
     
 }
 
