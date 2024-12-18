@@ -199,7 +199,8 @@ namespace Ui::Layout {
 
 	not_null<AbstractLayoutItem*> AbstractMosaicLayout::itemAt(
 		int row,
-		int column) const {
+		int column) const
+	{
 		Expects((row >= 0)
 			&& (row < _rows.size())
 			&& (column >= 0)
@@ -215,13 +216,14 @@ namespace Ui::Layout {
 
 	AbstractLayoutItem* AbstractMosaicLayout::maybeItemAt(
 		int row,
-		int column) const {
+		int column) const
+	{
 		if ((row >= 0)
 			&& (row < _rows.size())
 			&& (column >= 0)
-			&& (column < _rows[row].items.size())) {
+			&& (column < _rows[row].items.size()))
 			return _rows[row].items[column];
-		}
+
 		return nullptr;
 	}
 
@@ -231,55 +233,53 @@ namespace Ui::Layout {
 	}
 
 	void AbstractMosaicLayout::clearRows(bool resultsDeleted) {
-		if (!resultsDeleted) {
-			for (const auto& row : _rows) {
-				for (const auto& item : row.items) {
+		if (!resultsDeleted)
+			for (const auto& row : _rows)
+				for (const auto& item : row.items)
 					item->setPosition(-1);
-				}
-			}
-		}
+
 		_rows.clear();
 	}
 
 	void AbstractMosaicLayout::forEach(
-		Fn<void(not_null<const AbstractLayoutItem*>)> callback) {
-		for (const auto& row : _rows) {
-			for (const auto& item : row.items) {
+		Fn<void(not_null<const AbstractLayoutItem*>)> callback) 
+	{
+		for (const auto& row : _rows)
+			for (const auto& item : row.items)
 				callback(item);
-			}
-		}
 	}
 
 	void AbstractMosaicLayout::paint(
 		Fn<void(not_null<AbstractLayoutItem*>, QPoint)> paintItem,
-		const QRect& clip) const {
+		const QRect& clip) const
+	{
 		auto top = _padding.top();
 		const auto fromX = style::RightToLeft()
 			? (_width - clip.x() - clip.width())
 			: clip.x();
+
 		const auto toX = style::RightToLeft()
 			? (_width - clip.x())
 			: (clip.x() + clip.width());
+
 		const auto rows = _rows.size();
+
 		for (auto row = 0; row != rows; ++row) {
-			if (top >= clip.top() + clip.height()) {
+			if (top >= clip.top() + clip.height())
 				break;
-			}
+
 			auto& inlineRow = _rows[row];
 			if ((top + inlineRow.height) > clip.top()) {
 				auto left = _padding.left();
-				if (row == (rows - 1)) {
-					//				context.lastRow = true;
-				}
+
 				for (const auto& item : inlineRow.items) {
-					if (left >= toX) {
+					if (left >= toX)
 						break;
-					}
 
 					const auto w = item->width();
-					if ((left + w) > fromX) {
+					if ((left + w) > fromX)
 						paintItem(item, QPoint(left, top));
-					}
+
 					left += w;
 					left += _rightSkip;
 				}
@@ -290,66 +290,72 @@ namespace Ui::Layout {
 
 	int AbstractMosaicLayout::validateExistingRows(
 		Fn<bool(not_null<const AbstractLayoutItem*>, int)> checkItem,
-		int count) {
+		int count) 
+	{
 		auto until = 0;
 		auto untilRow = 0;
+
 		auto untilCol = 0;
+
 		while (until < count) {
-			if ((untilRow >= _rows.size())
-				|| checkItem(_rows[untilRow].items[untilCol], until)) {
+			if ((untilRow >= _rows.size()) || checkItem(_rows[untilRow].items[untilCol], until))
 				break;
-			}
+			
 			++until;
 			if (++untilCol == _rows[untilRow].items.size()) {
 				++untilRow;
 				untilCol = 0;
 			}
 		}
-		if (until == count) { // All items are layed out.
-			if (untilRow == _rows.size()) { // Nothing changed.
+		if (until == count) {
+			if (untilRow == _rows.size())
 				return until;
-			}
 
 			{
 				const auto rows = _rows.size();
 				auto skip = untilCol;
+
 				for (auto i = untilRow; i < rows; ++i) {
 					for (const auto& item : _rows[i].items) {
-						if (skip) {
+						if (skip)
 							--skip;
-						}
-						else {
+
+						else
 							item->setPosition(-1);
-						}
 					}
 				}
 			}
-			if (!untilCol) { // All good rows are filled.
+
+			if (!untilCol) {
 				_rows.resize(untilRow);
 				return until;
 			}
+
 			_rows.resize(untilRow + 1);
 			_rows[untilRow].items.resize(untilCol);
+
 			_rows[untilRow].maxWidth = core::utility::accumulate(
 				_rows[untilRow].items,
 				0,
 				[](int w, auto& row) { 
 					return w + row->maxWidth();
 				});
+
 			layoutRow(_rows[untilRow], _width);
 			return until;
 		}
-		if (untilRow && !untilCol) { // Remove last row, maybe it is not full.
+
+		if (untilRow && !untilCol) {
 			--untilRow;
 			untilCol = _rows[untilRow].items.size();
 		}
+
 		until -= untilCol;
 
-		for (auto i = untilRow; i < _rows.size(); ++i) {
-			for (const auto& item : _rows[i].items) {
+		for (auto i = untilRow; i < _rows.size(); ++i)
+			for (const auto& item : _rows[i].items)
 				item->setPosition(-1);
-			}
-		}
+		
 		_rows.resize(untilRow);
 
 		return until;
@@ -372,13 +378,12 @@ namespace Ui::Layout {
 	}
 
 	bool AbstractMosaicLayout::rowFinalize(Row& row, int& sumWidth, bool force) {
-		if (row.items.empty()) {
+		if (row.items.empty())
 			return false;
-		}
-
+		
 		const auto full = (row.items.size() >= kInlineItemsMaxPerRow);
-		// Currently use the same GIFs layout for all widget sizes.
 		const auto big = (sumWidth >= _bigWidth);
+
 		if (full || big || force) {
 			row.maxWidth = (full || big) ? sumWidth : 0;
 			layoutRow(row, _width);
@@ -388,6 +393,7 @@ namespace Ui::Layout {
 			sumWidth = 0;
 			return true;
 		}
+
 		return false;
 	}
 
@@ -395,32 +401,36 @@ namespace Ui::Layout {
 		const auto count = int(row.items.size());
 		assert(count <= kInlineItemsMaxPerRow);
 
-		// Enumerate items in the order of growing maxWidth()
-		// for that sort item indices by maxWidth().
 		int indices[kInlineItemsMaxPerRow];
-		for (auto i = 0; i != count; ++i) {
+		for (auto i = 0; i != count; ++i)
 			indices[i] = i;
-		}
+
 		std::sort(indices, indices + count, [&](int a, int b) {
 			return row.items[a]->maxWidth() < row.items[b]->maxWidth();
-			});
+		});
 
 		auto desiredWidth = row.maxWidth;
 		row.height = 0;
+
 		auto availableWidth = fullWidth - _padding.left() - _padding.right();
+
 		for (auto i = 0; i < count; ++i) {
 			const auto index = indices[i];
 			const auto& item = row.items[index];
+
 			const auto w = desiredWidth
 				? (item->maxWidth() * availableWidth / desiredWidth)
 				: item->maxWidth();
 			const auto actualWidth = std::max(w, style::minimumMessageWidth);
+
 			row.height = std::max(
 				row.height,
 				item->resizeGetHeight(actualWidth));
+
 			if (desiredWidth) {
 				availableWidth -= actualWidth;
 				desiredWidth -= row.items[index]->maxWidth();
+
 				if (index > 0 && _rightSkip) {
 					availableWidth -= _rightSkip;
 					desiredWidth -= _rightSkip;
@@ -428,5 +438,4 @@ namespace Ui::Layout {
 			}
 		}
 	}
-
 } // namespace Ui::Layout

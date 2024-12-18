@@ -47,6 +47,8 @@ SET(MAIN_SOURCES main.cpp
 	src/core/AutoRunUtils.cpp
 	src/core/AutoRunUtils.h
 
+    src/core/utlity/Accumulate.h
+
 	src/core/MouseDetector.cpp
 	src/core/MouseDetector.h
 
@@ -148,7 +150,6 @@ SET(MAIN_SOURCES main.cpp
 	src/ui/widgets/ContinuousScroll.cpp
 	src/ui/widgets/ContinuousScroll.h
 
-    src/ui/layouts/MosaicLayout.cpp
 	src/ui/layouts/MosaicLayout.h
 
     src/ui/layouts/AbstractMosaicLayout.cpp
