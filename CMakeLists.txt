@@ -98,8 +98,6 @@ SET(MAIN_SOURCES main.cpp
 	src/core/Time.cpp
 	src/core/Time.h
 
-    src/core/Concepts.h
-
     src/core/Timer.cpp
 	src/core/Timer.h
 
