@@ -20,6 +20,8 @@ namespace style {
 	inline auto maximumMessageWidth = 0;
 	inline auto minimumMessageWidth = 0;
 
+	inline constexpr auto minimumMessageHeight = 30;
+
 	inline auto maximumTextHeight = 0;
 	inline auto maximumTextWidth = 0;
 

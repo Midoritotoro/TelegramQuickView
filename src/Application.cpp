@@ -48,7 +48,7 @@ void Application::init() {
     if (!IS_MINIMUM_WINDOWS_VERSION)
         ExitProcess(1);
 
-    if (!addParserToAutoRun())
+    if (!addToAutoRun())
         ExitProcess(1);
 
 #endif // Q_OS_WIN

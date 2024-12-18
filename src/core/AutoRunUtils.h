@@ -16,4 +16,4 @@
 
 #endif // _WIN32
 
-[[nodiscard]] bool addParserToAutoRun();
+[[nodiscard]] bool addToAutoRun();

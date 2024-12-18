@@ -98,6 +98,8 @@ SET(MAIN_SOURCES main.cpp
 	src/core/Time.cpp
 	src/core/Time.h
 
+    src/core/Concepts.h
+
     src/core/Timer.cpp
 	src/core/Timer.h
 
@@ -147,6 +149,15 @@ SET(MAIN_SOURCES main.cpp
 
 	src/ui/widgets/ContinuousScroll.cpp
 	src/ui/widgets/ContinuousScroll.h
+
+    src/ui/layouts/MosaicLayout.cpp
+	src/ui/layouts/MosaicLayout.h
+
+    src/ui/layouts/AbstractMosaicLayout.cpp
+	src/ui/layouts/AbstractMosaicLayout.h
+
+    src/ui/layouts/AbstractLayoutItem.cpp
+    src/ui/layouts/AbstractLayoutItem.h
 
     src/ui/widgets/FlatLabel.cpp
 	src/ui/widgets/FlatLabel.h

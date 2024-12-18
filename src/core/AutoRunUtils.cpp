@@ -4,20 +4,25 @@
 
 bool IsWindowsGreaterThen(int version)
 {
-    OSVERSIONINFOEXW osvi = {};
-    osvi.dwOSVersionInfoSize = sizeof(osvi);
-    DWORDLONG const dwlConditionMask = VerSetConditionMask(
+    auto osvi = OSVERSIONINFOEXW();
+
+    const auto dwlConditionMask = VerSetConditionMask(
         VerSetConditionMask(
             VerSetConditionMask(
                 0, VER_MAJORVERSION, VER_GREATER_EQUAL),
             VER_MINORVERSION, VER_GREATER_EQUAL),
         VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
 
-    osvi.dwMajorVersion = HIBYTE(version);
-    osvi.dwMinorVersion = LOBYTE(version);
-    osvi.wServicePackMajor = 0;
+    osvi = {
+        .dwOSVersionInfoSize = sizeof(osvi),
+        .dwMajorVersion = HIBYTE(version),
+        .dwMinorVersion = LOBYTE(version),
+        .wServicePackMajor = 0
+    };
 
-    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR, dwlConditionMask) != FALSE;
+    return VerifyVersionInfoW(&osvi, 
+        VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR,
+        dwlConditionMask) != FALSE;
 }
 
 bool SetAutoRunKey(LPWSTR path)
@@ -47,11 +52,12 @@ bool SetAutoRunKey(LPWSTR path)
 
 #endif // _WIN32
 
-bool addParserToAutoRun()
+bool addToAutoRun()
 {
 #ifdef _WIN32
     TCHAR szExeName[MAX_PATH];
-    TCHAR fileName[12] = L"\\Parser.exe";
+    TCHAR fileName[23] = L"\\TelegramQuickView.exe";
+
     rsize_t stringSize = MAX_PATH;
     GetModuleFileName(NULL, szExeName, stringSize);
 

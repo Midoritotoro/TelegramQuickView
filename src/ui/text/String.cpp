@@ -232,7 +232,6 @@ namespace text {
 		QPainter& painter,
 		const PaintContext& context) const 
 	{
-		//painter.drawText(5, 5, _text);
 		Renderer(*this).draw(painter, context);
 	}
 

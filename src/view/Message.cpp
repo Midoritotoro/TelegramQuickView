@@ -13,7 +13,7 @@ Message::Message(
 {
 	_messageLayout = new QGridLayout(this);
 	_textLabel = new FlatLabel(this);
-
+	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setContentsMargins(0, 0, 0, 0);
 
 	_messageLayout->setSpacing(0);
@@ -31,10 +31,10 @@ void Message::setText(const QString& text) {
 	if (text.length() == 0)
 		return;
 
-	//auto handler = std::make_shared<UrlClickHandler>("https://google.com");
+	auto handler = std::make_shared<UrlClickHandler>("https://google.com");
 
 	_textLabel->setText(text);
-	//_textLabel->setLink(1, handler);
+	_textLabel->setLink(1, handler);
 
 	qDebug() << "hasLinks: " << _textLabel->hasLinks();
 

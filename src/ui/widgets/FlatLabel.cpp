@@ -44,10 +44,6 @@ void FlatLabel::init() {
 	_contextCopyText = style::flatLabel::phraseContextCopySelected;
 }
 
-QSize FlatLabel::sizeHint() const {
-	return size();
-}
-
 void FlatLabel::setText(const QString& text) {
 	_text.setText(_st, text);
 	textUpdated();
@@ -191,10 +187,10 @@ void FlatLabel::overrideLinkClickHandler(Fn<void(QString url)> handler) {
 void FlatLabel::paintEvent(QPaintEvent* event) {
 	auto painter = QPainter(this);
 
-	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
-	painter.setOpacity(_opacity);
+	//painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
+	//painter.setOpacity(_opacity);
 
-	painter.setPen(Qt::white);
+	//painter.setPen(Qt::white);
 
 	//style::RoundCorners(painter, size(), 10, _cornersRoundMode);
 
@@ -229,7 +225,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		? qMax(style::maximumTextHeight, lineHeight)
 		: height();
 
-	auto context = text::PaintContext{
+	_text.draw(painter, {
 		.position = { textLeft, style::flatLabel::margins.top() },
 		.availableWidth = textWidth,
 		.align = style::alignLeft,
@@ -239,9 +235,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		.selection = selection,
 		.elisionHeight = elisionHeight,
 		.elisionBreakEverywhere = renderElided && _breakEverywhere,
-	};
-
-	_text.draw(painter, context);
+		});
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
