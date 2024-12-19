@@ -14,10 +14,6 @@
 
 namespace style {
 	namespace flatLabel {
-		inline constexpr QMargins margins = {
-				8, 5, 8, 5
-		};
-
 		inline constexpr auto defaultColor = QColor(24, 37, 51);
 		inline constexpr auto phraseContextCopySelected = "Копировать текст";
 	}
@@ -81,7 +77,6 @@ public:
 
 	void overrideLinkClickHandler(Fn<void()> handler);
 	void overrideLinkClickHandler(Fn<void(QString url)> handler);
-
 
 	void init();
 protected:

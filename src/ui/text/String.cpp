@@ -67,9 +67,10 @@ namespace text {
 
 		enumerateLines(geometry, [&](int lineWidth, int lineBottom) {
 			const auto width = lineWidth;
-			if (request.lineWidths) {
+
+			if (request.lineWidths)
 				result.lineWidths.push_back(width);
-			}
+			
 			result.width = std::max(result.width, width);
 			result.height = lineBottom;
 			});
@@ -573,17 +574,16 @@ namespace text {
 					_minHeight += qpadding.top();
 					qpadding.setTop(0);
 				}
-				else if (qlinesleft > 0) {
+				else if (qlinesleft > 0)
 					--qlinesleft;
-				}
-				if (initial) {
+			
+				if (initial)
 					computeParagraphDirection(word.position());
-				}
+				
 				lastNewlineStart = word.position();
 
-				if (!hidden) {
+				if (!hidden)
 					_minHeight += lineHeight;
-				}
 
 				last_rBearing = 0;
 				last_rPadding = word.f_rpadding();
@@ -609,11 +609,12 @@ namespace text {
 			const auto useSkipHeight = (_blocks.back()->type() == TextBlockType::Skip)
 				&& (_words.back().f_width() == width);
 			_minHeight += qpadding.top() + qpadding.bottom();
-			if (qlinesleft != 0) {
+
+			if (qlinesleft != 0)
 				_minHeight += useSkipHeight
 					? _blocks.back().unsafe<SkipBlock>().height()
 					: lineHeight;
-			}
+			
 			core::utility::accumulateMax(maxWidth, width);
 			core::utility::accumulateMax(qmaxwidth, width);
 		}
@@ -629,6 +630,7 @@ namespace text {
 			const auto lastNewline = lastIsNewline
 				? static_cast<NewlineBlock*>(lastNewlineBlock->get())
 				: nullptr;
+
 			const auto lastLineDirection = lastNewline
 				? lastNewline->paragraphDirection()
 				: _startParagraphRTL
@@ -652,12 +654,11 @@ namespace text {
 	TextState String::getState(QPoint point, int width, StateRequest request) const {
 		if (isEmpty())
 			return {};
-		
-		return TextState();
-		/*return Renderer(*this).getState(
+
+		return Renderer(*this).getState(
 			point,
 			SimpleGeometry(width, 0, 0, false),
-			request);*/
+			request);
 	}
 
 	TextState String::getStateLeft(QPoint point, int width, int outerw, StateRequest request) const {
@@ -668,13 +669,12 @@ namespace text {
 		if (isEmpty())
 			return {};
 
-		return TextState();
-		/*return Renderer(*this).getState(point, SimpleGeometry(
+		return Renderer(*this).getState(point, SimpleGeometry(
 			width,
 			request.lines,
 			request.removeFromEnd,
 			request.flags & StateRequest::StateFlag::BreakEverywhere
-		), static_cast<StateRequest>(request));*/
+		), static_cast<StateRequest>(request));
 	}
 
 	TextState String::getStateElidedLeft(QPoint point, int width, int outerw, StateRequestElided request) const {

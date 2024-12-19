@@ -40,7 +40,7 @@ Application::Application(int& argc, char** argv) :
 
  //   _mediaPlayer->setMedia("C:/Users/danya/Downloads/videotestvertical.mp4");
   //  _mediaPlayer->show();
-    _messagesView->makeMessage(text);
+    _messagesView->makeMessage(text, list);
     
 }
 

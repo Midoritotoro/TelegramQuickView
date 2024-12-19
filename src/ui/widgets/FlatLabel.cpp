@@ -36,8 +36,7 @@ FlatLabel::FlatLabel(QWidget* parent) :
 	init();
 
 	setSelectable(true);
-	setMouseTracking(true);
-	
+
 	setDoubleClickSelectsParagraph(true);
 	setBreakEverywhere(true);
 
@@ -109,9 +108,8 @@ QSize FlatLabel::sizeHint() const {
 }
 
 int FlatLabel::textMaxWidth() const noexcept {
-	return style::maximumMessageWidth
-		- style::flatLabel::margins.left()
-		- style::flatLabel::margins.right();
+	return style::maximumTextWidth
+;
 }
 
 bool FlatLabel::hasLinks() const noexcept {
@@ -211,8 +209,10 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 	painter.setOpacity(_opacity);
 
+	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
+
 	painter.setPen(Qt::white);
-	painter.fillRect(rect(), style::flatLabel::defaultColor);
+	painter.fillRect(rect(), _backgroundColor);
 
 	const auto textWidth = _textWidth
 		? _textWidth
@@ -336,7 +336,7 @@ void FlatLabel::keyPressEvent(QKeyEvent* event) {
 
 int FlatLabel::resizeGetHeight(int newWidth) {
 	_allowedWidth = newWidth;
-	_textWidth = style::maximumMessageWidth;
+	_textWidth = style::maximumTextWidth;
 	return countTextHeight(_textWidth);
 }
 
@@ -358,6 +358,7 @@ void FlatLabel::copySelectedText() {
 			: _selection)
 		: _selection;
 
+	qDebug() << "selection.empty()" << selection.empty();
 	if (!selection.empty())
 		QGuiApplication::clipboard()->setText(_text.toString());
 }
@@ -380,7 +381,8 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 	_lastMousePos = p;
 	auto state = dragActionUpdate();
 
-	if (button != Qt::LeftButton) return state;
+	if (button != Qt::LeftButton) 
+		return state;
 
 	ClickHandler::pressed();
 	_dragAction = NoDrag;
@@ -592,6 +594,10 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 				&& (state.symbol < _selection.to)));
 
 	_contextMenu = new QMenu(this);
+
+	_contextMenu->show();
+	_contextMenu->move(_lastMousePos);
+
 	auto request = ContextMenuRequest({
 		.menu = _contextMenu,
 		.selection = _selectable ? _selection : text::TextSelection(),
@@ -613,41 +619,40 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 }
 
 void FlatLabel::fillContextMenu(ContextMenuRequest request) {
-	if (request.fullSelection && !_contextCopyText.isEmpty()) {
+	if (request.fullSelection && !_contextCopyText.isEmpty())
 		request.menu->addAction(
 			_contextCopyText,
 			[=] { copyContextText(); });
-	}
+	
 	else if (request.uponSelection && !request.fullSelection)
 		request.menu->addAction(
 			_contextCopyText,
 			[=] { copySelectedText(); });
 	else if (_selectable
 		&& request.selection.empty()
-		&& !_contextCopyText.isEmpty()) {
+		&& !_contextCopyText.isEmpty())
 		request.menu->addAction(
 			_contextCopyText,
 			[=] { copyContextText(); });
-	}
 
 	if (request.link) {
 		const auto label = request.link->copyToClipboardContextItemText();
-		if (!label.isEmpty()) {
+		if (!label.isEmpty())
 			request.menu->addAction(
 				label,
 				[text = request.link->copyToClipboardText()] {
 					QGuiApplication::clipboard()->setText(text);
 				});
-		}
 	}
 }
 
 int FlatLabel::countTextWidth() const noexcept {
 	const auto available = _allowedWidth
 		? _allowedWidth
-		: style::maximumMessageWidth;
+		: style::maximumTextWidth;
 	if (_allowedWidth > 0
-		&& _allowedWidth < _text.maxWidth()) {
+		&& _allowedWidth < _text.maxWidth())
+	{
 		auto large = _allowedWidth;
 		auto small = _allowedWidth / 2;
 		const auto largeHeight = _text.countHeight(large, _breakEverywhere);

@@ -30,7 +30,9 @@ MessagesView::MessagesView(QWidget* parent):
 
 	const auto panelWidth = (screenWidth / 3.5);
 
-	style::maximumMessageWidth = panelWidth - (width() / 12.5);
+	style::maximumMessageWidth = panelWidth - (width() / 12.5) 
+		- style::flatLabel::margins.left()
+		- style::flatLabel::margins.right();
 	style::minimumMessageWidth = (panelWidth - (width() / 12.5)) / 10.;
 
 	style::maximumTextWidth = style::maximumMessageWidth;

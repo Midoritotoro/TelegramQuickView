@@ -36,6 +36,12 @@ namespace style {
 
 	inline constexpr auto lineWidth = 1;
 
+	namespace flatLabel {
+		inline constexpr QMargins margins = {
+			10, 10, 10, 10
+		};
+	} // namespace flatLabel
+
 	enum class CornersRoundMode {
 		All,
 		Top,
