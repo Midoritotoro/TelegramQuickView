@@ -11,13 +11,10 @@ Message::Message(
 	QWidget(parent)
 	, _mediaDisplayMode(MediaDisplayMode::Stack)
 {
-	_messageLayout = new QGridLayout(this);
+	_messageLayout = new Ui::Layout::MosaicLayout<AbstractLayoutItem>(0);
 	_textLabel = new FlatLabel(this);
-	_textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	setContentsMargins(0, 0, 0, 0);
 
-	_messageLayout->setSpacing(0);
-	_messageLayout->setContentsMargins(0, 0, 0, 0);
+	setContentsMargins(0, 0, 0, 0);
 
 	setStyleSheet("QWidget{\n"
 		"background: rgb(24, 37, 51);\n"
@@ -38,9 +35,9 @@ void Message::setText(const QString& text) {
 
 	qDebug() << "hasLinks: " << _textLabel->hasLinks();
 
-	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
+	if (_messageLayout->rowsCount() > 1) // У сообщения есть вложение
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
-	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
+	_messageLayout->addItem(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 }
 
 QString Message::text() const noexcept {

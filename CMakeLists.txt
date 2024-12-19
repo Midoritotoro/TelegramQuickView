@@ -47,7 +47,7 @@ SET(MAIN_SOURCES main.cpp
 	src/core/AutoRunUtils.cpp
 	src/core/AutoRunUtils.h
 
-    src/core/utlity/Accumulate.h
+    src/core/utility/Accumulate.h
 
 	src/core/MouseDetector.cpp
 	src/core/MouseDetector.h

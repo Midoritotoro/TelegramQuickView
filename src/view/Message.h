@@ -1,11 +1,11 @@
 #pragma once
 
 #include "../core/Types.h"
+#include "../ui/layouts/MosaicLayout.h"
 
 #include <QWidget>
-#include <QGridLayout>
-
 #include <QList>
+
 
 class MessageAttachment;
 class FlatLabel;
@@ -42,7 +42,7 @@ public:
 private:
 	MessageAttachmentsList _attachments;
 
-	QGridLayout* _messageLayout = nullptr;
+	Ui::Layout::MosaicLayout<AbstractLayoutItem>* _messageLayout = nullptr;
 	MediaDisplayMode _mediaDisplayMode;
 
 	FlatLabel* _textLabel = nullptr;

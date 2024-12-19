@@ -23,6 +23,13 @@ namespace Ui::Layout {
 				items.size() });
 		}
 
+		void addItem(not_null<ItemBase*> item) {
+			Parent::addItems({
+				reinterpret_cast<const not_null<AbstractLayoutItem*>*>(
+					item),
+				1});
+		}
+
 		[[nodiscard]] not_null<ItemBase*> itemAt(int row, int column) const {
 			return Downcast(Parent::itemAt(row, column));
 		}

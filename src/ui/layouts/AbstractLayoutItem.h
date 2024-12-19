@@ -3,6 +3,7 @@
 #include "../BasicClickHandlers.h"
 
 #include <QRect>
+#include <qgridlayout.h>
 
 
 class AbstractLayoutItem: public ClickHandlerHost {

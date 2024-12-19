@@ -37,26 +37,39 @@ namespace core::utility {
 		template<typename I, typename S, typename T,
 			typename Op = plus, typename P = identity>
 
-			requires std::input_iterator<I>&& std::sentinel_for<S, I>&&
-		indirectly_binary_invocable<Op, T*, std::projected<I, P>>&&
-			std::assignable_from<T&, std::indirect_result_t<Op&,
-			T*, std::projected<I, P>>>
+			requires std::input_iterator<I>									&&
+				std::sentinel_for<S, I>										&&
+				indirectly_binary_invocable<Op, T*, std::projected<I, P>>	&&
+				std::assignable_from<T&, std::indirect_result_t<Op&,
+					T*, std::projected<I, P>>>
 
-			T operator()(I first, S last, T init, Op op = Op{}, P proj = P{}) const {
+			T operator()(
+				I first,
+				S last,
+				T init,
+				Op op = Op{},
+				P proj = P{}) const 
+		{
 			for (; first != last; ++first)
 				init = std::invoke(op, init, std::invoke(proj, *first));
 			return init;
 		}
 
 		template<typename Rng, typename T, typename Op = plus, typename P = identity>
-			requires
-		input_range<Rng>&&
-			indirectly_binary_invocable<Op, T*, std::projected<iterator_t<Rng>, P>>&&
-			std::assignable_from<T&, std::indirect_result_t<Op&, T*,
-			std::projected<iterator_t<Rng>, P>>>
+			requires input_range<Rng>				&&
+				indirectly_binary_invocable<Op, T*,
+				std::projected<iterator_t<Rng>, P>> &&
+				std::assignable_from<T&, std::indirect_result_t<Op&, T*,
+				std::projected<iterator_t<Rng>, P>>>
 
-			T operator()(Rng&& rng, T init, Op op = Op{}, P proj = P{}) const {
-			return (*this)(std::ranges::begin(rng), std::ranges::end(rng), std::move(init), std::move(op), std::move(proj));
+			T operator()(
+				Rng&& rng,
+				T init,
+				Op op = Op{},
+				P proj = P{}) const
+		{
+			return (*this)(std::ranges::begin(rng), std::ranges::end(rng),
+				std::move(init), std::move(op), std::move(proj));
 		}
 	};
 
