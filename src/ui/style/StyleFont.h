@@ -69,7 +69,7 @@ namespace style {
 		int header = 20;
 
 		int verticalSkip = 5;
-		QColor bg;
+		QColor bg = QColor(24, 37, 51);
 	};
 
 	struct TextPalette {
@@ -234,7 +234,7 @@ namespace style::internal {
 namespace style {
 	struct TextStyle {
 		font _font;
-		int lineHeight = 0;
+		int lineHeight = 14;
 
 		bool linkUnderLine = true;
 		QuoteStyle blockquote = {};

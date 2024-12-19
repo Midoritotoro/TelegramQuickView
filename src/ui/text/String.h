@@ -47,7 +47,7 @@ namespace text {
 			int reserve = 0;
 		};
 
-		String(int32 minResizeWidth = kQFixedMax);
+		String(int32 minResizeWidth = style::maximumMessageWidth);
 		String(String&& other) = default;
 		String(
 			const QString& string,

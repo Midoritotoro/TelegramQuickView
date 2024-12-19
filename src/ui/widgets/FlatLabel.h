@@ -15,7 +15,7 @@
 namespace style {
 	namespace flatLabel {
 		inline constexpr QMargins margins = {
-				8, 5, 20, 10
+				8, 5, 8, 5
 		};
 
 		inline constexpr auto defaultColor = QColor(24, 37, 51);
@@ -36,6 +36,8 @@ public:
 	};
 
 	FlatLabel(QWidget* parent = nullptr);
+
+	[[nodiscard]] QSize sizeHint() const override;
 
 	[[nodiscard]] int textMaxWidth() const noexcept;
 	[[nodiscard]] bool hasLinks() const noexcept;
@@ -96,6 +98,8 @@ protected:
 	void keyPressEvent(QKeyEvent* event) override;
 	void contextMenuEvent(QContextMenuEvent* event) override;
 private:
+	int resizeGetHeight(int newWidth);
+
 	enum class ContextMenuReason {
 		FromEvent,
 		FromTouch,

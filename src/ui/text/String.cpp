@@ -97,9 +97,10 @@ namespace text {
 
 	void String::setLink(uint16 index, const ClickHandlerPtr& link) {
 		const auto extended = _extended.get();
-		if (extended && index > 0 && index <= extended->links.size()) {
+		qDebug() << "extended == nullptr: " << (extended == nullptr);
+
+		if (extended && index > 0 && index <= extended->links.size())
 			extended->links[index - 1] = link;
-		}
 	}
 
 	bool String::hasCollapsedBlockquots() const {
@@ -1039,10 +1040,11 @@ namespace text {
 	void String::enumerateLines(
 		int w,
 		bool breakEverywhere,
-		Callback&& callback) const {
-		if (isEmpty()) {
+		Callback&& callback) const 
+	{
+		if (isEmpty())
 			return;
-		}
+	
 		const auto width = std::max(w, _minResizeWidth);
 		auto g = SimpleGeometry(width, 0, 0, false);
 		g.breakEverywhere = breakEverywhere;
@@ -1052,10 +1054,10 @@ namespace text {
 	template <typename Callback>
 	void String::enumerateLines(
 		GeometryDescriptor geometry,
-		Callback&& callback) const {
-		if (isEmpty()) {
+		Callback&& callback) const 
+	{
+		if (isEmpty())
 			return;
-		}
 
 		const auto withElided = [&](bool elided) {
 			if (geometry.outElided) {
@@ -1112,19 +1114,17 @@ namespace text {
 				const auto index = quoteIndex(_blocks[block].get());
 				const auto hidden = !qlinesleft;
 				const auto changed = (qindex != index);
-				if (changed) {
+				if (changed)
 					top += qpadding.bottom();
-				}
 
-				if (qlinesleft > 0) {
+				if (qlinesleft > 0)
 					--qlinesleft;
-				}
-				if (!hidden) {
+		
+				if (!hidden)
 					callback(lineLeft + lineWidth - widthLeft.toInt(), top += lineHeight);
-				}
-				if (lineElided) {
+
+				if (lineElided)
 					return withElided(true);
-				}
 
 				last_rBearing = 0;
 				last_rPadding = w->f_rpadding();
@@ -1135,9 +1135,8 @@ namespace text {
 				lastWordStart_wLeft = widthLeft;
 				continue;
 			}
-			else if (!qlinesleft) {
+			else if (!qlinesleft)
 				continue;
-			}
 			const auto wordEndsHere = !w->unfinished();
 
 			auto w__f_width = w->f_width();

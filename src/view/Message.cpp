@@ -11,7 +11,7 @@ Message::Message(
 	QWidget(parent)
 	, _mediaDisplayMode(MediaDisplayMode::Stack)
 {
-	_messageLayout = new Ui::Layout::MosaicLayout<AbstractLayoutItem>(0);
+	_messageLayout = new QGridLayout(this);
 	_textLabel = new FlatLabel(this);
 
 	setContentsMargins(0, 0, 0, 0);
@@ -35,15 +35,14 @@ void Message::setText(const QString& text) {
 
 	qDebug() << "hasLinks: " << _textLabel->hasLinks();
 
-	if (_messageLayout->rowsCount() > 1) // У сообщения есть вложение
+	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
-	_messageLayout->addItem(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
+	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 }
 
 QString Message::text() const noexcept {
 	return _textLabel->text();
 }
-
 
 void Message::setAttachments(const QStringList& attachmentsPaths) {
 	if (attachmentsPaths.length() == 0)

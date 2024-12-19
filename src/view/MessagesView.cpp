@@ -23,6 +23,7 @@ MessagesView::MessagesView(QWidget* parent):
 	, _currentPostIndex(1)
 {
 	setMouseTracking(true);
+	setContentsMargins(0, 0, 0, 0);
 
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
@@ -49,7 +50,7 @@ MessagesView::MessagesView(QWidget* parent):
 
 	_chatScrollArea->setWidgetResizable(true);
 
-	_chatScrollAreaLayout->setContentsMargins(width() / 25, 0, width() / 25, 15);
+	_chatScrollAreaLayout->setContentsMargins(10, 5,  10 + _chatScrollArea->verticalScrollBar()->width(), 15);
 	_chatScrollAreaLayout->setSpacing(15);
 
 	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
@@ -64,7 +65,6 @@ MessagesView::MessagesView(QWidget* parent):
 
 	QGridLayout* grid = new QGridLayout(this);
 
-	grid->setVerticalSpacing(0);
 
 	grid->setContentsMargins(0, 0, 5, 4);
 	grid->setVerticalSpacing(4);
@@ -81,8 +81,6 @@ MessagesView::MessagesView(QWidget* parent):
 
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
-
-	setContentsMargins(0, 0, 0, 0);
 
 	widgetsHider->SetInactivityDuration(1500);
 	widgetsHider->SetAnimationDuration(1500);

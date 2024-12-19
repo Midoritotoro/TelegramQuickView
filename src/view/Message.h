@@ -3,6 +3,8 @@
 #include "../core/Types.h"
 #include "../ui/layouts/MosaicLayout.h"
 
+#include <QGridLayout>
+
 #include <QWidget>
 #include <QList>
 
@@ -42,7 +44,7 @@ public:
 private:
 	MessageAttachmentsList _attachments;
 
-	Ui::Layout::MosaicLayout<AbstractLayoutItem>* _messageLayout = nullptr;
+	QGridLayout* _messageLayout = nullptr;
 	MediaDisplayMode _mediaDisplayMode;
 
 	FlatLabel* _textLabel = nullptr;

@@ -14,6 +14,14 @@
 
 #include "../text/TextUtility.h"
 
+namespace {
+	text::TextParseOptions _labelOptions = {
+		text::TextParseMultiline, // flags
+		0, // maxw
+		0, // maxh
+		Qt::LayoutDirectionAuto, // dir
+	};
+}
 
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)
@@ -21,9 +29,9 @@ FlatLabel::FlatLabel(QWidget* parent) :
 	, _st(new 
 		style::TextStyle{
 			._font = style::font(13, 0, 0),
-			.lineHeight = 0,
+			.lineHeight = 14,
 			.linkUnderLine = true,
-			.blockquote = {}})
+			.blockquote = {} })
 {
 	init();
 
@@ -45,7 +53,7 @@ void FlatLabel::init() {
 }
 
 void FlatLabel::setText(const QString& text) {
-	_text.setText(_st, text);
+	_text.setText(_st, text, _labelOptions);
 	textUpdated();
 }
 
@@ -54,7 +62,12 @@ QString FlatLabel::text() const noexcept {
 }
 
 void FlatLabel::setSelectable(bool selectable) {
-	_selectable = selectable;
+	if (_selectable != selectable) {
+		_selection = { 0, 0 };
+		_savedSelection = { 0, 0 };
+		_selectable = selectable;
+		setMouseTracking(_selectable || _text.hasLinks());
+	}
 }
 
 bool FlatLabel::selectable() const noexcept {
@@ -87,6 +100,12 @@ void FlatLabel::setOpacity(float opacity) {
 
 float FlatLabel::opacity() const noexcept {
 	return _opacity;
+}
+
+QSize FlatLabel::sizeHint() const {
+	qDebug() << size();
+
+	return size();
 }
 
 int FlatLabel::textMaxWidth() const noexcept {
@@ -146,7 +165,8 @@ void FlatLabel::setLink(
 void FlatLabel::setLinksTrusted() {
 	static const auto TrustedLinksFilter = [](
 		const ClickHandlerPtr& link,
-		Qt::MouseButton button) {
+		Qt::MouseButton button) 
+		{
 			if (const auto url = dynamic_cast<UrlClickHandler*>(link.get())) {
 				url->UrlClickHandler::onClick({ button });
 				return false;
@@ -163,10 +183,11 @@ void FlatLabel::setClickHandlerFilter(ClickHandlerFilter&& filter) {
 void FlatLabel::overrideLinkClickHandler(Fn<void()> handler) {
 	setClickHandlerFilter([=](
 		const ClickHandlerPtr& link,
-		Qt::MouseButton button) {
-			if (button != Qt::LeftButton) {
+		Qt::MouseButton button)
+		{
+			if (button != Qt::LeftButton)
 				return true;
-			}
+
 			handler();
 			return false;
 		});
@@ -187,12 +208,11 @@ void FlatLabel::overrideLinkClickHandler(Fn<void(QString url)> handler) {
 void FlatLabel::paintEvent(QPaintEvent* event) {
 	auto painter = QPainter(this);
 
-	//painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
-	//painter.setOpacity(_opacity);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
+	painter.setOpacity(_opacity);
 
-	//painter.setPen(Qt::white);
-
-	//style::RoundCorners(painter, size(), 10, _cornersRoundMode);
+	painter.setPen(Qt::white);
+	painter.fillRect(rect(), style::flatLabel::defaultColor);
 
 	const auto textWidth = _textWidth
 		? _textWidth
@@ -214,11 +234,14 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		? _savedSelection
 		: _selection;
 
-	const auto heightExceeded = style::maximumTextHeight < _fullTextHeight || textWidth < style::maximumTextWidth;
+	const auto heightExceeded = style::maximumTextHeight < _fullTextHeight 
+		|| textWidth < textMaxWidth();
 	const auto renderElided = _breakEverywhere || heightExceeded;
+
 	const auto lineHeight = _text.style()
 		? qMax(_text.style()->lineHeight, 14)
-		: QFontMetrics(font()).height();
+		: 0;
+
 	const auto elisionHeight = !heightExceeded
 		? 0
 		: style::maximumTextHeight
@@ -230,12 +253,15 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		.availableWidth = textWidth,
 		.align = style::alignLeft,
 		.clip = event->rect(),
-		.palette = new style::TextPalette(),
+		.palette = &style::defaultTextPalette,
 		.now = Time::now(),
 		.selection = selection,
 		.elisionHeight = elisionHeight,
 		.elisionBreakEverywhere = renderElided && _breakEverywhere,
 		});
+
+	refreshSize();
+	qDebug() << "hasLinks: " << hasLinks();
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
@@ -306,6 +332,12 @@ void FlatLabel::keyPressEvent(QKeyEvent* event) {
 			copySelectedText();
 			event->accept();
 		}
+}
+
+int FlatLabel::resizeGetHeight(int newWidth) {
+	_allowedWidth = newWidth;
+	_textWidth = style::maximumMessageWidth;
+	return countTextHeight(_textWidth);
 }
 
 void FlatLabel::contextMenuEvent(QContextMenuEvent* event) {
@@ -438,19 +470,19 @@ void FlatLabel::updateHover(const text::TextState& state) {
 
 	Qt::CursorShape cur = style::cursorDefault;
 	if (_dragAction == NoDrag) {
-		if (state.link) {
+		if (state.link)
 			cur = style::cursorPointer;
-		}
-		else if (state.uponSymbol) {
+		
+		else if (state.uponSymbol)
 			cur = style::cursorText;
-		}
 	}
 	else {
 		if (_dragAction == Selecting) {
 			uint16 second = state.symbol;
-			if (state.afterSymbol && _selectionType == text::TextSelection::Type::Letters) {
+
+			if (state.afterSymbol && _selectionType == text::TextSelection::Type::Letters)
 				++second;
-			}
+			
 			auto selection = _text.adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
 			if (_selection != selection) {
 				_selection = selection;
@@ -473,29 +505,38 @@ void FlatLabel::updateHover(const text::TextState& state) {
 text::TextState FlatLabel::getTextState(const QPoint& m) const {
 	text::StateRequestElided request;
 	request.align = style::alignLeft;
-	if (_selectable) {
+
+	if (_selectable)
 		request.flags |= text::StateRequest::StateFlag::LookupSymbol;
-	}
-	int textWidth = width() 
-		- style::flatLabel::margins.left() 
+	
+
+	int textWidth = width()
+		- style::flatLabel::margins.left()
 		- style::flatLabel::margins.right();
 
 	text::TextState state;
+
 	bool heightExceeded = (style::maximumTextHeight < _fullTextHeight || textWidth < _text.maxWidth());
 	bool renderElided = _breakEverywhere || heightExceeded;
+
 	if (renderElided) {
 		auto lineHeight = _text.style() && _text.style()->_font
-			? qMax(1, _text.style()->_font->height)
+			? qMax(14, _text.style()->_font->height)
 			: 1;
+
 		auto lines = qMax(style::maximumTextHeight / lineHeight, 1);
 		request.lines = lines;
-		if (_breakEverywhere) {
+
+		if (_breakEverywhere)
 			request.flags |= text::StateRequest::StateFlag::BreakEverywhere;
-		}
-		state = _text.getStateElided(m - QPoint(style::flatLabel::margins.left(), style::flatLabel::margins.top()), textWidth, request);
-	} else {
-		state = _text.getState(m - QPoint(style::flatLabel::margins.left(), style::flatLabel::margins.top()), textWidth, request);
-	}
+		
+		state = _text.getStateElided(m - QPoint(style::flatLabel::margins.left(),
+			style::flatLabel::margins.top()), textWidth, request);
+	} 
+	else 
+		state = _text.getState(m - QPoint(style::flatLabel::margins.left(),
+			style::flatLabel::margins.top()), textWidth, request);
+	
 
 	return state;
 }
@@ -604,20 +645,19 @@ void FlatLabel::fillContextMenu(ContextMenuRequest request) {
 int FlatLabel::countTextWidth() const noexcept {
 	const auto available = _allowedWidth
 		? _allowedWidth
-		: _text.maxWidth();
+		: style::maximumMessageWidth;
 	if (_allowedWidth > 0
 		&& _allowedWidth < _text.maxWidth()) {
 		auto large = _allowedWidth;
 		auto small = _allowedWidth / 2;
-		const auto largeHeight = _text.countHeight(large, true);
+		const auto largeHeight = _text.countHeight(large, _breakEverywhere);
 		while (large - small > 1) {
 			const auto middle = (large + small) / 2;
-			if (largeHeight == _text.countHeight(middle, true)) {
+
+			if (largeHeight == _text.countHeight(middle, _breakEverywhere))
 				large = middle;
-			}
-			else {
+			else
 				small = middle;
-			}
 		}
 		return large;
 	}
@@ -625,7 +665,7 @@ int FlatLabel::countTextWidth() const noexcept {
 }
 
 int FlatLabel::countTextHeight(int textWidth) {
-	_fullTextHeight = _text.countHeight(textWidth, true);
+	_fullTextHeight = _text.countHeight(textWidth, _breakEverywhere);
 	return qMin(_fullTextHeight, style::maximumTextHeight);
 }
 
