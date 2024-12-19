@@ -11,13 +11,19 @@
 #include <QWidget>
 #include "../style/StyleFont.h"
 
+#include "../style/StyleWidgets.h"
 
-namespace style {
-	namespace flatLabel {
-		inline constexpr auto defaultColor = QColor(24, 37, 51);
-		inline constexpr auto phraseContextCopySelected = "Копировать текст";
-	}
-} // namespace style
+
+namespace {
+	inline constexpr auto phraseContextCopySelected = "Копировать текст";
+
+	text::TextParseOptions _labelOptions = {
+		text::TextParseMultiline, // flags
+		0, // maxw
+		0, // maxh
+		Qt::LayoutDirectionAuto, // dir
+	};
+} // namespace
 
 
 class FlatLabel : public QWidget, public ClickHandlerHost {
@@ -134,7 +140,7 @@ private:
 		Selecting = 0x04,
 	};
 
-	const style::TextStyle* _st = nullptr;
+	const style::FlatLabel& _st;
 
 	text::String _text;
 	Qt::Alignment _alignment = Qt::AlignLeft;

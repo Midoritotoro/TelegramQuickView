@@ -116,4 +116,6 @@ namespace style {
 
 	void Start();
 	void Stop();
+
+	void RegisterStyles();
 } // namespace style

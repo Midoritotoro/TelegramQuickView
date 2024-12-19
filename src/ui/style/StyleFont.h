@@ -86,6 +86,8 @@ namespace style {
 		bool linkAlwaysActive;
 	};
 
+	const TextStyle* defaultTextStyle;
+
 	const TextPalette defaultTextPalette = TextPalette{
 		.linkFg = QColor(132, 220, 240),
 		.monoFg = QColor(132, 220, 240),

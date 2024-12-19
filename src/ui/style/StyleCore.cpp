@@ -14,6 +14,8 @@
 #include <QCoreApplication>
 #include "StyleFont.h"
 
+#include "StyleWidgets.h"
+
 
 namespace style {
 
@@ -387,5 +389,12 @@ namespace style {
 		internal::DestroyFonts();
 	}
 
-
+	void RegisterStyles() {
+		defaultTextStyle = new TextStyle{
+		   ._font = style::font(13, 0, 0),
+		   .lineHeight = 14,
+		   .linkUnderLine = true,
+		   .blockquote = {} };
+		// defaultFlatLabelStyle = new 
+	}
 } // namespace style

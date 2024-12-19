@@ -72,6 +72,8 @@ void Application::init() {
     style::SetCustomFont(u"OpenSans-Regular"_q);
     style::internal::StartFonts();
 
+    style::registerStyles();
+
     style::Start();
 
     QPixmapCache::setCacheLimit(1024 * 1024); 

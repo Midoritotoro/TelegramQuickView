@@ -109,9 +109,11 @@ namespace text {
 		}
 
 		// Tilde fix in OpenSans.
-		[[nodiscard]] bool ComputeCheckTilde(const style::font& font) {
+		[[nodiscard]] bool ComputeCheckTilde(const style::TextStyle& st) {
+			const auto& font = st._font;
 			return (font->size() * style::DevicePixelRatio() == 13)
-				&& (font->flags() == 0);
+				&& (font->flags() == 0)
+				&& (font->f.family() == QLatin1String("Open Sans"));
 		}
 
 		[[nodiscard]] bool IsDiacriticAllowedAfter(QChar ch) {
@@ -153,16 +155,16 @@ namespace text {
 
 	std::optional<uint16> BlockParser::StartedEntity::linkIndex() const {
 		if ((_value < int(kStringLinkIndexShift) && (_type == Type::IndexedLink))
-			|| (_value >= int(kStringLinkIndexShift) && (_type == Type::Link))) {
+			|| (_value >= int(kStringLinkIndexShift) && (_type == Type::Link)))
 			return uint16(_value);
-		}
+		
 		return std::nullopt;
 	}
 
 	std::optional<uint16> BlockParser::StartedEntity::colorIndex() const {
-		if (_type == Type::Colorized) {
+		if (_type == Type::Colorized)
 			return uint16(_value);
-		}
+
 		return std::nullopt;
 	}
 
@@ -196,14 +198,14 @@ namespace text {
 		, _entitiesEnd(_source.entities.end())
 		, _waitingEntity(_source.entities.begin())
 		, _multiline(options.flags& TextParseMultiline)
-		, _checkTilde(ComputeCheckTilde(_t->_st->_font)) {
+		, _checkTilde(ComputeCheckTilde(*_t->_st)) {
 		parse(options);
 	}
 
 	void BlockParser::createBlock(int skipBack) {
-		if (_linkIndex < kStringLinkIndexShift && _linkIndex > _maxLinkIndex) {
+		if (_linkIndex < kStringLinkIndexShift && _linkIndex > _maxLinkIndex)
 			_maxLinkIndex = _linkIndex;
-		}
+		
 		if (_linkIndex > kStringLinkIndexShift) {
 			_maxShiftedLinkIndex = std::max(
 				uint16(_linkIndex - kStringLinkIndexShift),
@@ -211,11 +213,12 @@ namespace text {
 		}
 
 		const auto length = int(_tText.size()) + skipBack - _blockStart;
-		if (length <= 0) {
+		if (length <= 0)
 			return;
-		}
+		
 		const auto newline = (length == 1)
 			&& (_tText.at(_blockStart) == QChar::LineFeed);
+
 		if (_newlineAwaited) {
 			_newlineAwaited = false;
 			if (!newline) {
@@ -224,26 +227,21 @@ namespace text {
 				createBlock(skipBack - length);
 			}
 		}
+
 		const auto linkIndex = _monoIndex ? _monoIndex : _linkIndex;
 		const auto push = [&](auto&& factory, auto &&...args) {
-			BlockDescriptor descriptor;
-
-			descriptor.position = uint16(_blockStart),
-			descriptor.flags = _flags,
-			descriptor.linkIndex = linkIndex,
-			descriptor.colorIndex = _colorIndex,
-
 			_tBlocks.push_back(factory({
-				descriptor
+				.flags = _flags,
+				.position = uint16(_blockStart),
+				.linkIndex = linkIndex,
+				.colorIndex = _colorIndex,
 				}, std::forward<decltype(args)>(args)...));
 			};
 
-		if (newline) {
+		if (newline)
 			push(&Block::Newline, _quoteIndex);
-		}
-		else {
+		else
 			push(&Block::Text);
-		}
 		// Diacritic can't attach from the next block to this one.
 		_allowDiacritic = false;
 		_blockStart += length;
@@ -260,19 +258,23 @@ namespace text {
 
 	void BlockParser::ensureAtNewline(QuoteDetails quote) {
 		createBlock();
+
 		const auto lastType = _tBlocks.empty()
 			? TextBlockType::Newline
 			: _tBlocks.back()->type();
+
 		if (lastType != TextBlockType::Newline)
 			createNewlineBlock(false);
 		
 		_quoteStartPosition = _tText.size();
 		auto& quotes = _t->ensureQuotes()->list;
+
 		quotes.push_back(std::move(quote));
+
 		const auto index = _quoteIndex = int(quotes.size());
-		if (_tBlocks.empty()) {
+
+		if (_tBlocks.empty()) 
 			_t->_startQuoteIndex = index;
-		}
 		else {
 			auto& last = _tBlocks.back();
 			assert(last->type() == TextBlockType::Newline);
@@ -351,27 +353,31 @@ namespace text {
 	bool BlockParser::checkEntities() {
 		finishEntities();
 		skipPassedEntities();
+
 		if (_waitingEntity == _entitiesEnd
-			|| _ptr < _start + _waitingEntity->offset()) {
+			|| _ptr < _start + _waitingEntity->offset())
 			return false;
-		}
+	
 
 		auto flags = TextBlockFlags();
 		auto link = EntityLinkData();
+
 		auto monoIndex = 0;
+
 		const auto entityType = _waitingEntity->type();
 		const auto entityLength = _waitingEntity->length();
+
 		const auto entityBegin = _start + _waitingEntity->offset();
 		const auto entityEnd = entityBegin + entityLength;
+
 		const auto pushSimpleUrl = [&](EntityType type) {
 			link.type = type;
 			link.data = QString(entityBegin, entityLength);
-			if (type == EntityType::Url) {
+
+			if (type == EntityType::Url)
 				computeLinkText(link.data, &link.text, &link.shown);
-			}
-			else {
+			else
 				link.text = link.data;
-			}
 			};
 		const auto pushComplexUrl = [&] {
 			link.type = entityType;
@@ -443,16 +449,14 @@ namespace text {
 		else if (entityType == EntityType::CustomUrl) {
 			const auto url = _waitingEntity->data();
 			const auto text = QString(entityBegin, entityLength);
-			if (url == text) {
+
+			if (url == text)
 				pushSimpleUrl(EntityType::Url);
-			}
-			else {
+			else
 				pushComplexUrl();
-			}
 		}
-		else if (entityType == EntityType::MentionName) {
+		else if (entityType == EntityType::MentionName)
 			pushComplexUrl();
-		}
 		else if (entityType == EntityType::Colorized) {
 			createBlock();
 
@@ -787,7 +791,8 @@ namespace text {
 	void BlockParser::computeLinkText(
 		const QString& linkData,
 		QString* outLinkText,
-		EntityLinkShown* outShown) {
+		EntityLinkShown* outShown)
+	{
 		auto url = QUrl(linkData);
 		auto good = QUrl(url.isValid()
 			? url.toEncoded()

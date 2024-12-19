@@ -14,24 +14,11 @@
 
 #include "../text/TextUtility.h"
 
-namespace {
-	text::TextParseOptions _labelOptions = {
-		text::TextParseMultiline, // flags
-		0, // maxw
-		0, // maxh
-		Qt::LayoutDirectionAuto, // dir
-	};
-}
 
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)
 	, ClickHandlerHost()
-	, _st(new 
-		style::TextStyle{
-			._font = style::font(13, 0, 0),
-			.lineHeight = 14,
-			.linkUnderLine = true,
-			.blockquote = {} })
+	, _st(style::defaultFlatLabelStyle)
 {
 	init();
 
@@ -40,7 +27,7 @@ FlatLabel::FlatLabel(QWidget* parent) :
 	setDoubleClickSelectsParagraph(true);
 	setBreakEverywhere(true);
 
-	setBackgroundColor(style::flatLabel::defaultColor);
+	setBackgroundColor(_st.colorBg);
 	setCornerRoundMode(style::CornersRoundMode::All);
 
 	setTextAlignment(Qt::AlignLeft);
@@ -48,11 +35,11 @@ FlatLabel::FlatLabel(QWidget* parent) :
 }
 
 void FlatLabel::init() {
-	_contextCopyText = style::flatLabel::phraseContextCopySelected;
+	_contextCopyText = phraseContextCopySelected;
 }
 
 void FlatLabel::setText(const QString& text) {
-	_text.setText(_st, text, _labelOptions);
+	_text.setText(_st.textStyle, text, _labelOptions);
 	textUpdated();
 }
 
@@ -102,8 +89,6 @@ float FlatLabel::opacity() const noexcept {
 }
 
 QSize FlatLabel::sizeHint() const {
-	qDebug() << size();
-
 	return size();
 }
 
@@ -329,6 +314,7 @@ void FlatLabel::keyPressEvent(QKeyEvent* event) {
 	if (event->key() == Qt::Key_Copy || (event->key() == Qt::Key_C
 		&& event->modifiers().testFlag(Qt::ControlModifier)))
 		if (!_selection.empty()) {
+			qDebug() << "copy text: ";
 			copySelectedText();
 			event->accept();
 		}
@@ -358,9 +344,9 @@ void FlatLabel::copySelectedText() {
 			: _selection)
 		: _selection;
 
-	qDebug() << "selection.empty()" << selection.empty();
 	if (!selection.empty())
-		QGuiApplication::clipboard()->setText(_text.toString());
+		text::SetClipboardText(_text.toTextForMimeData(selection));
+	qDebug() << _text.toTextForMimeData(selection).rich.text;
 }
 
 text::TextState FlatLabel::dragActionUpdate() {

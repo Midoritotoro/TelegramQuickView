@@ -31,7 +31,6 @@ namespace text {
 				Flags,
 				Link,
 				IndexedLink,
-				CustomEmoji,
 				Colorized,
 			};
 

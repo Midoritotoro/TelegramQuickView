@@ -52,6 +52,8 @@ SET(MAIN_SOURCES main.cpp
 	src/core/MouseDetector.cpp
 	src/core/MouseDetector.h
 
+    src/ui/style/StyleWidgets.h
+
 	src/ui/style/StyleCore.cpp
 	src/ui/style/StyleCore.h
 

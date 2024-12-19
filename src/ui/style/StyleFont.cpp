@@ -358,6 +358,7 @@ namespace style::internal {
 	}
 
 	int RegisterFontFamily(const QString& family) {
+
 		auto i = FontFamilyIndices.find(family);
 
 		if (i == end(FontFamilyIndices)) {
