@@ -65,9 +65,6 @@ public:
 	void setContextMenu(not_null<QMenu*> menu);
 	[[nodiscard]] QMenu* contextMenu() const noexcept;
 
-	void setBackgroundColor(const QColor& color);
-	[[nodiscard]] QColor backgroundColor() const noexcept;
-
 	void setCornerRoundMode(style::CornersRoundMode cornersRoundMode);
 	[[nodiscard]] style::CornersRoundMode cornerRoundMode() const noexcept;
 
@@ -98,6 +95,9 @@ protected:
 
 	void keyPressEvent(QKeyEvent* event) override;
 	void contextMenuEvent(QContextMenuEvent* event) override;
+
+	bool event(QEvent* e) override;
+	void touchEvent(QTouchEvent* e);
 private:
 	int resizeGetHeight(int newWidth);
 
@@ -140,12 +140,10 @@ private:
 		Selecting = 0x04,
 	};
 
-	const style::FlatLabel& _st;
-
+	const style::FlatLabel* _st = nullptr;
+	
+	style::align _alignment = style::alignLeft;
 	text::String _text;
-	Qt::Alignment _alignment = Qt::AlignLeft;
-
-	QColor _backgroundColor;
 
 	float _opacity = 1.;
 	bool _selectable;
@@ -184,4 +182,7 @@ private:
 
 	QPoint _trippleClickPoint;
 	core::Timer _trippleClickTimer;
+
+	bool _touchInProgress = false;
+	core::Timer _touchSelectTimer;
 };

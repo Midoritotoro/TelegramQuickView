@@ -86,9 +86,7 @@ namespace style {
 		bool linkAlwaysActive;
 	};
 
-	const TextStyle* defaultTextStyle;
-
-	const TextPalette defaultTextPalette = TextPalette{
+	inline const TextPalette defaultTextPalette = TextPalette{
 		.linkFg = QColor(132, 220, 240),
 		.monoFg = QColor(132, 220, 240),
 		.selectBg = QColor(46, 112, 165),
@@ -241,4 +239,6 @@ namespace style {
 		bool linkUnderLine = true;
 		QuoteStyle blockquote = {};
 	};
+
+	inline const TextStyle* defaultTextStyle = nullptr;
 } // namespace style

@@ -15,12 +15,5 @@ namespace style {
 
 	};
 
-	const FlatLabel defaultFlatLabelStyle = FlatLabel{
-		.margin = margins{
-			10, 10, 10, 10
-		},
-		.colorBg = QColor(24, 37, 51),
-		.textStyle = defaultTextStyle,
-		.textPalette = &defaultTextPalette
-	};
+	inline const FlatLabel* defaultFlatLabelStyle = nullptr;
 }

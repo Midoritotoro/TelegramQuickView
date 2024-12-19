@@ -395,6 +395,14 @@ namespace style {
 		   .lineHeight = 14,
 		   .linkUnderLine = true,
 		   .blockquote = {} };
-		// defaultFlatLabelStyle = new 
+
+		defaultFlatLabelStyle = new FlatLabel{
+			.margin = margins{
+				10, 10, 10, 10
+			},
+			.colorBg = QColor(24, 37, 51),
+			.textStyle = defaultTextStyle,
+			.textPalette = &defaultTextPalette
+		};
 	}
 } // namespace style

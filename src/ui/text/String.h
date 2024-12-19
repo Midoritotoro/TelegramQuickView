@@ -6,21 +6,21 @@
 namespace text {
 	inline constexpr auto kQFixedMax = (INT_MAX / 256);
 
-	const TextParseOptions kDefaultTextOptions = {
+	inline const TextParseOptions kDefaultTextOptions = {
 		TextParseLinks | TextParseMultiline, // flags
 		0, // maxw
 		0, // maxh
 		Qt::LayoutDirectionAuto, // dir
 	};
 
-	const TextParseOptions kMarkupTextOptions = {
+	inline const TextParseOptions kMarkupTextOptions = {
 		TextParseLinks | TextParseMultiline | TextParseMarkdown, // flags
 		0, // maxw
 		0, // maxh
 		Qt::LayoutDirectionAuto, // dir
 	};
 
-	const TextParseOptions kPlainTextOptions = {
+	inline const TextParseOptions kPlainTextOptions = {
 		TextParseMultiline, // flags
 		0, // maxw
 		0, // maxh

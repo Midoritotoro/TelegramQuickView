@@ -147,20 +147,26 @@ namespace text {
 	struct QuotePaintCache {
 		QImage corners;
 		QImage outline;
+
 		QImage expand;
 		QImage collapse;
+
 		mutable QImage bottomCorner;
 		mutable QImage bottomRounding;
 		mutable QImage collapsedLine;
 
 		std::array<QColor, kMaxQuoteOutlines> outlinesCached;
-		QColor headerCached;
-		QColor bgCached;
-		QColor iconCached;
+
+		QColor headerCached = QColor(24, 37, 51);
+
+		QColor bgCached = QColor(24, 37, 51);
+		QColor iconCached = QColor(24, 37, 51);
 
 		std::array<QColor, kMaxQuoteOutlines> outlines;
-		QColor header;
-		QColor bg;
+
+		QColor header = QColor(24, 37, 51);
+		QColor bg = QColor(24, 37, 51);
+
 		QColor icon;
 	};
 

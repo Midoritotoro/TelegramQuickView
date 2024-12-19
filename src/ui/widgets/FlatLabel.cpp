@@ -13,6 +13,7 @@
 #include <QDrag>
 
 #include "../text/TextUtility.h"
+#include "../style/StyleTypes.h"
 
 
 FlatLabel::FlatLabel(QWidget* parent) :
@@ -23,11 +24,9 @@ FlatLabel::FlatLabel(QWidget* parent) :
 	init();
 
 	setSelectable(true);
-
 	setDoubleClickSelectsParagraph(true);
-	setBreakEverywhere(true);
 
-	setBackgroundColor(_st.colorBg);
+	setBreakEverywhere(true);
 	setCornerRoundMode(style::CornersRoundMode::All);
 
 	setTextAlignment(Qt::AlignLeft);
@@ -39,7 +38,7 @@ void FlatLabel::init() {
 }
 
 void FlatLabel::setText(const QString& text) {
-	_text.setText(_st.textStyle, text, _labelOptions);
+	_text.setText(_st->textStyle, text, _labelOptions);
 	textUpdated();
 }
 
@@ -117,14 +116,6 @@ QMenu* FlatLabel::contextMenu() const noexcept {
 	return _contextMenu;
 }
 
-void FlatLabel::setBackgroundColor(const QColor& color) {
-	_backgroundColor = color;
-}
-
-QColor FlatLabel::backgroundColor() const noexcept {
-	return _backgroundColor;
-}
-
 void FlatLabel::setCornerRoundMode(style::CornersRoundMode cornersRoundMode) {
 	_cornersRoundMode = cornersRoundMode;
 }
@@ -194,10 +185,9 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 	painter.setOpacity(_opacity);
 
-	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
+	// style::RoundCorners(painter, size(), 10, _cornersRoundMode);
 
 	painter.setPen(Qt::white);
-	painter.fillRect(rect(), _backgroundColor);
 
 	const auto textWidth = _textWidth
 		? _textWidth
@@ -334,7 +324,7 @@ void FlatLabel::contextMenuEvent(QContextMenuEvent* event) {
 }
 
 void FlatLabel::copyContextText() {
-	QGuiApplication::clipboard()->setText(_text.toString());
+	text::SetClipboardText(_text.toTextForMimeData());
 }
 
 void FlatLabel::copySelectedText() {
@@ -343,10 +333,10 @@ void FlatLabel::copySelectedText() {
 			? _savedSelection
 			: _selection)
 		: _selection;
-
+	qDebug() << selection.from << selection.to;
+	qDebug() << _text.toTextForMimeData(selection).rich.text;
 	if (!selection.empty())
 		text::SetClipboardText(_text.toTextForMimeData(selection));
-	qDebug() << _text.toTextForMimeData(selection).rich.text;
 }
 
 text::TextState FlatLabel::dragActionUpdate() {
@@ -429,6 +419,7 @@ text::TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton but
 		_savedSelection = { 0, 0 };
 		update();
 	}
+
 	_dragAction = NoDrag;
 	_selectionType = text::TextSelection::Type::Letters;
 
@@ -475,6 +466,7 @@ void FlatLabel::updateHover(const text::TextState& state) {
 			if (_selection != selection) {
 				_selection = selection;
 				_savedSelection = { 0, 0 };
+
 				setFocus();
 				update();
 			}
@@ -485,8 +477,77 @@ void FlatLabel::updateHover(const text::TextState& state) {
 		else if (_dragAction == Selecting)
 			cur = style::cursorText;
 	}
-	if (_dragAction == NoDrag && (lnkChanged || cur != _cursor)) {
+	if (_dragAction == NoDrag && (lnkChanged || cur != _cursor))
 		setCursor(_cursor = cur);
+}
+
+bool FlatLabel::event(QEvent* e) {
+	if (e->type() == QEvent::TouchBegin || e->type() == QEvent::TouchUpdate || e->type() == QEvent::TouchEnd || e->type() == QEvent::TouchCancel) {
+		QTouchEvent* ev = static_cast<QTouchEvent*>(e);
+		if (ev->device()->type() == QInputDevice::DeviceType::TouchScreen) {
+			touchEvent(ev);
+			return true;
+		}
+	}
+	return QWidget::event(e);
+}
+
+void FlatLabel::touchEvent(QTouchEvent* e) {
+	if (e->type() == QEvent::TouchCancel) { // cancel
+		if (!_touchInProgress) return;
+		_touchInProgress = false;
+		_touchSelectTimer.cancel();
+		_touchSelect = false;
+		_dragAction = NoDrag;
+		return;
+	}
+
+	if (!e->touchPoints().isEmpty()) {
+		_touchPrevPos = _touchPos;
+		_touchPos = e->touchPoints().cbegin()->screenPos().toPoint();
+	}
+
+	switch (e->type()) {
+	case QEvent::TouchBegin: {
+		if (_contextMenu) {
+			e->accept();
+			return; // ignore mouse press, that was hiding context menu
+		}
+		if (_touchInProgress) return;
+		if (e->touchPoints().isEmpty()) return;
+
+		_touchInProgress = true;
+		_touchSelectTimer.callOnce(QApplication::startDragTime());
+		_touchSelect = false;
+		_touchStart = _touchPrevPos = _touchPos;
+	} break;
+
+	case QEvent::TouchUpdate: {
+		if (!_touchInProgress) return;
+		if (_touchSelect) {
+			_lastMousePos = _touchPos;
+			dragActionUpdate();
+		}
+	} break;
+
+	case QEvent::TouchEnd: {
+		if (!_touchInProgress) return;
+		_touchInProgress = false;
+		auto weak = QPointer<QWidget>(this);
+		if (_touchSelect) {
+			dragActionFinish(_touchPos, Qt::RightButton);
+			QContextMenuEvent contextMenu(QContextMenuEvent::Mouse, mapFromGlobal(_touchPos), _touchPos);
+			showContextMenu(&contextMenu, ContextMenuReason::FromTouch);
+		}
+		else { // one short tap -- like mouse click
+			dragActionStart(_touchPos, Qt::LeftButton);
+			dragActionFinish(_touchPos, Qt::LeftButton);
+		}
+		if (weak) {
+			_touchSelectTimer.cancel();
+			_touchSelect = false;
+		}
+	} break;
 	}
 }
 
