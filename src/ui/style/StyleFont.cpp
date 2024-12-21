@@ -96,7 +96,6 @@ namespace style::internal {
 
 		bool LoadCustomFont(const QString& filePath) {
 			auto regularId = QFontDatabase::addApplicationFont(filePath);
-			qDebug() << "LoadCustom font id: " << regularId;
 			if (regularId < 0) {
 				qDebug() << QString("Font Error: could not add '%1'.").arg(filePath);
 				return false;
@@ -365,7 +364,7 @@ namespace style::internal {
 			i = FontFamilyIndices.emplace(family, FontFamilies.size()).first;
 			FontFamilies.push_back(family);
 		}
-		qDebug() << "RegisterFontFamily: " << family << " pushed";
+
 		return i->second;
 	}
 

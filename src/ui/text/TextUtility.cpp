@@ -685,6 +685,13 @@ std::unique_ptr<QMimeData> text::MimeDataFromText(
 }
 
 std::unique_ptr<QMimeData> text::MimeDataFromText(const TextForMimeData& text) {
+	qDebug() << "text.rich.entities: ";
+	for (int i = 0; i < text.rich.entities.size(); ++i)
+		qDebug() << text.rich.entities[i].data();
+
+	qDebug() << "text.rich.text: " << text.rich.text;
+	qDebug() << "text.expanded: " << text.expanded;
+
 	return MimeDataFromText(
 		{ 
 			text.rich.text,
@@ -702,6 +709,8 @@ void text::SetClipboardText(
 	const TextForMimeData& text,
 	QClipboard::Mode mode) 
 {
-	if (auto data = MimeDataFromText(text))
+	if (auto data = MimeDataFromText(text)) {
+		qDebug() << "data->Text: " << data->text();
 		QGuiApplication::clipboard()->setMimeData(data.release(), mode);
+	}
 }

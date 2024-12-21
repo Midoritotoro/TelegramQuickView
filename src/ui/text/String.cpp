@@ -241,6 +241,7 @@ namespace text {
 	bool String::isEmpty() const {
 		return _blocks.empty() || _blocks[0]->type() == TextBlockType::Skip;
 	}
+
 	QString String::toString(TextSelection selection) const {
 		return toText(selection, false, false).rich.text;
 	}
@@ -256,7 +257,9 @@ namespace text {
 	TextForMimeData String::toText(
 		TextSelection selection,
 		bool composeExpanded,
-		bool composeEntities) const {
+		bool composeEntities) const
+	{
+		qDebug() << "____text:  " << _text;
 		struct MarkdownTagTracker {
 			TextBlockFlags flag = TextBlockFlags();
 			EntityType type = EntityType();
@@ -287,7 +290,6 @@ namespace text {
 				{ Flag::Bold, EntityType::Bold },
 				{ Flag::Semibold, EntityType::Semibold },
 				{ Flag::Underline, EntityType::Underline },
-				{ Flag::Spoiler, EntityType::Spoiler },
 				{ Flag::StrikeOut, EntityType::StrikeOut },
 				{ Flag::Code, EntityType::Code },
 				{ Flag::Pre, EntityType::Pre },
@@ -345,17 +347,19 @@ namespace text {
 			QStringView inText,
 			const ClickHandlerPtr& handler,
 			EntityType type) {
-				if (!handler || (!composeExpanded && !composeEntities)) {
+				if (!handler || (!composeExpanded && !composeEntities))
 					return;
-				}
+				
 				// This logic is duplicated in TextForMimeData::WithExpandedLinks.
 				const auto entity = handler->getTextEntity();
 				const auto plainUrl = (entity.type == EntityType::Url)
 					|| (entity.type == EntityType::Email)
 					|| (entity.type == EntityType::Phone);
+
 				const auto full = plainUrl
 					? QStringView(entity.data).mid(0, entity.data.size())
 					: inText;
+
 				const auto customTextLink = (entity.type == EntityType::CustomUrl);
 				const auto internalLink = customTextLink
 					&& entity.data.startsWith(QLatin1String("internal:"));
@@ -366,6 +370,14 @@ namespace text {
 					if (customTextLink && !internalLink && !sameAsTextLink) {
 						const auto& url = entity.data;
 						result.expanded.append(QLatin1String(" (")).append(url).append(')');
+					}
+
+					if (composeEntities && !internalLink) {
+						insertEntity({
+							entity.type,
+							linkStart,
+							int(result.rich.text.size() - linkStart),
+							plainUrl ? QString() : entity.data });
 					}
 				}
 				if (composeEntities && !internalLink) {
@@ -383,15 +395,9 @@ namespace text {
 				if (composeExpanded) {
 					result.expanded += part;
 				}
-				if (composeEntities && !customEmojiData.isEmpty()) {
-					insertEntity({
-						EntityType::CustomEmoji,
-						int(result.rich.text.size() - part.size()),
-						int(part.size()),
-						customEmojiData,
-						});
-				}
 			};
+
+		qDebug() << "String selection: " << selection.from << selection.to;
 
 		enumerateText(
 			selection,
@@ -820,7 +826,6 @@ namespace text {
 	}
 
 	not_null<ExtendedData*> String::ensureExtended() {
-		qDebug() << "ensureExtended";
 		if (!_extended) {
 			_extended = std::make_unique<ExtendedData>();
 		}
@@ -894,7 +899,7 @@ namespace text {
 			return {};
 		}
 		const auto& st = quoteStyle(quote);
-		const auto skip = 5;
+		const auto skip = st.verticalSkip;
 		return QMargins(0, 0, 0, skip);
 	}
 
@@ -943,7 +948,8 @@ namespace text {
 		AppendPartCallback appendPartCallback,
 		ClickHandlerStartCallback clickHandlerStartCallback,
 		ClickHandlerFinishCallback clickHandlerFinishCallback,
-		FlagsChangeCallback flagsChangeCallback) const {
+		FlagsChangeCallback flagsChangeCallback) const
+	{
 		if (isEmpty() || selection.empty()) {
 			return;
 		}
@@ -1028,11 +1034,6 @@ namespace text {
 			if (blockType == TextBlockType::Skip) {
 				continue;
 			}
-
-			auto rangeFrom = qMax(selection.from, blockPosition);
-			auto rangeTo = qMin(
-				selection.to,
-				uint16(blockPosition + blockLength(i)));
 		}
 	}
 

@@ -334,7 +334,7 @@ void FlatLabel::copySelectedText() {
 			: _selection)
 		: _selection;
 	qDebug() << selection.from << selection.to;
-	qDebug() << _text.toTextForMimeData(selection).rich.text;
+
 	if (!selection.empty())
 		text::SetClipboardText(_text.toTextForMimeData(selection));
 }
@@ -393,7 +393,7 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 		}
 		if (uponSelected) {
 			_dragStartPosition = mapFromGlobal(_lastMousePos);
-			_dragAction = PrepareDrag; // start text drag
+			_dragAction = PrepareDrag;
 		}
 		else {
 			if (state.afterSymbol) ++_dragSymbol;
@@ -511,7 +511,7 @@ void FlatLabel::touchEvent(QTouchEvent* e) {
 	case QEvent::TouchBegin: {
 		if (_contextMenu) {
 			e->accept();
-			return; // ignore mouse press, that was hiding context menu
+			return;
 		}
 		if (_touchInProgress) return;
 		if (e->touchPoints().isEmpty()) return;
@@ -539,7 +539,7 @@ void FlatLabel::touchEvent(QTouchEvent* e) {
 			QContextMenuEvent contextMenu(QContextMenuEvent::Mouse, mapFromGlobal(_touchPos), _touchPos);
 			showContextMenu(&contextMenu, ContextMenuReason::FromTouch);
 		}
-		else { // one short tap -- like mouse click
+		else {
 			dragActionStart(_touchPos, Qt::LeftButton);
 			dragActionFinish(_touchPos, Qt::LeftButton);
 		}

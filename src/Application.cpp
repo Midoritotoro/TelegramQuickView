@@ -20,7 +20,6 @@ Application::Application(int& argc, char** argv) :
         + "MSDN blogs is a series of blogs that were hosted under Microsoft's domain blogs.msdn.com. Some blogs are dedicated to a product (e.g. Visual Studio, Internet Explorer, PowerShell) or a version of a product (e.g Windows 7, Windows 8), while others belong to a Microsoft employee (e.g. Michael Howard or Raymond Chen.\n"
         + "In May 2020, the MSDN and TechNet blogs were closed and the content was archived at Microsoft Docs.\n");
 
-    qDebug() << text;
     QString videoPath = "C:\\Users\\danya\\Downloads\\2024-11-22_22-56-37.png";
 
 
