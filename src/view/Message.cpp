@@ -14,7 +14,7 @@ Message::Message(
 	_messageLayout = new QGridLayout(this);
 	_textLabel = new FlatLabel(this);
 
-	_textLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	_messageLayout->setSpacing(0);
 
 	_messageLayout->setContentsMargins(0, 0, 0, 0);
 	setContentsMargins(0, 0, 0, 0);
@@ -34,7 +34,7 @@ void Message::setText(const QString& text) {
 }
 
 QString Message::text() const noexcept {
-	return _textLabel->text();
+	return _textLabel->text().toString();
 }
 
 void Message::setAttachments(const QStringList& attachmentsPaths) {
@@ -51,9 +51,7 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 			style.maximumWidth = messageAttachment->width();
 
 			const auto st = new style::FlatLabel(style);
-
 			_textLabel->setStyle(st);
-
 			
 			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
@@ -70,7 +68,8 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 			auto style = *style::defaultFlatLabelStyle;
 			style.maximumWidth = messageAttachment->width();
 
-			_textLabel->setStyle(&style);
+			const auto st = new style::FlatLabel(style);
+			_textLabel->setStyle(st);
 
 			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 			_attachments.append(messageAttachment);

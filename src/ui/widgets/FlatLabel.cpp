@@ -43,8 +43,8 @@ void FlatLabel::setText(const QString& text) {
 	textUpdated();
 }
 
-QString FlatLabel::text() const noexcept {
-	return _text.toString();
+const text::String& FlatLabel::text() const noexcept {
+	return _text;
 }
 
 void FlatLabel::setSelectable(bool selectable) {
@@ -96,7 +96,6 @@ QSize FlatLabel::sizeHint() const {
 
 int FlatLabel::textMaxWidth() const noexcept {
 	return _st->maximumWidth;
-;
 }
 
 bool FlatLabel::hasLinks() const noexcept {
@@ -253,7 +252,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		.elisionBreakEverywhere = renderElided && _breakEverywhere,
 		});
 
-	//refreshSize();
+	refreshSize();
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
@@ -677,7 +676,7 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 		.menu = _contextMenu,
 		.selection = _selectable ? _selection : text::TextSelection(),
 		.uponSelection = uponSelection,
-		.fullSelection = _selectable && _selection.isFullSelection(text())
+		.fullSelection = _selectable && _text.isFullSelection(_selection)
 	});
 
 	if (_contextMenuHook)
@@ -730,14 +729,15 @@ int FlatLabel::countTextWidth() const noexcept {
 	{
 		auto large = _allowedWidth;
 		auto small = _allowedWidth / 2;
+
 		const auto largeHeight = _text.countHeight(large, _breakEverywhere);
+
 		while (large - small > 1) {
 			const auto middle = (large + small) / 2;
 
-			if (largeHeight == _text.countHeight(middle, _breakEverywhere))
-				large = middle;
-			else
-				small = middle;
+			largeHeight == _text.countHeight(middle, _breakEverywhere)
+				? large = middle
+				: small = middle;
 		}
 		return large;
 	}
@@ -763,7 +763,9 @@ void FlatLabel::refreshSize() {
 		+ _st->margin.top()
 		+ _st->margin.bottom();
 
+	qDebug() << "flatLabel w && h: " << fullWidth << fullHeight;
 	resize(fullWidth, fullHeight);
+	qDebug() << "flatLabel size: " << size();
 }
 
 void FlatLabel::refreshCursor(bool uponSymbol) {

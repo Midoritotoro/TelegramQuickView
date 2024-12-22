@@ -16,13 +16,13 @@ namespace style {
 
 	inline constexpr auto mediaPlayerPanelBorderRadius = 10;
 
-	inline auto maximumMessageWidth = 430;
-	inline auto minimumMessageWidth = 100;
+	inline constexpr auto maximumMessageWidth = 430;
+	inline constexpr auto minimumMessageWidth = 100;
 
 	inline constexpr auto minimumMessageHeight = 100;
 
-	inline auto maximumTextHeight = 3840;
-	inline auto maximumTextWidth = 430;
+	inline constexpr auto maximumTextHeight = 1080 * 5;
+	inline constexpr auto maximumTextWidth = 430;
 
 	inline constexpr auto sliderHeight = 20;
 

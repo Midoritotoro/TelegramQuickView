@@ -57,7 +57,6 @@ MessagesView::MessagesView(QWidget* parent):
 
 	QGridLayout* grid = new QGridLayout(this);
 
-
 	grid->setContentsMargins(0, 0, 5, 4);
 	grid->setVerticalSpacing(4);
 	grid->setHorizontalSpacing(0);

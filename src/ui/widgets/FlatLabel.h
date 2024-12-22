@@ -46,7 +46,7 @@ public:
 	[[nodiscard]] bool hasLinks() const noexcept;
 
 	void setText(const QString& text);
-	[[nodiscard]] QString text() const noexcept;
+	[[nodiscard]] const text::String& text() const noexcept;
 
 	void setSelectable(bool selectable);
 	[[nodiscard]] bool selectable() const noexcept;

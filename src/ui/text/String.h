@@ -49,6 +49,7 @@ namespace text {
 
 		String(int32 minResizeWidth = style::minimumMessageWidth);
 		String(String&& other) = default;
+		String(const String& other) = default;
 		String(
 			const QString& string,
 			const style::TextStyle* style);
