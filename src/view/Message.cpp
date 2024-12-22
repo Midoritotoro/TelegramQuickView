@@ -26,12 +26,7 @@ void Message::setText(const QString& text) {
 	if (text.length() == 0)
 		return;
 
-	//auto handler = std::make_shared<UrlClickHandler>("https://google.com");
-
 	_textLabel->setText(text);
-	//_textLabel->setLink(1, handler);
-
-	//qDebug() << "hasLinks: " << _textLabel->hasLinks();
 
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
@@ -52,6 +47,14 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 		foreach(const auto& path, attachmentsPaths) {
 			auto messageAttachment = new MessageAttachment(this, path);
 
+			auto style = *style::defaultFlatLabelStyle;
+			style.maximumWidth = messageAttachment->width();
+
+			const auto st = new style::FlatLabel(style);
+
+			_textLabel->setStyle(st);
+
+			
 			if (_messageLayout->rowCount() <= 1)
 				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 
@@ -63,6 +66,11 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 	case MediaDisplayMode::Stack:
 		foreach(const auto& path, attachmentsPaths) {
 			auto messageAttachment = new MessageAttachment(this, path);
+
+			auto style = *style::defaultFlatLabelStyle;
+			style.maximumWidth = messageAttachment->width();
+
+			_textLabel->setStyle(&style);
 
 			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
 			_attachments.append(messageAttachment);

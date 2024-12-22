@@ -47,7 +47,7 @@ namespace text {
 			int reserve = 0;
 		};
 
-		String(int32 minResizeWidth = style::maximumMessageWidth);
+		String(int32 minResizeWidth = style::minimumMessageWidth);
 		String(String&& other) = default;
 		String(
 			const QString& string,
@@ -79,6 +79,14 @@ namespace text {
 			const style::TextStyle* style,
 			const QString& text,
 			const TextParseOptions& options = kMarkupTextOptions);
+
+		void setMaximumWidth(int width) {
+			_maxWidth = width;
+		}
+
+		void setMinimumHeight(int height) {
+			_minHeight = height;
+		}
 
 		[[nodiscard]] bool hasLinks() const;
 		void setLink(uint16 index, const ClickHandlerPtr& lnk);
@@ -241,7 +249,7 @@ namespace text {
 		ExtendedWrap _extended;
 
 		int _minResizeWidth = 0;
-		int _maxWidth = style::maximumTextWidth;
+		int _maxWidth = 0;
 		int _minHeight = 0;
 		uint16 _startQuoteIndex = 0;
 		bool _startParagraphLTR : 1 = false;

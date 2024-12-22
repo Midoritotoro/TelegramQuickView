@@ -11,6 +11,27 @@
 #include <QPaintEvent>
 
 
+namespace {
+	[[nodiscard]] QSize countAttachmentSize(const QSize& originalSize, int maxWidth, int maxHeight) {
+		if (originalSize.isEmpty() || maxWidth <= 0 || maxHeight <= 0)
+			return QSize();
+
+		double originalWidth = originalSize.width();
+		double originalHeight = originalSize.height();
+
+		double widthScale = (double)maxWidth / originalWidth;
+		double heightScale = (double)maxHeight / originalHeight;
+
+		double scaleFactor = std::min(widthScale, heightScale);
+
+		int newWidth = static_cast<int>(originalWidth * scaleFactor);
+		int newHeight = static_cast<int>(originalHeight * scaleFactor);
+
+		return QSize(newWidth, newHeight);
+	}
+}
+
+
 MessageAttachment::MessageAttachment(
 	not_null<Message*> parentMessage,
 	const QString& attachmentPath
@@ -24,9 +45,13 @@ MessageAttachment::MessageAttachment(
 	setAttribute(Qt::WA_TranslucentBackground);
 
 	setCursor(Qt::PointingHandCursor);
-	setFixedSize(
 
-			style::GenerateThumbnail(_attachmentPath).size()
+	const auto thumbnail = style::GenerateThumbnail(_attachmentPath);
+	const auto size = thumbnail.size();
+
+	setFixedSize(
+		countAttachmentSize(size, style::maximumMessageWidth,
+			style::maximumMessageWidth)
 	);
 }
 

@@ -69,6 +69,9 @@ public:
 	void setCornerRoundMode(style::CornersRoundMode cornersRoundMode);
 	[[nodiscard]] style::CornersRoundMode cornerRoundMode() const noexcept;
 
+	void setStyle(const style::FlatLabel* style);
+	[[nodiscard]] const style::FlatLabel* style() const noexcept;
+
 	void setContextMenuHook(Fn<void(ContextMenuRequest)> hook);
 
 	void setLink(

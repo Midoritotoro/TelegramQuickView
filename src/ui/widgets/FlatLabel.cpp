@@ -19,9 +19,10 @@
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)
 	, ClickHandlerHost()
-	, _st(style::defaultFlatLabelStyle)
 {
 	init();
+
+	setStyle(style::defaultFlatLabelStyle);
 
 	setSelectable(true);
 	setDoubleClickSelectsParagraph(true);
@@ -47,12 +48,14 @@ QString FlatLabel::text() const noexcept {
 }
 
 void FlatLabel::setSelectable(bool selectable) {
-	if (_selectable != selectable) {
-		_selection = { 0, 0 };
-		_savedSelection = { 0, 0 };
-		_selectable = selectable;
-		setMouseTracking(_selectable || _text.hasLinks());
-	}
+	if (_selectable == selectable)
+		return;
+
+	_selection = { 0, 0 };
+	_savedSelection = { 0, 0 };
+
+	_selectable = selectable;
+	setMouseTracking(_selectable || _text.hasLinks());
 }
 
 bool FlatLabel::selectable() const noexcept {
@@ -92,7 +95,7 @@ QSize FlatLabel::sizeHint() const {
 }
 
 int FlatLabel::textMaxWidth() const noexcept {
-	return style::maximumTextWidth
+	return _st->maximumWidth;
 ;
 }
 
@@ -122,6 +125,20 @@ void FlatLabel::setCornerRoundMode(style::CornersRoundMode cornersRoundMode) {
 
 style::CornersRoundMode FlatLabel::cornerRoundMode() const noexcept {
 	return _cornersRoundMode;
+}
+
+void FlatLabel::setStyle(const style::FlatLabel* style) {
+	_st = style;
+
+	_text.setMaximumWidth(_st->maximumWidth);
+	_text.setMinimumHeight(_st->minimumHeight);
+
+	refreshSize();
+	update();
+}
+
+const style::FlatLabel* FlatLabel::style() const noexcept {
+	return _st;
 }
 
 void FlatLabel::setContextMenuHook(Fn<void(ContextMenuRequest)> hook) {
@@ -193,16 +210,16 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	const auto textWidth = _textWidth
 		? _textWidth
 		: width()
-			- style::flatLabel::margins.left()
-			- style::flatLabel::margins.right();
+			- _st->margin.left()
+			- _st->margin.right();
 
 	const auto textLeft = _textWidth
 		? ((_alignment & Qt::AlignLeft)
-			? style::flatLabel::margins.left()
+			? _st->margin.left()
 			: (_alignment & Qt::AlignHCenter)
 			? ((width() - _textWidth) / 2)
-			: (width() - style::flatLabel::margins.right() - _textWidth))
-		: style::flatLabel::margins.left();
+			: (width() - _st->margin.right() - _textWidth))
+		: _st->margin.left();
 
 	const auto selection = !_selection.empty()
 		? _selection
@@ -210,7 +227,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		? _savedSelection
 		: _selection;
 
-	const auto heightExceeded = style::maximumTextHeight < _fullTextHeight 
+	const auto heightExceeded = _st->maximumHeight < _fullTextHeight
 		|| textWidth < textMaxWidth();
 	const auto renderElided = _breakEverywhere || heightExceeded;
 
@@ -218,16 +235,16 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		? qMax(_text.style()->lineHeight, _text.style()->_font->height)
 		: 0;
 
-	const auto elisionHeight = !heightExceeded
+	const auto elisionHeight = !renderElided
 		? 0
-		: style::maximumTextHeight
-		? qMax(style::maximumTextHeight, lineHeight)
+		: _st->maximumHeight
+		? qMax(_st->maximumHeight, lineHeight)
 		: height();
 
 	_text.draw(painter, {
-		.position = { textLeft, style::flatLabel::margins.top() },
+		.position = { textLeft, _st->margin.top() },
 		.availableWidth = textWidth,
-		.align = style::alignLeft,
+		.align = _alignment,
 		.clip = event->rect(),
 		.palette = &style::defaultTextPalette,
 		.now = Time::now(),
@@ -236,9 +253,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		.elisionBreakEverywhere = renderElided && _breakEverywhere,
 		});
 
-	refreshSize();
-
-	qDebug() << style::maximumMessageWidth << width();
+	//refreshSize();
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
@@ -261,25 +276,32 @@ void FlatLabel::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void FlatLabel::mouseDoubleClickEvent(QMouseEvent* event) {
-	auto state = dragActionStart(event->globalPos(), event->button());
+	const auto state = dragActionStart(event->globalPos(), event->button());
 
-	if (((_dragAction == Selecting) || (_dragAction == NoDrag)) && _selectionType == text::TextSelection::Type::Letters) {
-		if (state.uponSymbol) {
-			_dragSymbol = state.symbol;
-			_selectionType = _doubleClickSelectsParagraph ? text::TextSelection::Type::Paragraphs : text::TextSelection::Type::Words;
+	if (((_dragAction != Selecting) &&
+		(_dragAction != NoDrag)) ||
+		_selectionType != text::TextSelection::Type::Letters)
+		return;
 
-			if (_dragAction == NoDrag) {
-				_dragAction = Selecting;
-				_selection = { state.symbol, state.symbol };
-				_savedSelection = { 0, 0 };
-			}
+	if (state.uponSymbol == false)
+		return;
 
-			mouseMoveEvent(event);
+	_dragSymbol = state.symbol;
+	_selectionType = _doubleClickSelectsParagraph 
+		? text::TextSelection::Type::Paragraphs 
+		: text::TextSelection::Type::Words;
 
-			_trippleClickPoint = event->globalPos();
-			_trippleClickTimer.callOnce(QApplication::doubleClickInterval());
-		}
+	if (_dragAction == NoDrag) {
+		_dragAction = Selecting;
+
+		_selection = { state.symbol, state.symbol };
+		_savedSelection = { 0, 0 };
 	}
+
+	mouseMoveEvent(event);
+
+	_trippleClickPoint = event->globalPos();
+	_trippleClickTimer.callOnce(QApplication::doubleClickInterval());	
 }
 
 void FlatLabel::focusOutEvent(QFocusEvent* event) {
@@ -314,7 +336,7 @@ void FlatLabel::keyPressEvent(QKeyEvent* event) {
 
 int FlatLabel::resizeGetHeight(int newWidth) {
 	_allowedWidth = newWidth;
-	_textWidth = style::maximumTextWidth;
+	_textWidth = countTextWidth();
 	return countTextHeight(_textWidth);
 }
 
@@ -342,11 +364,12 @@ void FlatLabel::copySelectedText() {
 }
 
 text::TextState FlatLabel::dragActionUpdate() {
-	auto m = mapFromGlobal(_lastMousePos);
-	auto state = getTextState(m);
+	const auto map = mapFromGlobal(_lastMousePos);
+	const auto state = getTextState(map);
+
 	updateHover(state);
 
-	if (_dragAction == PrepareDrag && (m - _dragStartPosition).manhattanLength() >= QApplication::startDragDistance()) {
+	if (_dragAction == PrepareDrag && (map - _dragStartPosition).manhattanLength() >= QApplication::startDragDistance()) {
 		_dragAction = Dragging;
 		core::InvokeQueued(this, [=] { executeDrag(); });
 	}
@@ -369,18 +392,21 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 		_dragStartPosition = mapFromGlobal(_lastMousePos);
 		_dragAction = PrepareDrag;
 	}
-	if (!_selectable || _dragAction != NoDrag) {
+	if (!_selectable || _dragAction != NoDrag)
 		return state;
-	}
 
 	if (_trippleClickTimer.isActive() && (_lastMousePos - _trippleClickPoint).manhattanLength() < QApplication::startDragDistance()) {
 		if (state.uponSymbol) {
 			_selection = { state.symbol, state.symbol };
 			_savedSelection = { 0, 0 };
+
 			_dragSymbol = state.symbol;
 			_dragAction = Selecting;
+
 			_selectionType = text::TextSelection::Type::Paragraphs;
+
 			updateHover(state);
+
 			_trippleClickTimer.callOnce(QApplication::doubleClickInterval());
 			update();
 		}
@@ -388,11 +414,11 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 	if (_selectionType != text::TextSelection::Type::Paragraphs) {
 		_dragSymbol = state.symbol;
 		bool uponSelected = state.uponSymbol;
-		if (uponSelected) {
-			if (_dragSymbol < _selection.from || _dragSymbol >= _selection.to) {
+
+		if (uponSelected)
+			if (_dragSymbol < _selection.from || _dragSymbol >= _selection.to)
 				uponSelected = false;
-			}
-		}
+			
 		if (uponSelected) {
 			_dragStartPosition = mapFromGlobal(_lastMousePos);
 			_dragAction = PrepareDrag;
@@ -555,38 +581,38 @@ void FlatLabel::touchEvent(QTouchEvent* e) {
 
 text::TextState FlatLabel::getTextState(const QPoint& m) const {
 	text::StateRequestElided request;
-	request.align = style::alignLeft;
+	request.align = _alignment;
 
 	if (_selectable)
 		request.flags |= text::StateRequest::StateFlag::LookupSymbol;
 	
 
 	int textWidth = width()
-		- style::flatLabel::margins.left()
-		- style::flatLabel::margins.right();
+		- _st->margin.left()
+		- _st->margin.right();
 
 	text::TextState state;
 
-	bool heightExceeded = (style::maximumTextHeight < _fullTextHeight || textWidth < _text.maxWidth());
+	bool heightExceeded = (_st->maximumHeight < _fullTextHeight || textWidth < _text.maxWidth());
 	bool renderElided = _breakEverywhere || heightExceeded;
 
 	if (renderElided) {
 		auto lineHeight = _text.style() && _text.style()->_font
-			? qMax(14, _text.style()->_font->height)
+			? qMax(_text.style()->lineHeight, _text.style()->_font->height)
 			: 1;
 
-		auto lines = qMax(style::maximumTextHeight / lineHeight, 1);
+		auto lines = qMax(_st->maximumHeight / lineHeight, 1);
 		request.lines = lines;
 
 		if (_breakEverywhere)
 			request.flags |= text::StateRequest::StateFlag::BreakEverywhere;
 		
-		state = _text.getStateElided(m - QPoint(style::flatLabel::margins.left(),
-			style::flatLabel::margins.top()), textWidth, request);
+		state = _text.getStateElided(m - QPoint(_st->margin.left(),
+			_st->margin.top()), textWidth, request);
 	} 
 	else 
-		state = _text.getState(m - QPoint(style::flatLabel::margins.left(),
-			style::flatLabel::margins.top()), textWidth, request);
+		state = _text.getState(m - QPoint(_st->margin.left(),
+			_st->margin.top()), textWidth, request);
 	
 
 	return state;
@@ -698,7 +724,7 @@ void FlatLabel::fillContextMenu(ContextMenuRequest request) {
 int FlatLabel::countTextWidth() const noexcept {
 	const auto available = _allowedWidth
 		? _allowedWidth
-		: style::maximumTextWidth;
+		: _st->maximumWidth;
 	if (_allowedWidth > 0
 		&& _allowedWidth < _text.maxWidth())
 	{
@@ -720,7 +746,9 @@ int FlatLabel::countTextWidth() const noexcept {
 
 int FlatLabel::countTextHeight(int textWidth) {
 	_fullTextHeight = _text.countHeight(textWidth, _breakEverywhere);
-	return qMin(_fullTextHeight, style::maximumTextHeight);
+	return _st->maximumHeight
+		? qMin(_fullTextHeight, _st->maximumHeight)
+		: _fullTextHeight;
 }
 
 void FlatLabel::refreshSize() {
@@ -728,12 +756,12 @@ void FlatLabel::refreshSize() {
 	const auto textHeight = countTextHeight(textWidth);
 
 	const auto fullWidth = textWidth
-		+ style::flatLabel::margins.right()
-		+ style::flatLabel::margins.left();
+		+ _st->margin.left()
+		+ _st->margin.right();
 
 	const auto fullHeight = textHeight
-		+ style::flatLabel::margins.top()
-		+ style::flatLabel::margins.bottom();
+		+ _st->margin.top()
+		+ _st->margin.bottom();
 
 	resize(fullWidth, fullHeight);
 }

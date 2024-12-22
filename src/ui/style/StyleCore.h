@@ -9,7 +9,6 @@
 #include <QFontMetrics>
 #include <QPixmapCache>
 
-
 namespace style {
 	inline constexpr QMargins mediaPlayerPanelMargins = { 
 		10, 5, 10, 5 
@@ -17,18 +16,20 @@ namespace style {
 
 	inline constexpr auto mediaPlayerPanelBorderRadius = 10;
 
-	inline auto maximumMessageWidth = 0;
-	inline auto minimumMessageWidth = 0;
+	inline auto maximumMessageWidth = 430;
+	inline auto minimumMessageWidth = 100;
 
-	inline constexpr auto minimumMessageHeight = 30;
+	inline constexpr auto minimumMessageHeight = 100;
 
-	inline auto maximumTextHeight = 0;
-	inline auto maximumTextWidth = 0;
+	inline auto maximumTextHeight = 3840;
+	inline auto maximumTextWidth = 430;
 
 	inline constexpr auto sliderHeight = 20;
 
 	inline constexpr QMargins messageTextViewMargins = { 8, 5, 8, 8 };
 	inline constexpr auto messageTextViewBorderRadius = 10;
+
+	inline constexpr auto panelWidth = 548;
 
 	inline constexpr auto kScaleMin = 50;
 	inline constexpr auto kScaleMax = 300;

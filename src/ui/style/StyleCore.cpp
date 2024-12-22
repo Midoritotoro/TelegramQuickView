@@ -233,8 +233,7 @@ namespace style {
 		thumbnailImage = style::Opaque(std::move(thumbnailImage));
 
 		thumbnail = QPixmap::fromImage(std::move(thumbnailImage), Qt::ColorOnly);
-		thumbnail.setDevicePixelRatio(style::DevicePixelRatio());
-		
+	
 		if (QPixmapCache::cacheLimit() > 0)
 			QPixmapCache::insert(key, thumbnail);
 
@@ -402,7 +401,11 @@ namespace style {
 			},
 			.colorBg = QColor(24, 37, 51),
 			.textStyle = defaultTextStyle,
-			.textPalette = &defaultTextPalette
+			.textPalette = &defaultTextPalette,
+			.maximumWidth = style::maximumMessageWidth,
+			.maximumHeight = style::maximumTextHeight,
+			.minimumWidth = style::minimumMessageWidth,
+			.minimumHeight = style::minimumMessageHeight
 		};
 	}
 } // namespace style

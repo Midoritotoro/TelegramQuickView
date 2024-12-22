@@ -28,17 +28,7 @@ MessagesView::MessagesView(QWidget* parent):
 	const auto screenWidth = QApplication::primaryScreen()->availableGeometry().width();
 	const auto screenHeight = QApplication::primaryScreen()->availableGeometry().height();
 
-	const auto panelWidth = (screenWidth / 3.5);
-
-	style::maximumMessageWidth = panelWidth - (width() / 12.5) 
-		- style::flatLabel::margins.left()
-		- style::flatLabel::margins.right();
-	style::minimumMessageWidth = (panelWidth - (width() / 12.5)) / 10.;
-
-	style::maximumTextWidth = style::maximumMessageWidth;
-	style::maximumTextHeight = screenHeight * 2;
-
-	resize(panelWidth, screenHeight);
+	resize(style::panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
 	QWidget* chatScrollAreaWidget = new QWidget();
