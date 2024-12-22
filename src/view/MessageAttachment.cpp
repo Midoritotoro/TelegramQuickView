@@ -7,6 +7,7 @@
 #include "../ui/style/StyleCore.h"
 #include "../core/Time.h"
 
+#include "../ui/style/StyleFont.h"
 #include <QPaintEvent>
 
 
@@ -23,6 +24,10 @@ MessageAttachment::MessageAttachment(
 	setAttribute(Qt::WA_TranslucentBackground);
 
 	setCursor(Qt::PointingHandCursor);
+	setFixedSize(
+
+			style::GenerateThumbnail(_attachmentPath).size()
+	);
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
@@ -66,30 +71,20 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	}
 }
 
-void MessageAttachment::resizeEvent(QResizeEvent* event) {
-	updateSize();
-}
-
 void MessageAttachment::paintAttachmentCount(QPainter& painter) {
+	const auto font = style::font(13, 0, 0);
+
 	const auto attachmentsCountText = "+" + QString::number(_parentMessage->attachmentsLength() - 1);
-	const auto attachmentsCountTextSize = style::TextSize(attachmentsCountText, font());
+	const auto attachmentsCountTextSize = style::TextSize(attachmentsCountText, font);
 
 	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
 	attachmentsCountTextRect.moveCenter(rect().center());
 
 	painter.setPen(Qt::white);
-	painter.setFont(font());
+	painter.setFont(font);
 
 	painter.setOpacity(1.0);
 	painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
-}
-
-void MessageAttachment::updateSize() {
-	setFixedSize(
-		style::getMinimumSizeWithAspectRatio(
-			style::GenerateThumbnail(_attachmentPath).size(),
-			style::maximumMessageWidth)
-	);
 }
 
 void MessageAttachment::setParentMessage(not_null<Message*> parentMessage) {

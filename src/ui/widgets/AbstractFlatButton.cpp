@@ -177,6 +177,19 @@ void AbstractFlatButton::setIconSize(const QSize& size) {
     QAbstractButton::setIconSize(size);
 }
 
+void AbstractFlatButton::setIcon(const QIcon& icon) {
+    QAbstractButton::setIcon(icon);
+
+    const auto size = iconSize();
+
+    setIconSize(QSize(size.width()
+        - style::flatButton::buttonMargins.left()
+        - style::flatButton::buttonMargins.right(),
+        size.height()
+        - style::flatButton::buttonMargins.top()
+        - style::flatButton::buttonMargins.bottom()));
+}
+
 void AbstractFlatButton::setBadgeValue(const QVariant& value) {
     if (_badgeValue == value)
         return;

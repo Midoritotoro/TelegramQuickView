@@ -90,6 +90,7 @@ namespace text {
 		else if (const auto outline = st.outline) {
 			const auto third = (cache.outlines[2].alpha() != 0);
 			const auto size = QSize(outline, outline * (third ? 6 : 4));
+
 			cache.outline = QImage(
 				size * ratio,
 				QImage::Format_ARGB32_Premultiplied);
@@ -186,6 +187,8 @@ namespace text {
 		const style::QuoteStyle& st,
 		SkipBlockPaintParts parts)
 	{
+		qDebug() << "FillQuotePaint called";
+
 		const auto& image = cache.corners;
 		
 		const auto ratio = int(image.devicePixelRatio());
@@ -205,6 +208,7 @@ namespace text {
 		auto height = rect.height();
 
 		const auto till = y + height;
+		qDebug() << "skippedTop: " << parts.skippedTop;
 		if (!parts.skippedTop) {
 			const auto top = std::min(height, hhalf);
 
@@ -216,6 +220,9 @@ namespace text {
 				QRect(x + width - whalf, y, whalf, top),
 				image,
 				QRect((iwidth - whalf) * ratio, 0, whalf * ratio, top * ratio));
+
+			qDebug() << "FillQuotePaint: " << image.size();
+			qDebug() << "FillQuotePaint cache.bg: " << cache.bg;
 
 			if (const auto middle = width - 2 * whalf) {
 				const auto header = st.header;

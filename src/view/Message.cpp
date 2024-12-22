@@ -14,12 +14,10 @@ Message::Message(
 	_messageLayout = new QGridLayout(this);
 	_textLabel = new FlatLabel(this);
 
-	setContentsMargins(0, 0, 0, 0);
+	_textLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	setStyleSheet("QWidget{\n"
-		"background: rgb(24, 37, 51);\n"
-		"border: 5px;\n"
-	"}");
+	_messageLayout->setContentsMargins(0, 0, 0, 0);
+	setContentsMargins(0, 0, 0, 0);
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
@@ -28,12 +26,12 @@ void Message::setText(const QString& text) {
 	if (text.length() == 0)
 		return;
 
-	auto handler = std::make_shared<UrlClickHandler>("https://google.com");
+	//auto handler = std::make_shared<UrlClickHandler>("https://google.com");
 
 	_textLabel->setText(text);
-	_textLabel->setLink(1, handler);
+	//_textLabel->setLink(1, handler);
 
-	qDebug() << "hasLinks: " << _textLabel->hasLinks();
+	//qDebug() << "hasLinks: " << _textLabel->hasLinks();
 
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);

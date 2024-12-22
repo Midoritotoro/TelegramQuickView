@@ -78,11 +78,18 @@ namespace text {
 		return result;
 	}
 
+	bool String::isFullSelection(TextSelection selection) const {
+		return (selection.from == 0) && (selection.to >= _text.size());
+	}
+
 	void String::setText(
 		const style::TextStyle* style,
 		const QString& text,
 		const TextParseOptions& options) 
 	{
+		#pragma warning(push)
+		#pragma warning(disable: 6262)
+
 		_st = style;
 		clear();
 
@@ -90,6 +97,8 @@ namespace text {
 		WordParser word(this);
 
 		recountNaturalSize(true, options.dir);
+
+		#pragma warning(pop)
 	}
 
 	bool String::hasLinks() const {
@@ -98,7 +107,7 @@ namespace text {
 
 	void String::setLink(uint16 index, const ClickHandlerPtr& link) {
 		const auto extended = _extended.get();
-		qDebug() << "extended == nullptr: " << (extended == nullptr);
+		// qDebug() << "extended == nullptr: " << (extended == nullptr);
 
 		if (extended && index > 0 && index <= extended->links.size())
 			extended->links[index - 1] = link;
@@ -234,7 +243,11 @@ namespace text {
 		QPainter& painter,
 		const PaintContext& context) const 
 	{
+		#pragma warning(push)
+		#pragma warning(disable: 6262)
+
 		Renderer(*this).draw(painter, context);
+		#pragma warning(pop)
 	}
 
 
@@ -259,7 +272,6 @@ namespace text {
 		bool composeExpanded,
 		bool composeEntities) const
 	{
-		qDebug() << "____text:  " << _text;
 		struct MarkdownTagTracker {
 			TextBlockFlags flag = TextBlockFlags();
 			EntityType type = EntityType();
@@ -396,8 +408,6 @@ namespace text {
 					result.expanded += part;
 				}
 			};
-
-		qDebug() << "String selection: " << selection.from << selection.to;
 
 		enumerateText(
 			selection,
@@ -661,10 +671,15 @@ namespace text {
 		if (isEmpty())
 			return {};
 
+		#pragma warning(push)
+		#pragma warning(disable: 6262)
+
 		return Renderer(*this).getState(
 			point,
 			SimpleGeometry(width, 0, 0, false),
 			request);
+
+		#pragma warning(pop)
 	}
 
 	TextState String::getStateLeft(QPoint point, int width, int outerw, StateRequest request) const {
@@ -675,12 +690,19 @@ namespace text {
 		if (isEmpty())
 			return {};
 
+		#pragma warning(push)
+
+		#pragma warning(disable: 6262)
+		#pragma warning(disable: 26437)
+
 		return Renderer(*this).getState(point, SimpleGeometry(
 			width,
 			request.lines,
 			request.removeFromEnd,
 			request.flags & StateRequest::StateFlag::BreakEverywhere
 		), static_cast<StateRequest>(request));
+
+		#pragma warning(pop)
 	}
 
 	TextState String::getStateElidedLeft(QPoint point, int width, int outerw, StateRequestElided request) const {
@@ -774,12 +796,14 @@ namespace text {
 	String::ExtendedWrap::ExtendedWrap() noexcept = default;
 
 	String::ExtendedWrap::ExtendedWrap(ExtendedWrap&& other) noexcept
-		: unique_ptr(std::move(other)) {
+		: unique_ptr(std::move(other))
+	{
 		adjustFrom(&other);
 	}
 
 	String::ExtendedWrap& String::ExtendedWrap::operator=(
-		ExtendedWrap&& other) noexcept {
+		ExtendedWrap&& other) noexcept
+	{
 		*static_cast<unique_ptr*>(this) = std::move(other);
 		adjustFrom(&other);
 		return *this;
@@ -792,7 +816,8 @@ namespace text {
 	}
 
 	String::ExtendedWrap& String::ExtendedWrap::operator=(
-		std::unique_ptr<ExtendedData>&& other) noexcept {
+		std::unique_ptr<ExtendedData>&& other) noexcept 
+	{
 		*static_cast<unique_ptr*>(this) = std::move(other);
 		assert(!get());
 		return *this;

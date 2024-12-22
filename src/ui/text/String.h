@@ -78,7 +78,7 @@ namespace text {
 		void setText(
 			const style::TextStyle* style,
 			const QString& text,
-			const TextParseOptions& options = kDefaultTextOptions);
+			const TextParseOptions& options = kMarkupTextOptions);
 
 		[[nodiscard]] bool hasLinks() const;
 		void setLink(uint16 index, const ClickHandlerPtr& lnk);
@@ -101,7 +101,7 @@ namespace text {
 			return _minHeight;
 		}
 
-
+		[[nodiscard]] bool isFullSelection(TextSelection selection) const;
 		[[nodiscard]] int countMaxMonospaceWidth() const;
 
 		void draw(

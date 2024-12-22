@@ -33,10 +33,8 @@ public:
 	[[nodiscard]] static AttachmentType detectMediaType(const QString& filePath) noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
-	void resizeEvent(QResizeEvent* event) override;
 private:
 	void paintAttachmentCount(QPainter& painter);
-	void updateSize();
 
 	QString _attachmentPath;
 	AttachmentType _attachmentType;

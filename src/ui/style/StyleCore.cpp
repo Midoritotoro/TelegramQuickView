@@ -170,7 +170,7 @@ namespace style {
 		return std::move(image);
 	}
 
-	QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth) {
+	QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, int targetWidth) {
 		return imageSize.width() != 0 
 			? QSize(targetWidth, targetWidth * 
 				imageSize.height() / imageSize.width())

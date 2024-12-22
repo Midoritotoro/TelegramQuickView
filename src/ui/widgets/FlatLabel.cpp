@@ -185,7 +185,8 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 	painter.setOpacity(_opacity);
 
-	// style::RoundCorners(painter, size(), 10, _cornersRoundMode);
+	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
+	painter.fillRect(rect(), _st->colorBg);
 
 	painter.setPen(Qt::white);
 
@@ -214,7 +215,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	const auto renderElided = _breakEverywhere || heightExceeded;
 
 	const auto lineHeight = _text.style()
-		? qMax(_text.style()->lineHeight, 14)
+		? qMax(_text.style()->lineHeight, _text.style()->_font->height)
 		: 0;
 
 	const auto elisionHeight = !heightExceeded
@@ -236,7 +237,8 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		});
 
 	refreshSize();
-	qDebug() << "hasLinks: " << hasLinks();
+
+	qDebug() << style::maximumMessageWidth << width();
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {

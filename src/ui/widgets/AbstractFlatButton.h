@@ -74,7 +74,8 @@ public:
 	[[nodiscard]] int borderRadius() const noexcept;
 
 	void setIconSize(const QSize& size);
-
+	void setIcon(const QIcon& _icon);
+	
 	void setBadgeValue(const QVariant& value);
 	[[nodiscard]] QVariant badgeValue() const;
 

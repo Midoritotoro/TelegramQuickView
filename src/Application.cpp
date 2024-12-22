@@ -20,25 +20,14 @@ Application::Application(int& argc, char** argv) :
         + "MSDN blogs is a series of blogs that were hosted under Microsoft's domain blogs.msdn.com. Some blogs are dedicated to a product (e.g. Visual Studio, Internet Explorer, PowerShell) or a version of a product (e.g Windows 7, Windows 8), while others belong to a Microsoft employee (e.g. Michael Howard or Raymond Chen.\n"
         + "In May 2020, the MSDN and TechNet blogs were closed and the content was archived at Microsoft Docs.\n");
 
-    QString videoPath = "C:\\Users\\danya\\Downloads\\2024-11-22_22-56-37.png";
+    QString videoPath = "C:\\Users\\danya\\Downloads\\videotestvertical.mp4";
 
-
-   //_mediaPlayer = std::make_unique<MediaPlayer>();
     _messagesView = std::make_unique<MessagesView>();
-    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::Stack);
+    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::PreviewWithCount);
 
     _messagesView->show();
 
     auto list = QStringList({ videoPath });
-    //QLabel* label = new QLabel;
-    //label->setText(text);
-    //label->show();
-    //label->adjustSize();
-
-   // qDebug() << fnt->ascent;
-
- //   _mediaPlayer->setMedia("C:/Users/danya/Downloads/videotestvertical.mp4");
-  //  _mediaPlayer->show();
     _messagesView->makeMessage(text, list);
     
 }

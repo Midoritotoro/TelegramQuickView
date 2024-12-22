@@ -324,6 +324,7 @@ void Renderer::enumerate() {
 			--_quoteLinesLeft;
 
 		fillParagraphBg(0);
+
 		while (_t->blockPosition(begin(_t->_blocks) + blockIndex + 1) < lineEnd)
 			++blockIndex;
 			
@@ -1450,23 +1451,30 @@ void Renderer::prepareElisionAt(
 }
 
 void Renderer::fillParagraphBg(int paddingBottom) {
+	// qDebug() << "_quote == nullptr: " << (_quote == nullptr);
+
 	if (_quote) {
 		const auto cutoff = _quote->collapsed
 			&& ((!paddingBottom && !_quoteLinesLeft) // !expanded
 				|| (paddingBottom // expanded
 					&& _quoteLinesLeft + kQuoteCollapsedLines < -1));
+
 		if (cutoff) {
 			paddingBottom = _quotePadding.bottom();
 		}
 		const auto& st = _t->quoteStyle(_quote);
 		const auto skip = st.verticalSkip;
+
 		const auto isTop = (_y != _quoteLineTop);
 		const auto isBottom = (paddingBottom != 0);
+
 		const auto left = _startLeft + _quoteShift;
 		const auto start = _quoteTop + skip;
+
 		const auto top = _quoteLineTop + (isTop ? skip : 0);
 		const auto fill = _y + _lineHeight + paddingBottom - top
 			- (isBottom ? skip : 0);
+
 		const auto rect = QRect(left, top, _startLineWidth, fill);
 
 		const auto cache = (!_p || !_quote)
@@ -1503,8 +1511,10 @@ void Renderer::fillParagraphBg(int paddingBottom) {
 			if (_p) {
 				const auto font = _t->_st->_font->monospace();
 				const auto topleft = rect.topLeft();
+
 				const auto position = topleft + st.headerPosition;
 				const auto lbaseline = position + QPoint(0, font->ascent);
+
 				_p->setFont(font);
 				_p->setPen(_palette->monoFg);
 				_p->drawText(lbaseline, _t->quoteHeaderText(_quote));

@@ -18,7 +18,8 @@ namespace {
 	inline constexpr auto phraseContextCopySelected = "Копировать текст";
 
 	text::TextParseOptions _labelOptions = {
-		text::TextParseMultiline, // flags
+		text::TextParseMultiline | text::TextParseLinks | text::TextParseHashtags
+		| text::TextParseMentions | text::TextParseBotCommands | text::TextParseMarkdown, // flags
 		0, // maxw
 		0, // maxh
 		Qt::LayoutDirectionAuto, // dir

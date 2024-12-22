@@ -15,12 +15,23 @@
 #include <ranges>
 
 
-
 class PreClickHandler;
 class BlockquoteClickHandler;
 
 
 namespace text {
+	namespace {
+		[[nodiscard]] QImage imageFromColor(
+			const QColor& color,
+			const QSize& size)
+		{
+			auto image = QImage(size, QImage::Format_ARGB32_Premultiplied);
+			image.fill(color);
+
+			return image;
+		}
+	}
+
 	inline constexpr auto kMaxQuoteOutlines = 3;
 
 	enum class EntityType : uchar {
@@ -145,15 +156,15 @@ namespace text {
 	};
 
 	struct QuotePaintCache {
-		QImage corners;
-		QImage outline;
+		QImage corners = imageFromColor(QColor(24, 37, 51), QSize(10, 10));
+		QImage outline = imageFromColor(QColor(24, 37, 51), QSize(10, 10));
 
-		QImage expand;
-		QImage collapse;
+		QImage expand = imageFromColor(QColor(24, 37, 51), QSize(10, 10));
+		QImage collapse = imageFromColor(QColor(24, 37, 51), QSize(10, 10));
 
-		mutable QImage bottomCorner;
-		mutable QImage bottomRounding;
-		mutable QImage collapsedLine;
+		mutable QImage bottomCorner = imageFromColor(QColor(24, 37, 51), QSize(10, 10));
+		mutable QImage bottomRounding = imageFromColor(QColor(24, 37, 51), QSize(10, 10));
+		mutable QImage collapsedLine = imageFromColor(QColor(24, 37, 51), QSize(10, 10));
 
 		std::array<QColor, kMaxQuoteOutlines> outlinesCached;
 
@@ -162,7 +173,7 @@ namespace text {
 		QColor bgCached = QColor(24, 37, 51);
 		QColor iconCached = QColor(24, 37, 51);
 
-		std::array<QColor, kMaxQuoteOutlines> outlines;
+		std::array<QColor, kMaxQuoteOutlines> outlines = { QColor(24, 37, 51), QColor(24, 37, 51), QColor(24, 37, 51) };
 
 		QColor header = QColor(24, 37, 51);
 		QColor bg = QColor(24, 37, 51);
