@@ -31,6 +31,12 @@ void Message::setText(const QString& text) {
 	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
 	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
+
+	//const auto recountedSize = QSize(
+	//	width(),
+	//	attachmentsHeight() + _textLabel->fullHeight());
+
+	//_recountSizeCallback(recountedSize);
 }
 
 QString Message::text() const noexcept {
@@ -85,6 +91,9 @@ const MessageAttachmentsList& Message::attachments() const noexcept {
 	return _attachments;
 }
 
+QSize Message::sizeHint() const {
+	return QWidget::sizeHint();
+}
 
 void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {
 	_mediaDisplayMode = displayMode;
@@ -92,6 +101,14 @@ void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {
 
 Message::MediaDisplayMode Message::mediaDisplayMode() const noexcept {
 	return _mediaDisplayMode; 
+}
+
+void Message::setRecountSizeCallback(Fn<void(const QSize&)> callback) {
+	_recountSizeCallback = std::move(callback);
+}
+
+Fn<void(const QSize&)> Message::recountSizeCallback() const noexcept {
+	return _recountSizeCallback;
 }
 
 int Message::indexOfAttachment(not_null<MessageAttachment*> messageAttachment) const noexcept {
@@ -114,4 +131,13 @@ bool Message::hasAttachments() const noexcept {
 
 bool Message::hasText() const noexcept {
 	return !_textLabel->text().isEmpty();
+}
+
+int Message::attachmentsHeight() const noexcept {
+	auto height = 0;
+
+	for (auto index = 0; index < _attachments.size(); ++index)
+		height += _attachments[index]->height();
+
+	return height;
 }

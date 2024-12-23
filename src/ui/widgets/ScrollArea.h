@@ -1,8 +1,27 @@
 #pragma once
 
 #include "../../core/Types.h"
-#include <QScrollArea>
 
+#include <QScrollArea>
+#include <QGridLayout>
+
+
+class InnerWidget : public QWidget {
+	Q_OBJECT
+public:
+	InnerWidget(QWidget* parent = nullptr);
+
+	void setOpacity(double opacity);
+	[[nodiscard]] double opacity() const noexcept;
+
+	void setBackgroundColor(const QColor& color);
+	[[nodiscard]] QColor backgroundColor() const noexcept;
+protected:
+	void paintEvent(QPaintEvent* event) override;
+private:
+	double _opacity = 1.;
+	QColor _backgroundColor = Qt::black;
+};
 
 class ScrollArea: public QScrollArea {
 public:
@@ -23,6 +42,9 @@ public:
 	void scrollToWidget(not_null<QWidget*> widget);
 
 	void disableScroll(bool dis);
+
+	void addItem(QWidget* item, Qt::Alignment align = Qt::AlignLeft | Qt::AlignTop);
+	[[nodiscard]] InnerWidget* widget() const noexcept;
 protected:
 	bool viewportEvent(QEvent* event) override;
 	void keyPressEvent(QKeyEvent* event) override;
@@ -33,4 +55,6 @@ private:
 
 	int _verticalValue;
 	double _opacity;
+	
+	QGridLayout* _scrollLayout = nullptr;
 };

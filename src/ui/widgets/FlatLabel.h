@@ -45,6 +45,8 @@ public:
 	[[nodiscard]] int textMaxWidth() const noexcept;
 	[[nodiscard]] bool hasLinks() const noexcept;
 
+	[[nodiscard]] int fullHeight() const noexcept;
+
 	void setText(const QString& text);
 	[[nodiscard]] const text::String& text() const noexcept;
 

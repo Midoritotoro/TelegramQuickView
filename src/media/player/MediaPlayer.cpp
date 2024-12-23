@@ -208,7 +208,7 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 
 void MediaPlayer::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
-//	paintBackground(painter, event);
+	paintBackground(painter, event);
 
 	const auto center = _current.size().width() < size().width()
 		|| _current.size().height() < size().height()
@@ -216,10 +216,10 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 
 	_currentFrameRect = QRect(center, _current.size());
 
-//	if (_current.size().width() <= size().width() && _current.size().height() <= size().height())
-//		painter.drawImage(center, _current);
-//	else
-//		painter.drawImage(QRect(QPoint(0, 0), size()), _current);
+	if (_current.size().width() <= size().width() && _current.size().height() <= size().height())
+		painter.drawImage(center, _current);
+	else
+		painter.drawImage(QRect(QPoint(0, 0), size()), _current);
 }
 
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {

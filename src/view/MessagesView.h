@@ -15,20 +15,6 @@
 
 class MessagesView: public QWidget {
 	Q_OBJECT
-private:
-	Message::MediaDisplayMode _displayMode;
-
-	QVBoxLayout* _chatScrollAreaLayout = nullptr;
-
-	std::unique_ptr<MediaViewer> _messageMediaViewer = nullptr;
-	//std::unique_ptr<TelegramParser> _telegramParser = nullptr;
-
-	std::unique_ptr<MouseDetector> _mouseDetector = nullptr;
-	std::shared_ptr<History> _messagesHistory;
-
-	ContinuousScroll* _chatScrollArea = nullptr;
-
-	int _currentPostIndex;
 public:
 	MessagesView(QWidget* parent = nullptr);
 
@@ -39,5 +25,17 @@ public:
 public Q_SLOTS:
 	void attachmentCliked();
 protected:
+	void paintEvent(QPaintEvent* event) override;
 	void addContent();
+private:
+	Message::MediaDisplayMode _displayMode;
+	std::unique_ptr<MediaViewer> _messageMediaViewer = nullptr;
+	//std::unique_ptr<TelegramParser> _telegramParser = nullptr;
+
+	std::unique_ptr<MouseDetector> _mouseDetector = nullptr;
+	std::shared_ptr<History> _messagesHistory;
+
+	ContinuousScroll* _chatScrollArea = nullptr;
+
+	int _currentPostIndex;
 };

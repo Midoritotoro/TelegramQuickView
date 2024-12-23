@@ -8,6 +8,45 @@
 #include "../../core/Time.h"
 #include "../../ui/style/StyleCore.h"
 
+InnerWidget::InnerWidget(QWidget* parent):
+	QWidget(parent)
+{
+	setAutoFillBackground(false);
+
+	setAttribute(Qt::WA_NoSystemBackground);
+	setAttribute(Qt::WA_TranslucentBackground);
+
+	setWindowFlag(Qt::FramelessWindowHint);
+}
+
+void InnerWidget::setOpacity(double opacity) {
+	_opacity = opacity;
+}
+
+double InnerWidget::opacity() const noexcept {
+	return _opacity;
+}
+
+void InnerWidget::setBackgroundColor(const QColor& color) {
+	_backgroundColor = color;
+}
+
+QColor InnerWidget::backgroundColor() const noexcept {
+	return _backgroundColor;
+}
+	
+void InnerWidget::paintEvent(QPaintEvent* event) {
+	auto painter = QPainter(this);
+
+	painter.setOpacity(_opacity);
+
+	painter.setPen(Qt::transparent);
+	painter.setBrush(_backgroundColor);
+
+	if (const auto fill = rect().intersected(event->rect()); fill.isNull() == false)
+		painter.drawRect(rect());
+}
+
 
 ScrollArea::ScrollArea(QWidget* parent):
 	QScrollArea(parent)
@@ -135,6 +174,14 @@ void ScrollArea::scrollToY(int toTop, int toBottom) {
 
 void ScrollArea::disableScroll(bool dis) {
 	_disabled = dis;
+}
+
+void ScrollArea::addItem(QWidget* item, Qt::Alignment align) {
+	_scrollLayout->addWidget(item, _scrollLayout->rowCount(), 0, align);
+}
+
+InnerWidget* ScrollArea::widget() const noexcept {
+	return static_cast<InnerWidget*>(widget());
 }
 
 void ScrollArea::setOpacity(double opacity) {

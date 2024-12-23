@@ -10,8 +10,11 @@
 
 #include <QShowEvent>
 #include <QElapsedTimer>
+
 #include <QScrollBar>
 #include <QDir>
+
+#include <QPainter>
 
 
 MessagesView::MessagesView(QWidget* parent):
@@ -31,44 +34,34 @@ MessagesView::MessagesView(QWidget* parent):
 	resize(style::panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
-	QWidget* chatScrollAreaWidget = new QWidget();
-	_chatScrollAreaLayout = new QVBoxLayout(chatScrollAreaWidget);
+	auto scrollInner = new InnerWidget();
 	_chatScrollArea = new ContinuousScroll(this);
-	
-	_chatScrollArea->setOpacity(0.1);
+
+	scrollInner->setOpacity(0.5);
+
+	_chatScrollArea->setOpacity(0);
 	_chatScrollArea->setTrackingContent(true);
 
 	_messageMediaViewer = std::make_unique<MediaViewer>(_messagesHistory.get());
 
-	_chatScrollArea->setWidgetResizable(true);
-
-	_chatScrollAreaLayout->setContentsMargins(10, 5,  10 + _chatScrollArea->verticalScrollBar()->width(), 15);
-	_chatScrollAreaLayout->setSpacing(15);
-
-	chatScrollAreaWidget->setContentsMargins(0, 0, 0, 0);
-	_chatScrollArea->setContentsMargins(0, 0, 0, 0);
-
-	chatScrollAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	scrollInner->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	_chatScrollArea->setWidget(chatScrollAreaWidget);
+	_chatScrollArea->setWidget(scrollInner);
 
-	chatScrollAreaWidget->setMouseTracking(true);
+	scrollInner->setMouseTracking(true);
 
-	QGridLayout* grid = new QGridLayout(this);
+	auto grid = new QGridLayout(this);
 
-	grid->setContentsMargins(0, 0, 5, 4);
-	grid->setVerticalSpacing(4);
+	grid->setContentsMargins(0, 0, 0, 0);
+
+	grid->setVerticalSpacing(0);
 	grid->setHorizontalSpacing(0);
 
 	grid->addWidget(_chatScrollArea, grid->rowCount(), 0, 1, 1);
 
-	QWidgetList widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
-	WidgetsHider* widgetsHider = new WidgetsHider(true, true, widgetsList);
-
-	setStyleSheet(QString::fromUtf8("QWidget {\n"
-		"background-color: rgba(0, 0, 0, 0); }\n"
-	));
+	auto widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
+	auto widgetsHider = new WidgetsHider(true, true, widgetsList);
 
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
@@ -95,14 +88,24 @@ void MessagesView::makeMessage(
 
 	auto message = new Message();
 
+	message->setRecountSizeCallback([this](const QSize& size) {
+		if (size.isNull() || _chatScrollArea->widget() == nullptr)
+			return;
+
+		const auto innerSize = _chatScrollArea->widget()->size();
+
+		_chatScrollArea->widget()->resize(innerSize.width(),
+			innerSize.height() + size.height());
+		});
+
 	message->setMediaDisplayMode(_displayMode);
 	message->setAttachments(attachmentsPaths);
 
 	message->setText(messageText);
 
-	_chatScrollAreaLayout->addWidget(message, 0, Qt::AlignLeft | Qt::AlignTop);
+	_chatScrollArea->addItem(message);
 	_messagesHistory->makeMessage(message);
-
+	
 	if (!message->hasAttachments())
 		return;
 
@@ -127,6 +130,18 @@ void MessagesView::attachmentCliked() {
 
 	showMinimized();
 }
+
+void MessagesView::paintEvent(QPaintEvent * event) {
+	auto painter = QPainter(this);
+
+	painter.setOpacity(0.5);
+	painter.fillRect(rect(), Qt::black);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	painter.setPen(Qt::white);
+	painter.drawRect(rect().adjusted(0, 0, -1, -1));
+}
+
 
 void MessagesView::addContent() {
 	const auto guard = gsl::finally([this] { _chatScrollArea->disableScroll(false); });

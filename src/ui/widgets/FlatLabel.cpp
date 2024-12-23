@@ -95,11 +95,19 @@ QSize FlatLabel::sizeHint() const {
 }
 
 int FlatLabel::textMaxWidth() const noexcept {
-	return _st->maximumWidth;
+	return _st->maximumWidth 
+		- _st->margin.left()
+		- _st->margin.right();
 }
 
 bool FlatLabel::hasLinks() const noexcept {
 	return _text.hasLinks();
+}
+
+int FlatLabel::fullHeight() const noexcept {
+	return _fullTextHeight 
+		+ _st->margin.top()
+		+ _st->margin.bottom();
 }
 
 void FlatLabel::setTextAlignment(Qt::Alignment alignment) {
@@ -129,7 +137,9 @@ style::CornersRoundMode FlatLabel::cornerRoundMode() const noexcept {
 void FlatLabel::setStyle(const style::FlatLabel* style) {
 	_st = style;
 
-	_text.setMaximumWidth(_st->maximumWidth);
+	_text.setMaximumWidth(_st->maximumWidth 
+			- _st->margin.left()
+			- _st->margin.right());
 	_text.setMinimumHeight(_st->minimumHeight);
 
 	refreshSize();
@@ -206,11 +216,16 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 
 	painter.setPen(Qt::white);
 
-	const auto textWidth = _textWidth
-		? _textWidth
-		: width()
+	const auto textWidth = _st->maximumWidth
+		? _st->maximumWidth
 			- _st->margin.left()
-			- _st->margin.right();
+			- _st->margin.right()
+		: _textWidth
+			? _textWidth
+			:
+				width()
+					- _st->margin.left()
+					- _st->margin.right();
 
 	const auto textLeft = _textWidth
 		? ((_alignment & Qt::AlignLeft)
@@ -250,7 +265,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		.selection = selection,
 		.elisionHeight = elisionHeight,
 		.elisionBreakEverywhere = renderElided && _breakEverywhere,
-		});
+	});
 
 	refreshSize();
 }
@@ -315,11 +330,13 @@ void FlatLabel::focusOutEvent(QFocusEvent* event) {
 }
 
 void FlatLabel::focusInEvent(QFocusEvent* event) {
-	if (!_savedSelection.empty()) {
-		_selection = _savedSelection;
-		_savedSelection = { 0, 0 };
-		update();
-	}
+	if (_savedSelection.empty())
+		return;
+
+	_selection = _savedSelection;
+	_savedSelection = { 0, 0 };
+
+	update();
 }
 
 void FlatLabel::keyPressEvent(QKeyEvent* event) {
@@ -336,6 +353,7 @@ void FlatLabel::keyPressEvent(QKeyEvent* event) {
 int FlatLabel::resizeGetHeight(int newWidth) {
 	_allowedWidth = newWidth;
 	_textWidth = countTextWidth();
+
 	return countTextHeight(_textWidth);
 }
 
@@ -356,6 +374,7 @@ void FlatLabel::copySelectedText() {
 			? _savedSelection
 			: _selection)
 		: _selection;
+
 	qDebug() << selection.from << selection.to;
 
 	if (!selection.empty())
@@ -379,7 +398,7 @@ text::TextState FlatLabel::dragActionUpdate() {
 
 text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton button) {
 	_lastMousePos = p;
-	auto state = dragActionUpdate();
+	const auto state = dragActionUpdate();
 
 	if (button != Qt::LeftButton) 
 		return state;
@@ -412,7 +431,7 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 	}
 	if (_selectionType != text::TextSelection::Type::Paragraphs) {
 		_dragSymbol = state.symbol;
-		bool uponSelected = state.uponSymbol;
+		auto uponSelected = state.uponSymbol;
 
 		if (uponSelected)
 			if (_dragSymbol < _selection.from || _dragSymbol >= _selection.to)
@@ -435,7 +454,7 @@ text::TextState FlatLabel::dragActionStart(const QPoint& p, Qt::MouseButton butt
 
 text::TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton button) {
 	_lastMousePos = p;
-	auto state = dragActionUpdate();
+	const auto state = dragActionUpdate();
 
 	auto activated = ClickHandler::unpressed();
 
@@ -467,29 +486,30 @@ text::TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton but
 }
 
 void FlatLabel::updateHover(const text::TextState& state) {
-	bool lnkChanged = ClickHandler::setActive(state.link, this);
+	const auto linkChanged = ClickHandler::setActive(state.link, this);
 
 	if (!_selectable) {
 		refreshCursor(state.uponSymbol);
 		return;
 	}
 
-	Qt::CursorShape cur = style::cursorDefault;
+	auto cur = style::cursorDefault;
 	if (_dragAction == NoDrag) {
+
 		if (state.link)
 			cur = style::cursorPointer;
-		
 		else if (state.uponSymbol)
 			cur = style::cursorText;
 	}
 	else {
 		if (_dragAction == Selecting) {
-			uint16 second = state.symbol;
+			auto second = state.symbol;
 
 			if (state.afterSymbol && _selectionType == text::TextSelection::Type::Letters)
 				++second;
 			
-			auto selection = _text.adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
+			const auto selection = _text.adjustSelection({ qMin(second, _dragSymbol), qMax(second, _dragSymbol) }, _selectionType);
+
 			if (_selection != selection) {
 				_selection = selection;
 				_savedSelection = { 0, 0 };
@@ -504,53 +524,68 @@ void FlatLabel::updateHover(const text::TextState& state) {
 		else if (_dragAction == Selecting)
 			cur = style::cursorText;
 	}
-	if (_dragAction == NoDrag && (lnkChanged || cur != _cursor))
+
+	if (_dragAction == NoDrag && (linkChanged || cur != _cursor))
 		setCursor(_cursor = cur);
 }
 
 bool FlatLabel::event(QEvent* e) {
-	if (e->type() == QEvent::TouchBegin || e->type() == QEvent::TouchUpdate || e->type() == QEvent::TouchEnd || e->type() == QEvent::TouchCancel) {
+	if (e->type() == QEvent::TouchBegin || e->type() == QEvent::TouchUpdate 
+		|| e->type() == QEvent::TouchEnd || e->type() == QEvent::TouchCancel)
+	{
 		QTouchEvent* ev = static_cast<QTouchEvent*>(e);
 		if (ev->device()->type() == QInputDevice::DeviceType::TouchScreen) {
 			touchEvent(ev);
 			return true;
 		}
 	}
+
 	return QWidget::event(e);
 }
 
-void FlatLabel::touchEvent(QTouchEvent* e) {
-	if (e->type() == QEvent::TouchCancel) { // cancel
-		if (!_touchInProgress) return;
+void FlatLabel::touchEvent(QTouchEvent* event) {
+	if (event->type() == QEvent::TouchCancel) {
+		if (!_touchInProgress) 
+			return;
+
 		_touchInProgress = false;
 		_touchSelectTimer.cancel();
+
 		_touchSelect = false;
 		_dragAction = NoDrag;
+
 		return;
 	}
 
-	if (!e->touchPoints().isEmpty()) {
+	if (!event->touchPoints().isEmpty()) {
 		_touchPrevPos = _touchPos;
-		_touchPos = e->touchPoints().cbegin()->screenPos().toPoint();
+		_touchPos = event->touchPoints().cbegin()->screenPos().toPoint();
 	}
 
-	switch (e->type()) {
+	switch (event->type()) {
 	case QEvent::TouchBegin: {
 		if (_contextMenu) {
-			e->accept();
+			event->accept();
 			return;
 		}
-		if (_touchInProgress) return;
-		if (e->touchPoints().isEmpty()) return;
+
+		if (_touchInProgress) 
+			return;
+
+		if (event->touchPoints().isEmpty())
+			return;
 
 		_touchInProgress = true;
 		_touchSelectTimer.callOnce(QApplication::startDragTime());
+
 		_touchSelect = false;
 		_touchStart = _touchPrevPos = _touchPos;
 	} break;
 
 	case QEvent::TouchUpdate: {
-		if (!_touchInProgress) return;
+		if (!_touchInProgress) 
+			return;
+
 		if (_touchSelect) {
 			_lastMousePos = _touchPos;
 			dragActionUpdate();
@@ -558,18 +593,24 @@ void FlatLabel::touchEvent(QTouchEvent* e) {
 	} break;
 
 	case QEvent::TouchEnd: {
-		if (!_touchInProgress) return;
+		if (!_touchInProgress) 
+			return;
+
 		_touchInProgress = false;
+
 		auto weak = QPointer<QWidget>(this);
+
 		if (_touchSelect) {
 			dragActionFinish(_touchPos, Qt::RightButton);
 			QContextMenuEvent contextMenu(QContextMenuEvent::Mouse, mapFromGlobal(_touchPos), _touchPos);
+
 			showContextMenu(&contextMenu, ContextMenuReason::FromTouch);
 		}
 		else {
 			dragActionStart(_touchPos, Qt::LeftButton);
 			dragActionFinish(_touchPos, Qt::LeftButton);
 		}
+
 		if (weak) {
 			_touchSelectTimer.cancel();
 			_touchSelect = false;
@@ -579,28 +620,27 @@ void FlatLabel::touchEvent(QTouchEvent* e) {
 }
 
 text::TextState FlatLabel::getTextState(const QPoint& m) const {
-	text::StateRequestElided request;
+	auto request = text::StateRequestElided();
 	request.align = _alignment;
 
 	if (_selectable)
 		request.flags |= text::StateRequest::StateFlag::LookupSymbol;
 	
-
-	int textWidth = width()
+	const auto textWidth = width()
 		- _st->margin.left()
 		- _st->margin.right();
 
-	text::TextState state;
+	auto state = text::TextState();
 
-	bool heightExceeded = (_st->maximumHeight < _fullTextHeight || textWidth < _text.maxWidth());
-	bool renderElided = _breakEverywhere || heightExceeded;
+	const auto heightExceeded = (_st->maximumHeight < _fullTextHeight || textWidth < _text.maxWidth());
+	const auto renderElided = _breakEverywhere || heightExceeded;
 
 	if (renderElided) {
-		auto lineHeight = _text.style() && _text.style()->_font
+		const auto lineHeight = _text.style() && _text.style()->_font
 			? qMax(_text.style()->lineHeight, _text.style()->_font->height)
 			: 1;
 
-		auto lines = qMax(_st->maximumHeight / lineHeight, 1);
+		const auto lines = qMax(_st->maximumHeight / lineHeight, 1);
 		request.lines = lines;
 
 		if (_breakEverywhere)
@@ -623,15 +663,15 @@ void FlatLabel::touchSelect() {
 }
 
 void FlatLabel::executeDrag() {
-	if (_dragAction != Dragging) return;
+	if (_dragAction != Dragging) 
+		return;
 
 	auto state = getTextState(_dragStartPosition);
 	bool uponSelected = state.uponSymbol && _selection.from <= state.symbol;
-	if (uponSelected) {
-		if (_dragSymbol < _selection.from || _dragSymbol >= _selection.to) {
+
+	if (uponSelected)
+		if (_dragSymbol < _selection.from || _dragSymbol >= _selection.to)
 			uponSelected = false;
-		}
-	}
 
 	const auto pressedHandler = ClickHandler::getPressed();
 	const auto selectedText = [&] {
@@ -679,10 +719,9 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 		.fullSelection = _selectable && _text.isFullSelection(_selection)
 	});
 
-	if (_contextMenuHook)
-		_contextMenuHook(request);
-	else
-		fillContextMenu(request);
+	_contextMenuHook
+		? _contextMenuHook(request)
+		: fillContextMenu(request);
 
 	if (_contextMenu)
 		_contextMenu = nullptr;
@@ -697,7 +736,6 @@ void FlatLabel::fillContextMenu(ContextMenuRequest request) {
 		request.menu->addAction(
 			_contextCopyText,
 			[=] { copyContextText(); });
-	
 	else if (request.uponSelection && !request.fullSelection)
 		request.menu->addAction(
 			_contextCopyText,
@@ -723,7 +761,10 @@ void FlatLabel::fillContextMenu(ContextMenuRequest request) {
 int FlatLabel::countTextWidth() const noexcept {
 	const auto available = _allowedWidth
 		? _allowedWidth
-		: _st->maximumWidth;
+		: _st->maximumWidth
+			- _st->margin.left()
+			- _st->margin.right();
+
 	if (_allowedWidth > 0
 		&& _allowedWidth < _text.maxWidth())
 	{
@@ -739,8 +780,10 @@ int FlatLabel::countTextWidth() const noexcept {
 				? large = middle
 				: small = middle;
 		}
+
 		return large;
 	}
+
 	return available;
 }
 
@@ -763,9 +806,7 @@ void FlatLabel::refreshSize() {
 		+ _st->margin.top()
 		+ _st->margin.bottom();
 
-	qDebug() << "flatLabel w && h: " << fullWidth << fullHeight;
 	resize(fullWidth, fullHeight);
-	qDebug() << "flatLabel size: " << size();
 }
 
 void FlatLabel::refreshCursor(bool uponSymbol) {
