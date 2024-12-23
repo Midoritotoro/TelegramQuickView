@@ -8,7 +8,55 @@
 #include "../../core/Time.h"
 #include "../../ui/style/StyleCore.h"
 
-InnerWidget::InnerWidget(QWidget* parent):
+#include <Windows.h>
+#include <QWindow>
+#include <qpa/qplatformnativeinterface.h>
+
+//namespace {
+//	void SetWindowBlur(HWND hWnd)
+//	{
+//		qDebug() << "SetWindowBlur";
+//		const HINSTANCE hModule = LoadLibrary(TEXT("user32.dll"));
+//		if (hModule)
+//		{
+//			struct ACCENTPOLICY
+//			{
+//				int nAccentState;
+//				int nFlags;
+//				int nColor;
+//				int nAnimationId;
+//			};
+//			struct WINCOMPATTRDATA
+//			{
+//				int nAttribute;
+//				PVOID pData;
+//				ULONG ulDataSize;
+//			};
+//			typedef BOOL(WINAPI* pSetWindowCompositionAttribute)(HWND, WINCOMPATTRDATA*);
+//			const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute)GetProcAddress(hModule, "SetWindowCompositionAttribute");
+//			if (SetWindowCompositionAttribute)
+//			{
+//				ACCENTPOLICY policy = { 3, 0, 0, 0 };
+//				WINCOMPATTRDATA data = { 19, &policy, sizeof(ACCENTPOLICY) };
+//				SetWindowCompositionAttribute(hWnd, &data);
+//			}
+//			FreeLibrary(hModule);
+//		}
+//	}
+//}
+//
+//static QWindow* windowForWidget(const QWidget* widget)
+//{
+//	QWindow* window = widget->windowHandle();
+//	if (window)
+//		return window;
+//	const QWidget* nativeParent = widget->nativeParentWidget();
+//	if (nativeParent)
+//		return nativeParent->windowHandle();
+//	return 0;
+//}
+
+InnerWidget::InnerWidget(QWidget* parent) :
 	QWidget(parent)
 {
 	setAutoFillBackground(false);
@@ -44,12 +92,13 @@ void InnerWidget::paintEvent(QPaintEvent* event) {
 	painter.setBrush(_backgroundColor);
 
 	if (const auto fill = rect().intersected(event->rect()); fill.isNull() == false)
-		painter.drawRect(rect());
+		painter.drawRect(fill);
 }
 
 
 ScrollArea::ScrollArea(QWidget* parent):
-	QScrollArea(parent)
+	QScrollArea(parent),
+	_scrollLayout(new QGridLayout(this))
 {
 	setLayoutDirection(Qt::LeftToRight);
 	setOpacity(1);
@@ -66,6 +115,10 @@ ScrollArea::ScrollArea(QWidget* parent):
 	connect(verticalScrollBar(), &QAbstractSlider::rangeChanged, this, &ScrollArea::scrolled);
 
 	setStyleSheet(style::ScrollAreaStyle());
+	setAutoFillBackground(false);
+
+	_scrollLayout->setContentsMargins(10, 5, 10 + verticalScrollBar()->width(), 15);
+	_scrollLayout->setSpacing(15);
 
 	_verticalValue = verticalScrollBar()->value();
 }
@@ -178,10 +231,15 @@ void ScrollArea::disableScroll(bool dis) {
 
 void ScrollArea::addItem(QWidget* item, Qt::Alignment align) {
 	_scrollLayout->addWidget(item, _scrollLayout->rowCount(), 0, align);
+
+	QScrollArea::widget()->resize(
+		QScrollArea::widget()->width(),
+		QScrollArea::widget()->height() + item->sizeHint().height()
+		+ contentsMargins().bottom());
 }
 
 InnerWidget* ScrollArea::widget() const noexcept {
-	return static_cast<InnerWidget*>(widget());
+	return static_cast<InnerWidget*>(QScrollArea::widget());
 }
 
 void ScrollArea::setOpacity(double opacity) {

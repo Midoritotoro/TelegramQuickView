@@ -184,6 +184,9 @@ SET(MAIN_SOURCES main.cpp
     src/ui/widgets/EnhancedSlider.cpp
     src/ui/widgets/EnhancedSlider.h
 
+    src/ui/images/ImagesBlur.h
+    src/ui/images/ImagesBlur.cpp
+
     src/media/player/buttons/FullScreenButton.cpp
     src/media/player/buttons/FullScreenButton.h
 
@@ -217,6 +220,10 @@ SET(MAIN_SOURCES main.cpp
     src/ui/effects/shaders/dual_kawase_down.frag
     src/ui/effects/shaders/dual_kawase_up.frag
     src/ui/effects/shaders/simple.vert
+
+
+    src/ui/gl/GlImage.cpp
+    src/ui/gl/GlImage.h
 
 	src/ui/effects/vertex.h
 
@@ -258,6 +265,7 @@ qt_add_resources(${PROJECT_NAME}
     speaker_white_small_on.png
     speed_button.png
     stop.png
+    black.jpg
 )
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})

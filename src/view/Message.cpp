@@ -32,10 +32,6 @@ void Message::setText(const QString& text) {
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
 	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
 
-	//const auto recountedSize = QSize(
-	//	width(),
-	//	attachmentsHeight() + _textLabel->fullHeight());
-
 	//_recountSizeCallback(recountedSize);
 }
 
@@ -92,7 +88,9 @@ const MessageAttachmentsList& Message::attachments() const noexcept {
 }
 
 QSize Message::sizeHint() const {
-	return QWidget::sizeHint();
+	return QSize(
+		width(),
+		attachmentsHeight() + _textLabel->fullHeight());
 }
 
 void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {

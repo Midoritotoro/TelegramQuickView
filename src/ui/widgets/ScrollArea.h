@@ -5,6 +5,8 @@
 #include <QScrollArea>
 #include <QGridLayout>
 
+#include "../images/ImagesBlur.h"
+
 
 class InnerWidget : public QWidget {
 	Q_OBJECT

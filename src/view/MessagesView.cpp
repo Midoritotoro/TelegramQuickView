@@ -34,7 +34,7 @@ MessagesView::MessagesView(QWidget* parent):
 	resize(style::panelWidth, screenHeight);
 	move(screenWidth - width(), 0);
 
-	auto scrollInner = new InnerWidget();
+	auto scrollInner = new InnerWidget(this);
 	_chatScrollArea = new ContinuousScroll(this);
 
 	scrollInner->setOpacity(0.5);
@@ -48,6 +48,7 @@ MessagesView::MessagesView(QWidget* parent):
 	_chatScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	_chatScrollArea->setWidget(scrollInner);
+	_chatScrollArea->setWidgetResizable(true);
 
 	scrollInner->setMouseTracking(true);
 
@@ -58,7 +59,7 @@ MessagesView::MessagesView(QWidget* parent):
 	grid->setVerticalSpacing(0);
 	grid->setHorizontalSpacing(0);
 
-	grid->addWidget(_chatScrollArea, grid->rowCount(), 0, 1, 1);
+	grid->addWidget(_chatScrollArea, grid->rowCount(), 0);
 
 	auto widgetsList = QWidgetList({ _chatScrollArea->verticalScrollBar() });
 	auto widgetsHider = new WidgetsHider(true, true, widgetsList);
@@ -136,6 +137,7 @@ void MessagesView::paintEvent(QPaintEvent * event) {
 
 	painter.setOpacity(0.5);
 	painter.fillRect(rect(), Qt::black);
+
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	painter.setPen(Qt::white);
