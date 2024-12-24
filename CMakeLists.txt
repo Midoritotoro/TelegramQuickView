@@ -49,6 +49,7 @@ SET(MAIN_SOURCES main.cpp
 	src/Application.h
 
     src/core/concurrent/common/CommonConfig.h
+    src/core/CoreConcurrent.h
 
     src/core/concurrent/common/CommonExceptions.cpp
 
