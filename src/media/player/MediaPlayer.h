@@ -6,6 +6,7 @@
 #include "../../ui/WidgetsHider.h"
 
 #include <QWidget>
+#include <QOpenGLWidget>
 
 
 class MediaPlayer final: public QWidget {
@@ -44,9 +45,12 @@ Q_SIGNALS:
 	void mediaGeometryChanged();
 	void needScrollToMessage();
 protected:
+	//void initializeGL() override;
+	//void paintGL() override;
+
 	void resizeEvent(QResizeEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
-	void mousePressEvent(QMouseEvent* event) override;
+	void mousePressEvent(QMouseEvent* event);
 private:
 	enum class MediaDisplayType {
 		FullScreen,

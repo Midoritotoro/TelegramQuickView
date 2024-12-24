@@ -117,6 +117,8 @@ ScrollArea::ScrollArea(QWidget* parent):
 	setStyleSheet(style::ScrollAreaStyle());
 	setAutoFillBackground(false);
 
+	setContentsMargins(0, 0, 0, 0);
+
 	_scrollLayout->setContentsMargins(10, 5, 10 + verticalScrollBar()->width(), 15);
 	_scrollLayout->setSpacing(15);
 
@@ -248,8 +250,8 @@ void ScrollArea::setOpacity(double opacity) {
 }
 
 void ScrollArea::paintEvent(QPaintEvent* event) {
-	const auto ms = Time::now();
-	const auto timer = gsl::finally([=] { qDebug() << "ScrollArea::paintEvent: " << Time::now() - ms << " ms"; });
+	//const auto ms = Time::now();
+	//const auto timer = gsl::finally([=] { qDebug() << "ScrollArea::paintEvent: " << Time::now() - ms << " ms"; });
 
 	QPainter painter(viewport());
 

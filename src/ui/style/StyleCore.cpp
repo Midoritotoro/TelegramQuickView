@@ -15,6 +15,7 @@
 #include "StyleFont.h"
 
 #include "StyleWidgets.h"
+#include "../images/ImagesBlur.h"
 
 
 namespace style {
@@ -178,8 +179,8 @@ namespace style {
 	}
 
 	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
-		const auto ms = Time::now();
-		const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
+		//const auto ms = Time::now();
+		//const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
 
 		auto size = targetSize;
 		if (size.width() <= 0)
@@ -231,6 +232,7 @@ namespace style {
 			Qt::SmoothTransformation);
 
 		thumbnailImage = style::Opaque(std::move(thumbnailImage));
+		// thumbnailImage = images::Blur(std::move(thumbnailImage), true);
 
 		thumbnail = QPixmap::fromImage(std::move(thumbnailImage), Qt::ColorOnly);
 	
@@ -254,7 +256,8 @@ namespace style {
 				path.moveTo(borderRadius, 0);
 				path.lineTo(widgetSize.width() - borderRadius, 0);
 
-				path.arcTo(widgetSize.width() - 2 * borderRadius, 0, 2 * borderRadius, 2 * borderRadius, 90, -90);
+				path.arcTo(widgetSize.width() - 2 * borderRadius, 0, 
+					2 * borderRadius, 2 * borderRadius, 90, -90);
 				path.lineTo(widgetSize.width(), widgetSize.height());
 
 				path.lineTo(0, widgetSize.height());
@@ -265,16 +268,21 @@ namespace style {
 				break;
 
 			case CornersRoundMode::Bottom:
-				path.moveTo(0, widgetSize.height() - borderRadius);
-				path.lineTo(0, borderRadius);
+				path.moveTo(0, 0);
 
-				path.lineTo(widgetSize.width(), borderRadius);
+				path.lineTo(widgetSize.width(), 0);
 				path.lineTo(widgetSize.width(), widgetSize.height() - borderRadius);
 
-				path.arcTo(widgetSize.width() - 2 * borderRadius, widgetSize.height() - 2 * borderRadius, 2 * borderRadius, 2 * borderRadius, 0, -90);
+				path.arcTo(widgetSize.width() - 2 * borderRadius,
+					widgetSize.height() - 2 * borderRadius,
+					2 * borderRadius, 2 * borderRadius, 0, -90);
+
 				path.lineTo(borderRadius, widgetSize.height());
 
-				path.arcTo(0, widgetSize.height() - 2 * borderRadius, 2 * borderRadius, 2 * borderRadius, 180, -90);
+				path.arcTo(0, widgetSize.height() - 2 * borderRadius,
+					2 * borderRadius, 2 * borderRadius, 180, -90);
+
+				path.lineTo(0, 0);
 
 				break;
 

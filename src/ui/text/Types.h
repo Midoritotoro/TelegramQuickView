@@ -215,8 +215,8 @@ namespace text {
 
 		const style::TextPalette* palette = new style::TextPalette();
 
-		QuotePaintCache* pre = nullptr;
-		QuotePaintCache* blockquote = nullptr;
+		QuotePaintCache* pre = new QuotePaintCache();
+		QuotePaintCache* blockquote = new QuotePaintCache();
 		std::span<SpecialColor> colors = {};
 		Time::time now = 0;
 
@@ -250,10 +250,10 @@ namespace text {
 		int minHeight = 0;
 		int scrollLeft = 0;
 
-		bool blockquote = false;
-		bool collapsed = false;
-		bool expanded = false;
-		bool pre = false;
+		bool blockquote = true;
+		bool collapsed = true;
+		bool expanded = true;
+		bool pre = true;
 	};
 
 	struct QuotesData {

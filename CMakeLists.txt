@@ -27,6 +27,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 			Widgets
 			Multimedia
 			OpenGL
+            OpenGLWidgets
 )
 find_package(Microsoft.GSL CONFIG REQUIRED)
 
@@ -327,6 +328,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 			Qt6::Widgets
 			Qt6::Multimedia
             Qt6::OpenGL
+            Qt6::OpenGLWidgets
             Qt6::WidgetsPrivate
             app::external_ffmpeg
             Microsoft.GSL::GSL

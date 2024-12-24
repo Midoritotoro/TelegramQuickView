@@ -172,6 +172,7 @@ namespace text {
 		painter.setBrush(cache.bg);
 		painter.setClipRect(outline, header, wside - outline, hside - header);
 		painter.drawRoundedRect(0, 0, wside, hside, radius, radius);
+		qDebug() << "ValidateQuotePaintCache fill rect: " << QRect(wside, hside, radius, radius);
 
 		painter.end();
 

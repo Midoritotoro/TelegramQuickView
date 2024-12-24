@@ -22,6 +22,7 @@ FlatLabel::FlatLabel(QWidget* parent) :
 {
 	init();
 
+	setContentsMargins(0, 0, 0, 0);
 	setStyle(style::defaultFlatLabelStyle);
 
 	setSelectable(true);
@@ -214,7 +215,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
 	painter.fillRect(rect(), _st->colorBg);
 
-	painter.setPen(Qt::white);
+	painter.setPen(Qt::white); 
 
 	const auto textWidth = _st->maximumWidth
 		? _st->maximumWidth

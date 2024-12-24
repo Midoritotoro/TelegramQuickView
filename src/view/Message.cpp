@@ -11,7 +11,7 @@ Message::Message(
 	QWidget(parent)
 	, _mediaDisplayMode(MediaDisplayMode::Stack)
 {
-	_messageLayout = new QGridLayout(this);
+	_messageLayout = new QVBoxLayout(this);
 	_textLabel = new FlatLabel(this);
 
 	_messageLayout->setSpacing(0);
@@ -20,6 +20,7 @@ Message::Message(
 	setContentsMargins(0, 0, 0, 0);
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	setMouseTracking(true);
 }
 
 void Message::setText(const QString& text) {
@@ -28,11 +29,10 @@ void Message::setText(const QString& text) {
 
 	_textLabel->setText(text);
 
-	if (_messageLayout->rowCount() > 1) // У сообщения есть вложение
-		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
-	_messageLayout->addWidget(_textLabel, _messageLayout->rowCount(), 0, 1, 1, Qt::AlignBottom);
+	//if (_messageLayout->count() > 0) // У сообщения есть вложение
+	//	_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
 
-	//_recountSizeCallback(recountedSize);
+	_messageLayout->addWidget(_textLabel, Qt::AlignLeft | Qt::AlignTop);
 }
 
 QString Message::text() const noexcept {
@@ -55,8 +55,8 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 			const auto st = new style::FlatLabel(style);
 			_textLabel->setStyle(st);
 			
-			if (_messageLayout->rowCount() <= 1)
-				_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+			if (_messageLayout->count() < 1)
+				_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 
 			_attachments.append(messageAttachment);
 		}
@@ -73,7 +73,7 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 			const auto st = new style::FlatLabel(style);
 			_textLabel->setStyle(st);
 
-			_messageLayout->addWidget(messageAttachment, _messageLayout->rowCount(), 0, 1, 1);
+			_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 			_attachments.append(messageAttachment);
 		}
 		break;
@@ -99,14 +99,6 @@ void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {
 
 Message::MediaDisplayMode Message::mediaDisplayMode() const noexcept {
 	return _mediaDisplayMode; 
-}
-
-void Message::setRecountSizeCallback(Fn<void(const QSize&)> callback) {
-	_recountSizeCallback = std::move(callback);
-}
-
-Fn<void(const QSize&)> Message::recountSizeCallback() const noexcept {
-	return _recountSizeCallback;
 }
 
 int Message::indexOfAttachment(not_null<MessageAttachment*> messageAttachment) const noexcept {

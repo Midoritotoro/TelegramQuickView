@@ -87,17 +87,7 @@ void MessagesView::makeMessage(
 	auto ms = Time::now();
 	const auto timer = gsl::finally([&ms] { qDebug() << "TelegramPostQuickView::makeMessage: " << Time::now() - ms << " ms";  });
 
-	auto message = new Message();
-
-	message->setRecountSizeCallback([this](const QSize& size) {
-		if (size.isNull() || _chatScrollArea->widget() == nullptr)
-			return;
-
-		const auto innerSize = _chatScrollArea->widget()->size();
-
-		_chatScrollArea->widget()->resize(innerSize.width(),
-			innerSize.height() + size.height());
-		});
+	auto message = new Message(this);
 
 	message->setMediaDisplayMode(_displayMode);
 	message->setAttachments(attachmentsPaths);

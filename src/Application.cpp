@@ -27,7 +27,7 @@ Application::Application(int& argc, char** argv) :
 
     _messagesView->show();
 
-    auto list = QStringList({ videoPath });
+    auto list = QStringList({ videoPath, videoPath, videoPath, videoPath, videoPath, videoPath });
     _messagesView->makeMessage(text, list);
     
 }

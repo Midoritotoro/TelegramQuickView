@@ -59,11 +59,13 @@ MessageAttachment::MessageAttachment(
 		countAttachmentSize(_size, style::maximumMessageWidth,
 			style::maximumMessageWidth)
 	);
+
+	qDebug() << "MessageAttachment::MessageAttachment";
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
-	const auto ms = Time::now();
-	const auto timer = gsl::finally([=] { qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms"; });
+	//const auto ms = Time::now();
+	//const auto timer = gsl::finally([=] { qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms"; });
 
 	const auto _preview = style::GenerateThumbnail(_attachmentPath, size());
 
@@ -73,9 +75,10 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
-	qDebug() << "_parentMessage->attachmentsLength(): " << _parentMessage->attachmentsLength();
-	qDebug() << "_parentMessage->hasText(): " << _parentMessage->hasText();
-	qDebug() << "_parentMessage->indexOfAttachment(this): " << _parentMessage->indexOfAttachment(this);
+	//qDebug() << "_parentMessage->attachmentsLength(): " << _parentMessage->attachmentsLength();
+	//qDebug() << "_parentMessage->hasText(): " << _parentMessage->hasText();
+	//qDebug() << "_parentMessage->indexOfAttachment(this): " << _parentMessage->indexOfAttachment(this);
+	//qDebug() << "size(): " << size() << "_preview.size()" << _preview.size();
 
 	switch (_parentMessage->mediaDisplayMode()) {
 		case Message::MediaDisplayMode::Stack:

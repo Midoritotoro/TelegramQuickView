@@ -297,8 +297,8 @@ void MediaPlayer::setNormal() {
 }
 
 QImage MediaPlayer::prepareImage(const QImage& sourceImage) {
-	const auto ms = Time::now();
-	const auto timeCheck = gsl::finally([&ms] { qDebug() << "MediaPlayer::prepareImage: " << Time::now() - ms << " ms"; });
+	//const auto ms = Time::now();
+	//const auto timeCheck = gsl::finally([&ms] { qDebug() << "MediaPlayer::prepareImage: " << Time::now() - ms << " ms"; });
 
 	auto resolveSize = [=](const QSize& size) -> QSize {
 		const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
