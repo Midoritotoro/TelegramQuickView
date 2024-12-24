@@ -16,6 +16,7 @@
 #include "../style/StyleTypes.h"
 
 #include <QPainterPath>
+#include "../../core/CoreConcurrent.h"
 
 
 FlatLabel::FlatLabel(QWidget* parent) :
@@ -471,10 +472,12 @@ text::TextState FlatLabel::dragActionFinish(const QPoint& p, Qt::MouseButton but
 	_selectionType = text::TextSelection::Type::Letters;
 
 	if (activated) {
-		const auto guard = window();
-		if (!_clickHandlerFilter
-			|| _clickHandlerFilter(activated, button))
-			ActivateClickHandler(guard, activated, button);
+	//	concurrent::on_main(this, [=] {
+			const auto guard = window();
+			if (!_clickHandlerFilter
+				|| _clickHandlerFilter(activated, button))
+				ActivateClickHandler(guard, activated, button);
+		//});
 	}
 
 	if (QGuiApplication::clipboard()->supportsSelection()
@@ -770,16 +773,16 @@ int FlatLabel::countTextWidth() const noexcept {
 		&& _allowedWidth < _text.maxWidth())
 	{
 		auto large = _allowedWidth;
-		auto small = _allowedWidth / 2;
+		auto _small = _allowedWidth / 2;
 
 		const auto largeHeight = _text.countHeight(large, _breakEverywhere);
 
-		while (large - small > 1) {
-			const auto middle = (large + small) / 2;
+		while (large - _small > 1) {
+			const auto middle = (large + _small) / 2;
 
 			largeHeight == _text.countHeight(middle, _breakEverywhere)
 				? large = middle
-				: small = middle;
+				: _small = middle;
 		}
 
 		return large;

@@ -3,7 +3,10 @@
 #include "concurrent/common/CommonConfig.h"
 
 #include "concurrent/common/CommonQueue.h"
-#include "concurrent/common/CommonSemaphore.h"
+#include "concurrent/winapi/WinapiSemaphore.h"
+
+#include "concurrent/common/CommonOnMainGuarded.h"
+
 
 #if defined USE_WINAPI
 #include "concurrent/winapi/WinapiAsync.h"

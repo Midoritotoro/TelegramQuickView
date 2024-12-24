@@ -84,6 +84,8 @@ namespace style {
 		const QSize& second,
 		int maxDifference);
 
+	[[nodiscard]] bool FindPreviewInCache(const QString& path);
+
 	[[nodiscard]] QPixmap MediaPreview(const QString& path);
 	[[nodiscard]] QPixmap GenerateThumbnail(
 		const QString& path, 

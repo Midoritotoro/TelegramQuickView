@@ -11,7 +11,7 @@
 
 namespace concurrent::details {
 
-	extern queue* MainQueue;
+	extern concurrent::queue* MainQueue;
 	extern std::atomic<int> MainQueueCounter;
 
 	class main_queue_pointer {
@@ -20,13 +20,13 @@ namespace concurrent::details {
 			grab();
 		}
 
-		void create(main_queue_processor processor);
+		void create(concurrent::main_queue_processor processor);
 
 		explicit operator bool() const {
 			return _pointer != nullptr;
 		}
 
-		queue* operator->() const {
+		concurrent::queue* operator->() const {
 			return _pointer;
 		}
 
@@ -38,7 +38,7 @@ namespace concurrent::details {
 		void grab();
 		void ungrab();
 
-		queue* _pointer = nullptr;
+		concurrent::queue* _pointer = nullptr;
 
 	};
 
@@ -54,16 +54,14 @@ namespace concurrent {
 
 	template <typename Callable>
 	inline void on_main(Callable&& callable) {
-		if (const auto main = details::main_queue_pointer()) {
+		if (const auto main = details::main_queue_pointer())
 			main->async(std::forward<Callable>(callable));
-		}
 	}
 
 	template <typename Callable>
 	inline void on_main_sync(Callable&& callable) {
-		if (const auto main = details::main_queue_pointer()) {
+		if (const auto main = details::main_queue_pointer())
 			main->sync(std::forward<Callable>(callable));
-		}
 	}
 
 } // namespace concurrent

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "CommonConfig.h"
+#include "CommonGuards.h"
+
+#include "CommonOnMain.h"
 
 #include <memory>
 #include <type_traits>

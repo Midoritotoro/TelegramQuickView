@@ -198,6 +198,11 @@ namespace style {
 		return (widthDifference + heightDifference) <= maxDifference;
 	}
 
+	bool FindPreviewInCache(const QString& path) {
+		auto temp = QPixmap();
+		return QPixmapCache::find(path, &temp);
+	}
+
 	QPixmap MediaPreview(const QString& path) {
 		auto pixmap = QPixmap();
 

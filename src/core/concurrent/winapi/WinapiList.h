@@ -31,11 +31,11 @@ public:
 private:
 #if defined WINAPI_X64
 	static constexpr auto kLockFreeAlignment = 16;
-#elif defined WINAPI_X86 // CRL_WINAPI_X64
+#elif defined WINAPI_X86 // WINAPI_X64
 	static constexpr auto kLockFreeAlignment = 8;
 #else // CRL_WINAPI_X86
 #error "Configuration is not supported."
-#endif // !CRL_WINAPI_X86 && !CRL_WINAPI_X64
+#endif // !WINAPI_X86 && !WINAPI_X64
 
 	// Hide WinAPI SLIST_HEADER
 	struct alignas(kLockFreeAlignment) lock_free_list {

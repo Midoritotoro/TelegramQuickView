@@ -11,7 +11,11 @@
 #include <QPaintEvent>
 
 #include "../ui/style/StyleWidgets.h"
+#include "../core/CoreConcurrent.h"
 
+#ifdef min
+#undef min
+#endif min
 
 namespace {
 	[[nodiscard]] QSize countAttachmentSize(
@@ -52,14 +56,17 @@ MessageAttachment::MessageAttachment(
 
 	setCursor(Qt::PointingHandCursor);
 
-	const auto imageSize = style::MediaPreview(_attachmentPath).size();
+	concurrent::on_main([=] {
+		const auto imageSize = style::MediaPreview(_attachmentPath).size();
 
-	setFixedSize(
-		countAttachmentSize(style::getMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
-			style::maximumMessageWidth, style::maximumMessageWidth)
-	);
+		setFixedSize(
+			countAttachmentSize(style::getMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
+				style::maximumMessageWidth, style::maximumMessageWidth)
+		);
 
-	style::GenerateThumbnail(_attachmentPath, size());
+		style::GenerateThumbnail(_attachmentPath, size());
+		//update();
+	});
 }
 
 QSize MessageAttachment::sizeHint() const {
@@ -76,6 +83,8 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	//const auto timer = gsl::finally([=] { /*qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms";*/ time += Time::now() - ms; qDebug() <<
 	//	"totaltime: " << time;  });
 	//
+	if (style::FindPreviewInCache(_attachmentPath) == false)
+		return;
 
 	const auto _preview = style::GenerateThumbnail(_attachmentPath, size());
 

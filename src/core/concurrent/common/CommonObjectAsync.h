@@ -108,6 +108,7 @@ public:
 			});
 		};
 	}
+
 private:
 	std::weak_ptr<my_data> _weak;
 

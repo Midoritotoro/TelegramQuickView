@@ -3,6 +3,7 @@
 #include "text/TextEntities.h"
 
 #include <QPointer>
+#include "../core/CoreConcurrent.h"
 
 
 namespace {
@@ -148,12 +149,16 @@ void ActivateClickHandler(
 	ClickHandlerPtr handler,
 	ClickContext context) 
 {
+	//concurrent::on_main(guard, [=, weak = std::weak_ptr<ClickHandler>(handler)] {
+		//if (const auto strong = weak.lock())
 	handler->onClick(context);
+	//});
 }
 
 void ActivateClickHandler(
 	not_null<QWidget*> guard,
 	ClickHandlerPtr handler,
-	Qt::MouseButton button) {
+	Qt::MouseButton button) 
+{
 	ActivateClickHandler(guard, handler, ClickContext{ button });
 }

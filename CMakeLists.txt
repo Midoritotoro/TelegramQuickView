@@ -48,8 +48,8 @@ SET(MAIN_SOURCES main.cpp
 	src/Application.cpp
 	src/Application.h
 
-    src/core/concurrent/common/CommonConfig.h
     src/core/CoreConcurrent.h
+    src/core/concurrent/common/CommonConfig.h
 
     src/core/concurrent/common/CommonExceptions.cpp
 
@@ -64,8 +64,6 @@ SET(MAIN_SOURCES main.cpp
 
     src/core/concurrent/common/CommonQueue.cpp
     src/core/concurrent/common/CommonQueue.h
-
-    src/core/concurrent/common/CommonSemaphore.h
 
     src/core/concurrent/common/CommonSync.h
 
