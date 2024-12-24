@@ -60,18 +60,34 @@ namespace style {
 	[[nodiscard]] int Scale();
 	void SetScale(int scale);
 
-	[[nodiscard]] QSize TextSize(const QString& text, const QFontMetrics& metrics);
-	[[nodiscard]] QSize TextSize(const QString& text, const QFont& font);
+	[[nodiscard]] QSize TextSize(
+		const QString& text,
+		const QFontMetrics& metrics);
+	[[nodiscard]] QSize TextSize(
+		const QString& text,
+		const QFont& font);
 
 	[[nodiscard]] int FontHeight(const QFont& font);
 
 	[[nodiscard]] QString SliderStyle();
 	[[nodiscard]] QString ScrollAreaStyle();
 
-	[[nodiscard]] QImage Opaque(QImage&& image);
-	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(const QSize& imageSize, const int targetWidth);
+	[[nodiscard]] QPixmap PixmapFast(QImage&& image);
 
-	[[nodiscard]] QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize = QSize());
+	[[nodiscard]] QImage Opaque(QImage&& image);
+	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(
+		const QSize& imageSize,
+		const int targetWidth);
+
+	[[nodiscard]] bool PartiallyEqual(
+		const QSize& first,
+		const QSize& second,
+		int maxDifference);
+
+	[[nodiscard]] QPixmap MediaPreview(const QString& path);
+	[[nodiscard]] QPixmap GenerateThumbnail(
+		const QString& path, 
+		const QSize& targetSize = QSize());
 
 	void RoundCorners(
 		QPainter& painter,

@@ -52,20 +52,30 @@ MessageAttachment::MessageAttachment(
 
 	setCursor(Qt::PointingHandCursor);
 
-	const auto thumbnail = style::GenerateThumbnail(_attachmentPath);
-	const auto _size = thumbnail.size();
+	const auto imageSize = style::MediaPreview(_attachmentPath).size();
 
 	setFixedSize(
-		countAttachmentSize(_size, style::maximumMessageWidth,
-			style::maximumMessageWidth)
+		countAttachmentSize(style::getMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
+			style::maximumMessageWidth, style::maximumMessageWidth)
 	);
 
-	qDebug() << "MessageAttachment::MessageAttachment";
+	style::GenerateThumbnail(_attachmentPath, size());
+}
+
+QSize MessageAttachment::sizeHint() const {
+	return size();
+}
+
+QSize MessageAttachment::minimumSizeHint() const {
+	return size();
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
+	//static int time;
 	//const auto ms = Time::now();
-	//const auto timer = gsl::finally([=] { qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms"; });
+	//const auto timer = gsl::finally([=] { /*qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms";*/ time += Time::now() - ms; qDebug() <<
+	//	"totaltime: " << time;  });
+	//
 
 	const auto _preview = style::GenerateThumbnail(_attachmentPath, size());
 
@@ -74,11 +84,6 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
-
-	//qDebug() << "_parentMessage->attachmentsLength(): " << _parentMessage->attachmentsLength();
-	//qDebug() << "_parentMessage->hasText(): " << _parentMessage->hasText();
-	//qDebug() << "_parentMessage->indexOfAttachment(this): " << _parentMessage->indexOfAttachment(this);
-	//qDebug() << "size(): " << size() << "_preview.size()" << _preview.size();
 
 	switch (_parentMessage->mediaDisplayMode()) {
 		case Message::MediaDisplayMode::Stack:

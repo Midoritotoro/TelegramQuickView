@@ -6,7 +6,10 @@ if (POLICY CMP0141)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOMOC ON)
+
 project("TelegramQuickView" LANGUAGES CXX)
 
 
@@ -44,6 +47,42 @@ SET(MAIN_SOURCES main.cpp
 
 	src/Application.cpp
 	src/Application.h
+
+    src/core/concurrent/common/CommonConfig.h
+
+    src/core/concurrent/common/CommonExceptions.cpp
+
+    src/core/concurrent/common/CommonGuards.h
+
+    src/core/concurrent/common/CommonObjectAsync.h
+
+    src/core/concurrent/common/CommonOnMain.cpp
+    src/core/concurrent/common/CommonOnMain.h
+
+    src/core/concurrent/common/CommonOnMainGuarded.h
+
+    src/core/concurrent/common/CommonQueue.cpp
+    src/core/concurrent/common/CommonQueue.h
+
+    src/core/concurrent/common/CommonSemaphore.h
+
+    src/core/concurrent/common/CommonSync.h
+
+    src/core/concurrent/common/CommonUtils.h
+
+    src/core/concurrent/winapi/WinapiAsync.cpp
+    src/core/concurrent/winapi/WinapiAsync.h
+
+    src/core/concurrent/winapi/WinapiDll.h
+
+    src/core/concurrent/winapi/WinapiExceptions.cpp
+    src/core/concurrent/winapi/WinapiExceptions.h
+
+    src/core/concurrent/winapi/WinapiList.cpp
+    src/core/concurrent/winapi/WinapiList.h
+
+    src/core/concurrent/winapi/WinapiSemaphore.cpp
+    src/core/concurrent/winapi/WinapiSemaphore.h
 
 	src/core/AutoRunUtils.cpp
 	src/core/AutoRunUtils.h
@@ -153,14 +192,6 @@ SET(MAIN_SOURCES main.cpp
 	src/ui/widgets/ContinuousScroll.cpp
 	src/ui/widgets/ContinuousScroll.h
 
-	src/ui/layouts/MosaicLayout.h
-
-    src/ui/layouts/AbstractMosaicLayout.cpp
-	src/ui/layouts/AbstractMosaicLayout.h
-
-    src/ui/layouts/AbstractLayoutItem.cpp
-    src/ui/layouts/AbstractLayoutItem.h
-
     src/ui/widgets/FlatLabel.cpp
 	src/ui/widgets/FlatLabel.h
 
@@ -222,7 +253,6 @@ SET(MAIN_SOURCES main.cpp
     src/ui/effects/shaders/dual_kawase_up.frag
     src/ui/effects/shaders/simple.vert
 
-
     src/ui/gl/GlImage.cpp
     src/ui/gl/GlImage.h
 
@@ -246,30 +276,44 @@ SET(MAIN_SOURCES main.cpp
 	# src/parser/TelegramParser.h
 )
 
-qt_add_resources(${PROJECT_NAME}
-    PREFIX "/assets/images"
-    FILES 
-    arrow_right.png
-    auth.png
-    buttton_close.png  
-    button_minimize.png
-    main_screen.jpg
-    play.png
-    player_fullscreen.png
-    player_minimize.png
-    repeat.png
-    settings.png
-    shadow_close.png
-    shadow_minimize.png
-    speaker_white_off.png
-    speaker_white_on.png
-    speaker_white_small_on.png
-    speed_button.png
-    stop.png
-    black.jpg
+
+set(IMAGE_RESOURCES_DIR "assets/images")
+set(CSS_RESOURCES_DIR "src/css")
+
+set(IMAGE_RESOURCES
+    "${IMAGE_RESOURCES_DIR}/arrow_right.png"
+    "${IMAGE_RESOURCES_DIR}/auth.png"
+    "${IMAGE_RESOURCES_DIR}/button_close.png"
+    "${IMAGE_RESOURCES_DIR}/button_minimize.png"
+    "${IMAGE_RESOURCES_DIR}/main_screen.jpg"
+    "${IMAGE_RESOURCES_DIR}/play.png"
+    "${IMAGE_RESOURCES_DIR}/player_fullscreen.png"
+    "${IMAGE_RESOURCES_DIR}/player_minimize.png"
+    "${IMAGE_RESOURCES_DIR}/repeat.png"
+    "${IMAGE_RESOURCES_DIR}/settings.png"
+    "${IMAGE_RESOURCES_DIR}/shadow_close.png"
+    "${IMAGE_RESOURCES_DIR}/shadow_minimize.png"
+    "${IMAGE_RESOURCES_DIR}/speaker_white_off.png"
+    "${IMAGE_RESOURCES_DIR}/speaker_white_on.png"
+    "${IMAGE_RESOURCES_DIR}/speaker_white_small_on.png"
+    "${IMAGE_RESOURCES_DIR}/speed_button.png"
+    "${IMAGE_RESOURCES_DIR}/stop.png"
+    "${IMAGE_RESOURCES_DIR}/black.jpg"
 )
 
-add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
+set(CSS_RESOURCES
+    "${CSS_RESOURCES_DIR}/ScrollAreaStyle.css"
+    "${CSS_RESOURCES_DIR}/SliderStyle.css"
+)
+
+qt_add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
+
+
+qt_add_resources(${PROJECT_NAME}
+    PREFIX "/assets/images" "/src/css"
+    FILES ${IMAGE_RESOURCES} ${CSS_RESOURCES}
+)
+
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
    set_target_properties(${PROJECT_NAME} PROPERTIES

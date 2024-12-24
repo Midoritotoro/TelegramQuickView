@@ -15,6 +15,8 @@
 #include "../text/TextUtility.h"
 #include "../style/StyleTypes.h"
 
+#include <QPainterPath>
+
 
 FlatLabel::FlatLabel(QWidget* parent) :
 	QWidget(parent)
@@ -213,7 +215,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	painter.setOpacity(_opacity);
 
 	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
-	painter.fillRect(rect(), _st->colorBg);
+	painter.fillRect(QRect(0, 0, _st->maximumWidth, height()), _st->colorBg);
 
 	painter.setPen(Qt::white); 
 
@@ -267,8 +269,6 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 		.elisionHeight = elisionHeight,
 		.elisionBreakEverywhere = renderElided && _breakEverywhere,
 	});
-
-	refreshSize();
 }
 
 void FlatLabel::mouseMoveEvent(QMouseEvent* event) {
@@ -828,6 +828,6 @@ void FlatLabel::refreshCursor(bool uponSymbol) {
 
 void FlatLabel::textUpdated() {
 	refreshSize();
-	setMouseTracking(_selectable || hasLinks());
 	update();
+	setMouseTracking(_selectable || hasLinks());
 }

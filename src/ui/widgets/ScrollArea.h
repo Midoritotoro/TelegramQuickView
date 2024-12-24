@@ -3,7 +3,7 @@
 #include "../../core/Types.h"
 
 #include <QScrollArea>
-#include <QGridLayout>
+#include <QVBoxLayout>
 
 #include "../images/ImagesBlur.h"
 
@@ -46,6 +46,8 @@ public:
 	void disableScroll(bool dis);
 
 	void addItem(QWidget* item, Qt::Alignment align = Qt::AlignLeft | Qt::AlignTop);
+
+	void setWidget(InnerWidget* widget);
 	[[nodiscard]] InnerWidget* widget() const noexcept;
 protected:
 	bool viewportEvent(QEvent* event) override;
@@ -53,10 +55,11 @@ protected:
 
 	void paintEvent(QPaintEvent* event) override;
 private:
+	[[nodiscard]] int itemsHeight() const;
 	bool _disabled = false;
 
 	int _verticalValue;
 	double _opacity;
 	
-	QGridLayout* _scrollLayout = nullptr;
+	QVBoxLayout* _scrollLayout = nullptr;
 };

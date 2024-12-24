@@ -135,18 +135,18 @@ void MediaViewer::updateMessageTextView() {
 	if (!_currentMessage)
 		return;
 
-	//if (!_currentMessage->hasText()) {
-	//	if (!_messageTextView->isHidden()) {
-	//		_messageTextView->hide();
-	//		_widgetsHider->removeWidget(_messageTextView);
-	//	}
-	//	return;
-	//}
+	if (!_currentMessage->hasText()) {
+		if (!_messageTextView->isHidden()) {
+			_messageTextView->hide();
+			_widgetsHider->removeWidget(_messageTextView);
+		}
+		return;
+	}
 
-	//if (_messageTextView->isHidden())
-	//	_messageTextView->show();
+	if (_messageTextView->isHidden())
+		_messageTextView->show();
 
-	//_widgetsHider->addWidget(_messageTextView);
+	_widgetsHider->addWidget(_messageTextView);
 	_messageTextView->setText(_currentMessage->text());
 
 	auto yCoordinate = 0;
@@ -174,7 +174,7 @@ void MediaViewer::updateMessageTextView() {
 			- messageTextViewBottomIndent * 2. - videoControlsHeight;
 	}
 
-	//_messageTextView->hide();
+	_messageTextView->hide();
 	_messageTextView->move((width() - _messageTextView->width()) / 2., yCoordinate);
 }
 

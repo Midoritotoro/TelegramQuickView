@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../core/Types.h"
-#include "../ui/layouts/MosaicLayout.h"
 
 #include <QVBoxLayout>
 

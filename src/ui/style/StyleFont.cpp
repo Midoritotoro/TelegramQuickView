@@ -511,7 +511,7 @@ namespace style::internal {
 	{
 		const auto key = FontKey(size, flags, family);
 		auto i = FontsByKey.find(key);
-		qDebug() << "(i == end(FontsByKey)): " << (i == end(FontsByKey));
+
 		if (i == end(FontsByKey)) {
 			i = FontsByKey.emplace(
 				key,

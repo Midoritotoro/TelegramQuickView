@@ -17,6 +17,7 @@
 #include "StyleWidgets.h"
 #include "../images/ImagesBlur.h"
 
+#include "../../core/CoreUtility.h"
 
 namespace style {
 
@@ -28,6 +29,8 @@ namespace style {
 		QString _scrollAreaStyle = "";
 
 		bool rightToLeft = false;
+
+		inline constexpr auto kPreviewPrefix = "_p";
 
 		struct Shifted {
 			Shifted() = default;
@@ -66,7 +69,6 @@ namespace style {
 		}
 
 		Shifted shifted(QColor color) {
-			// Make it premultiplied.
 			auto alpha = static_cast<uint64>((color.alpha() & 0xFF) + 1);
 			auto components = static_cast<uint64>(color.blue() & 0xFF)
 				| (static_cast<uint64>(color.green() & 0xFF) << 16)
@@ -76,11 +78,8 @@ namespace style {
 		}
 
 		void loadStyles() {
-			const auto currentPath = QCoreApplication::applicationDirPath();
-			const auto cssDir = QDir(currentPath + "/../../src/css");
-
-			const auto sliderStyle = cssDir.absolutePath() + "/SliderStyle.css";
-			const auto scrollAreaStyle = cssDir.absolutePath() + "/ScrollAreaStyle.css";
+			const auto sliderStyle = ":/src/css/SliderStyle.css";
+			const auto scrollAreaStyle = ":/src/css/ScrollAreaStyle.css";
 
 			auto file = QFile(sliderStyle);
 		
@@ -178,38 +177,51 @@ namespace style {
 			: QSize(style::maximumMessageWidth, 100);
 	}
 
-	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
-		//const auto ms = Time::now();
-		//const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
+	QPixmap PixmapFast(QImage&& image) {
+		Expects(image.format() == QImage::Format_ARGB32_Premultiplied
+			|| image.format() == QImage::Format_RGB32);
 
-		auto size = targetSize;
-		if (size.width() <= 0)
-			size.setWidth(style::maximumMessageWidth);
+		return QPixmap::fromImage(std::move(image), Qt::NoFormatConversion);
+	}
 
-		auto thumbnail = QPixmap();
-		const auto key = path;
+	bool PartiallyEqual(
+		const QSize& first,
+		const QSize& second,
+		int maxDifference)
+	{
+		const auto widthDifference = qMax(first.width(), second.width())
+			- qMin(first.width(), second.width());
 
-		if (QPixmapCache::find(key, &thumbnail))
-			return thumbnail;
+		const auto heightDifference = qMax(first.height(), second.height())
+			- qMin(first.height(), second.height());
+
+		return (widthDifference + heightDifference) <= maxDifference;
+	}
+
+	QPixmap MediaPreview(const QString& path) {
+		auto pixmap = QPixmap();
+
+		if (QPixmapCache::find(kPreviewPrefix + path, &pixmap))
+			return pixmap;
 
 		auto file = QFile(path);
 		if (!file.open(QIODevice::ReadOnly))
 			return QPixmap();
 
-		auto mediaData = file.readAll();
+		const auto mediaData = file.readAll();
 		if (mediaData.isNull())
 			return QPixmap();
 
-		auto thumbnailImage = QImage();
+		auto preview = QPixmap();
 
 		switch (MediaPlayer::detectMediaType(path)) {
 			case MediaPlayer::MediaType::Image:
-				thumbnailImage.loadFromData(mediaData);
+				preview.loadFromData(mediaData);
 				break;
 
 			case MediaPlayer::MediaType::Video:
-				thumbnailImage = FFmpeg::FrameGenerator(mediaData)
-					.renderNext(QSize(), Qt::IgnoreAspectRatio, false).image;
+				preview = PixmapFast(std::move(FFmpeg::FrameGenerator(mediaData)
+					.renderNext(QSize(), Qt::IgnoreAspectRatio, false).image));
 				break;
 
 			case MediaPlayer::MediaType::Audio:
@@ -218,6 +230,36 @@ namespace style {
 			case MediaPlayer::MediaType::Unknown:
 				return QPixmap();
 		}
+
+		if (QPixmapCache::cacheLimit() > 0)
+			QPixmapCache::insert(kPreviewPrefix + path, preview);
+
+		return preview;
+	}
+
+	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
+		const auto ms = Time::now();
+		const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
+
+		auto size = targetSize;
+		if (size.width() <= 0)
+			size.setWidth(style::maximumMessageWidth);
+
+		auto thumbnail = QPixmap();
+		auto mediaPreview = QPixmap();
+
+		const auto key = path;
+
+		if (QPixmapCache::find(key, &thumbnail) && PartiallyEqual(thumbnail.size(), targetSize, 1)) {
+			if (QPixmapCache::find(kPreviewPrefix + key, &mediaPreview))
+				QPixmapCache::remove(kPreviewPrefix + key);
+
+			return thumbnail;
+		}
+
+		qDebug() << thumbnail.size() << targetSize;
+
+		auto thumbnailImage = MediaPreview(path).toImage();
 
 		if (thumbnailImage.isNull())
 			return QPixmap();
@@ -268,22 +310,21 @@ namespace style {
 				break;
 
 			case CornersRoundMode::Bottom:
-				path.moveTo(0, 0);
+				path.moveTo(borderRadius, 0);
 
-				path.lineTo(widgetSize.width(), 0);
+				path.lineTo(widgetSize.width() - borderRadius, 0);
+				path.quadTo(widgetSize.width(), 0, widgetSize.width(), borderRadius);
+
 				path.lineTo(widgetSize.width(), widgetSize.height() - borderRadius);
-
-				path.arcTo(widgetSize.width() - 2 * borderRadius,
-					widgetSize.height() - 2 * borderRadius,
-					2 * borderRadius, 2 * borderRadius, 0, -90);
+				path.quadTo(widgetSize.width(), widgetSize.height(),
+					widgetSize.width() - borderRadius, widgetSize.height());
 
 				path.lineTo(borderRadius, widgetSize.height());
+				path.quadTo(0, widgetSize.height(), 0,
+					widgetSize.height() - borderRadius);
 
-				path.arcTo(0, widgetSize.height() - 2 * borderRadius,
-					2 * borderRadius, 2 * borderRadius, 180, -90);
-
-				path.lineTo(0, 0);
-
+				path.lineTo(0, borderRadius);
+				path.quadTo(0, 0, borderRadius, 0);
 				break;
 
 			case CornersRoundMode::All:
@@ -341,6 +382,7 @@ namespace style {
 		QImage image,
 		const QSize& _outer)
 	{
+		qDebug() << "Style::prepare: ";
 		const auto imageWidth = image.width();
 		const auto imageHeight = image.height();
 

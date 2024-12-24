@@ -20,6 +20,9 @@ public:
 		Unknown
 	};
 
+	[[nodiscard]] QSize sizeHint() const override;
+	[[nodiscard]] QSize minimumSizeHint() const override;
+
 	MessageAttachment(
 		not_null<Message*> parentMessage,
 		const QString& attachmentPath);

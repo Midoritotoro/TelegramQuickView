@@ -10,7 +10,11 @@
 
 #include <Windows.h>
 #include <QWindow>
+
 #include <qpa/qplatformnativeinterface.h>
+
+#include <cmath>
+
 
 //namespace {
 //	void SetWindowBlur(HWND hWnd)
@@ -88,7 +92,7 @@ void InnerWidget::paintEvent(QPaintEvent* event) {
 
 	painter.setOpacity(_opacity);
 
-	painter.setPen(Qt::transparent);
+	painter.setPen(Qt::NoPen);
 	painter.setBrush(_backgroundColor);
 
 	if (const auto fill = rect().intersected(event->rect()); fill.isNull() == false)
@@ -97,8 +101,7 @@ void InnerWidget::paintEvent(QPaintEvent* event) {
 
 
 ScrollArea::ScrollArea(QWidget* parent):
-	QScrollArea(parent),
-	_scrollLayout(new QGridLayout(this))
+	QScrollArea(parent)
 {
 	setLayoutDirection(Qt::LeftToRight);
 	setOpacity(1);
@@ -118,9 +121,7 @@ ScrollArea::ScrollArea(QWidget* parent):
 	setAutoFillBackground(false);
 
 	setContentsMargins(0, 0, 0, 0);
-
-	_scrollLayout->setContentsMargins(10, 5, 10 + verticalScrollBar()->width(), 15);
-	_scrollLayout->setSpacing(15);
+	setWidgetResizable(true);
 
 	_verticalValue = verticalScrollBar()->value();
 }
@@ -232,12 +233,30 @@ void ScrollArea::disableScroll(bool dis) {
 }
 
 void ScrollArea::addItem(QWidget* item, Qt::Alignment align) {
-	_scrollLayout->addWidget(item, _scrollLayout->rowCount(), 0, align);
+	const auto itemHeight = 
+		item->sizeHint().height()
+		+ _scrollLayout->contentsMargins().bottom();
 
-	QScrollArea::widget()->resize(
-		QScrollArea::widget()->width(),
-		QScrollArea::widget()->height() + item->sizeHint().height()
-		+ contentsMargins().bottom());
+	const auto fullHeight =
+		_scrollLayout->count() > 0
+		? widget()->height()
+		  + itemHeight
+		: itemHeight;
+
+	widget()->setFixedSize(
+		widget()->width(),
+		qMax(widget()->minimumHeight(), qMin(fullHeight, itemsHeight())));
+
+	_scrollLayout->addWidget(item, 0, align);
+}
+
+void ScrollArea::setWidget(InnerWidget* widget) {
+	QScrollArea::setWidget(widget);
+
+	_scrollLayout = new QVBoxLayout(widget);
+
+	_scrollLayout->setContentsMargins(10, 5, 10 + verticalScrollBar()->width(), 15);
+	_scrollLayout->setSpacing(15);
 }
 
 InnerWidget* ScrollArea::widget() const noexcept {
@@ -250,16 +269,26 @@ void ScrollArea::setOpacity(double opacity) {
 }
 
 void ScrollArea::paintEvent(QPaintEvent* event) {
-	//const auto ms = Time::now();
-	//const auto timer = gsl::finally([=] { qDebug() << "ScrollArea::paintEvent: " << Time::now() - ms << " ms"; });
-
-	QPainter painter(viewport());
+	/*QPainter painter(viewport());
 
 	painter.setPen(Qt::black);
 	painter.setBrush(Qt::black);
 	
 	painter.setOpacity(_opacity);
-	painter.drawRect(rect());
+	painter.drawRect(rect());*/
+}
+
+int ScrollArea::itemsHeight() const {
+	if (_scrollLayout->count() <= 0)
+		return 0;
+
+	auto height = 0;
+
+	for (auto index = 0; index < _scrollLayout->count(); ++index)
+		height += _scrollLayout->itemAt(index)->sizeHint().height()
+			+ _scrollLayout->contentsMargins().bottom();
+
+	return height;
 }
 
 bool ScrollArea::focusNextPrevChild(bool next) {
