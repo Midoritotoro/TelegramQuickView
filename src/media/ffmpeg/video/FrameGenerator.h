@@ -5,6 +5,7 @@
 
 
 namespace FFmpeg {
+class ThumbnailGenerator;
 
 class FrameGenerator {
 public:
@@ -15,6 +16,7 @@ public:
 	};
 
 	FrameGenerator(const QByteArray& bytes);
+	FrameGenerator(const QString& path);
 
 	[[nodiscard]] Frame renderNext(
 		QSize size,
@@ -35,8 +37,6 @@ public:
 
 	[[nodiscard]] Time::time frameDelay() const noexcept;
 private:
-	FrameGenerator(const QString& path);
-
 	struct ReadFrame {
 		FramePointer frame = nullptr;
 		Time::time position = 0;
@@ -79,10 +79,8 @@ private:
 
 	float _speed = 1.0f;
 
-	union {
-		QByteArray _bytes = nullptr;
-		QString _path;
-	};
+	QByteArray _bytes = nullptr;
+	QString _path;
 
 	int _swscaleFlags = 0;
 

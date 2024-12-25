@@ -1,5 +1,8 @@
 #pragma once 
 
+#include <xtr1common>
+#include <cmath>
+
 
 namespace style {
 	inline constexpr auto kScaleMin = 50;

@@ -1,5 +1,6 @@
 #include "VideoStateWidget.h"
 
+#include "../../../media/images/ImagesPrepare.h"
 #include "../../../ui/style/StyleCore.h"
 
 #include <QPainter>
@@ -53,7 +54,7 @@ void VideoStateWidget::paintEvent(QPaintEvent* event) {
             break;
     }
 
-    image = style::Prepare(image, size());
+    image = images::Prepare(image, size());
     image = std::move(image).scaled(
         image.width() * style::DevicePixelRatio(),
         image.height() * style::DevicePixelRatio(),

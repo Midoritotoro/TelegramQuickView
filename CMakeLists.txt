@@ -37,9 +37,7 @@ find_package(Microsoft.GSL CONFIG REQUIRED)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 qt_standard_project_setup()
-
 
 SET(MAIN_SOURCES main.cpp
 
@@ -57,8 +55,8 @@ SET(MAIN_SOURCES main.cpp
     src/media/MediaCommon.h
     src/media/MediaCommon.cpp
 
-    src/media/video/ThumbnailGenerator.h
-    src/media/video/ThumbnailGenerator.cpp
+    src/media/ffmpeg/video/ThumbnailGenerator.h
+    src/media/ffmpeg/video/ThumbnailGenerator.cpp
 
     src/core/concurrent/common/CommonExceptions.cpp
 
@@ -104,6 +102,7 @@ SET(MAIN_SOURCES main.cpp
     src/ui/MainQueueProcessor.cpp
 
     src/ui/style/StyleWidgets.h
+    src/ui/style/StyleWidgets.cpp
 
 	src/ui/style/StyleCore.cpp
 	src/ui/style/StyleCore.h

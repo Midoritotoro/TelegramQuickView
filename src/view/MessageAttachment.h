@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QAbstractButton>
 #include "../core/Types.h"
+#include "../media/MediaCommon.h"
 
-#include <QPixmap>
+#include <QAbstractButton>
 
 class Message;
 class QPaintEvent;
@@ -13,13 +13,6 @@ class QResizeEvent;
 class MessageAttachment final: public QAbstractButton {
 	Q_OBJECT
 public:
-	enum class AttachmentType {
-		Audio,
-		Video,
-		Photo,
-		Unknown
-	};
-
 	[[nodiscard]] QSize sizeHint() const override;
 	[[nodiscard]] QSize minimumSizeHint() const override;
 
@@ -30,17 +23,16 @@ public:
 	void setParentMessage(not_null<Message*> parentMessage);
 
 	[[nodiscard]] QString attachmentPath() const noexcept;
-	[[nodiscard]] AttachmentType attachmentType() const noexcept;
+	[[nodiscard]] Media::Type attachmentType() const noexcept;
 
 	[[nodiscard]] Message* parentMessage() const noexcept;
-	[[nodiscard]] static AttachmentType detectMediaType(const QString& filePath) noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
 private:
 	void paintAttachmentCount(QPainter& painter);
 
 	QString _attachmentPath;
-	AttachmentType _attachmentType;
+	Media::Type _attachmentType;
 
 	QSize _previewSize;
 	Message* _parentMessage = nullptr;

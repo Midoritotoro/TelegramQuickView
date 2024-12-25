@@ -1,5 +1,11 @@
 #include "SpeedButton.h"
 
+#include "../../../ui/style/StyleScale.h"
+#include "../../../ui/style/StyleWidgets.h"
+
+#include "../../../media/images/ImagesPrepare.h"
+#include "../../../core/CoreUtility.h"
+
 #include "../../../ui/style/StyleCore.h"
 
 #include <QApplication>
@@ -41,7 +47,7 @@ void SpeedButtonOverlay::paintEvent(QPaintEvent* event) {
 }
 
 void SpeedButtonOverlay::resizeEvent(QResizeEvent* event) {
-	_textRect = QRect(QPoint(), style::TextSize(QString::number(_speed, 'f', 1) + "x", font()));
+	_textRect = QRect(QPoint(), core::utility::TextSize(QString::number(_speed, 'f', 1) + "x", font()));
 	_textRect.moveTo(QPoint(style::mediaPlayerPanelMargins.left() * 0.5,
 		(height() - _textRect.height()) / 2.));
 
@@ -83,7 +89,7 @@ void SpeedController::paintEvent(QPaintEvent* event) {
 	painter.setBrush(Qt::NoBrush);
 
 	if (_speedButtonImage.size() != size()) {
-		_speedButtonImage = style::Prepare(_speedButtonImage, size());
+		_speedButtonImage = images::Prepare(_speedButtonImage, size());
 
 		_speedButtonImage = std::move(_speedButtonImage).scaled(
 			_speedButtonImage.width() * style::DevicePixelRatio(),

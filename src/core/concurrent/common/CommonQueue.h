@@ -24,10 +24,8 @@ public:
 
 	template <typename Callable>
 	void async(Callable &&callable) {
-		if (_list.push_is_first(std::forward<Callable>(callable))) {
-			// printf("push_is_first returns true\n");
+		if (_list.push_is_first(std::forward<Callable>(callable)))
 			wake_async();
-		}
 	}
 
 	template <typename Callable>

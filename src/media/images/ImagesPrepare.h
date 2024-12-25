@@ -17,7 +17,7 @@ namespace images {
 
 	[[nodiscard]] QImage Prepare(
 		const QImage& image,
-		double scale);
+		double _scale);
 
 	[[nodiscard]] QImage Prepare(
 		QImage image,

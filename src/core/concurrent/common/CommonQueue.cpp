@@ -14,9 +14,6 @@ queue::queue(main_queue_processor processor) : _main_processor(processor) {
 
 void queue::wake_async() {
 	if (!_queued.test_and_set()) {
-		printf("test_and_set returns false\n");
-		//qDebug() << "_main_processor == nullptr: " << (_main_processor == nullptr);
-
 		(_main_processor ? _main_processor : details::async_plain)(
 			ProcessCallback,
 			static_cast<void*>(this));
@@ -35,7 +32,6 @@ void queue::process() {
 }
 
 void queue::ProcessCallback(void *that) {
-	printf("ProcessCallback called\n");
 	static_cast<queue*>(that)->process();
 }
 

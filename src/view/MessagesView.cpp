@@ -1,9 +1,10 @@
 ﻿#include "MessagesView.h"
 
 #include "../ui/WidgetsHider.h"
+#include "../core/Time.h"
 
 #include "../ui/style/StyleCore.h"
-#include "../core/Time.h"
+#include "../ui/style/StyleWidgets.h"
 
 #include "MessageAttachment.h"
 #include "History.h"

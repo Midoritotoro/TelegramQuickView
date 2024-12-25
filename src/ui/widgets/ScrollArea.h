@@ -5,7 +5,7 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 
-#include "../images/ImagesBlur.h"
+#include "../../media/images/ImagesBlur.h"
 
 
 class InnerWidget : public QWidget {

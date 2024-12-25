@@ -150,17 +150,17 @@ namespace images {
 
 	QImage Prepare(
 		const QImage& sourceImage,
-		double scale)
+		double _scale)
 	 {
 		const auto resolveSize = [=](const QSize& size) -> QSize {
 			const auto screenSize = core::utility::screenResolution();
 			double scale = qMin(static_cast<double>(screenSize.width()) / size.width(),
 				static_cast<double>(screenSize.height()) / size.height());
 
-			if (size.width() * scale <= (screenSize.width() * 0.7))
+			if (size.width() * scale <= (screenSize.width() * _scale))
 				return size;
 
-			scale = qMin(scale, (screenSize.width() * 0.7) / size.width());
+			scale = qMin(scale, (screenSize.width() * _scale) / size.width());
 			return QSize(size.width() * scale, size.height() * scale);
 		};
 

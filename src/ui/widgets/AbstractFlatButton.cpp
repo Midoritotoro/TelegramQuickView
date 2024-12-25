@@ -1,6 +1,7 @@
 #include "AbstractFlatButton.h"
 
 #include <cmath>
+#include "../../core/CoreUtility.h"
 
 
 namespace style {
@@ -257,7 +258,7 @@ QSize AbstractFlatButton::sizeHint() const {
         return _sizeHint;
 
     const auto iconRect = QRect(QPoint(), iconSize());
-    const auto textSize = style::TextSize(text(), font());
+    const auto textSize = core::utility::TextSize(text(), font());
 
     auto width = 0;
     auto height = 0;
@@ -347,7 +348,7 @@ QRect AbstractFlatButton::textRect(const QRect& iconRect) const noexcept {
     if (_buttonStyle == Qt::ToolButtonIconOnly)
         return QRect{};
 
-    const auto textSize = style::TextSize(text(), font());
+    const auto textSize = core::utility::TextSize(text(), font());
     auto textRect = QRect(QPoint(), textSize);
 
     switch (_buttonStyle) {

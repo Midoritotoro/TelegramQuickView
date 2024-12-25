@@ -54,8 +54,8 @@ void VolumeController::paintEvent(QPaintEvent* event) {
 	painter.setBrush(Qt::NoBrush);
 
 	_isSpeakerOn
-	? paintSpeakerOn(painter)
-	: paintSpeakerOff(painter);
+		? paintSpeakerOn(painter)
+		: paintSpeakerOff(painter);
 }
 
 bool VolumeController::isSpeakerOn() const noexcept {

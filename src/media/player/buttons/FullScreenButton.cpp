@@ -1,6 +1,8 @@
 #include "FullScreenButton.h"
 
-#include "../../../ui/style/StyleCore.h"
+#include "../../../ui/style/StyleScale.h"
+#include "../../../media/images/ImagesPrepare.h"
+
 #include <QPainter>
 
 
@@ -31,7 +33,7 @@ void FullScreenButton::paintEvent(QPaintEvent* event) {
 		: _fullScreenFrom;
 
 	if (image.size() != size()) {
-		image = style::Prepare(image, size());
+		image = images::Prepare(image, size());
 
 		image = std::move(image).scaled(
 			image.width() * style::DevicePixelRatio(),

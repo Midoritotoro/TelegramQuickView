@@ -7,6 +7,8 @@
 #include <QPaintEvent>
 
 #include <QColor>
+#include "../../media/images/ImagesPrepare.h"
+
 
 FlatButton::FlatButton(QWidget* parent) :
     AbstractFlatButton(parent)
@@ -159,7 +161,7 @@ void FlatButton::drawText(
 {
     painter.setFont(font());
 
-    if (style::IsRgbNull(textColor().rgb()) == false) {
+    if (images::IsRgbNull(textColor().rgb()) == false) {
         painter.setPen(textColor());
         painter.drawText(option.rect, Qt::AlignCenter, this->text());
         return;

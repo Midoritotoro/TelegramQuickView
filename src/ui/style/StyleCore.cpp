@@ -135,6 +135,8 @@ namespace style {
 	}
 
 	void RegisterStyles() {
+		loadStyles();
+
 		defaultTextStyle = new TextStyle{
 		   ._font = style::font(13, 0, 0),
 		   .lineHeight = 14,

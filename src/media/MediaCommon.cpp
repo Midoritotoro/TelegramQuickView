@@ -1,7 +1,7 @@
 #include "MediaCommon.h"
 
 #include "images/ImagesPrepare.h"
-#include "ffmpeg/video/FrameGenerator.h"
+#include "ffmpeg/video/ThumbnailGenerator.h"
 
 #include <QMimeDataBase>
 #include <QFile>
@@ -44,14 +44,11 @@ namespace Media {
 			: type;
 
 		switch (mediaType) {
-		case Type::Photo:
-			return QPixmap(path).size();
+			case Type::Photo:
+				return QPixmap(path).size();
 
-		case Type::Video: {
-			auto file = QFile(path);
-			if (file.open(QIODevice::ReadOnly))
-				return FFmpeg::FrameGenerator(file.read(40000)).resolution();
-			}
+			case Type::Video:
+				return FFmpeg::ThumbnailGenerator(path).resolution();
 		}
 
 		return QSize();
@@ -73,20 +70,19 @@ namespace Media {
 		auto preview = QPixmap();
 
 		switch (detectMediaType(path)) {
-		case Type::Photo:
-			preview.loadFromData(mediaData);
-			break;
+			case Type::Photo:
+				preview.loadFromData(mediaData);
+				break;
 
-		case Type::Video:
-			preview = images::PixmapFast(std::move(FFmpeg::FrameGenerator(mediaData)
-				.renderNext(QSize(), Qt::IgnoreAspectRatio, false).image));
-			break;
+			case Type::Video:
+				preview = images::PixmapFast(std::move(FFmpeg::ThumbnailGenerator(mediaData).generate()));
+				break;
 
-		case Type::Audio:
-			return QPixmap();
+			case Type::Audio:
+				return QPixmap();
 
-		case Type::Unknown:
-			return QPixmap();
+			case Type::Unknown:
+				return QPixmap();
 		}
 
 		if (QPixmapCache::cacheLimit() > 0)
@@ -108,8 +104,8 @@ namespace Media {
 			core::utility::PartiallyEqual(thumbnail.size(), targetSize, 1)) {
 			auto mediaPreview = QPixmap();
 
-			if (QPixmapCache::find(kPreviewPrefix + key, &mediaPreview))
-				QPixmapCache::remove(kPreviewPrefix + key);
+			if (QPixmapCache::find(kPreviewPrefix + path, &mediaPreview))
+				QPixmapCache::remove(kPreviewPrefix + path);
 
 			return thumbnail;
 		}
@@ -119,7 +115,7 @@ namespace Media {
 			return QPixmap();
 
 		thumbnailImage = images::Prepare(std::move(thumbnailImage),
-			core::utility::getMinimumSizeWithAspectRatio(thumbnailImage.size(), targetSize.width()));
+			core::utility::GetMinimumSizeWithAspectRatio(thumbnailImage.size(), targetSize.width()));
 
 		thumbnailImage = std::move(thumbnailImage).scaled(
 			thumbnailImage.width() * style::DevicePixelRatio(),

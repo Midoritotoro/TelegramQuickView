@@ -7,10 +7,11 @@
 namespace FFmpeg {
 	class ThumbnailGenerator {
 	public:
-		ThumbnailGenerator(const QString& path)
+		ThumbnailGenerator(const QString& path);
 
 		[[nodiscard]] QImage generate();
+		[[nodiscard]] QSize resolution() const;
 	private:
-		FrameGenerator generator;
+		std::unique_ptr<FrameGenerator> generator = nullptr;
 	};
 } // namespace FFmpeg

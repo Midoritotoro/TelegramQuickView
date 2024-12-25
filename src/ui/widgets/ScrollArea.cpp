@@ -6,7 +6,9 @@
 #include <QPainter>
 
 #include "../../core/Time.h"
-#include "../../ui/style/StyleCore.h"
+
+#include "../../ui/style/StyleWidgets.h"
+#include "../../ui/style/StyleScale.h"
 
 #include <Windows.h>
 #include <QWindow>
@@ -274,15 +276,8 @@ void ScrollArea::setOpacity(double opacity) {
 	update();
 }
 
-void ScrollArea::paintEvent(QPaintEvent* event) {
-	/*QPainter painter(viewport());
-
-	painter.setPen(Qt::black);
-	painter.setBrush(Qt::black);
-	
-	painter.setOpacity(_opacity);
-	painter.drawRect(rect());*/
-}
+void ScrollArea::paintEvent(QPaintEvent* event) 
+{}
 
 int ScrollArea::itemsHeight() const {
 	return _itemsHeight;

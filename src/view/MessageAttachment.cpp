@@ -13,6 +13,9 @@
 #include "../ui/style/StyleWidgets.h"
 #include "../core/CoreConcurrent.h"
 
+#include "../core/CoreUtility.h"
+
+
 #ifdef min
 #undef min
 #endif min
@@ -48,7 +51,7 @@ MessageAttachment::MessageAttachment(
 )
 	: QAbstractButton()
 	, _attachmentPath(attachmentPath)
-	, _attachmentType(detectMediaType(attachmentPath))
+	, _attachmentType(Media::detectMediaType(attachmentPath))
 	, _parentMessage(parentMessage)
 {
 	setAttribute(Qt::WA_NoSystemBackground);
@@ -56,18 +59,18 @@ MessageAttachment::MessageAttachment(
 
 	setCursor(Qt::PointingHandCursor);
 
-	const auto imageSize = style::MediaResolution(_attachmentPath, _attachmentType);
+	const auto imageSize = Media::MediaResolution(_attachmentPath, _attachmentType);
 
 	_previewSize =
-		countAttachmentSize(style::getMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
+		countAttachmentSize(core::utility::GetMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
 			style::maximumMessageWidth, style::maximumMessageWidth);
 	setFixedSize(_previewSize);
 
 	concurrent::on_main([this] {
-		if (style::FindPreviewInCache(_attachmentPath).isNull() == false)
+		if (Media::FindPreviewInCache(_attachmentPath).isNull() == false)
 			return;
 
-		style::GenerateThumbnail(_attachmentPath, size());
+		Media::GenerateThumbnail(_attachmentPath, size());
 		update();
 	});
 }
@@ -86,7 +89,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	//const auto timer = gsl::finally([=] { /*qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms";*/ time += Time::now() - ms; qDebug() <<
 	//	"totaltime: " << time;  });
 	//
-	const auto preview = style::FindPreviewInCache(_attachmentPath);
+	const auto preview = Media::FindPreviewInCache(_attachmentPath);
 	if (preview.isNull())
 		return;
 
@@ -127,7 +130,7 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 	const auto font = style::font(13, 0, 0);
 
 	const auto attachmentsCountText = "+" + QString::number(_parentMessage->attachmentsLength() - 1);
-	const auto attachmentsCountTextSize = style::TextSize(attachmentsCountText, font);
+	const auto attachmentsCountTextSize = core::utility::TextSize(attachmentsCountText, font);
 
 	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
 	attachmentsCountTextRect.moveCenter(rect().center());
@@ -147,19 +150,10 @@ QString MessageAttachment::attachmentPath() const noexcept {
 	return _attachmentPath;
 }
 
-MessageAttachment::AttachmentType MessageAttachment::attachmentType() const noexcept {
+Media::Type MessageAttachment::attachmentType() const noexcept {
 	return _attachmentType;
 }
 
 Message* MessageAttachment::parentMessage() const noexcept {
 	return _parentMessage;
-}
-
-MessageAttachment::AttachmentType MessageAttachment::detectMediaType(const QString& filePath) noexcept {
-	const auto type = QMimeDatabase().mimeTypeForFile(filePath).name();
-
-	return type.contains("audio") ? AttachmentType::Audio
-		: type.contains("video") ? AttachmentType::Video
-		: type.contains("image") ? AttachmentType::Photo
-		: AttachmentType::Unknown;
 }

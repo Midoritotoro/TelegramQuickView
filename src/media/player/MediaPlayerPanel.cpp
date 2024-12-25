@@ -17,7 +17,10 @@
 #include <QScreen>
 
 #include "../../core/Time.h"
+#include "../../core/CoreUtility.h"
+
 #include "../../ui/style/StyleCore.h"
+#include "../../ui/style/StyleWidgets.h"
 
 
 MediaPlayerPanel::MediaPlayerPanel(QWidget* parent) :
@@ -153,8 +156,8 @@ void MediaPlayerPanel::updateSize() {
 }
 
 void MediaPlayerPanel::updateTimeSize() {
-	const auto timeLabelSize = style::TextSize(_timeLabel->text(), _timeLabel->font());
-	const auto remainingTimeLabelSize = style::TextSize(_remainingTimeLabel->text(), _remainingTimeLabel->font());
+	const auto timeLabelSize = core::utility::TextSize(_timeLabel->text(), _timeLabel->font());
+	const auto remainingTimeLabelSize = core::utility::TextSize(_remainingTimeLabel->text(), _remainingTimeLabel->font());
 
 	if (timeLabelSize.isNull() || remainingTimeLabelSize.isNull())
 		return;

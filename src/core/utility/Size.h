@@ -28,7 +28,7 @@ namespace core::utility {
 			: TextSize(text, QFontMetrics(font));
 	}
 
-	[[nodiscard]] inline QSize getMinimumSizeWithAspectRatio(
+	[[nodiscard]] inline QSize GetMinimumSizeWithAspectRatio(
 		const QSize& imageSize,
 		int targetWidth)
 	{

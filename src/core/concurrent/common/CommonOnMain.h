@@ -25,7 +25,6 @@ namespace concurrent::details {
 		void create(concurrent::main_queue_processor processor);
 
 		explicit operator bool() const {
-			qDebug() << "_pointer == nullptr:" << (_pointer == nullptr);
 			return _pointer != nullptr;
 		}
 

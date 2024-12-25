@@ -3,6 +3,9 @@
 #include "../core/Types.h"
 #include <QString>
 
+#include <QSize>
+#include <QPixmap>
+
 
 namespace Media {
 	enum class Type : uchar {

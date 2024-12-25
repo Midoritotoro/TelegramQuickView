@@ -4,6 +4,8 @@
 
 
 namespace style {
+	void loadStyles();
+
 	[[nodiscard]] QString SliderStyle();
 	[[nodiscard]] QString ScrollAreaStyle();
 
@@ -26,4 +28,4 @@ namespace style {
 	};
 
 	inline const FlatLabel* defaultFlatLabelStyle = nullptr;
-}
+} // namespace style

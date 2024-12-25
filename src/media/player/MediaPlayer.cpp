@@ -13,6 +13,8 @@
 #include "../../ui/style/StyleCore.h"
 #include <qopenglfunctions_3_3_core.h>
 
+#include "../images/ImagesPrepare.h"
+
 
 namespace {
 	inline constexpr auto kPanelBottomIndent = 5;
@@ -136,7 +138,7 @@ void MediaPlayer::setMedia(const QString& path) {
 			break;
 		case Media::Type::Photo:
 			_current.loadFromData(data);
-			_current = Media::prepareImage(_current);
+			_current = images::Prepare(_current, 0.7);
 
 			update();
 			break;
