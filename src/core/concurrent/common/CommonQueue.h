@@ -24,9 +24,8 @@ public:
 
 	template <typename Callable>
 	void async(Callable &&callable) {
-
 		if (_list.push_is_first(std::forward<Callable>(callable))) {
-			printf("queue->async called");
+			// printf("push_is_first returns true\n");
 			wake_async();
 		}
 	}

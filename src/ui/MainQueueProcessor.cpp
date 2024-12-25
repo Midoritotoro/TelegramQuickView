@@ -17,7 +17,7 @@ namespace {
 	}
 
 	QMutex ProcessorMutex;
-	MainQueueProcessor* ProcessorInstance/* = nullptr*/;
+	MainQueueProcessor* ProcessorInstance = nullptr;
 
 	enum class ProcessState : int {
 		Processed,
@@ -41,7 +41,6 @@ namespace {
 		}
 
 		auto event = std::make_unique<QEvent>(ProcessorEventType());
-
 		QMutexLocker lock(&ProcessorMutex);
 
 		if (ProcessorInstance)
@@ -65,6 +64,7 @@ namespace {
 MainQueueProcessor::MainQueueProcessor() {
 	acquire();
 	concurrent::init_main_queue(PushToMainQueueGeneric);
+	DrainMainQueueGeneric();
 }
 
 bool MainQueueProcessor::event(QEvent* event) {

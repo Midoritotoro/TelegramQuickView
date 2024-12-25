@@ -26,6 +26,7 @@ public:
 	Message(QWidget* parent = nullptr);
 
 	[[nodiscard]] QSize sizeHint() const override;
+	[[nodiscard]] QSize minimumSizeHint() const override;
 
 	void setMediaDisplayMode(MediaDisplayMode displayMode);
 	[[nodiscard]] MediaDisplayMode mediaDisplayMode() const noexcept;

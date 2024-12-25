@@ -7,10 +7,6 @@
 #include "../common/CommonUtils.h"
 #include "WinapiSemaphore.h"
 
-#ifndef USE_WINAPI
-#error "This file should not be included by client-code directly."
-#endif // USE_WINAPI
-
 namespace concurrent::details {
 
 class list {

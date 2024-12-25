@@ -56,17 +56,16 @@ MessageAttachment::MessageAttachment(
 
 	setCursor(Qt::PointingHandCursor);
 
-	setFixedSize(size());
+	const auto imageSize = style::MediaResolution(_attachmentPath);
+
+	_previewSize =
+		countAttachmentSize(style::getMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
+			style::maximumMessageWidth, style::maximumMessageWidth);
+	setFixedSize(_previewSize);
 
 	concurrent::on_main([this] {
-		const auto imageSize = style::MediaPreview(_attachmentPath).size();
-
-		setFixedSize(
-			countAttachmentSize(style::getMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
-				style::maximumMessageWidth, style::maximumMessageWidth)
-		);
-
-		qDebug() << "countedSize: " << size();
+		if (style::FindPreviewInCache(_attachmentPath).isNull() == false)
+			return;
 
 		style::GenerateThumbnail(_attachmentPath, size());
 		update();
@@ -74,11 +73,11 @@ MessageAttachment::MessageAttachment(
 }
 
 QSize MessageAttachment::sizeHint() const {
-	return size();
+	return _previewSize;
 }
 
 QSize MessageAttachment::minimumSizeHint() const {
-	return size();
+	return _previewSize;
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
@@ -87,13 +86,9 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	//const auto timer = gsl::finally([=] { /*qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms";*/ time += Time::now() - ms; qDebug() <<
 	//	"totaltime: " << time;  });
 	//
-
-	if (style::FindPreviewInCache(_attachmentPath) == false)
-		return;
-
-	const auto _preview = style::GenerateThumbnail(_attachmentPath, size());
-
-	if (_preview.isNull())
+	const auto preview = style::FindPreviewInCache(_attachmentPath);
+	qDebug() << preview.isNull();
+	if (preview.isNull())
 		return;
 
 	QPainter painter(this);
@@ -106,7 +101,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 		else if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
 			style::RoundTopCorners(painter, size(), 15);
 
-		painter.drawPixmap(0, 0, _preview);
+		painter.drawPixmap(0, 0, preview);
 		break;
 
 	case Message::MediaDisplayMode::PreviewWithCount:
@@ -115,7 +110,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			: style::RoundCorners(painter, size(), 15);
 
 		if (_parentMessage->attachmentsLength() > 1) {
-			painter.drawPixmap(0, 0, _preview);
+			painter.drawPixmap(0, 0, preview);
 
 			painter.setOpacity(0.4);
 			painter.fillRect(rect(), Qt::black);
@@ -123,7 +118,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 			paintAttachmentCount(painter);
 		}
 		else
-			painter.drawPixmap(0, 0, _preview);
+			painter.drawPixmap(0, 0, preview);
 
 		break;
 	}

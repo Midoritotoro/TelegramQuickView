@@ -42,5 +42,6 @@ private:
 	QString _attachmentPath;
 	AttachmentType _attachmentType;
 
+	QSize _previewSize;
 	Message* _parentMessage = nullptr;
 };

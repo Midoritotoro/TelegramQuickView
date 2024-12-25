@@ -5,8 +5,6 @@
 #include "ui/style/StyleCore.h"
 #include "ui/style/StyleFont.h"
 
-#include "ui/MainQueueProcessor.h"
-
 
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv)
@@ -22,8 +20,8 @@ Application::Application(int& argc, char** argv) :
         + "MSDN blogs is a series of blogs that were hosted under Microsoft's domain blogs.msdn.com. Some blogs are dedicated to a product (e.g. Visual Studio, Internet Explorer, PowerShell) or a version of a product (e.g Windows 7, Windows 8), while others belong to a Microsoft employee (e.g. Michael Howard or Raymond Chen.\n"
         + "In May 2020, the MSDN and TechNet blogs were closed and the content was archived at Microsoft Docs.\n");
 
-    QString videoPath = "C:\\Users\\danya\\Downloads\\videotestvertical.mp4";
-
+    //QString videoPath = "C:\\Users\\danya\\Downloads\\videotestvertical.mp4";
+    QString videoPath = "C:\\Users\\danya\\Downloads\\code.png";
     _messagesView = std::make_unique<MessagesView>();
     _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::PreviewWithCount);
 
@@ -32,7 +30,7 @@ Application::Application(int& argc, char** argv) :
     auto list = QStringList({ videoPath, videoPath, videoPath, videoPath, videoPath, videoPath });
 
     for (int i = 0; i < 2; ++i)
-        _messagesView->makeMessage("", list);
+        _messagesView->makeMessage(text, list);
 }
 
 Application::~Application() {
@@ -53,6 +51,8 @@ void Application::init() {
 
 #endif // Q_OS_WIN
 
+    _mainQueueProcessor = std::make_unique<MainQueueProcessor>();
+
     setlocale(LC_ALL, "");
 
     const auto ratio = devicePixelRatio();
@@ -67,6 +67,4 @@ void Application::init() {
 
     style::Start();
     QPixmapCache::setCacheLimit(1024 * 1024); 
-
-    MainQueueProcessor processor;
 }

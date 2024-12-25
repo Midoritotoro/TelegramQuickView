@@ -28,6 +28,8 @@ public:
 	void setSpeed(float speed);
 	void rewind(Time::time positionMs);
 
+	[[nodiscard]] QSize resolution() const;
+
 	[[nodiscard]] Time::time duration() const noexcept;
 	[[nodiscard]] Time::time position() const noexcept;
 

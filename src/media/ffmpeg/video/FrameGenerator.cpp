@@ -17,6 +17,9 @@ namespace {
 FrameGenerator::FrameGenerator(const QByteArray& bytes):
 	_bytes(bytes)
 {
+	const auto ms = Time::now();
+	const auto timer = gsl::finally([=] { qDebug() << "FrameGenerator::FrameGenerator: " << Time::now() - ms; });
+
 	if (_bytes.isEmpty())
 		return;
 
@@ -224,6 +227,15 @@ void FrameGenerator::rewind(Time::time positionMs) {
 	_framePosition = positionMs;
 
 	readNextFrame();
+}
+
+QSize FrameGenerator::resolution() const {
+	if (_format == nullptr)
+		return QSize();
+
+	return QSize(
+		_format->streams[_bestVideoStreamId]->codecpar->width,
+		_format->streams[_bestVideoStreamId]->codecpar->height);
 }
 
 Time::time FrameGenerator::duration() const noexcept {

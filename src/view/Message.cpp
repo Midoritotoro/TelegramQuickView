@@ -110,6 +110,11 @@ QSize Message::sizeHint() const {
 		textHeight);
 }
 
+QSize Message::minimumSizeHint() const {
+	return QWidget::minimumSizeHint();
+	//return sizeHint();
+}
+
 void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {
 	_mediaDisplayMode = displayMode;
 }

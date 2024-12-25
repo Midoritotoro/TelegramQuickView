@@ -18,6 +18,8 @@
 #include "../images/ImagesBlur.h"
 
 #include "../../core/CoreUtility.h"
+#include <QMediaMetaData>
+
 
 namespace style {
 
@@ -198,18 +200,36 @@ namespace style {
 		return (widthDifference + heightDifference) <= maxDifference;
 	}
 
-	bool FindPreviewInCache(const QString& path) {
+	QPixmap FindPreviewInCache(const QString& key) {
 		auto temp = QPixmap();
-		return QPixmapCache::find(path, &temp);
+		QPixmapCache::find(key, &temp);
+
+		return temp;
+	}
+
+	QSize MediaResolution(const QString& path) {
+		const auto mediaType = MediaPlayer::detectMediaType(path);
+		switch (mediaType) {
+			case MediaPlayer::MediaType::Image:
+				return QPixmap(path).size();
+
+			case MediaPlayer::MediaType::Video: {
+				auto file = QFile(path);
+				if (file.open(QIODevice::ReadOnly))
+					return FFmpeg::FrameGenerator(file.read(40000)).resolution();
+			}
+
+		}
+		return QSize();
 	}
 
 	QPixmap MediaPreview(const QString& path) {
-		auto pixmap = QPixmap();
-		if (QPixmapCache::find(kPreviewPrefix + path, &pixmap))
-			return pixmap;
+		if (const auto _preview = FindPreviewInCache(kPreviewPrefix + path); 
+			_preview.isNull() == false)
+			return _preview;
 
 		auto file = QFile(path);
-		if (!file.open(QIODevice::ReadOnly))
+		if (file.open(QIODevice::ReadOnly) == false)
 			return QPixmap();
 
 		const auto mediaData = file.readAll();
@@ -234,14 +254,17 @@ namespace style {
 			case MediaPlayer::MediaType::Unknown:
 				return QPixmap();
 		}
-
+		
 		if (QPixmapCache::cacheLimit() > 0)
 			QPixmapCache::insert(kPreviewPrefix + path, preview);
 
 		return preview;
 	}
 
-	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
+	QPixmap GenerateThumbnail(
+		const QString& path,
+		const QSize& targetSize)
+	{
 	//	const auto ms = Time::now();
 	//	const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
 
@@ -250,21 +273,18 @@ namespace style {
 			size.setWidth(style::maximumMessageWidth);
 
 		auto thumbnail = QPixmap();
-		auto mediaPreview = QPixmap();
-
 		const auto key = path;
 
 		if (QPixmapCache::find(key, &thumbnail) && PartiallyEqual(thumbnail.size(), targetSize, 1)) {
+			auto mediaPreview = QPixmap();
+
 			if (QPixmapCache::find(kPreviewPrefix + key, &mediaPreview))
 				QPixmapCache::remove(kPreviewPrefix + key);
 
 			return thumbnail;
 		}
 
-	//	qDebug() << thumbnail.size() << targetSize;
-
 		auto thumbnailImage = MediaPreview(path).toImage();
-
 		if (thumbnailImage.isNull())
 			return QPixmap();
 
