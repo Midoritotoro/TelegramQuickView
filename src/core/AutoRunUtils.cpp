@@ -28,8 +28,8 @@ bool IsWindowsGreaterThen(int version)
 bool SetAutoRunKey(LPWSTR path)
 {
     LPCWSTR lpSubKey = TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-    LONG result = NULL;
-    DWORD pResult = NULL;
+    LONG result = 0;
+    DWORD pResult = 0;
     HKEY hKey = NULL;
 
     if ((RegOpenKeyEx(HKEY_CURRENT_USER, lpSubKey, 0, KEY_READ, &hKey)) != ERROR_SUCCESS) {
@@ -41,7 +41,7 @@ bool SetAutoRunKey(LPWSTR path)
         RegCloseKey(hKey);
         return FALSE;
     }
-    result = RegSetValueEx(hKey, TEXT("TelegramQuickView"), 0, REG_SZ, (PBYTE)(path), ((LPBYTE)(path), (lstrlen(path) * sizeof(TCHAR) + 1)));
+    result = RegSetValueEx(hKey, TEXT(PROJECT_NAME), 0, REG_SZ, (PBYTE)(path), ((LPBYTE)(path), (lstrlen(path) * sizeof(TCHAR) + 1)));
     if (result != ERROR_SUCCESS){
         RegCloseKey(hKey);
         return FALSE;

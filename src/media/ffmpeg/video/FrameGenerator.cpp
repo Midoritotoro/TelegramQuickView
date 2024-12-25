@@ -40,13 +40,29 @@ FrameGenerator::FrameGenerator(const QByteArray& bytes):
 	if (_bestVideoStreamId < 0)
 		return;
 
-	CodecDescriptor descriptor;
-	descriptor.stream = _format->streams[_bestVideoStreamId];
+	_codec = MakeCodecPointer({ .stream = _format->streams[_bestVideoStreamId] });
 
-	_codec = MakeCodecPointer(descriptor);	
-
-	qDebug() << "Video fps: " << (double)descriptor.stream->avg_frame_rate.num / descriptor.stream->avg_frame_rate.den;
 	qDebug() << "Video duration: " << (double)_format->duration / AV_TIME_BASE << " seconds";
+}
+
+FrameGenerator::FrameGenerator(const QString& path) {
+	if (path.isEmpty())
+		return;
+
+	_format = MakeFormatPointer(path);
+
+	const auto error = avformat_find_stream_info(_format.get(), nullptr);
+	if (error < 0)
+		return;
+
+	_bestVideoStreamId = av_find_best_stream(
+		_format.get(), AVMEDIA_TYPE_VIDEO,
+		-1, -1, nullptr, 0);
+
+	if (_bestVideoStreamId < 0)
+		return;
+
+	_codec = MakeCodecPointer({ .stream = _format->streams[_bestVideoStreamId] });
 }
 
 FrameGenerator::Frame FrameGenerator::renderCurrent(
@@ -181,7 +197,8 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 FrameGenerator::Frame FrameGenerator::renderNext(
 	QSize size,
 	Qt::AspectRatioMode mode,
-	bool fullScreen) {
+	bool fullScreen) 
+{
 	//	const auto ms = Time::now();
 	//  const auto time = gsl::finally([&ms] { qDebug() << "renderNext: " << Time::now() - ms << " ms"; });
 

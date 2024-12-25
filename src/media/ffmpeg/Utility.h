@@ -194,9 +194,8 @@ using SwresamplePointer = std::unique_ptr<SwrContext, SwresampleDeleter>;
 	int64_t(*seek)(void* opaque, int64_t offset, int whence));
 
 
-[[nodiscard]] FormatPointer MakeFormatPointer(
-	IOPointer* ioPointer
-);
+[[nodiscard]] FormatPointer MakeFormatPointer(const QString& path);
+[[nodiscard]] FormatPointer MakeFormatPointer(IOPointer* ioPointer);
 
 [[nodiscard]] CodecPointer MakeCodecPointer(CodecDescriptor descriptor);
 

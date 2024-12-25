@@ -57,6 +57,9 @@ SET(MAIN_SOURCES main.cpp
     src/media/MediaCommon.h
     src/media/MediaCommon.cpp
 
+    src/media/video/ThumbnailGenerator.h
+    src/media/video/ThumbnailGenerator.cpp
+
     src/core/concurrent/common/CommonExceptions.cpp
 
     src/core/concurrent/common/CommonGuards.h

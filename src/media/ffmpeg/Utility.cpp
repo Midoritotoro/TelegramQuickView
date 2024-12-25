@@ -137,6 +137,29 @@ FormatPointer MakeFormatPointer(
 	return FormatPointer(result);
 }
 
+FormatPointer MakeFormatPointer(const QString& path) {
+	auto format = (AVFormatContext*)nullptr;
+
+	format = avformat_alloc_context();
+	if (!format)
+		return {};
+
+	auto error = avformat_open_input(
+		&format, 
+		path.toUtf8(),
+		nullptr, 
+		nullptr);
+
+	if (error)
+		return {};
+
+	error = avformat_find_stream_info(format, nullptr);
+	if (error)
+		return {};
+
+	return FormatPointer(format);
+}
+
 FormatPointer MakeFormatPointer(
 	IOPointer* ioPointer
 ) {
