@@ -99,20 +99,20 @@ QSize Message::sizeHint() const {
 		? _textLabel->fullHeight()
 		: 0;
 
-	qDebug() << QSize(
-		width(),
+	qDebug() << "QSize(maximumAttachmentsWidth(), attachmentsHeight() + textHeight):" << QSize(
+		maximumAttachmentsWidth(),
 		attachmentsHeight() +
 		textHeight);
 
 	return QSize(
-		width(),
+		maximumAttachmentsWidth(),
 		attachmentsHeight() + 
 		textHeight);
 }
 
 QSize Message::minimumSizeHint() const {
-	return QWidget::minimumSizeHint();
-	//return sizeHint();
+	//return QWidget::minimumSizeHint();
+	return sizeHint();
 }
 
 void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {
@@ -166,4 +166,29 @@ int Message::attachmentsHeight() const noexcept {
 			break;
 	}
 	return height;
+}
+
+int Message::maximumAttachmentsWidth() const noexcept {
+	if (_attachments.isEmpty())
+		return 0;
+
+	auto width = 0;
+
+	switch (_mediaDisplayMode) {
+		case MediaDisplayMode::Stack:
+			for (auto index = 0; index < _attachments.size(); ++index)
+				if (const auto maximumWidth = _attachments[index]->sizeHint().width();
+					maximumWidth > width)
+					width = maximumWidth;
+			break;
+
+		case MediaDisplayMode::PreviewWithCount:
+			width = _attachments[0]->sizeHint().width();
+			break;
+
+		case MediaDisplayMode::Album:
+			break;
+	}
+
+	return width;
 }

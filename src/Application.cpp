@@ -29,7 +29,7 @@ Application::Application(int& argc, char** argv) :
 
     auto list = QStringList({ videoPath, videoPath, videoPath, videoPath, videoPath, videoPath });
 
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 10; ++i)
         _messagesView->makeMessage(text, list);
 }
 

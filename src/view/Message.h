@@ -45,6 +45,7 @@ public:
 	[[nodiscard]] bool hasText() const noexcept;
 private:
 	[[nodiscard]] int attachmentsHeight() const noexcept;
+	[[nodiscard]] int maximumAttachmentsWidth() const noexcept;
 
 	MessageAttachmentsList _attachments;
 

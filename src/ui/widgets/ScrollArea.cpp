@@ -129,11 +129,12 @@ ScrollArea::ScrollArea(QWidget* parent):
 void ScrollArea::scrolled() {
 	const int verticalValue = verticalScrollBar()->value();
 
-	if (_verticalValue != verticalValue)
-		if (_disabled) 
-			verticalScrollBar()->setValue(_verticalValue);
-		else
-			_verticalValue = verticalValue;
+	if (_verticalValue == verticalValue)
+		return;
+
+	_disabled
+		? verticalScrollBar()->setValue(_verticalValue)
+		: (void)(_verticalValue = verticalValue);
 }
 
 int ScrollArea::scrollHeight() const {
@@ -237,18 +238,21 @@ void ScrollArea::addItem(QWidget* item, Qt::Alignment align) {
 		item->sizeHint().height()
 		+ _scrollLayout->contentsMargins().bottom();
 
+	_itemsHeight += itemHeight;
+
 	const auto fullHeight =
 		_scrollLayout->count() > 0
 		? widget()->height()
 		  + itemHeight
 		: itemHeight;
 
-	widget()->setFixedHeight(
-		qMax(widget()->minimumHeight(), qMax(fullHeight, itemsHeight())));
+	const auto newHeight = 
+		widget()->height() != widget()->minimumHeight()
+			? qMax(widget()->minimumHeight(), fullHeight)
+			: qMax(widget()->minimumHeight(),
+				qMin(itemsHeight(), fullHeight));
 
-	qDebug() << "fullHeight: " << fullHeight;
-	qDebug() << "widget()->size(): " << widget()->size();
-
+	widget()->setFixedHeight(newHeight);
 	_scrollLayout->addWidget(item, 0, align);
 }
 
@@ -281,16 +285,7 @@ void ScrollArea::paintEvent(QPaintEvent* event) {
 }
 
 int ScrollArea::itemsHeight() const {
-	if (_scrollLayout->count() <= 0)
-		return 0;
-
-	auto height = 0;
-
-	for (auto index = 0; index < _scrollLayout->count(); ++index)
-		height += _scrollLayout->itemAt(index)->sizeHint().height()
-			+ _scrollLayout->contentsMargins().bottom();
-
-	return height;
+	return _itemsHeight;
 }
 
 bool ScrollArea::focusNextPrevChild(bool next) {

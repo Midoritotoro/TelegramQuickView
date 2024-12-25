@@ -59,7 +59,8 @@ private:
 	bool _disabled = false;
 
 	int _verticalValue;
-	double _opacity;
+	int _itemsHeight = 0;
+	double _opacity = 1.;
 	
 	QVBoxLayout* _scrollLayout = nullptr;
 };
