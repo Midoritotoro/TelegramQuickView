@@ -21,74 +21,73 @@ Message::Message(
 	setMouseTracking(true);
 }
 
-void Message::setText(const QString& text) {
-	if (text.length() == 0)
-		return;
+void Message::setAttributes(
+	const QString& text,
+	const QStringList& attachments)
+{
+	if (text.isEmpty() == false) {
+		_textLabel = new FlatLabel(this);
+		_textLabel->setText(text);
+	}
 
-	_textLabel = new FlatLabel(this);
-	_textLabel->setText(text);
-
-	if (_messageLayout->count() > 0) // У сообщения есть вложение
+	if (attachments.count() > 0)
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
-
-	_messageLayout->addWidget(_textLabel, Qt::AlignLeft | Qt::AlignTop);
-}
-
-QString Message::text() const noexcept {
-	return _textLabel != nullptr
-		? _textLabel->text().toString()
-		: "";
-}
-
-void Message::setAttachments(const QStringList& attachmentsPaths) {
-	if (attachmentsPaths.length() == 0)
-		return;
 
 	switch (_mediaDisplayMode) {
 
 	case MediaDisplayMode::PreviewWithCount:
-		foreach(const auto& path, attachmentsPaths) {
+		foreach(const auto & path, attachments) {
 			const auto display = _messageLayout->count() < 1;
 			auto messageAttachment = new MessageAttachment(this, path, display);
-			
+
 			if (display)
 				_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 
 			_attachments.append(messageAttachment);
 
-			if (_textLabel == nullptr)
+			if (text.isEmpty() || display == false)
 				continue;
 
-			auto style = *style::defaultFlatLabelStyle;
-			style.maximumWidth = messageAttachment->width();
+			auto _style = *style::defaultFlatLabelStyle;
+			_style.maximumWidth = messageAttachment->width();
 
-			const auto st = new style::FlatLabel(style);
+			const auto st = new style::FlatLabel(_style);
 			_textLabel->setStyle(st);
 		}
 
 		break;
 
 	case MediaDisplayMode::Stack:
-		foreach(const auto& path, attachmentsPaths) {
+		foreach(const auto & path, attachments) {
 			auto messageAttachment = new MessageAttachment(this, path);
 
 			_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 			_attachments.append(messageAttachment);
 
-			if (_textLabel == nullptr)
+			if (text.isEmpty())
 				continue;
 
-			auto style = *style::defaultFlatLabelStyle;
-			style.maximumWidth = messageAttachment->width();
+			auto _style = *style::defaultFlatLabelStyle;
+			_style.maximumWidth = messageAttachment->width();
 
-			const auto st = new style::FlatLabel(style);
+			const auto st = new style::FlatLabel(_style);
 			_textLabel->setStyle(st);
 		}
+
 		break;
 
 	case MediaDisplayMode::Album:
 		break;
 	}
+
+	_messageLayout->addWidget(_textLabel, Qt::AlignLeft | Qt::AlignTop);
+}
+
+
+QString Message::text() const noexcept {
+	return _textLabel != nullptr
+		? _textLabel->text().toString()
+		: "";
 }
 
 const MessageAttachmentsList& Message::attachments() const noexcept {

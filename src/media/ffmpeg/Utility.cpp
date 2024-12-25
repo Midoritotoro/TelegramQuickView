@@ -144,11 +144,8 @@ FormatPointer MakeFormatPointer(const QString& path) {
 	if (!format)
 		return {};
 
-	auto error = avformat_open_input(
-		&format, 
-		path.toUtf8(),
-		nullptr, 
-		nullptr);
+	auto error = AvErrorWrap(avformat_open_input(&format, 
+		path.toUtf8(), nullptr, nullptr));
 
 	if (error)
 		return {};
@@ -156,6 +153,8 @@ FormatPointer MakeFormatPointer(const QString& path) {
 	error = avformat_find_stream_info(format, nullptr);
 	if (error)
 		return {};
+
+	qDebug() << format->bit_rate << format->debug << format->url;
 
 	return FormatPointer(format);
 }

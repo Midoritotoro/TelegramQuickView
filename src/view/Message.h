@@ -31,10 +31,11 @@ public:
 	void setMediaDisplayMode(MediaDisplayMode displayMode);
 	[[nodiscard]] MediaDisplayMode mediaDisplayMode() const noexcept;
 
-	void setText(const QString& text);
-	[[nodiscard]] QString text() const noexcept;
+	void setAttributes(
+		const QString& text,
+		const QStringList& attachments);
 
-	void setAttachments(const QStringList& attachments);
+	[[nodiscard]] QString text() const noexcept;
 	[[nodiscard]] const MessageAttachmentsList& attachments() const noexcept;
 
 	[[nodiscard]] int indexOfAttachment(not_null<MessageAttachment*> messageAttachment) const noexcept;

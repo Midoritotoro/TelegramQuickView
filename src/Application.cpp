@@ -20,17 +20,21 @@ Application::Application(int& argc, char** argv) :
         + "MSDN blogs is a series of blogs that were hosted under Microsoft's domain blogs.msdn.com. Some blogs are dedicated to a product (e.g. Visual Studio, Internet Explorer, PowerShell) or a version of a product (e.g Windows 7, Windows 8), while others belong to a Microsoft employee (e.g. Michael Howard or Raymond Chen.\n"
         + "In May 2020, the MSDN and TechNet blogs were closed and the content was archived at Microsoft Docs.\n");
 
-    //QString videoPath = "C:\\Users\\danya\\Downloads\\videotestvertical.mp4";
-    QString videoPath = "C:\\Users\\danya\\Downloads\\code.png";
+    QString videoPath = "C:\\Users\\danya\\Downloads\\videotestvertical.mp4";
+    QString photoPath = "C:\\Users\\danya\\Downloads\\code.png";
+
     _messagesView = std::make_unique<MessagesView>();
     _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::PreviewWithCount);
 
     _messagesView->show();
 
-    auto list = QStringList({ videoPath, videoPath, videoPath, videoPath, videoPath, videoPath });
+    auto videoList = QStringList({ videoPath, videoPath, videoPath, videoPath, videoPath, videoPath });
+    auto photoList = QStringList({ photoPath, photoPath, photoPath, photoPath, photoPath, photoPath });
 
-    for (int i = 0; i < 1000; ++i)
-        _messagesView->makeMessage(text, list);
+    //for (int i = 0; i < 5; ++i) {
+        _messagesView->makeMessage(text, videoList);
+        _messagesView->makeMessage(text, photoList);
+    //}
 }
 
 Application::~Application() {

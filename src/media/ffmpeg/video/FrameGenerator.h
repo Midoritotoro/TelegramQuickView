@@ -80,7 +80,6 @@ private:
 	float _speed = 1.0f;
 
 	QByteArray _bytes = nullptr;
-	QString _path;
 
 	int _swscaleFlags = 0;
 

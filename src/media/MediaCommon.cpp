@@ -59,23 +59,17 @@ namespace Media {
 			_preview.isNull() == false)
 			return _preview;
 
-		auto file = QFile(path);
-		if (file.open(QIODevice::ReadOnly) == false)
-			return QPixmap();
-
-		const auto mediaData = file.readAll();
-		if (mediaData.isNull())
-			return QPixmap();
-
 		auto preview = QPixmap();
 
 		switch (detectMediaType(path)) {
 			case Type::Photo:
-				preview.loadFromData(mediaData);
+				preview = QPixmap(path);
 				break;
 
 			case Type::Video:
-				preview = images::PixmapFast(std::move(FFmpeg::ThumbnailGenerator(mediaData).generate()));
+				preview = images::PixmapFast(
+					std::move(
+						FFmpeg::ThumbnailGenerator(path).generate()));
 				break;
 
 			case Type::Audio:

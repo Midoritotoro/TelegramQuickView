@@ -62,10 +62,9 @@ namespace style {
 				break;
 
 			case CornersRoundMode::Bottom:
-				path.moveTo(borderRadius, 0);
+				path.moveTo(0, 0);
 
-				path.lineTo(widgetSize.width() - borderRadius, 0);
-				path.quadTo(widgetSize.width(), 0, widgetSize.width(), borderRadius);
+				path.lineTo(widgetSize.width(), 0);
 
 				path.lineTo(widgetSize.width(), widgetSize.height() - borderRadius);
 				path.quadTo(widgetSize.width(), widgetSize.height(),
@@ -75,8 +74,8 @@ namespace style {
 				path.quadTo(0, widgetSize.height(), 0,
 					widgetSize.height() - borderRadius);
 
-				path.lineTo(0, borderRadius);
-				path.quadTo(0, 0, borderRadius, 0);
+				path.lineTo(0, 0);
+
 				break;
 
 			case CornersRoundMode::All:

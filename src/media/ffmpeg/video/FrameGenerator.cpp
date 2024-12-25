@@ -1,5 +1,5 @@
 #include "FrameGenerator.h"
-
+#include "../../../core/CoreUtility.h"
 
 #include <functional>
 #include <QApplication>
@@ -12,6 +12,13 @@ namespace FFmpeg {
 
 namespace {
 	constexpr auto kMaxArea = 1920 * 1080 * 4;
+
+	[[nodiscard]] QByteArray ReadFile(const QString& filepath) {
+		auto file = QFile(filepath);
+		return file.open(QIODevice::ReadOnly)
+			? file.readAll()
+			: QByteArray();
+	}
 } // namespace
 
 FrameGenerator::FrameGenerator(const QByteArray& bytes):
@@ -45,32 +52,16 @@ FrameGenerator::FrameGenerator(const QByteArray& bytes):
 	qDebug() << "Video duration: " << (double)_format->duration / AV_TIME_BASE << " seconds";
 }
 
-FrameGenerator::FrameGenerator(const QString& path) {
-	if (path.isEmpty())
-		return;
-
-	_format = MakeFormatPointer(path);
-
-	const auto error = avformat_find_stream_info(_format.get(), nullptr);
-	if (error < 0)
-		return;
-
-	_bestVideoStreamId = av_find_best_stream(
-		_format.get(), AVMEDIA_TYPE_VIDEO,
-		-1, -1, nullptr, 0);
-
-	if (_bestVideoStreamId < 0)
-		return;
-
-	_codec = MakeCodecPointer({ .stream = _format->streams[_bestVideoStreamId] });
-}
+FrameGenerator::FrameGenerator(const QString& path):
+	FrameGenerator(ReadFile(path))
+{}
 
 FrameGenerator::Frame FrameGenerator::renderCurrent(
 	QSize size,
 	Qt::AspectRatioMode mode,
 	bool fullScreen)
 {
-	const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
+	const auto screenSize = core::utility::screenResolution();
 	const auto frame = _current.frame.get();
 
 	const auto width = frame->width;

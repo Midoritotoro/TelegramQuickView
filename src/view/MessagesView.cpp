@@ -90,9 +90,7 @@ void MessagesView::makeMessage(
 	auto message = new Message(this);
 
 	message->setMediaDisplayMode(_displayMode);
-	message->setAttachments(attachmentsPaths);
-
-	message->setText(messageText);
+	message->setAttributes(messageText, attachmentsPaths);
 
 	_chatScrollArea->addItem(message);
 	_messagesHistory->makeMessage(message);
