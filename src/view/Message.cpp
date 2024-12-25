@@ -48,9 +48,10 @@ void Message::setAttachments(const QStringList& attachmentsPaths) {
 
 	case MediaDisplayMode::PreviewWithCount:
 		foreach(const auto& path, attachmentsPaths) {
-			auto messageAttachment = new MessageAttachment(this, path);
+			const auto display = _messageLayout->count() < 1;
+			auto messageAttachment = new MessageAttachment(this, path, display);
 			
-			if (_messageLayout->count() < 1)
+			if (display)
 				_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 
 			_attachments.append(messageAttachment);

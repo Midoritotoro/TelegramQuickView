@@ -18,7 +18,8 @@ public:
 
 	MessageAttachment(
 		not_null<Message*> parentMessage,
-		const QString& attachmentPath);
+		const QString& attachmentPath,
+		bool display = true);
 
 	void setParentMessage(not_null<Message*> parentMessage);
 
@@ -26,6 +27,7 @@ public:
 	[[nodiscard]] Media::Type attachmentType() const noexcept;
 
 	[[nodiscard]] Message* parentMessage() const noexcept;
+	[[nodiscard]] bool display() const noexcept;
 protected:
 	void paintEvent(QPaintEvent* event) override;
 private:
@@ -36,4 +38,6 @@ private:
 
 	QSize _previewSize;
 	Message* _parentMessage = nullptr;
+
+	bool _display;
 };

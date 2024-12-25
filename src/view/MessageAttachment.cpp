@@ -47,17 +47,23 @@ namespace {
 
 MessageAttachment::MessageAttachment(
 	not_null<Message*> parentMessage,
-	const QString& attachmentPath
+	const QString& attachmentPath,
+	bool display
 )
 	: QAbstractButton()
 	, _attachmentPath(attachmentPath)
 	, _attachmentType(Media::detectMediaType(attachmentPath))
 	, _parentMessage(parentMessage)
+	, _display(display)
 {
+	static int p = 0;
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TranslucentBackground);
 
 	setCursor(Qt::PointingHandCursor);
+
+	if (display == false)
+		return;
 
 	const auto imageSize = Media::MediaResolution(_attachmentPath, _attachmentType);
 
@@ -73,6 +79,8 @@ MessageAttachment::MessageAttachment(
 		Media::GenerateThumbnail(_attachmentPath, size());
 		update();
 	});
+	++p;
+	qDebug() << p;
 }
 
 QSize MessageAttachment::sizeHint() const {
@@ -84,6 +92,8 @@ QSize MessageAttachment::minimumSizeHint() const {
 }
 
 void MessageAttachment::paintEvent(QPaintEvent* event) {
+	if (_display == false)
+		return;
 	//static int time;
 	//const auto ms = Time::now();
 	//const auto timer = gsl::finally([=] { /*qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms";*/ time += Time::now() - ms; qDebug() <<
@@ -156,4 +166,8 @@ Media::Type MessageAttachment::attachmentType() const noexcept {
 
 Message* MessageAttachment::parentMessage() const noexcept {
 	return _parentMessage;
+}
+
+bool MessageAttachment::display() const noexcept {
+	return _display;
 }
