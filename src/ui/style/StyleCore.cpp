@@ -1,8 +1,6 @@
 #include "StyleCore.h"
 
 #include "../../media/ffmpeg/video/FrameGenerator.h"
-#include "../../media/player/MediaPlayer.h"
-
 #include <QMimeDataBase>
 
 #include <QPainterPath>
@@ -207,8 +205,14 @@ namespace style {
 		return temp;
 	}
 
-	QSize MediaResolution(const QString& path) {
-		const auto mediaType = MediaPlayer::detectMediaType(path);
+	QSize MediaResolution(
+		const QString& path,
+		MediaPlayer::MediaType type)
+	{
+		const auto mediaType = type == MediaPlayer::MediaType::Unknown
+			? MediaPlayer::detectMediaType(path)
+			: type;
+
 		switch (mediaType) {
 			case MediaPlayer::MediaType::Image:
 				return QPixmap(path).size();

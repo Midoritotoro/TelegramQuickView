@@ -9,6 +9,9 @@
 #include <QFontMetrics>
 #include <QPixmapCache>
 
+#include "../../media/player/MediaPlayer.h"
+
+
 namespace style {
 	inline constexpr QMargins mediaPlayerPanelMargins = { 
 		10, 5, 10, 5 
@@ -85,7 +88,9 @@ namespace style {
 		int maxDifference);
 
 	[[nodiscard]] QPixmap FindPreviewInCache(const QString& key);
-	[[nodiscard]] QSize MediaResolution(const QString& path);
+	[[nodiscard]] QSize MediaResolution(
+		const QString& path,
+		MediaPlayer::MediaType type = MediaPlayer::MediaType::Unknown);
 
 	[[nodiscard]] QPixmap MediaPreview(const QString& path);
 	[[nodiscard]] QPixmap GenerateThumbnail(

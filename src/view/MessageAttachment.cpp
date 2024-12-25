@@ -56,7 +56,7 @@ MessageAttachment::MessageAttachment(
 
 	setCursor(Qt::PointingHandCursor);
 
-	const auto imageSize = style::MediaResolution(_attachmentPath);
+	const auto imageSize = style::MediaResolution(_attachmentPath, _attachmentType);
 
 	_previewSize =
 		countAttachmentSize(style::getMinimumSizeWithAspectRatio(imageSize, style::maximumMessageWidth),
@@ -87,11 +87,10 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	//	"totaltime: " << time;  });
 	//
 	const auto preview = style::FindPreviewInCache(_attachmentPath);
-	qDebug() << preview.isNull();
 	if (preview.isNull())
 		return;
 
-	QPainter painter(this);
+	auto painter = QPainter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
 	switch (_parentMessage->mediaDisplayMode()) {
