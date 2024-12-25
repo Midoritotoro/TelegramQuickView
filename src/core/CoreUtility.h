@@ -11,6 +11,9 @@
 
 #include "utility/Accumulate.h"
 
+#include "utility/Round.h"
+#include "utility/Size.h"
+
 
 namespace core::utility {
 	[[nodiscard]] inline bool IsCtrlPressed() {
@@ -23,24 +26,5 @@ namespace core::utility {
 
 	[[nodiscard]] inline bool IsShiftPressed() {
 		return (QGuiApplication::keyboardModifiers() == Qt::ShiftModifier);
-	}
-
-	[[nodiscard]] inline double SafeRound(double value) {
-		Expects(!std::isnan(value));
-
-		if (const auto result = std::round(value); !std::isnan(result)) {
-			return result;
-		}
-		const auto errors = std::fetestexcept(FE_ALL_EXCEPT);
-		if (const auto result = std::round(value); !std::isnan(result)) {
-			return result;
-		}
-
-		std::feclearexcept(FE_ALL_EXCEPT);
-		if (const auto result = std::round(value); !std::isnan(result)) {
-			return result;
-		}
-
-		return value;
 	}
 } // namespace core::utility

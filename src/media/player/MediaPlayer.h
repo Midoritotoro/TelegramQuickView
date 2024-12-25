@@ -9,23 +9,18 @@
 #include <QOpenGLWidget>
 
 
+#include "../MediaCommon.h"
+
+
 class MediaPlayer final: public QWidget {
 	Q_OBJECT
 public:
-	enum class MediaType {
-		Image,
-		Video,
-		Audio,
-		Unknown
-	};
-
 	MediaPlayer(QWidget* parent = nullptr);
 
 	void setMedia(const QString& path);
 
 	[[nodiscard]] int getVideoControlsHeight() const noexcept;
 
-	[[nodiscard]] static MediaType detectMediaType(const QString& path);
 	[[nodiscard]] QSize occupiedMediaSpace() const noexcept;
 	[[nodiscard]] QPoint mediaPosition() const noexcept;
 
@@ -62,8 +57,6 @@ private:
 		QPaintEvent* event);
 	void updatePanelVisibility();
 
-	[[nodiscard]] QImage prepareImage(const QImage& sourceImage);
-
 	std::unique_ptr<Manager> _manager = nullptr;
 	MediaPlayerPanel* _mediaPlayerPanel = nullptr;
 
@@ -77,7 +70,7 @@ private:
 	Time::time _currMs;
 
 	MediaDisplayType _displayType = MediaDisplayType::Normal;
-	MediaType _currentMediaType = MediaType::Unknown;
+	Media::Type _currentMediaType = Media::Type::Unknown;
 
 	QString _currentMediaPath;
 };

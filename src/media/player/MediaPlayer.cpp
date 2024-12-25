@@ -115,33 +115,33 @@ void MediaPlayer::setMedia(const QString& path) {
 		cleanUp();
 	}
 
-	_currentMediaType = detectMediaType(path);
+	_currentMediaType = Media::detectMediaType(path);
 	_currentMediaPath = path;
 
 	qDebug() << "currentMediaPath: " << _currentMediaPath;
 
-	if (_currentMediaType == MediaType::Unknown)
+	if (_currentMediaType == Media::Type::Unknown)
 		return;
 
 	updatePanelVisibility();
 	const auto data = ReadFile(path);
 
 	switch (_currentMediaType) {
-		case MediaType::Video:
+		case Media::Type::Video:
 			_manager->setVideo(std::move(std::make_unique<FFmpeg::FrameGenerator>(data)));
 			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
 			play();
 
 			_currMs = Time::now();
 			break;
-		case MediaType::Image:
+		case Media::Type::Photo:
 			_current.loadFromData(data);
-			_current = prepareImage(_current);
+			_current = Media::prepareImage(_current);
 
 			update();
 			break;
 
-		case MediaType::Audio:
+		case Media::Type::Audio:
 			_manager->setAudio(std::move(std::make_unique<FFmpeg::AudioReader>(data)));
 			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
 			play();
@@ -155,19 +155,6 @@ int MediaPlayer::getVideoControlsHeight() const noexcept {
 	return !_mediaPlayerPanel->isHidden()
 		? _mediaPlayerPanel->height()
 		: 0;
-}
-
-MediaPlayer::MediaType MediaPlayer::detectMediaType(const QString& filePath) {
-	const auto mimeType = QMimeDatabase().mimeTypeForFile(filePath).name();
-
-	if (mimeType.contains("video"))
-		return MediaType::Video;
-	else if (mimeType.contains("image"))
-		return MediaType::Image;
-	else if (mimeType.contains("audio"))
-		return MediaType::Audio;
-
-	return MediaType::Unknown;
 }
 
 QSize MediaPlayer::occupiedMediaSpace() const noexcept {
@@ -233,7 +220,7 @@ void MediaPlayer::mousePressEvent(QMouseEvent* event) {
 		break;
 
 	case Manager::State::Paused:
-		if (_manager->hasVideo() == false && _currentMediaPath.isEmpty() == false && _currentMediaType == MediaType::Video)
+		if (_manager->hasVideo() == false && _currentMediaPath.isEmpty() == false && _currentMediaType == Media::Type::Video)
 			setMedia(_currentMediaPath);
 
 		if ((_manager->duration() - _manager->position()) <= 100)
@@ -247,7 +234,7 @@ void MediaPlayer::mousePressEvent(QMouseEvent* event) {
 
 void MediaPlayer::updatePanelVisibility() {
 	switch (_currentMediaType) {
-	case MediaType::Video:
+	case Media::Type::Video:
 		_widgetsHider->addWidget(_mediaPlayerPanel);
 		_widgetsHider->addWidget(_mediaPlayerPanel->speedController());
 
@@ -256,7 +243,7 @@ void MediaPlayer::updatePanelVisibility() {
 
 		break;
 
-	case MediaType::Image:
+	case Media::Type::Photo:
 		_widgetsHider->removeWidget(_mediaPlayerPanel);
 		_widgetsHider->removeWidget(_mediaPlayerPanel->speedController());
 
@@ -265,7 +252,7 @@ void MediaPlayer::updatePanelVisibility() {
 
 		break;
 
-	case MediaType::Audio:
+	case Media::Type::Audio:
 		_widgetsHider->addWidget(_mediaPlayerPanel);
 		_widgetsHider->addWidget(_mediaPlayerPanel->speedController());
 
@@ -294,25 +281,6 @@ void MediaPlayer::setNormal() {
 	emit mediaGeometryChanged();
 
 	update();
-}
-
-QImage MediaPlayer::prepareImage(const QImage& sourceImage) {
-	//const auto ms = Time::now();
-	//const auto timeCheck = gsl::finally([&ms] { qDebug() << "MediaPlayer::prepareImage: " << Time::now() - ms << " ms"; });
-
-	auto resolveSize = [=](const QSize& size) -> QSize {
-		const auto screenSize = QApplication::primaryScreen()->availableGeometry().size();
-		double scale = qMin(static_cast<double>(screenSize.width()) / size.width(),
-			static_cast<double>(screenSize.height()) / size.height());
-
-		if (size.width() * scale <= (screenSize.width() * 0.7))
-			return size;
-
-		scale = qMin(scale, (screenSize.width() * 0.7) / size.width());
-		return QSize(size.width() * scale, size.height() * scale);
-	};
-
-	return style::Prepare(sourceImage, resolveSize(sourceImage.size()));
 }
 
 void MediaPlayer::changeVolume(int value) {

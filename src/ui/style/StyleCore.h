@@ -9,7 +9,7 @@
 #include <QFontMetrics>
 #include <QPixmapCache>
 
-#include "../../media/player/MediaPlayer.h"
+#include "StyleScale.h"
 
 
 namespace style {
@@ -33,11 +33,6 @@ namespace style {
 	inline constexpr auto messageTextViewBorderRadius = 10;
 
 	inline constexpr auto panelWidth = 548;
-
-	inline constexpr auto kScaleMin = 50;
-	inline constexpr auto kScaleMax = 300;
-	inline constexpr auto kScaleDefault = 100;
-
 	inline constexpr auto lineWidth = 1;
 
 	namespace flatLabel {
@@ -57,46 +52,6 @@ namespace style {
 
 	[[nodiscard]] Qt::LayoutDirection LayoutDirection();
 
-	[[nodiscard]] int DevicePixelRatio();
-	void SetDevicePixelRatio(int ratio);
-
-	[[nodiscard]] int Scale();
-	void SetScale(int scale);
-
-	[[nodiscard]] QSize TextSize(
-		const QString& text,
-		const QFontMetrics& metrics);
-	[[nodiscard]] QSize TextSize(
-		const QString& text,
-		const QFont& font);
-
-	[[nodiscard]] int FontHeight(const QFont& font);
-
-	[[nodiscard]] QString SliderStyle();
-	[[nodiscard]] QString ScrollAreaStyle();
-
-	[[nodiscard]] QPixmap PixmapFast(QImage&& image);
-
-	[[nodiscard]] QImage Opaque(QImage&& image);
-	[[nodiscard]] QSize getMinimumSizeWithAspectRatio(
-		const QSize& imageSize,
-		const int targetWidth);
-
-	[[nodiscard]] bool PartiallyEqual(
-		const QSize& first,
-		const QSize& second,
-		int maxDifference);
-
-	[[nodiscard]] QPixmap FindPreviewInCache(const QString& key);
-	[[nodiscard]] QSize MediaResolution(
-		const QString& path,
-		MediaPlayer::MediaType type = MediaPlayer::MediaType::Unknown);
-
-	[[nodiscard]] QPixmap MediaPreview(const QString& path);
-	[[nodiscard]] QPixmap GenerateThumbnail(
-		const QString& path, 
-		const QSize& targetSize = QSize());
-
 	void RoundCorners(
 		QPainter& painter,
 		const QSize& widgetSize,
@@ -115,29 +70,6 @@ namespace style {
 		QPainter& painter,
 		const QSize& widgetSize,
 		int borderRadius);
-
-	[[nodiscard]] bool IsRgbNull(QRgb rgb);
-
-	template <typename T>
-	[[nodiscard]] inline T ConvertScale(T value, int scale) {
-		if (value < 0.)
-			return -ConvertScale(-value, scale);
-
-		const auto result = T(std::round(
-			(double(value) * scale / 100.) - 0.01));
-
-		return (!std::is_integral_v<T> || !value || result) ? result : 1;
-	}
-
-	template <typename T>
-	[[nodiscard]] inline T ConvertScale(T value) {
-		return ConvertScale(value, Scale());
-	}
-
-	[[nodiscard]] QImage Prepare(
-		QImage image, 
-		const QSize& _outer
-	);
 
 	void Start();
 	void Stop();

@@ -48,8 +48,14 @@ SET(MAIN_SOURCES main.cpp
 	src/Application.cpp
 	src/Application.h
 
+    src/core/utility/Size.h
+    src/core/utility/Round.h
+
     src/core/CoreConcurrent.h
     src/core/concurrent/common/CommonConfig.h
+
+    src/media/MediaCommon.h
+    src/media/MediaCommon.cpp
 
     src/core/concurrent/common/CommonExceptions.cpp
 
@@ -99,6 +105,9 @@ SET(MAIN_SOURCES main.cpp
 	src/ui/style/StyleCore.cpp
 	src/ui/style/StyleCore.h
 
+    src/ui/style/StyleScale.cpp
+	src/ui/style/StyleScale.h
+
     src/ui/text/TextEntities.cpp
     src/ui/text/TextEntities.h
 
@@ -139,7 +148,6 @@ SET(MAIN_SOURCES main.cpp
     src/ui/text/TextBlock.h
 
     src/core/CoreUtility.h
-    src/core/CoreUtility.cpp
 
 	src/core/Time.cpp
 	src/core/Time.h
@@ -218,8 +226,12 @@ SET(MAIN_SOURCES main.cpp
     src/ui/widgets/EnhancedSlider.cpp
     src/ui/widgets/EnhancedSlider.h
 
-    src/ui/images/ImagesBlur.h
-    src/ui/images/ImagesBlur.cpp
+    src/media/images/ImagesBlur.h
+    src/media/images/ImagesBlur.cpp
+
+    src/media/images/ImagesPrepare.h
+    src/media/images/ImagesPrepare.cpp
+
 
     src/media/player/buttons/FullScreenButton.cpp
     src/media/player/buttons/FullScreenButton.h

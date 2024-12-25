@@ -4,10 +4,9 @@
 #include <__msvc_iter_core.hpp>
 
 
-using namespace std::ranges;
-
 
 namespace core::utility {
+	using namespace std::ranges;
 	template <typename F, typename Type, typename Type2>
 	concept indirectly_binary_invocable =
 		std::indirectly_readable<Type> &&
