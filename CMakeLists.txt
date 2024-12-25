@@ -91,6 +91,9 @@ SET(MAIN_SOURCES main.cpp
 	src/core/MouseDetector.cpp
 	src/core/MouseDetector.h
 
+    src/ui/MainQueueProcessor.h
+    src/ui/MainQueueProcessor.cpp
+
     src/ui/style/StyleWidgets.h
 
 	src/ui/style/StyleCore.cpp

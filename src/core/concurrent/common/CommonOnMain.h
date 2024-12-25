@@ -5,6 +5,8 @@
 #include "CommonQueue.h"
 #include <atomic>
 
+#include <qDebug>
+
 #ifndef USE_COMMON_QUEUE
 #define USE_COMMON_QUEUE
 #endif // !USE_COMMON_QUEUE
@@ -23,6 +25,7 @@ namespace concurrent::details {
 		void create(concurrent::main_queue_processor processor);
 
 		explicit operator bool() const {
+			qDebug() << "_pointer == nullptr:" << (_pointer == nullptr);
 			return _pointer != nullptr;
 		}
 

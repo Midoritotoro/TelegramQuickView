@@ -205,7 +205,6 @@ namespace style {
 
 	QPixmap MediaPreview(const QString& path) {
 		auto pixmap = QPixmap();
-
 		if (QPixmapCache::find(kPreviewPrefix + path, &pixmap))
 			return pixmap;
 
@@ -243,8 +242,8 @@ namespace style {
 	}
 
 	QPixmap GenerateThumbnail(const QString& path, const QSize& targetSize) {
-		const auto ms = Time::now();
-		const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
+	//	const auto ms = Time::now();
+	//	const auto timer = gsl::finally([=] { qDebug() << "style::GenerateThumbnail: " << Time::now() - ms << " ms"; });
 
 		auto size = targetSize;
 		if (size.width() <= 0)
@@ -262,7 +261,7 @@ namespace style {
 			return thumbnail;
 		}
 
-		qDebug() << thumbnail.size() << targetSize;
+	//	qDebug() << thumbnail.size() << targetSize;
 
 		auto thumbnailImage = MediaPreview(path).toImage();
 

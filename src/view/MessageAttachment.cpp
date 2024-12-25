@@ -21,7 +21,7 @@ namespace {
 	[[nodiscard]] QSize countAttachmentSize(
 		const QSize& originalSize,
 		int maxWidth,
-		int maxHeight) 
+		int maxHeight)
 	{
 		if (originalSize.isEmpty() || maxWidth <= 0 || maxHeight <= 0)
 			return QSize();
@@ -56,7 +56,9 @@ MessageAttachment::MessageAttachment(
 
 	setCursor(Qt::PointingHandCursor);
 
-	concurrent::on_main([=] {
+	setFixedSize(size());
+
+	concurrent::on_main([this] {
 		const auto imageSize = style::MediaPreview(_attachmentPath).size();
 
 		setFixedSize(
@@ -64,8 +66,10 @@ MessageAttachment::MessageAttachment(
 				style::maximumMessageWidth, style::maximumMessageWidth)
 		);
 
+		qDebug() << "countedSize: " << size();
+
 		style::GenerateThumbnail(_attachmentPath, size());
-		//update();
+		update();
 	});
 }
 
@@ -83,6 +87,7 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	//const auto timer = gsl::finally([=] { /*qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms";*/ time += Time::now() - ms; qDebug() <<
 	//	"totaltime: " << time;  });
 	//
+
 	if (style::FindPreviewInCache(_attachmentPath) == false)
 		return;
 
@@ -95,32 +100,32 @@ void MessageAttachment::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
 	switch (_parentMessage->mediaDisplayMode()) {
-		case Message::MediaDisplayMode::Stack:
-			if (_parentMessage->attachmentsLength() == 1 && _parentMessage->hasText() == false)
-				style::RoundCorners(painter, size(), 15);
-			else if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
-				style::RoundTopCorners(painter, size(), 15);
+	case Message::MediaDisplayMode::Stack:
+		if (_parentMessage->attachmentsLength() == 1 && _parentMessage->hasText() == false)
+			style::RoundCorners(painter, size(), 15);
+		else if (_parentMessage->attachmentsLength() > 1 && _parentMessage->indexOfAttachment(this) == 0)
+			style::RoundTopCorners(painter, size(), 15);
 
+		painter.drawPixmap(0, 0, _preview);
+		break;
+
+	case Message::MediaDisplayMode::PreviewWithCount:
+		_parentMessage->hasText()
+			? style::RoundTopCorners(painter, size(), 15)
+			: style::RoundCorners(painter, size(), 15);
+
+		if (_parentMessage->attachmentsLength() > 1) {
 			painter.drawPixmap(0, 0, _preview);
-			break;
 
-		case Message::MediaDisplayMode::PreviewWithCount:
-			_parentMessage->hasText()
-				? style::RoundTopCorners(painter, size(), 15)
-				: style::RoundCorners(painter, size(), 15);
+			painter.setOpacity(0.4);
+			painter.fillRect(rect(), Qt::black);
 
-			if (_parentMessage->attachmentsLength() > 1) {
-				painter.drawPixmap(0, 0, _preview);
+			paintAttachmentCount(painter);
+		}
+		else
+			painter.drawPixmap(0, 0, _preview);
 
-				painter.setOpacity(0.4);
-				painter.fillRect(rect(), Qt::black);
-
-				paintAttachmentCount(painter);
-			}
-			else
-				painter.drawPixmap(0, 0, _preview);
-
-			break;
+		break;
 	}
 }
 
@@ -141,11 +146,11 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 }
 
 void MessageAttachment::setParentMessage(not_null<Message*> parentMessage) {
-	_parentMessage = parentMessage; 
+	_parentMessage = parentMessage;
 }
 
-QString MessageAttachment::attachmentPath() const noexcept { 
-	return _attachmentPath; 
+QString MessageAttachment::attachmentPath() const noexcept {
+	return _attachmentPath;
 }
 
 MessageAttachment::AttachmentType MessageAttachment::attachmentType() const noexcept {
@@ -153,7 +158,7 @@ MessageAttachment::AttachmentType MessageAttachment::attachmentType() const noex
 }
 
 Message* MessageAttachment::parentMessage() const noexcept {
-	return _parentMessage; 
+	return _parentMessage;
 }
 
 MessageAttachment::AttachmentType MessageAttachment::detectMediaType(const QString& filePath) noexcept {

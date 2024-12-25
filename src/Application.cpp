@@ -5,6 +5,8 @@
 #include "ui/style/StyleCore.h"
 #include "ui/style/StyleFont.h"
 
+#include "ui/MainQueueProcessor.h"
+
 
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv)
@@ -65,4 +67,6 @@ void Application::init() {
 
     style::Start();
     QPixmapCache::setCacheLimit(1024 * 1024); 
+
+    MainQueueProcessor processor;
 }

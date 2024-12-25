@@ -32,6 +32,7 @@ void queue::process() {
 }
 
 void queue::ProcessCallback(void *that) {
+	printf("ProcessCallback called\n");
 	static_cast<queue*>(that)->process();
 }
 
