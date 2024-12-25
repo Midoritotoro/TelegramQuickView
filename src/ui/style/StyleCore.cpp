@@ -48,16 +48,15 @@ namespace style {
 		switch (roundType) {
 			case CornersRoundMode::Top:
 				path.moveTo(borderRadius, 0);
+
 				path.lineTo(widgetSize.width() - borderRadius, 0);
+				path.quadTo(widgetSize.width(), 0, widgetSize.width(), borderRadius);
 
-				path.arcTo(widgetSize.width() - 2 * borderRadius, 0, 
-					2 * borderRadius, 2 * borderRadius, 90, -90);
 				path.lineTo(widgetSize.width(), widgetSize.height());
-
 				path.lineTo(0, widgetSize.height());
-				path.lineTo(0, borderRadius);
 
-				path.arcTo(0, 0, 2 * borderRadius, 2 * borderRadius, 180, -90);
+				path.lineTo(0, borderRadius);
+				path.quadTo(0, 0, borderRadius, 0);
 
 				break;
 

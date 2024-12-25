@@ -24,15 +24,15 @@ Application::Application(int& argc, char** argv) :
     QString photoPath = "C:\\Users\\danya\\Downloads\\code.png";
 
     _messagesView = std::make_unique<MessagesView>();
-    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::PreviewWithCount);
+    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::Stack);
 
     _messagesView->show();
 
     auto videoList = QStringList({ videoPath, videoPath, videoPath, videoPath, videoPath, videoPath });
-    auto photoList = QStringList({ photoPath, photoPath, photoPath, photoPath, photoPath, photoPath });
+    auto photoList = QStringList({ photoPath });
 
     //for (int i = 0; i < 5; ++i) {
-        _messagesView->makeMessage(text, videoList);
+       // _messagesView->makeMessage(text);
         _messagesView->makeMessage(text, photoList);
     //}
 }

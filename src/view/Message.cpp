@@ -99,6 +99,8 @@ QSize Message::sizeHint() const {
 		? _textLabel->fullHeight()
 		: 0;
 
+	qDebug() << "textHeight: " << textHeight;
+
 	return QSize(
 		maximumAttachmentsWidth(),
 		attachmentsHeight() + 
