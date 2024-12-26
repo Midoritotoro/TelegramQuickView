@@ -32,7 +32,7 @@ Application::Application(int& argc, char** argv) :
     auto photoList = QStringList({ photoPath });
 
     //for (int i = 0; i < 5; ++i) {
-    _messagesView->makeMessage(text, videoList);
+ //   _messagesView->makeMessage(text, videoList);
     _messagesView->makeMessage(text, photoList);
     //}
 }

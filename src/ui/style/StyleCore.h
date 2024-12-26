@@ -32,7 +32,7 @@ namespace style {
 	inline constexpr QMargins messageTextViewMargins = { 8, 5, 8, 8 };
 	inline constexpr auto messageTextViewBorderRadius = 10;
 
-	inline constexpr auto panelWidth = 548;
+	inline constexpr auto panelWidth = 460;
 	inline constexpr auto lineWidth = 1;
 
 	namespace flatLabel {

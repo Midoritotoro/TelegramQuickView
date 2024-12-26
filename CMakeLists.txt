@@ -107,14 +107,6 @@ SET(MAIN_SOURCES main.cpp
 	src/ui/style/StyleCore.cpp
 	src/ui/style/StyleCore.h
 
-    src/ui/layouts/AbstractMosaicLayout.cpp
-    src/ui/layouts/AbstractMosaicLayout.h
-
-    src/ui/layouts/MosaicLayout.h
-
-    src/ui/layouts/AbstractLayoutItem.cpp
-    src/ui/layouts/AbstractLayoutItem.h
-
     src/ui/style/StyleScale.cpp
 	src/ui/style/StyleScale.h
 

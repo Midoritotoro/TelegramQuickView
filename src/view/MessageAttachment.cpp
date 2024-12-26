@@ -50,13 +50,12 @@ MessageAttachment::MessageAttachment(
 	const QString& attachmentPath,
 	bool display
 )
-	: QAbstractButton()
+	: QAbstractButton(parentMessage)
 	, _attachmentPath(attachmentPath)
 	, _attachmentType(Media::detectMediaType(attachmentPath))
 	, _parentMessage(parentMessage)
 	, _display(display)
 {
-	static int p = 0;
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TranslucentBackground);
 
@@ -79,8 +78,8 @@ MessageAttachment::MessageAttachment(
 		Media::GenerateThumbnail(_attachmentPath, size());
 		update();
 	});
-	++p;
-	qDebug() << p;
+
+	qDebug() << "MessageAttachment::MessageAttachment";
 }
 
 QSize MessageAttachment::sizeHint() const {
@@ -94,11 +93,7 @@ QSize MessageAttachment::minimumSizeHint() const {
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	if (_display == false)
 		return;
-	//static int time;
-	//const auto ms = Time::now();
-	//const auto timer = gsl::finally([=] { /*qDebug() << "MessageAttachment::paintEvent: " << Time::now() - ms << " ms";*/ time += Time::now() - ms; qDebug() <<
-	//	"totaltime: " << time;  });
-	//
+
 	const auto preview = Media::FindPreviewInCache(_attachmentPath);
 	if (preview.isNull())
 		return;

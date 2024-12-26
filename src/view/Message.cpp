@@ -4,6 +4,8 @@
 #include "../ui/widgets/FlatLabel.h"
 #include "../ui/BasicClickHandlers.h"
 
+#include <QLabel>
+
 
 Message::Message(
 	QWidget* parent
@@ -11,24 +13,8 @@ Message::Message(
 	QWidget(parent)
 	, _mediaDisplayMode(MediaDisplayMode::Stack)
 {
-	_messageLayout = new QVBoxLayout(this);
-
-	_messageLayout->setSpacing(0);
-
-	_messageLayout->setContentsMargins(0, 0, 0, 0);
-
 	setContentsMargins(0, 0, 0, 0);
 	setMouseTracking(true);
-}
-
-void Message::setText(const QString& text) {
-	_hasText = !text.isEmpty();
-
-	if (_hasText == false)
-		return;
-
-	_textLabel = new FlatLabel(this);
-	_textLabel->setText(text);
 }
 
 QString Message::text() const noexcept {
@@ -36,69 +22,60 @@ QString Message::text() const noexcept {
 		? _textLabel->text().toString()
 		: "";
 }
+void Message::setAttributes(
+	const QString& text,
+	const QStringList& attachments)
+{
+	if (text.isEmpty() == false) {
+		_textLabel = new FlatLabel(this);
+		_textLabel->setText(text);
+	}
 
-void Message::setAttachments(const QStringList& attachmentsPaths) {
-	if (attachmentsPaths.length() == 0)
-		return;
+	if (attachments.count() > 0)
+		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
 
 	switch (_mediaDisplayMode) {
 
 	case MediaDisplayMode::PreviewWithCount:
-		foreach(const auto & path, attachmentsPaths) {
-			auto messageAttachment = new MessageAttachment(this, path);
-
-			if (_messageLayout->count() < 1)
-				_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
+		for (auto index = 0; index < attachments.length(); ++index) {
+			const auto display = index == 0;
+			auto messageAttachment = new MessageAttachment(this, attachments[index], display);
 
 			_attachments.append(messageAttachment);
 
-			if (_hasText == false)
-				continue;
+			if (display && text.isEmpty() == false) {
+				auto _style = *style::defaultFlatLabelStyle;
+				_style.maximumWidth = messageAttachment->width();
 
-			auto style = *style::defaultFlatLabelStyle;
-			style.maximumWidth = messageAttachment->width();
-
-			const auto st = new style::FlatLabel(style);
-			_textLabel->setStyle(st);
+				const auto st = new style::FlatLabel(_style);
+				_textLabel->setStyle(st);
+			}
 		}
 
 		break;
 
 	case MediaDisplayMode::Stack:
-		foreach(const auto & path, attachmentsPaths) {
-			auto messageAttachment = new MessageAttachment(this, path);
+		for (auto index = 0; index < attachments.length(); ++index) {
+			auto messageAttachment = new MessageAttachment(this, attachments[index]);
 
-			_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 			_attachments.append(messageAttachment);
 
-			if (_hasText == false)
-				continue;
+			if (text.isEmpty() == false) {
+				auto _style = *style::defaultFlatLabelStyle;
+				_style.maximumWidth = messageAttachment->width();
 
-			auto style = *style::defaultFlatLabelStyle;
-			style.maximumWidth = messageAttachment->width();
-
-			const auto st = new style::FlatLabel(style);
-			_textLabel->setStyle(st);
+				const auto st = new style::FlatLabel(_style);
+				_textLabel->setStyle(st);
+			}
 		}
+
 		break;
 
 	case MediaDisplayMode::Album:
 		break;
 	}
 
-
-	if (_attachments.length() > 0)
-		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
-
-	_messageLayout->addWidget(_textLabel, Qt::AlignLeft | Qt::AlignTop);
-}
-
-void Message::setAttributes(
-	const QString& text,
-	const QStringList& attachments)
-{
-	setText(text);
-	setAttachments(attachments);
+	updateGeometry();
 }
 
 const MessageAttachmentsList& Message::attachments() const noexcept {
@@ -110,15 +87,22 @@ QSize Message::sizeHint() const {
 		? _textLabel->fullHeight()
 		: 0;
 
-	qDebug() << "QSize(maximumAttachmentsWidth(), attachmentsHeight() + textHeight):" << QSize(
-		maximumAttachmentsWidth(),
+	const auto maxAttachmentsWidth = maximumAttachmentsWidth();
+
+	const auto hint = QSize(
+		maxAttachmentsWidth
+			? maxAttachmentsWidth
+				: _textLabel != nullptr
+				? _textLabel->style()->maximumWidth
+			: style::minimumMessageWidth,
 		attachmentsHeight() +
 		textHeight);
 
-	return QSize(
-		maximumAttachmentsWidth(),
-		attachmentsHeight() +
-		textHeight);
+	qDebug() << "this->size(): " << size();
+	qDebug() << "hint: " << hint;
+	qDebug() << "textHeight: " << textHeight;
+
+	return hint;
 }
 
 QSize Message::minimumSizeHint() const {
@@ -155,49 +139,77 @@ bool Message::hasText() const noexcept {
 	return _textLabel != nullptr && !_textLabel->text().isEmpty();
 }
 
-int Message::attachmentsHeight() const noexcept {
-	if (_attachments.isEmpty())
-		return 0;
+void Message::resizeEvent(QResizeEvent* event) {
+	updateGeometry();
+}
 
-	auto height = 0;
+void Message::updateGeometry() {
+	setFixedSize(430, 900);
 
 	switch (_mediaDisplayMode) {
-	case MediaDisplayMode::Stack:
-		for (auto index = 0; index < _attachments.size(); ++index)
-			height += _attachments[index]->sizeHint().height();
+		case MediaDisplayMode::Stack:
+			for (auto index = 0; index < _attachments.size(); ++index)
+				_attachments[index]->move(index == 0
+					? QPoint(0, 0)
+					: _attachments[index - 1]->rect().bottomLeft());
+			break;
 
-		break;
+		case MediaDisplayMode::PreviewWithCount:
+			if (_attachments.isEmpty() == false)
+				_attachments[0]->move(0, 0);
+			break;
 
-	case MediaDisplayMode::PreviewWithCount:
-		height += _attachments[0]->sizeHint().height();
-		break;
-
-	case MediaDisplayMode::Album:
-		break;
+		case MediaDisplayMode::Album:
+			break;
 	}
+
+	if (_textLabel != nullptr && _attachments.isEmpty() == false)
+		_textLabel->move(_attachments[_attachments.length() - 1]->rect().bottomLeft());
+}
+
+int Message::attachmentsHeight() const noexcept {
+	auto height = 0;
+
+	if (_attachments.isEmpty())
+		return height;
+
+	switch (_mediaDisplayMode) {
+		case MediaDisplayMode::Stack:
+			for (auto index = 0; index < _attachments.size(); ++index)
+				height += _attachments[index]->sizeHint().height();
+
+			break;
+
+		case MediaDisplayMode::PreviewWithCount:
+			height += _attachments[0]->sizeHint().height();
+			break;
+
+		case MediaDisplayMode::Album:
+			break;
+	}
+
 	return height;
 }
 
 int Message::maximumAttachmentsWidth() const noexcept {
-	if (_attachments.isEmpty())
-		return 0;
-
 	auto width = 0;
 
+	if (_attachments.isEmpty())
+		return width;
+
 	switch (_mediaDisplayMode) {
-	case MediaDisplayMode::Stack:
-		for (auto index = 0; index < _attachments.size(); ++index)
-			if (const auto maximumWidth = _attachments[index]->sizeHint().width();
-				maximumWidth > width)
-				width = maximumWidth;
-		break;
+		case MediaDisplayMode::Stack:
+			for (auto index = 0; index < _attachments.size(); ++index)
+				if (const auto maximumWidth = _attachments[index]->sizeHint().width(); maximumWidth > width)
+					width = maximumWidth;
+			break;
 
-	case MediaDisplayMode::PreviewWithCount:
-		width = _attachments[0]->sizeHint().width();
-		break;
+		case MediaDisplayMode::PreviewWithCount:
+			width = _attachments[0]->sizeHint().width();
+			break;
 
-	case MediaDisplayMode::Album:
-		break;
+		case MediaDisplayMode::Album:
+			break;
 	}
 
 	return width;

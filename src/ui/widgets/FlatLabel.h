@@ -41,6 +41,7 @@ public:
 	FlatLabel(QWidget* parent = nullptr);
 
 	[[nodiscard]] QSize sizeHint() const override;
+	[[nodiscard]] QSize minimumSizeHint() const override;
 
 	[[nodiscard]] int textMaxWidth() const noexcept;
 	[[nodiscard]] bool hasLinks() const noexcept;

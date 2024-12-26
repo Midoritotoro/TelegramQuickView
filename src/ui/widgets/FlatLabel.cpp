@@ -98,6 +98,10 @@ QSize FlatLabel::sizeHint() const {
 	return size();
 }
 
+QSize FlatLabel::minimumSizeHint() const {
+	return size();
+}
+
 int FlatLabel::textMaxWidth() const noexcept {
 	return _st->maximumWidth 
 		- _st->margin.left()
@@ -346,7 +350,6 @@ void FlatLabel::keyPressEvent(QKeyEvent* event) {
 	if (event->key() == Qt::Key_Copy || (event->key() == Qt::Key_C
 		&& event->modifiers().testFlag(Qt::ControlModifier)))
 		if (!_selection.empty()) {
-			qDebug() << "copy text: ";
 			copySelectedText();
 			event->accept();
 		}
@@ -811,6 +814,7 @@ void FlatLabel::refreshSize() {
 		+ _st->margin.bottom();
 
 	resize(fullWidth, fullHeight);
+	qDebug() << "FlatLabel::refreshSize(): " << fullWidth << fullHeight << size();
 }
 
 void FlatLabel::refreshCursor(bool uponSymbol) {

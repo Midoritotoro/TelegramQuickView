@@ -1,9 +1,6 @@
 #pragma once
 
 #include "../core/Types.h"
-#include "../ui/layouts/MosaicLayout.h"
-
-#include <QVBoxLayout>
 
 #include <QWidget>
 #include <QList>
@@ -32,9 +29,6 @@ public:
 	void setMediaDisplayMode(MediaDisplayMode displayMode);
 	[[nodiscard]] MediaDisplayMode mediaDisplayMode() const noexcept;
 
-	void setText(const QString& text);
-	void setAttachments(const QStringList& attachmentsPaths);
-
 	void setAttributes(
 		const QString& text,
 		const QStringList& attachments);
@@ -48,13 +42,15 @@ public:
 
 	[[nodiscard]] bool hasAttachments() const noexcept;
 	[[nodiscard]] bool hasText() const noexcept;
+protected:
+	void resizeEvent(QResizeEvent* event) override;
 private:
+	void updateGeometry();
+
 	[[nodiscard]] int attachmentsHeight() const noexcept;
 	[[nodiscard]] int maximumAttachmentsWidth() const noexcept;
 
 	MessageAttachmentsList _attachments;
-
-	QVBoxLayout* _messageLayout = nullptr;
 	MediaDisplayMode _mediaDisplayMode;
 
 	FlatLabel* _textLabel = nullptr;
