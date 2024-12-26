@@ -75,9 +75,6 @@ MessagesView::MessagesView(QWidget* parent):
 
 	//connect(_mouseDetector.get(), &MouseDetector::needsToShow, this, &MessagesView::show);
 	connect(_chatScrollArea, &ContinuousScroll::addContentRequest, this, &MessagesView::addContent);
-	//addContent();
-	//addContent();
-	//addContent();
 }
 
 void MessagesView::makeMessage(
@@ -120,19 +117,8 @@ void MessagesView::attachmentCliked() {
 	showMinimized();
 }
 
-void MessagesView::paintEvent(QPaintEvent * event) {
-	//qDebug() << "mespaint";
-	//auto painter = QPainter(this);
-
-	//painter.setOpacity(0.5);
-	//painter.fillRect(rect(), Qt::black);
-
-	//painter.setRenderHint(QPainter::Antialiasing);
-
-	//painter.setPen(Qt::white);
-	//painter.drawRect(rect().adjusted(0, 0, -1, -1));
-}
-
+void MessagesView::paintEvent(QPaintEvent * event) 
+{}
 
 void MessagesView::addContent() {
 	const auto guard = gsl::finally([this] { _chatScrollArea->disableScroll(false); });

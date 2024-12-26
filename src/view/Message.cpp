@@ -144,8 +144,6 @@ void Message::resizeEvent(QResizeEvent* event) {
 }
 
 void Message::updateGeometry() {
-	setFixedSize(430, 900);
-
 	switch (_mediaDisplayMode) {
 		case MediaDisplayMode::Stack:
 			for (auto index = 0; index < _attachments.size(); ++index)
@@ -163,8 +161,10 @@ void Message::updateGeometry() {
 			break;
 	}
 
-	if (_textLabel != nullptr && _attachments.isEmpty() == false)
-		_textLabel->move(_attachments[_attachments.length() - 1]->rect().bottomLeft());
+	if (_textLabel != nullptr)
+		_attachments.isEmpty()
+			? _textLabel->move(0, 0)
+			: _textLabel->move(_attachments[_attachments.length() - 1]->rect().bottomLeft());
 }
 
 int Message::attachmentsHeight() const noexcept {

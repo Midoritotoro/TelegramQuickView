@@ -814,7 +814,6 @@ void FlatLabel::refreshSize() {
 		+ _st->margin.bottom();
 
 	resize(fullWidth, fullHeight);
-	qDebug() << "FlatLabel::refreshSize(): " << fullWidth << fullHeight << size();
 }
 
 void FlatLabel::refreshCursor(bool uponSymbol) {
@@ -834,7 +833,7 @@ void FlatLabel::refreshCursor(bool uponSymbol) {
 }
 
 void FlatLabel::textUpdated() {
-	refreshSize();
 	update();
 	setMouseTracking(_selectable || hasLinks());
+	refreshSize();
 }
