@@ -111,12 +111,6 @@ namespace Media {
 		thumbnailImage = images::Prepare(std::move(thumbnailImage),
 			core::utility::GetMinimumSizeWithAspectRatio(thumbnailImage.size(), targetSize.width()));
 
-		thumbnailImage = std::move(thumbnailImage).scaled(
-			thumbnailImage.width() * style::DevicePixelRatio(),
-			thumbnailImage.height() * style::DevicePixelRatio(),
-			Qt::IgnoreAspectRatio,
-			Qt::SmoothTransformation);
-
 		thumbnailImage = images::Opaque(std::move(thumbnailImage));
 		thumbnail = images::PixmapFast(std::move(thumbnailImage));
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../core/Types.h"
+#include "../ui/layouts/MosaicLayout.h"
 
 #include <QVBoxLayout>
 
@@ -31,6 +32,9 @@ public:
 	void setMediaDisplayMode(MediaDisplayMode displayMode);
 	[[nodiscard]] MediaDisplayMode mediaDisplayMode() const noexcept;
 
+	void setText(const QString& text);
+	void setAttachments(const QStringList& attachmentsPaths);
+
 	void setAttributes(
 		const QString& text,
 		const QStringList& attachments);
@@ -55,5 +59,5 @@ private:
 
 	FlatLabel* _textLabel = nullptr;
 
-	Fn<void(const QSize&)> _recountSizeCallback = nullptr;
+	bool _hasText = false;
 };

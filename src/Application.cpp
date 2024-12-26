@@ -24,7 +24,7 @@ Application::Application(int& argc, char** argv) :
     QString photoPath = "C:\\Users\\danya\\Downloads\\code.png";
 
     _messagesView = std::make_unique<MessagesView>();
-    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::Stack);
+    _messagesView->setMessageMediaDisplayMode(Message::MediaDisplayMode::PreviewWithCount);
 
     _messagesView->show();
 
@@ -32,8 +32,8 @@ Application::Application(int& argc, char** argv) :
     auto photoList = QStringList({ photoPath });
 
     //for (int i = 0; i < 5; ++i) {
-       // _messagesView->makeMessage(text);
-        _messagesView->makeMessage(text, photoList);
+    _messagesView->makeMessage(text, videoList);
+    _messagesView->makeMessage(text, photoList);
     //}
 }
 

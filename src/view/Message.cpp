@@ -7,7 +7,7 @@
 
 Message::Message(
 	QWidget* parent
-):
+) :
 	QWidget(parent)
 	, _mediaDisplayMode(MediaDisplayMode::Stack)
 {
@@ -21,73 +21,84 @@ Message::Message(
 	setMouseTracking(true);
 }
 
-void Message::setAttributes(
-	const QString& text,
-	const QStringList& attachments)
-{
-	if (text.isEmpty() == false) {
-		_textLabel = new FlatLabel(this);
-		_textLabel->setText(text);
-	}
+void Message::setText(const QString& text) {
+	_hasText = !text.isEmpty();
 
-	if (attachments.count() > 0)
-		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
+	if (_hasText == false)
+		return;
+
+	_textLabel = new FlatLabel(this);
+	_textLabel->setText(text);
+}
+
+QString Message::text() const noexcept {
+	return _textLabel != nullptr
+		? _textLabel->text().toString()
+		: "";
+}
+
+void Message::setAttachments(const QStringList& attachmentsPaths) {
+	if (attachmentsPaths.length() == 0)
+		return;
 
 	switch (_mediaDisplayMode) {
 
 	case MediaDisplayMode::PreviewWithCount:
-		foreach(const auto & path, attachments) {
-			const auto display = _messageLayout->count() < 1;
-			auto messageAttachment = new MessageAttachment(this, path, display);
+		foreach(const auto & path, attachmentsPaths) {
+			auto messageAttachment = new MessageAttachment(this, path);
 
-			if (display)
+			if (_messageLayout->count() < 1)
 				_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 
 			_attachments.append(messageAttachment);
 
-			if (text.isEmpty() || display == false)
+			if (_hasText == false)
 				continue;
 
-			auto _style = *style::defaultFlatLabelStyle;
-			_style.maximumWidth = messageAttachment->width();
+			auto style = *style::defaultFlatLabelStyle;
+			style.maximumWidth = messageAttachment->width();
 
-			const auto st = new style::FlatLabel(_style);
+			const auto st = new style::FlatLabel(style);
 			_textLabel->setStyle(st);
 		}
 
 		break;
 
 	case MediaDisplayMode::Stack:
-		foreach(const auto & path, attachments) {
+		foreach(const auto & path, attachmentsPaths) {
 			auto messageAttachment = new MessageAttachment(this, path);
 
 			_messageLayout->addWidget(messageAttachment, Qt::AlignLeft | Qt::AlignTop);
 			_attachments.append(messageAttachment);
 
-			if (text.isEmpty())
+			if (_hasText == false)
 				continue;
 
-			auto _style = *style::defaultFlatLabelStyle;
-			_style.maximumWidth = messageAttachment->width();
+			auto style = *style::defaultFlatLabelStyle;
+			style.maximumWidth = messageAttachment->width();
 
-			const auto st = new style::FlatLabel(_style);
+			const auto st = new style::FlatLabel(style);
 			_textLabel->setStyle(st);
 		}
-
 		break;
 
 	case MediaDisplayMode::Album:
 		break;
 	}
 
+
+	if (_attachments.length() > 0)
+		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
+
 	_messageLayout->addWidget(_textLabel, Qt::AlignLeft | Qt::AlignTop);
 }
 
-
-QString Message::text() const noexcept {
-	return _textLabel != nullptr
-		? _textLabel->text().toString()
-		: "";
+void Message::setAttributes(
+	const QString& text,
+	const QStringList& attachments)
+{
+	setText(text);
+	setAttachments(attachments);
 }
 
 const MessageAttachmentsList& Message::attachments() const noexcept {
@@ -99,11 +110,14 @@ QSize Message::sizeHint() const {
 		? _textLabel->fullHeight()
 		: 0;
 
-	qDebug() << "textHeight: " << textHeight;
+	qDebug() << "QSize(maximumAttachmentsWidth(), attachmentsHeight() + textHeight):" << QSize(
+		maximumAttachmentsWidth(),
+		attachmentsHeight() +
+		textHeight);
 
 	return QSize(
 		maximumAttachmentsWidth(),
-		attachmentsHeight() + 
+		attachmentsHeight() +
 		textHeight);
 }
 
@@ -116,11 +130,11 @@ void Message::setMediaDisplayMode(MediaDisplayMode displayMode) {
 }
 
 Message::MediaDisplayMode Message::mediaDisplayMode() const noexcept {
-	return _mediaDisplayMode; 
+	return _mediaDisplayMode;
 }
 
 int Message::indexOfAttachment(not_null<MessageAttachment*> messageAttachment) const noexcept {
-	return _attachments.indexOf(messageAttachment); 
+	return _attachments.indexOf(messageAttachment);
 }
 
 MessageAttachment* Message::attachmentAt(int index) const noexcept {
@@ -148,18 +162,18 @@ int Message::attachmentsHeight() const noexcept {
 	auto height = 0;
 
 	switch (_mediaDisplayMode) {
-		case MediaDisplayMode::Stack:
-			for (auto index = 0; index < _attachments.size(); ++index)
-				height += _attachments[index]->sizeHint().height();
+	case MediaDisplayMode::Stack:
+		for (auto index = 0; index < _attachments.size(); ++index)
+			height += _attachments[index]->sizeHint().height();
 
-			break;
+		break;
 
-		case MediaDisplayMode::PreviewWithCount:
-			height += _attachments[0]->sizeHint().height();
-			break;
+	case MediaDisplayMode::PreviewWithCount:
+		height += _attachments[0]->sizeHint().height();
+		break;
 
-		case MediaDisplayMode::Album:
-			break;
+	case MediaDisplayMode::Album:
+		break;
 	}
 	return height;
 }
@@ -171,19 +185,19 @@ int Message::maximumAttachmentsWidth() const noexcept {
 	auto width = 0;
 
 	switch (_mediaDisplayMode) {
-		case MediaDisplayMode::Stack:
-			for (auto index = 0; index < _attachments.size(); ++index)
-				if (const auto maximumWidth = _attachments[index]->sizeHint().width();
-					maximumWidth > width)
-					width = maximumWidth;
-			break;
+	case MediaDisplayMode::Stack:
+		for (auto index = 0; index < _attachments.size(); ++index)
+			if (const auto maximumWidth = _attachments[index]->sizeHint().width();
+				maximumWidth > width)
+				width = maximumWidth;
+		break;
 
-		case MediaDisplayMode::PreviewWithCount:
-			width = _attachments[0]->sizeHint().width();
-			break;
+	case MediaDisplayMode::PreviewWithCount:
+		width = _attachments[0]->sizeHint().width();
+		break;
 
-		case MediaDisplayMode::Album:
-			break;
+	case MediaDisplayMode::Album:
+		break;
 	}
 
 	return width;

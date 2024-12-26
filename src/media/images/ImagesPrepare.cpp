@@ -73,8 +73,9 @@ namespace images {
 
 	QImage Opaque(QImage&& image) {
 		if (image.hasAlphaChannel()) {
-			image = std::move(image).convertToFormat(
-				QImage::Format_ARGB32_Premultiplied);
+			if (image.format() != QImage::Format_ARGB32_Premultiplied)
+				image = std::move(image).convertToFormat(
+					QImage::Format_ARGB32_Premultiplied);
 
 			auto ints = reinterpret_cast<uint32*>(image.bits());
 			const auto bg = shifted(QColor(Qt::white));
