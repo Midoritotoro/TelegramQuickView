@@ -72,9 +72,6 @@ MessageAttachment::MessageAttachment(
 	setFixedSize(_previewSize);
 
 	concurrent::on_main([this] {
-		if (Media::FindPreviewInCache(_attachmentPath).isNull() == false)
-			return;
-
 		Media::GenerateThumbnail(_attachmentPath, size());
 		update();
 	});

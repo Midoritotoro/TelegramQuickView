@@ -26,7 +26,7 @@ FlatLabel::FlatLabel(QWidget* parent) :
 	init();
 
 	setContentsMargins(0, 0, 0, 0);
-	setStyle(style::defaultFlatLabelStyle);
+	setStyle(style::defaultFlatLabelStyle, false);
 
 	setSelectable(true);
 	setDoubleClickSelectsParagraph(true);
@@ -142,16 +142,17 @@ style::CornersRoundMode FlatLabel::cornerRoundMode() const noexcept {
 	return _cornersRoundMode;
 }
 
-void FlatLabel::setStyle(const style::FlatLabel* style) {
+void FlatLabel::setStyle(const style::FlatLabel* style, bool repaint) {
 	_st = style;
 
-	_text.setMaximumWidth(_st->maximumWidth 
-			- _st->margin.left()
-			- _st->margin.right());
+	_text.setMaximumWidth(textMaxWidth());
 	_text.setMinimumHeight(_st->minimumHeight);
 
-	refreshSize();
+	if (repaint == false || _text.toQString().isEmpty())
+		return;
+
 	update();
+	refreshSize();
 }
 
 const style::FlatLabel* FlatLabel::style() const noexcept {
@@ -225,15 +226,12 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	painter.setPen(Qt::white); 
 
 	const auto textWidth = _st->maximumWidth
-		? _st->maximumWidth
-			- _st->margin.left()
-			- _st->margin.right()
-		: _textWidth
-			? _textWidth
-			:
-				width()
-					- _st->margin.left()
-					- _st->margin.right();
+		? textMaxWidth()
+			: _textWidth
+		? _textWidth
+			: width()
+				- _st->margin.left()
+				- _st->margin.right();
 
 	const auto textLeft = _textWidth
 		? ((_alignment & Qt::AlignLeft)
@@ -768,9 +766,7 @@ void FlatLabel::fillContextMenu(ContextMenuRequest request) {
 int FlatLabel::countTextWidth() const noexcept {
 	const auto available = _allowedWidth
 		? _allowedWidth
-		: _st->maximumWidth
-			- _st->margin.left()
-			- _st->margin.right();
+		: textMaxWidth();
 
 	if (_allowedWidth > 0
 		&& _allowedWidth < _text.maxWidth())

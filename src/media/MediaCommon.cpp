@@ -39,6 +39,9 @@ namespace Media {
 		const QString& path,
 		Type type)
 	{
+		const auto ms = Time::now();
+		const auto timer = gsl::finally([=] { qDebug() << "MediaResolution: " << Time::now() - ms << " ms"; });
+
 		const auto mediaType = type == Type::Unknown
 			? detectMediaType(path)
 			: type;
@@ -48,7 +51,7 @@ namespace Media {
 				return QPixmap(path).size();
 
 			case Type::Video:
-				return FFmpeg::ThumbnailGenerator(path).resolution();
+				return FFmpeg::ThumbnailGenerator::resolution(path);
 		}
 
 		return QSize();
@@ -69,7 +72,7 @@ namespace Media {
 			case Type::Video:
 				preview = images::PixmapFast(
 					std::move(
-						FFmpeg::ThumbnailGenerator(path).generate()));
+						FFmpeg::ThumbnailGenerator::generate(path)));
 				break;
 
 			case Type::Audio:
@@ -94,29 +97,39 @@ namespace Media {
 
 		auto thumbnail = QPixmap();
 
-		if (QPixmapCache::find(path, &thumbnail) &&
-			core::utility::PartiallyEqual(thumbnail.size(), targetSize, 1)) {
+		if (QPixmapCache::find(path, &thumbnail)) {
+			qDebug() << "FFFFFFFFFFFIND THUMBNASFFSFE";
+			return thumbnail;
+		}
+
+	
+		auto thumbnailImage = MediaPreview(path).toImage();
+		if (thumbnailImage.isNull())
+			return QPixmap();
+
+		thumbnailImage = images::Prepare(
+			std::move(thumbnailImage),
+			core::utility::GetMinimumSizeWithAspectRatio(
+				thumbnailImage.size(),
+				targetSize.width()));
+
+		if (core::utility::PartiallyEqual(thumbnailImage.size(),
+			targetSize, 1) == false)
+			return QPixmap();
+
+		thumbnailImage = images::Opaque(std::move(thumbnailImage));
+		thumbnail = images::PixmapFast(std::move(thumbnailImage));
+
+		if (QPixmapCache::cacheLimit() > 0) {
 			auto mediaPreview = QPixmap();
 
 			if (QPixmapCache::find(kPreviewPrefix + path, &mediaPreview))
 				QPixmapCache::remove(kPreviewPrefix + path);
 
-			return thumbnail;
-		}
-
-		auto thumbnailImage = MediaPreview(path).toImage();
-		if (thumbnailImage.isNull())
-			return QPixmap();
-
-		thumbnailImage = images::Prepare(std::move(thumbnailImage),
-			core::utility::GetMinimumSizeWithAspectRatio(thumbnailImage.size(), targetSize.width()));
-
-		thumbnailImage = images::Opaque(std::move(thumbnailImage));
-		thumbnail = images::PixmapFast(std::move(thumbnailImage));
-
-		if (QPixmapCache::cacheLimit() > 0)
+			qDebug() << "inserting cache AAAAAAAAAAAAAAAAAAAAAAAA: " << path;
 			QPixmapCache::insert(path, thumbnail);
 
+		}
 		return thumbnail;
 	}
 } // namespace Media

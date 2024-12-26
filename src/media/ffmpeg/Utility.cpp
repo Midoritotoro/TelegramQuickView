@@ -12,6 +12,7 @@ extern "C" {
 #endif // Q_OS_WIN
 
 #include <qDebug>
+#include "../../core/Time.h"
 
 
 namespace FFmpeg {
@@ -105,6 +106,9 @@ FormatPointer MakeFormatPointer(
 #endif
 	int64_t(*seek)(void* opaque, int64_t offset, int whence)
 ) {
+	//const auto ms = Time::now();
+	//const auto timer = gsl::finally([=] { qDebug() << "MakeFormatPointer: " << Time::now() - ms << " ms"; });
+
 	auto ioPointer = MakeIOPointer(opaque, read, write, seek);
 	if (!ioPointer)
 		return {};
@@ -122,6 +126,7 @@ FormatPointer MakeFormatPointer(
 	const auto guard = gsl::finally([&] { av_dict_free(&options); });
 
 	av_dict_set(&options, "usetoc", "1", 0);
+	av_dict_set(&options, "duration", "100ms", 0);
 
 	const auto error = AvErrorWrap(avformat_open_input(
 		&result, nullptr, nullptr, &options));

@@ -255,12 +255,6 @@ void ScrollArea::addItem(QWidget* item, Qt::Alignment align) {
 				qMin(itemsHeight(), fullHeight));
 
 	widget()->setFixedHeight(newHeight);
-
-	qDebug() << "newHeight: " << newHeight;
-	qDebug() << "itemHeight: " << itemHeight;
-	qDebug() << "_itemsHeight: " << _itemsHeight;
-	qDebug() << "fullHeight: " << fullHeight;
-
 	_scrollLayout->addWidget(item, 0, align);
 }
 

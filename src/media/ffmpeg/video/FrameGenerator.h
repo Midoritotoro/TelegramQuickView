@@ -15,8 +15,14 @@ public:
 		bool last = false;
 	};
 
-	FrameGenerator(const QByteArray& bytes);
-	FrameGenerator(const QString& path);
+	FrameGenerator(
+		const QByteArray& bytes,
+		bool findStreamInfo = true,
+		bool createCodec = true);
+	FrameGenerator(
+		const QString& path,
+		bool findStreamInfo = true,
+		bool createCodec = true);
 
 	[[nodiscard]] Frame renderNext(
 		QSize size,
@@ -80,6 +86,8 @@ private:
 	float _speed = 1.0f;
 
 	QByteArray _bytes = nullptr;
+
+	AVDictionary* _avOptions = nullptr;
 
 	int _swscaleFlags = 0;
 

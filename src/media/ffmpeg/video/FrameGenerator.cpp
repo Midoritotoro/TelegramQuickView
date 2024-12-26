@@ -1,27 +1,43 @@
 #include "FrameGenerator.h"
 #include "../../../core/CoreUtility.h"
 
+#include "../../../core/CoreConcurrent.h"
+
 #include <functional>
 #include <QApplication>
 #include <QScreen>
 
 #include <qDebug>
 
+#ifdef min
+#undef min
+#endif // min
 
 namespace FFmpeg {
 
-namespace {
-	constexpr auto kMaxArea = 1920 * 1080 * 4;
+	namespace {
+		constexpr auto kMaxArea = 1920 * 1080 * 4;
 
-	[[nodiscard]] QByteArray ReadFile(const QString& filepath) {
-		auto file = QFile(filepath);
-		return file.open(QIODevice::ReadOnly)
-			? file.readAll()
-			: QByteArray();
-	}
-} // namespace
+		[[nodiscard]] QByteArray ReadFile(const QString& filepath) {
+			auto file = QFile(filepath);
+			return file.open(QIODevice::ReadOnly)
+				? file.readAll()
+				: QByteArray();
+		}
 
-FrameGenerator::FrameGenerator(const QByteArray& bytes):
+		[[nodiscard]] QByteArray ReadFile(const QString& filepath, int bytes) {
+			auto file = QFile(filepath);
+			return file.open(QIODevice::ReadOnly)
+				? file.read(bytes)
+				: QByteArray();
+		}
+	} // namespace
+
+FrameGenerator::FrameGenerator(
+	const QByteArray& bytes,
+	bool findStreamInfo,
+	bool createCodec
+):
 	_bytes(bytes)
 {
 	const auto ms = Time::now();
@@ -36,24 +52,29 @@ FrameGenerator::FrameGenerator(const QByteArray& bytes):
 		nullptr,
 		&FrameGenerator::Seek);
 
-	const auto error = avformat_find_stream_info(_format.get(), nullptr);
-	if (error < 0)
-		return;
-	
+	if (findStreamInfo)
+		concurrent::on_main([this] {
+			avformat_find_stream_info(_format.get(), nullptr);
+		});
+
 	_bestVideoStreamId = av_find_best_stream(
-			_format.get(), AVMEDIA_TYPE_VIDEO,
-			-1, -1, nullptr, 0);
+		_format.get(), AVMEDIA_TYPE_VIDEO,
+		-1, -1, nullptr, 0);
 
 	if (_bestVideoStreamId < 0)
 		return;
 
-	_codec = MakeCodecPointer({ .stream = _format->streams[_bestVideoStreamId] });
-
-	qDebug() << "Video duration: " << (double)_format->duration / AV_TIME_BASE << " seconds";
+	if (createCodec)
+		_codec = MakeCodecPointer({ .stream = _format->streams[_bestVideoStreamId] });
+	//qDebug() << "Video duration: " << (double)_format->duration / AV_TIME_BASE << " seconds";
 }
 
-FrameGenerator::FrameGenerator(const QString& path):
-	FrameGenerator(ReadFile(path))
+FrameGenerator::FrameGenerator(
+	const QString& path,
+	bool findStreamInfo,
+	bool createCodec
+):
+	FrameGenerator(ReadFile(path), findStreamInfo, createCodec)
 {}
 
 FrameGenerator::Frame FrameGenerator::renderCurrent(

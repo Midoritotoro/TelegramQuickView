@@ -255,6 +255,10 @@ namespace text {
 		return _blocks.empty() || _blocks[0]->type() == TextBlockType::Skip;
 	}
 
+	QString String::toQString() const {
+		return _text;
+	}
+
 	QString String::toString(TextSelection selection) const {
 		return toText(selection, false, false).rich.text;
 	}

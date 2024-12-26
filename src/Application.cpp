@@ -29,12 +29,12 @@ Application::Application(int& argc, char** argv) :
     _messagesView->show();
 
     auto videoList = QStringList({ videoPath, videoPath, videoPath, videoPath, videoPath, videoPath });
-    auto photoList = QStringList({ photoPath });
+    auto photoList = QStringList({ photoPath, photoPath , photoPath , photoPath });
 
-    //for (int i = 0; i < 5; ++i) {
-    _messagesView->makeMessage(text, videoList);
-    //_messagesView->makeMessage(text, photoList);
-    //}
+    for (int i = 0; i < 1; ++i) {
+        _messagesView->makeMessage(text, videoList);
+        _messagesView->makeMessage(text, photoList);
+    }
 }
 
 Application::~Application() {

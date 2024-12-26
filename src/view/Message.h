@@ -54,6 +54,4 @@ private:
 	MediaDisplayMode _mediaDisplayMode;
 
 	FlatLabel* _textLabel = nullptr;
-
-	bool _hasText = false;
 };

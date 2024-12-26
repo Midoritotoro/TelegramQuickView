@@ -26,10 +26,8 @@ void Message::setAttributes(
 	const QString& text,
 	const QStringList& attachments)
 {
-	if (text.isEmpty() == false) {
+	if (text.isEmpty() == false)
 		_textLabel = new FlatLabel(this);
-		_textLabel->setText(text);
-	}
 
 	if (attachments.count() > 0)
 		_textLabel->setCornerRoundMode(style::CornersRoundMode::Bottom);
@@ -43,7 +41,7 @@ void Message::setAttributes(
 
 			_attachments.append(messageAttachment);
 
-			if (display && text.isEmpty() == false) {
+			if (display && text.isEmpty() == false && messageAttachment->width() != style::maximumMessageWidth) {
 				auto _style = *style::defaultFlatLabelStyle;
 				_style.maximumWidth = messageAttachment->width();
 
@@ -60,7 +58,7 @@ void Message::setAttributes(
 
 			_attachments.append(messageAttachment);
 
-			if (text.isEmpty() == false) {
+			if (text.isEmpty() == false && messageAttachment->width() != style::maximumMessageWidth) {
 				auto _style = *style::defaultFlatLabelStyle;
 				_style.maximumWidth = messageAttachment->width();
 
@@ -75,6 +73,7 @@ void Message::setAttributes(
 		break;
 	}
 
+	_textLabel->setText(text);
 	updateGeometry();
 }
 
@@ -97,10 +96,6 @@ QSize Message::sizeHint() const {
 			: style::minimumMessageWidth,
 		attachmentsHeight() +
 		textHeight);
-
-	qDebug() << "this->size(): " << size();
-	qDebug() << "hint: " << hint;
-	qDebug() << "textHeight: " << textHeight;
 
 	return hint;
 }
@@ -164,7 +159,10 @@ void Message::updateGeometry() {
 	if (_textLabel != nullptr)
 		_attachments.isEmpty()
 			? _textLabel->move(0, 0)
-			: _textLabel->move(_attachments[_attachments.length() - 1]->rect().bottomLeft());
+				: _textLabel->move(
+					_attachments[_attachments.length() - 1]->display() == true
+				? _attachments[_attachments.length() - 1]->rect().bottomLeft()
+			: _attachments[0]->rect().bottomLeft());
 }
 
 int Message::attachmentsHeight() const noexcept {

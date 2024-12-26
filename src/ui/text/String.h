@@ -122,6 +122,7 @@ namespace text {
 			return _text.size();
 		}
 
+		[[nodiscard]] QString toQString() const;
 		[[nodiscard]] QString toString(
 			TextSelection selection = AllTextSelection) const;
 		[[nodiscard]] TextWithEntities toTextWithEntities(
@@ -134,7 +135,6 @@ namespace text {
 		TextSelection adjustSelection(
 			TextSelection selection,
 			TextSelection::Type selectType);
-		void clear();
 		void recountNaturalSize(
 			bool initial,
 			Qt::LayoutDirection optionsDirection = Qt::LayoutDirectionAuto);
@@ -161,6 +161,7 @@ namespace text {
 			int outerw,
 			StateRequestElided request) const;
 
+		void clear();
 		const style::TextStyle* style() const noexcept {
 			return _st;
 		}
