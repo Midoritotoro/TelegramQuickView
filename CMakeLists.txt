@@ -55,10 +55,11 @@ SET(MAIN_SOURCES main.cpp
     src/media/MediaCommon.h
     src/media/MediaCommon.cpp
 
+    src/media/MediaCache.h
+    src/media/MediaCache.cpp
+
     src/media/ffmpeg/video/ThumbnailGenerator.h
     src/media/ffmpeg/video/ThumbnailGenerator.cpp
-
-    src/core/concurrent/common/CommonExceptions.cpp
 
     src/core/concurrent/common/CommonGuards.h
 
@@ -80,9 +81,6 @@ SET(MAIN_SOURCES main.cpp
     src/core/concurrent/winapi/WinapiAsync.h
 
     src/core/concurrent/winapi/WinapiDll.h
-
-    src/core/concurrent/winapi/WinapiExceptions.cpp
-    src/core/concurrent/winapi/WinapiExceptions.h
 
     src/core/concurrent/winapi/WinapiList.cpp
     src/core/concurrent/winapi/WinapiList.h

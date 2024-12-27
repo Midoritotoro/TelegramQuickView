@@ -33,18 +33,17 @@ private:
 #error "Configuration is not supported."
 #endif // !WINAPI_X86 && !WINAPI_X64
 
-	// Hide WinAPI SLIST_HEADER
 	struct alignas(kLockFreeAlignment) lock_free_list {
-		void *Next__; // Hide WinAPI SLIST_ENTRY
-		unsigned short Depth__; // Hide WinAPI WORD
-		unsigned short CpuId__; // Hide WinAPI WORD
+		void *Next__;
+		unsigned short Depth__;
+		unsigned short CpuId__;
 	};
 
 	struct alignas(kLockFreeAlignment) BasicEntry;
 	using ProcessEntryMethod = void(*)(BasicEntry *entry);
 
 	struct alignas(kLockFreeAlignment) BasicEntry {
-		void *plain; // Hide WinAPI SLIST_ENTRY
+		void *plain;
 		ProcessEntryMethod process;
 	};
 
@@ -54,18 +53,22 @@ private:
 
 	template <typename Function>
 	struct Entry : BasicEntry {
-		Entry(Function &&function) : function(std::move(function)) {
-		}
-		Entry(const Function &function) : function(function) {
-		}
+		Entry(Function&& function):
+			function(std::move(function)) 
+		{}
+
+		Entry(const Function &function):
+			function(function) 
+		{}
+
 		Function function;
 
 		static void Process(BasicEntry *entry) {
 			auto full = static_cast<Entry*>(entry);
 			auto guard = details::finally([=] { delete full; });
+
 			full->function();
 		}
-
 	};
 
 	template <typename Callable>
@@ -76,6 +79,7 @@ private:
 
 		auto result = new Type(std::forward<Callable>(callable));
 		result->process = &Type::Process;
+
 		return result;
 	}
 
@@ -83,7 +87,6 @@ private:
 
 	const std::unique_ptr<lock_free_list> _impl;
 	bool *_alive = nullptr;
-
 };
 
 } // namespace concurrent::details

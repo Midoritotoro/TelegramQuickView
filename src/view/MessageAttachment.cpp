@@ -87,6 +87,30 @@ QSize MessageAttachment::minimumSizeHint() const {
 	return _previewSize;
 }
 
+QString MessageAttachment::attachmentPath() const noexcept {
+	return _attachmentPath;
+}
+
+Media::Type MessageAttachment::attachmentType() const noexcept {
+	return _attachmentType;
+}
+
+void MessageAttachment::setParentMessage(not_null<Message*> parentMessage) {
+	_parentMessage = parentMessage;
+}
+
+not_null<Message*> MessageAttachment::parentMessage() const noexcept {
+	return _parentMessage;
+}
+
+void MessageAttachment::setDisplay(bool display) {
+	_display = display;
+}
+
+bool MessageAttachment::display() const noexcept {
+	return _display;
+}
+
 void MessageAttachment::paintEvent(QPaintEvent* event) {
 	if (_display == false)
 		return;
@@ -144,22 +168,22 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 	painter.drawText(attachmentsCountTextRect, Qt::AlignCenter, attachmentsCountText);
 }
 
-void MessageAttachment::setParentMessage(not_null<Message*> parentMessage) {
-	_parentMessage = parentMessage;
+void MessageAttachment::mouseMoveEvent(QMouseEvent* event) {
+	if (_thumbnailQuality != Media::Quality::Ultra) {
+		if (_touchTimer == nullptr)
+			_touchTimer = new core::Timer();
+
+		_touchTimer->setCallback([this] {
+
+			})
+	}
+	QAbstractButton::mouseMoveEvent(event);
 }
 
-QString MessageAttachment::attachmentPath() const noexcept {
-	return _attachmentPath;
+void MessageAttachment::mousePressEvent(QMouseEvent* event) {
+
 }
 
-Media::Type MessageAttachment::attachmentType() const noexcept {
-	return _attachmentType;
-}
+bool MessageAttachment::event(QEvent* event) {
 
-Message* MessageAttachment::parentMessage() const noexcept {
-	return _parentMessage;
-}
-
-bool MessageAttachment::display() const noexcept {
-	return _display;
 }

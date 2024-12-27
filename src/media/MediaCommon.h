@@ -15,6 +15,13 @@ namespace Media {
 		Unknown = 0x08
 	};
 
+	enum class Quality : uchar {
+		Low = 0x01,
+		Medium = 0x02,
+		High = 0x04,
+		Ultra = 0x08,
+	};
+
 	[[nodiscard]] Type detectMediaType(const QString& path);
 	
 	[[nodiscard]] QPixmap FindPreviewInCache(const QString& key);
@@ -22,8 +29,11 @@ namespace Media {
 		const QString& path,
 		Type type = Type::Unknown);
 
-	[[nodiscard]] QPixmap MediaPreview(const QString& path);
+	[[nodiscard]] QPixmap MediaPreview(
+		const QString& path,
+		Quality quality = Quality::Medium);
 	[[nodiscard]] QPixmap GenerateThumbnail(
 		const QString& path,
-		const QSize& targetSize);
+		const QSize& targetSize,
+		Quality quality = Quality::Medium);
 } // namespace Media

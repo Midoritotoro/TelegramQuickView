@@ -35,13 +35,14 @@ namespace FFmpeg {
 
 FrameGenerator::FrameGenerator(
 	const QByteArray& bytes,
+	int swscaleFlags,
 	bool findStreamInfo,
 	bool createCodec
 ):
 	_bytes(bytes)
+	, _swscaleFlags(swscaleFlags)
 {
-	const auto ms = Time::now();
-	const auto timer = gsl::finally([=] { qDebug() << "FrameGenerator::FrameGenerator: " << Time::now() - ms; });
+	measureExecutionTime("FrameGenerator::FrameGenerator")
 
 	if (_bytes.isEmpty())
 		return;
@@ -52,10 +53,11 @@ FrameGenerator::FrameGenerator(
 		nullptr,
 		&FrameGenerator::Seek);
 
-	if (findStreamInfo)
-		concurrent::on_main([this] {
-			avformat_find_stream_info(_format.get(), nullptr);
-		});
+	if (findStreamInfo) {
+		const auto error = AvErrorWrap(avformat_find_stream_info(_format.get(), nullptr));
+		if (error)
+			std::cout << error.text() << '\n';
+	}
 
 	_bestVideoStreamId = av_find_best_stream(
 		_format.get(), AVMEDIA_TYPE_VIDEO,
@@ -71,10 +73,12 @@ FrameGenerator::FrameGenerator(
 
 FrameGenerator::FrameGenerator(
 	const QString& path,
+	int swscaleFlags,
 	bool findStreamInfo,
 	bool createCodec
 ):
-	FrameGenerator(ReadFile(path), findStreamInfo, createCodec)
+	FrameGenerator(ReadFile(path), swscaleFlags,
+		findStreamInfo, createCodec)
 {}
 
 FrameGenerator::Frame FrameGenerator::renderCurrent(

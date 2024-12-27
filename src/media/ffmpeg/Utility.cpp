@@ -12,7 +12,9 @@ extern "C" {
 #endif // Q_OS_WIN
 
 #include <qDebug>
+
 #include "../../core/Time.h"
+#include "../../core/CoreUtility.h"
 
 
 namespace FFmpeg {
@@ -195,6 +197,8 @@ const AVCodec* FindDecoder(AVCodecContext* context) {
 }
 
 CodecPointer MakeCodecPointer(CodecDescriptor descriptor) {
+// 	measureExecutionTime("MakeCodecPointer")
+
 	auto error = AvErrorWrap();
 
 	auto result = CodecPointer(avcodec_alloc_context3(nullptr));
@@ -227,8 +231,6 @@ CodecPointer MakeCodecPointer(CodecDescriptor descriptor) {
 		context->get_format = GetHwFormat;
 		context->opaque = context;
 	}
-	else
-		qDebug() << QString("Video Info: Using software \"%2\" decoder.").arg(codec->name);
 	if ((error = avcodec_open2(context, codec, nullptr)))
 		return {};
 
@@ -285,6 +287,7 @@ SwscalePointer MakeSwscalePointer(
 		nullptr,
 		nullptr,
 		nullptr);
+
 	return SwscalePointer(
 		result,
 		{ srcSize, srcFormat, dstSize, dstFormat });

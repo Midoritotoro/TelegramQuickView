@@ -17,10 +17,12 @@ public:
 
 	FrameGenerator(
 		const QByteArray& bytes,
+		int swscaleFlags = 0,
 		bool findStreamInfo = true,
 		bool createCodec = true);
 	FrameGenerator(
 		const QString& path,
+		int swscaleFlags = 0,
 		bool findStreamInfo = true,
 		bool createCodec = true);
 

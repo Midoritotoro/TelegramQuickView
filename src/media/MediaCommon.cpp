@@ -13,6 +13,25 @@
 namespace Media {
 	namespace {
 		inline constexpr auto kPreviewPrefix = "_p";
+
+		[[nodiscard]] int QualityToSwscaleFlags(Quality quality) {
+			switch (quality) {
+				case Quality::Low:
+					return SWS_POINT;
+
+				case Quality::Medium:
+					return SWS_BICUBIC;
+
+				case Quality::High:
+					return SWS_BILINEAR;
+
+				case Quality::Ultra:
+					return SWS_SINC;
+
+				default: 
+					return SWS_BICUBIC;	
+			}
+		}
 	} // namespace 
 
 	Type detectMediaType(const QString& filePath) {
@@ -57,7 +76,10 @@ namespace Media {
 		return QSize();
 	}
 
-	QPixmap MediaPreview(const QString& path) {
+	QPixmap MediaPreview(
+		const QString& path,
+		Quality quality)
+	{
 		if (const auto _preview = FindPreviewInCache(kPreviewPrefix + path);
 			_preview.isNull() == false)
 			return _preview;
@@ -72,7 +94,8 @@ namespace Media {
 			case Type::Video:
 				preview = images::PixmapFast(
 					std::move(
-						FFmpeg::ThumbnailGenerator::generate(path)));
+						FFmpeg::ThumbnailGenerator::generate(path,
+							QualityToSwscaleFlags(quality))));
 				break;
 
 			case Type::Audio:
@@ -90,18 +113,16 @@ namespace Media {
 
 	QPixmap GenerateThumbnail(
 		const QString& path,
-		const QSize& targetSize)
+		const QSize& targetSize,
+		Quality quality)
 	{
 		if (targetSize.isNull())
 			return QPixmap();
 
 		auto thumbnail = QPixmap();
 
-		if (QPixmapCache::find(path, &thumbnail)) {
-			qDebug() << "FFFFFFFFFFFIND THUMBNASFFSFE";
+		if (QPixmapCache::find(path, &thumbnail))
 			return thumbnail;
-		}
-
 	
 		auto thumbnailImage = MediaPreview(path).toImage();
 		if (thumbnailImage.isNull())
@@ -126,10 +147,9 @@ namespace Media {
 			if (QPixmapCache::find(kPreviewPrefix + path, &mediaPreview))
 				QPixmapCache::remove(kPreviewPrefix + path);
 
-			qDebug() << "inserting cache AAAAAAAAAAAAAAAAAAAAAAAA: " << path;
 			QPixmapCache::insert(path, thumbnail);
-
 		}
+
 		return thumbnail;
 	}
 } // namespace Media

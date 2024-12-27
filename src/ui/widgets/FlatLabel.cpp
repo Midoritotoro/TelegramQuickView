@@ -36,6 +36,8 @@ FlatLabel::FlatLabel(QWidget* parent) :
 
 	setTextAlignment(Qt::AlignLeft);
 	setLinksTrusted();
+
+	setAttribute(Qt::WA_AcceptTouchEvents);
 }
 
 void FlatLabel::init() {
