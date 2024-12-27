@@ -36,7 +36,7 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
 
-	bool event(QEvent* event) override;
+	bool event(QEvent* _event) override;
 private:
 	void paintAttachmentCount(QPainter& painter);
 

@@ -11,8 +11,8 @@
 #define USE_COMMON_QUEUE
 #endif // !USE_COMMON_QUEUE
 
-namespace concurrent::details {
 
+namespace concurrent::details {
 	extern concurrent::queue* MainQueue;
 	extern std::atomic<int> MainQueueCounter;
 
@@ -47,23 +47,20 @@ namespace concurrent::details {
 } // namespace crl::details
 
 namespace concurrent {
-
 	void init_main_queue(main_queue_processor processor);
-
 	inline void wrap_main_queue(main_queue_wrapper wrapper) {
-		// If wrapping is needed here, it can be done inside processor.
+		
 	}
 
 	template <typename Callable>
-	inline void on_main(Callable&& callable) {
+	inline void invokeAsync(Callable&& callable) {
 		if (const auto main = details::main_queue_pointer())
 			main->async(std::forward<Callable>(callable));
 	}
 
 	template <typename Callable>
-	inline void on_main_sync(Callable&& callable) {
+	inline void invokeSync(Callable&& callable) {
 		if (const auto main = details::main_queue_pointer())
 			main->sync(std::forward<Callable>(callable));
 	}
-
 } // namespace concurrent

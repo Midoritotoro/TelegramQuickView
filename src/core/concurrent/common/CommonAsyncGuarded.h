@@ -3,7 +3,7 @@
 #include "CommonConfig.h"
 #include "CommonGuards.h"
 
-#include "CommonOnMain.h"
+#include "CommonAsync.h"
 
 #include <memory>
 #include <type_traits>
@@ -91,7 +91,7 @@ template <
 	typename GuardTraits = guard_traits<std::decay_t<Guard>>,
 	typename = std::enable_if_t<
 		sizeof(GuardTraits) != details::dependent_zero<GuardTraits>>>
-inline void on_main(Guard &&object, Callable &&callable) {
+inline void invokeAsync(Guard &&object, Callable &&callable) {
 	return on_main(guard(
 		std::forward<Guard>(object),
 		std::forward<Callable>(callable)));
@@ -103,7 +103,7 @@ template <
 	typename GuardTraits = guard_traits<std::decay_t<Guard>>,
 	typename = std::enable_if_t<
 		sizeof(GuardTraits) != details::dependent_zero<GuardTraits>>>
-inline void on_main_sync(Guard &&object, Callable &&callable) {
+inline void invokeSync(Guard &&object, Callable &&callable) {
 	return on_main_sync(guard(
 		std::forward<Guard>(object),
 		std::forward<Callable>(callable)));

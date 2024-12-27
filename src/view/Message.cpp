@@ -14,7 +14,7 @@ Message::Message(
 	, _mediaDisplayMode(MediaDisplayMode::Stack)
 {
 	setContentsMargins(0, 0, 0, 0);
-	setMouseTracking(true);
+	// setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 
 QString Message::text() const noexcept {

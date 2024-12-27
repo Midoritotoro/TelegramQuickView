@@ -12,9 +12,9 @@
 #endif // !USE_COMMON_QUEUE
 
 namespace concurrent {
-namespace details {
-class main_queue_pointer;
-} // namespace details
+	namespace details {
+		class main_queue_pointer;
+	} // namespace details
 
 class queue {
 public:
@@ -31,16 +31,17 @@ public:
 	template <typename Callable>
 	void sync(Callable &&callable) {
 		semaphore waiter;
+
 		async([&] {
 			const auto guard = details::finally([&] { waiter.release(); });
 			callable();
 		});
+
 		waiter.acquire();
 	}
 
 private:
 	friend class details::main_queue_pointer;
-
 	static void ProcessCallback(void *that);
 
 	queue(main_queue_processor processor);
@@ -51,7 +52,6 @@ private:
 	main_queue_processor _main_processor = nullptr;
 	details::list _list;
 	std::atomic_flag _queued = ATOMIC_FLAG_INIT;
-
 };
 
 } // namespace concurrent

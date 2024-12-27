@@ -21,6 +21,8 @@
 #endif min
 
 namespace {
+	inline constexpr auto kInactiveTimeout = 2000;
+
 	[[nodiscard]] QSize countAttachmentSize(
 		const QSize& originalSize,
 		int maxWidth,
@@ -59,6 +61,7 @@ MessageAttachment::MessageAttachment(
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TranslucentBackground);
 
+	setMouseTracking(true);
 	setCursor(Qt::PointingHandCursor);
 
 	if (display == false)
@@ -71,7 +74,7 @@ MessageAttachment::MessageAttachment(
 			style::maximumMessageWidth, style::maximumMessageWidth);
 	setFixedSize(_previewSize);
 
-	concurrent::on_main([this] {
+	concurrent::invokeAsync([this] {
 		Media::GenerateThumbnail(_attachmentPath, size());
 		update();
 	});
@@ -158,7 +161,7 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 	const auto attachmentsCountText = "+" + QString::number(_parentMessage->attachmentsLength() - 1);
 	const auto attachmentsCountTextSize = core::utility::TextSize(attachmentsCountText, font);
 
-	QRect attachmentsCountTextRect(QPoint(), attachmentsCountTextSize);
+	auto attachmentsCountTextRect = QRect(QPoint(), attachmentsCountTextSize);
 	attachmentsCountTextRect.moveCenter(rect().center());
 
 	painter.setPen(Qt::white);
@@ -169,21 +172,31 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 }
 
 void MessageAttachment::mouseMoveEvent(QMouseEvent* event) {
+	qDebug() << "mouseevent";
 	if (_thumbnailQuality != Media::Quality::Ultra) {
 		if (_touchTimer == nullptr)
 			_touchTimer = new core::Timer();
 
 		_touchTimer->setCallback([this] {
+			concurrent::invokeAsync([this] {
+				QPixmapCache::remove(_attachmentPath);
+				Media::GenerateThumbnail(
+					_attachmentPath, size(), Media::Quality::Ultra);
 
-			})
+				update();
+				_touchTimer = nullptr;
+			});
+		});
+
+		_touchTimer->callOnce(kInactiveTimeout);
+		_thumbnailQuality = Media::Quality::Ultra;
 	}
-	QAbstractButton::mouseMoveEvent(event);
 }
 
 void MessageAttachment::mousePressEvent(QMouseEvent* event) {
-
+	QAbstractButton::mousePressEvent(event);
 }
 
-bool MessageAttachment::event(QEvent* event) {
-
+bool MessageAttachment::event(QEvent* _event) {
+	return QAbstractButton::event(_event);
 }

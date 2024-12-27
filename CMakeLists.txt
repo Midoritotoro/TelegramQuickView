@@ -61,14 +61,15 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/ThumbnailGenerator.h
     src/media/ffmpeg/video/ThumbnailGenerator.cpp
 
+    src/ui/widgets/PopupMenu.h
+    src/ui/widgets/PopupMenu.cpp
+
     src/core/concurrent/common/CommonGuards.h
 
-    src/core/concurrent/common/CommonObjectAsync.h
+    src/core/concurrent/common/CommonAsync.cpp
+    src/core/concurrent/common/CommonAsync.h
 
-    src/core/concurrent/common/CommonOnMain.cpp
-    src/core/concurrent/common/CommonOnMain.h
-
-    src/core/concurrent/common/CommonOnMainGuarded.h
+    src/core/concurrent/common/CommonAsyncGuarded.h
 
     src/core/concurrent/common/CommonQueue.cpp
     src/core/concurrent/common/CommonQueue.h

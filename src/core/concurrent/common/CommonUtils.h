@@ -19,8 +19,13 @@ struct false_t {
 
 template <typename Return, typename ...Args>
 struct check_plain_function {
+	#pragma warning(push)
+	#pragma warning(disable: 1698)
+
 	static false_t check(...);
 	static true_t check(Return(*)(Args...));
+
+	#pragma warning(pop)
 };
 
 template <typename Callable, typename Return, typename ...Args>
@@ -31,24 +36,28 @@ constexpr bool is_plain_function_v = sizeof(
 template <typename Callable>
 class finalizer {
 public:
-	explicit finalizer(Callable &&callable)
-	: _callable(std::move(callable)) {
-	}
 	finalizer(const finalizer &other) = delete;
 	finalizer &operator=(const finalizer &other) = delete;
-	finalizer(finalizer &&other)
-	: _callable(std::move(other._callable))
-	, _disabled(std::exchange(other._disabled, true)) {
-	}
+
+	explicit finalizer(Callable&& callable) :
+		_callable(std::move(callable))
+	{}
+
+	finalizer(finalizer &&other):
+		_callable(std::move(other._callable))
+		, _disabled(std::exchange(other._disabled, true)) 
+	{}
+
 	finalizer &operator=(finalizer &&other) {
 		_callable = std::move(other._callable);
 		_disabled = std::exchange(other._disabled, true);
+
 		return *this;
 	}
+
 	~finalizer() {
-		if (!_disabled) {
+		if (!_disabled)
 			_callable();
-		}
 	}
 
 private:
@@ -61,7 +70,9 @@ template <
 	typename Callable,
 	typename = std::enable_if_t<!std::is_reference_v<Callable>>>
 finalizer<Callable> finally(Callable &&callable) {
-	return finalizer<Callable>{ std::move(callable) };
+	return finalizer<Callable>{ 
+		std::move(callable) 
+	};
 }
 
 } // namespace concurrent::details

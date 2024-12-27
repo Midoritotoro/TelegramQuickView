@@ -153,5 +153,13 @@ namespace style {
 			.minimumWidth = style::minimumMessageWidth,
 			.minimumHeight = style::minimumMessageHeight
 		};
+
+		defaultPopupMenuStyle = new PopupMenu{
+			.margin = { 0, 0, 0, 0 },
+			.colorBg = QColor(24, 37, 51),
+			.borderRadius = 10,
+			.textStyle = defaultTextStyle,
+			.textPalette = &defaultTextPalette
+		};
 	}
 } // namespace style

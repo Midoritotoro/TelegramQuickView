@@ -5,7 +5,7 @@
 #include "concurrent/common/CommonQueue.h"
 #include "concurrent/winapi/WinapiSemaphore.h"
 
-#include "concurrent/common/CommonOnMainGuarded.h"
+#include "concurrent/common/CommonAsyncGuarded.h"
 
 
 #if defined USE_WINAPI
