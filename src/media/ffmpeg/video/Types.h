@@ -14,6 +14,10 @@
 #define AUDIO_REPLAY_GAIN_TRACK             (0)
 #define AUDIO_REPLAY_GAIN_ALBUM             (1)
 
+#define FIELD_OF_VIEW_DEGREES_DEFAULT  80.f
+#define FIELD_OF_VIEW_DEGREES_MAX 150.f
+#define FIELD_OF_VIEW_DEGREES_MIN 20.f
+
 #define SUCCESS        0
 /** Unspecified error */
 #define EGENERIC       (-2 * (1 << (sizeof (int) * 8 - 2))) /* INT_MIN */
@@ -470,6 +474,16 @@ namespace FFmpeg {
          VIDEO_CONTEXT_CVPX,      //!< private: cvpx_video_context*
          VIDEO_CONTEXT_MMAL,      //!< empty
          VIDEO_CONTEXT_GSTDECODE, //!< empty
+     };
+
+     struct fourcc_desc {
+         unsigned char alias[4];
+         const char* desc;
+     };
+
+     struct fourcc_mapping {
+         unsigned char alias[4];
+         uint32_t fourcc;
      };
 
 

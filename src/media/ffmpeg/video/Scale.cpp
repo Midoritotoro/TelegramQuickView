@@ -10,21 +10,23 @@ extern "C" {
 #define container_of(ptr, type, member) \
     ((type *)(((char *)(ptr)) - offsetof(type, member)))
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
 
 #include <Windows.h>
 
 namespace FFmpeg {
-	int GetCpuCount() {
+    int GetCpuCount() {
 #if defined Q_OS_WIN
-		SYSTEM_INFO info;
-		GetSystemInfo(&info);
+        SYSTEM_INFO info;
+        GetSystemInfo(&info);
 
-		return info.dwNumberOfProcessors;
+        return info.dwNumberOfProcessors;
 #endif // Q_OS_WIN
-		return 1;
-	}
+        return 1;
+    }
 
-     bool AtomicRcDec(atomic_rc_t* rc)
+    bool AtomicRcDec(atomic_rc_t* rc)
     {
         uintptr_t prev = atomic_fetch_sub_explicit(&rc->refs, (uintptr_t)1,
             std::memory_order_acq_rel);
@@ -36,7 +38,7 @@ namespace FFmpeg {
     void PictureRelease(picture_t* picture)
     {
         if (AtomicRcDec(&picture->refs))
-            picture_Destroy(picture);
+            PictureDestroy(picture);
     }
 
     void DecoderDeviceRelease(decoder_device* device)
@@ -47,9 +49,96 @@ namespace FFmpeg {
         {
             if (device->ops->close != NULL)
                 device->ops->close(device);
-          //  vlc_objres_clear(VLC_OBJECT(device));
-          //  vlc_object_delete(device);
+            //  vlc_objres_clear(VLC_OBJECT(device));
+            //  vlc_object_delete(device);
         }
+    }
+
+
+    int FourccCmp(
+        const void* key,
+        const void* ent) 
+    {
+        return memcmp(key, ent, 4);
+    }
+
+    fourcc_t Lookup(
+        fourcc_t fourcc,
+        const char** dsc,
+        const struct fourcc_mapping* mapv, size_t mapc,
+        const struct fourcc_desc* dscv, size_t dscc)
+    {
+        const struct fourcc_mapping* mapping;
+        const struct fourcc_desc* desc;
+
+        mapping = (fourcc_mapping*)bsearch(&fourcc, mapv, mapc, sizeof(*mapv), fourcc_cmp);
+        if (mapping != NULL)
+        {
+            if (dsc != NULL)
+            {
+                desc = (fourcc_desc*)bsearch(&fourcc, dscv, dscc, sizeof(*dscv), fourcc_cmp);
+                if (desc != NULL)
+                {
+                    *dsc = desc->desc;
+                    return mapping->fourcc;
+                }
+            }
+            fourcc = mapping->fourcc;
+        }
+
+        desc = (fourcc_desc*)bsearch(&fourcc, dscv, dscc, sizeof(*dscv), fourcc_cmp);
+        if (desc == NULL)
+            return 0; /* Unknown FourCC */
+        if (dsc != NULL)
+            *dsc = desc->desc;
+        return fourcc; /* Known FourCC (has a description) */
+    }
+
+    fourcc_t LookupVideo(
+        fourcc_t fourcc,
+        const char** dsc)
+    {
+        return Lookup(fourcc, dsc, mapping_video, ARRAY_SIZE(mapping_video),
+            desc_video, ARRAY_SIZE(desc_video));
+    }
+
+    fourcc_t LookupAudio(
+        fourcc_t fourcc,
+        const char** dsc)
+    {
+        return Lookup(fourcc, dsc, mapping_audio, ARRAY_SIZE(mapping_audio),
+            desc_audio, ARRAY_SIZE(desc_audio));
+    }
+
+    fourcc_t LookupSpu(
+        fourcc_t fourcc,
+        const char** dsc)
+    {
+        return Lookup(fourcc, dsc, mapping_spu, ARRAY_SIZE(mapping_spu),
+            desc_spu, ARRAY_SIZE(desc_spu));
+    }
+
+    fourcc_t LookupCat(
+        fourcc_t fourcc,
+        const char** dsc,
+        int cat)
+    {
+        switch (cat)
+        {
+        case VIDEO_ES:
+            return LookupVideo(fourcc, dsc);
+        case AUDIO_ES:
+            return LookupAudio(fourcc, dsc);
+        case SPU_ES:
+            return LookupSpu(fourcc, dsc);
+        }
+
+        fourcc_t ret = LookupVideo(fourcc, dsc);
+        if (!ret)
+            ret = LookupAudio(fourcc, dsc);
+        if (!ret)
+            ret = LookupSpu(fourcc, dsc);
+        return ret;
     }
 
 
@@ -75,7 +164,7 @@ namespace FFmpeg {
         }
     }
 
-     void PictureDestroyContext(picture_t* p_picture)
+    void PictureDestroyContext(picture_t* p_picture)
     {
         picture_context_t* ctx = p_picture->context;
         if (ctx != NULL)
@@ -88,30 +177,85 @@ namespace FFmpeg {
         }
     }
 
-     void AncillaryRelease(struct ancillary* ancillary)
-     {
-         if (AtomicRcDec(&ancillary->rc))
-         {
-             if (ancillary->free_cb != NULL)
-                 ancillary->free_cb(ancillary->data);
-             free(ancillary);
-         }
-     };
+    void AncillaryRelease(struct ancillary* ancillary)
+    {
+        if (AtomicRcDec(&ancillary->rc))
+        {
+            if (ancillary->free_cb != NULL)
+                ancillary->free_cb(ancillary->data);
+            free(ancillary);
+        }
+    };
 
-     void AncillaryArrayClear(struct ancillary*** array)
-     {
-         if (*array != NULL)
-         {
-             for (struct ancillary** ancillary = *array;
-                 *ancillary != NULL; ancillary++)
-             {
-                 ancillary_Release(*ancillary);
-             }
+    void AncillaryArrayClear(struct ancillary*** array)
+    {
+        if (*array != NULL)
+        {
+            for (struct ancillary** ancillary = *array;
+                *ancillary != NULL; ancillary++)
+            {
+                AncillaryRelease(*ancillary);
+            }
 
-             free(*array);
-             *array = NULL;
-         }
+            free(*array);
+            *array = NULL;
+        }
+    }
+
+    fourcc_t FourccGetCodec(int cat, fourcc_t fourcc)
+    {
+        fourcc_t codec = LookupCat(fourcc, NULL, cat);
+        return codec ? codec : fourcc;
+    }
+
+    void VideoFormatSetup(
+        video_format_t* p_fmt, fourcc_t i_chroma,
+        int i_width, int i_height,
+        int i_visible_width, int i_visible_height,
+        int i_sar_num, int i_sar_den)
+    {
+        p_fmt->i_chroma = FourccGetCodec(VIDEO_ES, i_chroma);
+        p_fmt->i_width = i_width;
+        p_fmt->i_visible_width = i_visible_width;
+        p_fmt->i_height = i_height;
+        p_fmt->i_visible_height = i_visible_height;
+        p_fmt->i_x_offset =
+            p_fmt->i_y_offset = 0;
+        p_fmt->orientation = ORIENT_NORMAL;
+        vlc_ureduce(&p_fmt->i_sar_num, &p_fmt->i_sar_den,
+            i_sar_num, i_sar_den, 0);
+
+    }
+    void ViewpointInit(viewpoint_t* p_vp)
+    {
+        p_vp->yaw = p_vp->pitch = p_vp->roll = 0.0f;
+        p_vp->fov = FIELD_OF_VIEW_DEGREES_DEFAULT;
+    }
+
+     void VideoFormatInit(
+         video_format_t* p_src,
+         fourcc_t i_chroma)
+     {
+         memset(p_src, 0, sizeof(video_format_t));
+         p_src->i_chroma = i_chroma;
+
+         ViewpointInit(&p_src->pose);
      }
+
+     picture_t* PictureNew(
+        fourcc_t i_chroma, int i_width,
+        int i_height, int i_sar_num,
+        int i_sar_den)
+     {
+         video_format_t fmt;
+
+         VideoFormatInit(&fmt, 0);
+         VideoFormatSetup(&fmt, i_chroma, i_width, i_height,
+             i_width, i_height, i_sar_num, i_sar_den);
+
+         return picture_NewFromFormat(&fmt);
+     }
+
 
 
     void PictureDestroy(picture_t* picture)
@@ -264,13 +408,13 @@ namespace FFmpeg {
         }
         if (p_sys->ctxA)
         {
-            p_sys->p_src_a = picture_New(CODEC_GREY, i_fmti_visible_width, p_fmti->i_visible_height, 0, 1);
-            p_sys->p_dst_a = picture_New(CODEC_GREY, i_fmto_visible_width, p_fmto->i_visible_height, 0, 1);
+            p_sys->p_src_a = PictureNew(CODEC_GREY, i_fmti_visible_width, p_fmti->i_visible_height, 0, 1);
+            p_sys->p_dst_a = PictureNew(CODEC_GREY, i_fmto_visible_width, p_fmto->i_visible_height, 0, 1);
         }
         if (p_sys->i_extend_factor != 1)
         {
-            p_sys->p_src_e = picture_New(p_fmti->i_chroma, i_fmti_visible_width, p_fmti->i_visible_height, 0, 1);
-            p_sys->p_dst_e = picture_New(p_fmto->i_chroma, i_fmto_visible_width, p_fmto->i_visible_height, 0, 1);
+            p_sys->p_src_e = PictureNew(p_fmti->i_chroma, i_fmti_visible_width, p_fmti->i_visible_height, 0, 1);
+            p_sys->p_dst_e = PictureNew(p_fmto->i_chroma, i_fmto_visible_width, p_fmto->i_visible_height, 0, 1);
 
             if (p_sys->p_src_e)
                 memset(p_sys->p_src_e->p[0].p_pixels, 0, p_sys->p_src_e->p[0].i_pitch * p_sys->p_src_e->p[0].i_lines);
