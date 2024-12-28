@@ -8,29 +8,6 @@
 
 
 namespace Media {
-    namespace {
-        inline constexpr auto defaultCacheLimit = 1024 * 10; // 10 Mb
-    } // namespace
-
-    using namespace std::chrono_literals;
-
-    static inline qsizetype cost(const QPixmap& pixmap)
-    {
-        const qint64 costKb = static_cast<qint64>(pixmap.width())
-            * pixmap.height() * pixmap.depth() / (8 * 1024);
-        const qint64 costMax = std::numeric_limits<qsizetype>::max();
-
-        return static_cast<qsizetype>(qBound(1LL, costKb, costMax));
-    }
-
-    static inline bool qt_pixmapcache_thread_test()
-    {
-        if (Q_LIKELY(QCoreApplication::instance() && QThread::currentThread() == QCoreApplication::instance()->thread()))
-            return true;
-
-        return false;
-    }
-
     MediaCachePrivate::MediaCachePrivate():
         QObject(nullptr),
         QCache<Media::Cache::Key, Media::Cache::MediaCacheEntry>(defaultCacheLimit),
@@ -70,40 +47,40 @@ namespace Media {
     }
 
 
-    QPixmap* MediaCachePrivate::object(const QString& key) const
+    OpenGL::Image* MediaCachePrivate::object(const QString& key) const
     {
         if (const auto it = cacheKeys.find(key); it != cacheKeys.cend())
-            return object(it.value());
+            return object(const_cast<Cache::Key&>(it.value()));
         return nullptr;
     }
 
-    QPixmap* MediaCachePrivate::object(const Cache::Key& key) const
+    OpenGL::Image* MediaCachePrivate::object(Cache::Key& key) const
     {
         Q_ASSERT(key.isValid());
-        QPixmap* ptr = QCache<Cache::Key, Cache::MediaCacheEntry>::object(key);
+        OpenGL::Image* ptr = QCache<Cache::Key, Cache::MediaCacheEntry>::object(key);
         //We didn't find the pixmap in the cache, the key is not valid anymore
         if (!ptr)
-            const_cast<QPMCache*>(this)->releaseKey(key);
+            const_cast<MediaCachePrivate*>(this)->releaseKey(key);
         return ptr;
     }
 
-    bool MediaCachePrivate::insert(const QString& key, const QPixmap& pixmap, int cost)
+    bool MediaCachePrivate::insert(const QString& key, const OpenGL::Image& image, int cost)
     {
         remove(key);
 
-        auto k = insert(pixmap, cost);
+        auto k = insert(image, cost);
         if (k.isValid()) {
-            k.d->stringKey = key;
+            k.data_ptr()->stringKey = key;
             cacheKeys[key] = std::move(k);
             return true;
         }
         return false;
     }
 
-    Cache::Key MediaCachePrivate::insert(const QPixmap& pixmap, int cost)
+    Cache::Key MediaCachePrivate::insert(const OpenGL::Image& image, int cost)
     {
         Cache::Key cacheKey = createKey();
-        bool success = QCache<Cache::Key, Cache::MediaCacheEntry>::insert(cacheKey, new Cache::MediaCacheEntry(cacheKey, pixmap), cost);
+        bool success = QCache<Cache::Key, Cache::MediaCacheEntry>::insert(cacheKey, new Cache::MediaCacheEntry(cacheKey, image), cost);
         Q_ASSERT(success || !cacheKey.isValid());
         if (success) {
             if (!theid) {
@@ -148,9 +125,9 @@ namespace Media {
         return key;
     }
 
-    void MediaCachePrivate::releaseKey(const Cache::Key& key)
+    void MediaCachePrivate::releaseKey(Cache::Key& key)
     {
-        Cache::KeyData* keyData = key.d;
+        Cache::KeyData* keyData = key.data_ptr();
         if (!keyData)
             return;
         if (!keyData->stringKey.isNull())
@@ -171,12 +148,12 @@ namespace Media {
         freeKey = 0;
         keyArraySize = 0;
         //Mark all keys as invalid
-        const QList<Cache::Key> keys = QCache<Cache::Key, MediaCacheEntry>::keys();
-        for (const auto& key : keys) {
-            if (key.d)
-                key.d->isValid = false;
+        QList<Cache::Key> keys = QCache<Cache::Key, Cache::MediaCacheEntry>::keys();
+        for (auto& key : keys) {
+            if (key.data_ptr())
+                key.data_ptr()->isValid = false;
         }
-        QCache<QPixmapCache::Key, QPixmapCacheEntry>::clear();
+        QCache<Cache::Key, Cache::MediaCacheEntry>::clear();
         // Nothing left to flush; stop the timer
         if (theid) {
             killTimer(theid);
@@ -184,15 +161,15 @@ namespace Media {
         }
     }
 
-    Cache::KeyData* MediaCachePrivate::get(const Cache::Key& key) {
-        return key.d;
+    Cache::KeyData* MediaCachePrivate::get(Cache::Key& key) {
+        return key.data_ptr();
     }
 
     Cache::KeyData* MediaCachePrivate::getKeyData(Cache::Key* key)
     {
-        if (!key->d)
-            key->d = new Cache::KeyData;
-        return key->d;
+        if (!key->data_ptr())
+            key->setData(new Cache::KeyData);
+        return key->data_ptr();
     }
 
 }

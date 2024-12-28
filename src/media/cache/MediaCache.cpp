@@ -1,112 +1,61 @@
 #include "MediaCache.h"
+#include "MediaCacheUtility.h"
 
 
 namespace Media {
-    
-
-    Q_GLOBAL_STATIC(QPMCache, pm_cache)
-
-        int Q_AUTOTEST_EXPORT q_QPixmapCache_keyHashSize()
+    bool MediaCache::find(const QString& key, OpenGL::Image* image)
     {
-        return pm_cache()->size();
-    }
-
-    QPixmapCacheEntry::~QPixmapCacheEntry()
-    {
-        pm_cache()->releaseKey(key);
-    }
-
-    bool QPixmapCache::find(const QString& key, QPixmap* pixmap)
-    {
-        if (key.isEmpty() || !qt_pixmapcache_thread_test())
+        if (key.isEmpty() || !Cache::PixmapCacheThreadTest())
             return false;
-        QPixmap* ptr = pm_cache()->object(key);
-        if (ptr && pixmap)
-            *pixmap = *ptr;
-        return ptr != nullptr;
+
+        OpenGL::Image* ptr = pm_cache()->object(key);
+        if (ptr && image)
+            *image = *ptr;
+
+        return (ptr != nullptr);
     }
 
-    bool QPixmapCache::find(const Key& key, QPixmap* pixmap)
+    bool MediaCache::insert(const QString& key, const OpenGL::Image& image)
     {
-        if (!qt_pixmapcache_thread_test())
+        if (key.isEmpty() || !Cache::PixmapCacheThreadTest())
             return false;
-        //The key is not valid anymore, a flush happened before probably
-        if (!key.d || !key.d->isValid)
-            return false;
-        QPixmap* ptr = pm_cache()->object(key);
-        if (ptr && pixmap)
-            *pixmap = *ptr;
-        return ptr != nullptr;
+
+        return pm_cache()->insert(key, image, Cache::PixmapCost(image.toPixmap()));
     }
 
-    bool QPixmapCache::insert(const QString& key, const QPixmap& pixmap)
+    int MediaCache::cacheLimit()
     {
-        if (key.isEmpty() || !qt_pixmapcache_thread_test())
-            return false;
-        return pm_cache()->insert(key, pixmap, cost(pixmap));
-    }
-
-    QPixmapCache::Key QPixmapCache::insert(const QPixmap& pixmap)
-    {
-        if (!qt_pixmapcache_thread_test())
-            return QPixmapCache::Key();
-        return pm_cache()->insert(pixmap, cost(pixmap));
-    }
-
-    int QPixmapCache::cacheLimit()
-    {
-        if (!qt_pixmapcache_thread_test())
+        if (!Cache::PixmapCacheThreadTest())
             return 0;
+
         return pm_cache()->maxCost();
     }
 
-    void QPixmapCache::setCacheLimit(int n)
+    void MediaCache::setCacheLimit(int n)
     {
-        if (!qt_pixmapcache_thread_test())
+        if (!Cache::PixmapCacheThreadTest())
             return;
+
         pm_cache()->setMaxCost(n);
     }
 
-    void QPixmapCache::remove(const QString& key)
+    void MediaCache::remove(const QString& key)
     {
-        if (key.isEmpty() || !qt_pixmapcache_thread_test())
+        if (key.isEmpty() || !Cache::PixmapCacheThreadTest())
             return;
+
         pm_cache()->remove(key);
     }
 
-    void QPixmapCache::remove(const Key& key)
+    void MediaCache::clear()
     {
-        if (!qt_pixmapcache_thread_test())
+        if (!QCoreApplication::closingDown() && !Cache::PixmapCacheThreadTest())
             return;
-
-        if (!key.d || !key.d->isValid)
-            return;
-        pm_cache()->remove(key);
-    }
-
-    void QPixmapCache::clear()
-    {
-        if (!QCoreApplication::closingDown() && !qt_pixmapcache_thread_test())
-            return;
-        QT_TRY{
+        try {
             if (pm_cache.exists())
                 pm_cache->clear();
-        } QT_CATCH(const std::bad_alloc&) {
+        } catch (const std::bad_alloc&) {
            
         }
-    }
-
-    Q_AUTOTEST_EXPORT void qt_qpixmapcache_flush_detached_pixmaps() // for tst_qpixmapcache
-    {
-        if (!qt_pixmapcache_thread_test())
-            return;
-        pm_cache()->flushDetachedPixmaps(true);
-    }
-
-    Q_AUTOTEST_EXPORT int qt_qpixmapcache_qpixmapcache_total_used() // for tst_qpixmapcache
-    {
-        if (!qt_pixmapcache_thread_test())
-            return 0;
-        return (pm_cache()->totalCost() + 1023) / 1024;
     }
 } // namespace Media

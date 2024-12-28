@@ -1,4 +1,5 @@
 #include "MediaCacheGeneral.h"
+#include "MediaCachePrivate.h"
 
 
 namespace Media::Cache {
@@ -10,27 +11,6 @@ namespace Media::Cache {
     KeyData::~KeyData()
     {}
 
-    MediaCacheEntry::MediaCacheEntry(
-        const Key& key,
-        const gl::Image& image
-    ): 
-        gl::Image(image),
-        key(key)
-    {
-        QPlatformPixmap* pd = handle();
-        if (pd && pd->classId() == QPlatformPixmap::RasterClass) {
-            QRasterPlatformPixmap* d = static_cast<QRasterPlatformPixmap*>(pd);
-            if (!d->buffer()->isNull() && d->buffer()->data_ptr()->paintEngine
-                && !d->buffer()->data_ptr()->paintEngine->isActive())
-            {
-                delete d->buffer()->data_ptr()->paintEngine;
-                delete d->buffer()->data_ptr()->paintEngine;
-                d->buffer()->data_ptr()->paintEngine = nullptr;
-            }
-        }
-    }
-
- 
     Key::Key():
         d(nullptr)
     {}
@@ -69,4 +49,30 @@ namespace Media::Cache {
     size_t Key::hash(size_t seed) const noexcept {
         return qHash(this->d ? this->d->key : 0, seed);
     }
+
+    MediaCacheEntry::MediaCacheEntry(
+        const Key& key,
+        const OpenGL::Image& image
+    ) :
+        OpenGL::Image(image),
+        key(key)
+    {
+        QPlatformPixmap* pd = toPixmap().handle();
+        if (pd && pd->classId() == QPlatformPixmap::RasterClass) {
+            QRasterPlatformPixmap* d = static_cast<QRasterPlatformPixmap*>(pd);
+            if (!d->buffer()->isNull() && d->buffer()->data_ptr()->paintEngine
+                && !d->buffer()->data_ptr()->paintEngine->isActive())
+            {
+                delete d->buffer()->data_ptr()->paintEngine;
+                delete d->buffer()->data_ptr()->paintEngine;
+                d->buffer()->data_ptr()->paintEngine = nullptr;
+            }
+        }
+    }
+
+    MediaCacheEntry::~MediaCacheEntry()
+    {
+        pm_cache()->releaseKey(key);
+    }
+
 }

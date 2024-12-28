@@ -4,6 +4,8 @@
 #include "../../core/Types.h"
 #include "MediaCacheGeneral.h"
 
+#include <qglobalstatic.h>
+
 #include <QObject>
 #include <QCache>
 
@@ -11,10 +13,16 @@
 
 
 namespace Media {
+    namespace {
+        inline constexpr auto defaultCacheLimit = 1024 * 10; // 10 Mb
+    } // namespace
+
+    using namespace std::chrono_literals;
+
     class MediaCachePrivate: 
         public QObject,
-        public QCache<Media::Cache::Key,
-            Media::Cache::MediaCacheEntry>
+        public QCache<Cache::Key,
+            Cache::MediaCacheEntry>
     {
         Q_OBJECT
     public:
@@ -24,11 +32,11 @@ namespace Media {
         void timerEvent(QTimerEvent*) override;
         bool insert(
             const QString& key,
-            const QPixmap& pixmap,
+            const OpenGL::Image& image,
             int cost);
 
         Cache::Key insert(
-            const QPixmap& pixmap,
+            const OpenGL::Image& image,
             int cost);
 
         bool remove(const QString& key);
@@ -37,13 +45,13 @@ namespace Media {
         void resizeKeyArray(int size);
         Cache::Key createKey();
 
-        void releaseKey(const Cache::Key& key);
+        void releaseKey(Cache::Key& key);
         void clear();
 
-        QPixmap* object(const QString& key) const;
-        QPixmap* object(const Cache::Key& key) const;
+        OpenGL::Image* object(const QString& key) const;
+        OpenGL::Image* object(Cache::Key& key) const;
 
-        static Cache::KeyData* get(const Cache::Key& key);
+        static Cache::KeyData* get(Cache::Key& key);
         static Cache::KeyData* getKeyData(Cache::Key* key);
 
         bool flushDetachedPixmaps(bool nt);
@@ -62,4 +70,6 @@ namespace Media {
         QHash<QString, Media::Cache::Key> cacheKeys;
         bool t;
     };
+
+    Q_GLOBAL_STATIC(MediaCachePrivate, pm_cache);
 } // namespace Media

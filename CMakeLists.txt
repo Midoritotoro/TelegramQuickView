@@ -66,6 +66,11 @@ SET(MAIN_SOURCES main.cpp
     src/media/cache/MediaCachePrivate.h
     src/media/cache/MediaCachePrivate.cpp
 
+    src/media/cache/MediaCacheUtility.h
+
+    src/media/MediaItemBase.cpp
+    src/media/MediaItemBase.h
+
     src/media/ffmpeg/video/ThumbnailGenerator.h
     src/media/ffmpeg/video/ThumbnailGenerator.cpp
 
@@ -282,8 +287,8 @@ SET(MAIN_SOURCES main.cpp
     src/ui/effects/shaders/dual_kawase_up.frag
     src/ui/effects/shaders/simple.vert
 
-    src/gl/GlImage.cpp
-    src/gl/GlImage.h
+    src/opengl/OpenGLImage.cpp
+    src/opengl/OpenGLImage.h
 
 	src/ui/effects/vertex.h
 

@@ -3,22 +3,19 @@
 #include "MediaCacheGeneral.h"
 #include "MediaCachePrivate.h"
 
+#include "../MediaItemBase.h"
+
 
 namespace Media {
-	template <class Key, class T>
 	class MediaCache {
 	public:
         static int cacheLimit();
-        static void setCacheLimit(int);
+        static void setCacheLimit(int limit);
 
-        static bool find(const QString& key, QPixmap* pixmap);
-        static bool find(const Key& key, QPixmap* pixmap);
-
-        static bool insert(const QString& key, const QPixmap& pixmap);
-        static Key insert(const QPixmap& pixmap);
+        static bool find(const QString& key, OpenGL::Image* image);
+        static bool insert(const QString& key, const OpenGL::Image& image);
 
         static void remove(const QString& key);
-        static void remove(const Key& key);
 
         static void clear();
 	};
