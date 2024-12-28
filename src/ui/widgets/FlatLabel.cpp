@@ -128,11 +128,11 @@ Qt::Alignment FlatLabel::alignment() const noexcept {
 	return _alignment;
 }
 
-void FlatLabel::setContextMenu(not_null<QMenu*> menu) {
+void FlatLabel::setContextMenu(not_null<PopupMenu*> menu) {
 	_contextMenu = menu;
 }
 
-QMenu* FlatLabel::contextMenu() const noexcept {
+PopupMenu* FlatLabel::contextMenu() const noexcept {
 	return _contextMenu;
 }
 
@@ -222,7 +222,7 @@ void FlatLabel::paintEvent(QPaintEvent* event) {
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 	painter.setOpacity(_opacity);
 
-	style::RoundCorners(painter, size(), 10, _cornersRoundMode);
+	style::RoundCorners(painter, size(), _st->borderRadius, _cornersRoundMode);
 	painter.fillRect(QRect(0, 0, _st->maximumWidth, height()), _st->colorBg);
 
 	painter.setPen(Qt::white); 
@@ -714,7 +714,7 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 				&& (state.symbol >= _selection.from)
 				&& (state.symbol < _selection.to)));
 
-	_contextMenu = new QMenu(this);
+	_contextMenu = new PopupMenu(this);
 
 	_contextMenu->show();
 	_contextMenu->move(_lastMousePos);

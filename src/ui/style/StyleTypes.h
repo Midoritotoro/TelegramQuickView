@@ -16,6 +16,7 @@ namespace style {
 	using margins = QMargins;
 	using font = internal::Font;
 	using owned_font = internal::OwnedFont;
+	using icon = QIcon;
 
 	static constexpr cursor cursorDefault = Qt::ArrowCursor;
 	static constexpr cursor cursorPointer = Qt::PointingHandCursor;

@@ -20,7 +20,7 @@ namespace FFmpeg {
 	[[nodiscard]] bool GoodStorageForFrame(const QImage& storage, QSize size);
 
 	[[nodiscard]] QImage CreateFrameStorage(QSize size);
-	[[nodiscard]] void UnPremultiply(QImage& dst, const QImage& src);
+	void UnPremultiply(QImage& dst, const QImage& src);
 
 	void PremultiplyInplace(QImage& image);
 } // namespace FFmpeg

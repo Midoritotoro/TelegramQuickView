@@ -7,31 +7,30 @@
 #include "../BasicClickHandlers.h"
 
 #include "../text/String.h"
-
-#include <QWidget>
-#include "../style/StyleFont.h"
-
-#include "../style/StyleWidgets.h"
+#include "PopupMenu.h"
 
 
 namespace {
 	inline constexpr auto phraseContextCopySelected = "Копировать текст";
 
-	text::TextParseOptions _labelOptions = {
+	inline constexpr text::TextParseOptions _labelOptions = {
 		text::TextParseMultiline | text::TextParseLinks | text::TextParseHashtags
-		| text::TextParseMentions | text::TextParseBotCommands | text::TextParseMarkdown, // flags
-		0, // maxw
-		0, // maxh
-		Qt::LayoutDirectionAuto, // dir
+		| text::TextParseMentions | text::TextParseBotCommands | text::TextParseMarkdown,
+		0,
+		0,
+		Qt::LayoutDirectionAuto
 	};
 } // namespace
 
 
-class FlatLabel : public QWidget, public ClickHandlerHost {
+class FlatLabel : 
+	public QWidget, 
+	public ClickHandlerHost 
+{
 	Q_OBJECT
 public:
 	struct ContextMenuRequest {
-		QMenu* menu;
+		PopupMenu* menu;
 		text::TextSelection selection;
 		ClickHandlerPtr link;
 		bool uponSelection = false;
@@ -66,8 +65,8 @@ public:
 	void setTextAlignment(Qt::Alignment alignment);
 	[[nodiscard]] Qt::Alignment alignment() const noexcept;
 
-	void setContextMenu(not_null<QMenu*> menu);
-	[[nodiscard]] QMenu* contextMenu() const noexcept;
+	void setContextMenu(not_null<PopupMenu*> menu);
+	[[nodiscard]] PopupMenu* contextMenu() const noexcept;
 
 	void setCornerRoundMode(style::CornersRoundMode cornersRoundMode);
 	[[nodiscard]] style::CornersRoundMode cornerRoundMode() const noexcept;
@@ -165,7 +164,7 @@ private:
 	text::TextSelection _selection, _savedSelection;
 	text::TextSelection::Type _selectionType = text::TextSelection::Type::Letters;
 
-	QMenu* _contextMenu = nullptr;
+	PopupMenu* _contextMenu = nullptr;
 
 	Fn<void(ContextMenuRequest)> _contextMenuHook = nullptr;
 	style::CornersRoundMode _cornersRoundMode;

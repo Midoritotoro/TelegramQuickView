@@ -1,29 +1,34 @@
 #pragma once
 
-#include "../style/StyleCore.h"
+
 #include "../../core/Timer.h"
 
-#include "../../core/InvokeQueued.h"
-#include "../BasicClickHandlers.h"
+#include "../style/StyleFont.h"
+#include "../style/StyleWidgets.h"
 
-#include "../text/String.h"
+#include "FlatButton.h"
 
 #include <QWidget>
-#include "../style/StyleFont.h"
-
-#include "../style/StyleWidgets.h"
+#include <QAction>
 
 
 class PopupMenu : public QWidget {
 	Q_OBJECT
 public:
+	using Action = FlatButton;
+	using Actions = std::vector<Action*>;
+
 	PopupMenu(QWidget* parent = nullptr);
 
 	[[nodiscard]] QSize sizeHint() const override;
 	[[nodiscard]] QSize minimumSizeHint() const override;
 
-	void setAction(const QAction& action);
-	[[nodiscard]] QAction action(int index) const noexcept;
+	void addAction(
+		const QString& title,
+		Fn<void()> callback,
+		const style::icon* icon = nullptr);
+
+	[[nodiscard]] Action* action(int index) const;
 
 	void setOpacity(float opacity);
 	[[nodiscard]] float opacity() const noexcept;
@@ -32,21 +37,21 @@ public:
 		const style::PopupMenu* style,
 		bool repaint = true);
 	[[nodiscard]] const style::PopupMenu* style() const noexcept;
+
+	void popup(const QPoint& point);
+	void addSeparator();
 protected:
 	void paintEvent(QPaintEvent* event) override;
-	void mouseMoveEvent(QMouseEvent* event) override;
-	void mousePressEvent(QMouseEvent* event) override;
-
-	void mouseReleaseEvent(QMouseEvent* event) override;
-	void mouseDoubleClickEvent(QMouseEvent* event) override;
 
 	void focusOutEvent(QFocusEvent* event) override;
 	void focusInEvent(QFocusEvent* event) override;
 
-	void keyPressEvent(QKeyEvent* event) override;
 	bool event(QEvent* _event) override;
 private:
-	const style::PopupMenu* _st = nullptr;
+	void recountSize();
 
-	
+	const style::PopupMenu* _st = nullptr;
+	Actions _actions;
+
+	float _opacity = 1.f;
 };

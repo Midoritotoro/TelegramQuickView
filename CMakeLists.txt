@@ -64,6 +64,9 @@ SET(MAIN_SOURCES main.cpp
     src/ui/widgets/PopupMenu.h
     src/ui/widgets/PopupMenu.cpp
 
+    src/ui/widgets/Separator.h
+    src/ui/widgets/Separator.cpp
+
     src/core/concurrent/common/CommonGuards.h
 
     src/core/concurrent/common/CommonAsync.cpp

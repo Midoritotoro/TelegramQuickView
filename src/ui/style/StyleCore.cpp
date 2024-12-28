@@ -133,33 +133,6 @@ namespace style {
 	}
 
 	void RegisterStyles() {
-		loadStyles();
-
-		defaultTextStyle = new TextStyle{
-		   ._font = style::font(13, 0, 0),
-		   .lineHeight = 14,
-		   .linkUnderLine = true,
-		   .blockquote = {} };
-
-		defaultFlatLabelStyle = new FlatLabel{
-			.margin = margins{
-				10, 10, 10, 10
-			},
-			.colorBg = QColor(24, 37, 51),
-			.textStyle = defaultTextStyle,
-			.textPalette = &defaultTextPalette,
-			.maximumWidth = style::maximumMessageWidth,
-			.maximumHeight = style::maximumTextHeight,
-			.minimumWidth = style::minimumMessageWidth,
-			.minimumHeight = style::minimumMessageHeight
-		};
-
-		defaultPopupMenuStyle = new PopupMenu{
-			.margin = { 0, 0, 0, 0 },
-			.colorBg = QColor(24, 37, 51),
-			.borderRadius = 10,
-			.textStyle = defaultTextStyle,
-			.textPalette = &defaultTextPalette
-		};
+		initStyles();
 	}
 } // namespace style
