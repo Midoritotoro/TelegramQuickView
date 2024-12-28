@@ -73,4 +73,5 @@ private:
 	Media::Type _currentMediaType = Media::Type::Unknown;
 
 	QString _currentMediaPath;
+	uint32 _currFPS = 0;
 };

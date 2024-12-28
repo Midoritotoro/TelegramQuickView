@@ -68,7 +68,6 @@ FrameGenerator::FrameGenerator(
 
 	if (createCodec)
 		_codec = MakeCodecPointer({ .stream = _format->streams[_bestVideoStreamId] });
-	//qDebug() << "Video duration: " << (double)_format->duration / AV_TIME_BASE << " seconds";
 }
 
 FrameGenerator::FrameGenerator(
@@ -215,9 +214,6 @@ FrameGenerator::Frame FrameGenerator::renderNext(
 	Qt::AspectRatioMode mode,
 	bool fullScreen) 
 {
-	//	const auto ms = Time::now();
-	//  const auto time = gsl::finally([&ms] { qDebug() << "renderNext: " << Time::now() - ms << " ms"; });
-
 	if (!_codec)
 		return {};
 	else if (!_current.frame)

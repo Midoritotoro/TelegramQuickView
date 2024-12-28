@@ -17,6 +17,8 @@ VolumeController::VolumeController(QWidget* parent) :
 	_speakerOff = QImage(":/assets/images/speaker_white_off.png");
 	_speakerOn = QImage(":/assets/images/speaker_white_on.png");
 	_speakerSmallOn = QImage(":/assets/images/speaker_white_small_on.png");
+
+	qDebug() << "_speakerOn: " << _speakerOn.size();
 }
 
 

@@ -1451,7 +1451,8 @@ void Renderer::prepareElisionAt(
 }
 
 void Renderer::fillParagraphBg(int paddingBottom) {
-	// qDebug() << "_quote == nullptr: " << (_quote == nullptr);
+	// 
+	// () << "_quote == nullptr: " << (_quote == nullptr);
 
 	if (_quote) {
 		const auto cutoff = _quote->collapsed

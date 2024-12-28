@@ -172,7 +172,6 @@ void MessageAttachment::paintAttachmentCount(QPainter& painter) {
 }
 
 void MessageAttachment::mouseMoveEvent(QMouseEvent* event) {
-	qDebug() << "mouseevent";
 	if (_thumbnailQuality != Media::Quality::Ultra) {
 		if (_touchTimer == nullptr)
 			_touchTimer = new core::Timer();

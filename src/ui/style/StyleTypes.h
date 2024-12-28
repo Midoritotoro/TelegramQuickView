@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <QCursor>
+#include <QIcon>
 
 
 namespace style {

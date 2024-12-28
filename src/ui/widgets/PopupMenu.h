@@ -38,6 +38,8 @@ public:
 		bool repaint = true);
 	[[nodiscard]] const style::PopupMenu* style() const noexcept;
 
+	[[nodiscard]] bool empty() const noexcept;
+
 	void popup(const QPoint& point);
 	void addSeparator();
 protected:
@@ -48,7 +50,7 @@ protected:
 
 	bool event(QEvent* _event) override;
 private:
-	void recountSize();
+	void updateGeometry();
 
 	const style::PopupMenu* _st = nullptr;
 	Actions _actions;

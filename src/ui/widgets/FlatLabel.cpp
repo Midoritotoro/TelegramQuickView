@@ -716,9 +716,6 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 
 	_contextMenu = new PopupMenu(this);
 
-	_contextMenu->show();
-	_contextMenu->move(_lastMousePos);
-
 	auto request = ContextMenuRequest({
 		.menu = _contextMenu,
 		.selection = _selectable ? _selection : text::TextSelection(),
@@ -730,7 +727,7 @@ void FlatLabel::showContextMenu(QContextMenuEvent* e, ContextMenuReason reason) 
 		? _contextMenuHook(request)
 		: fillContextMenu(request);
 
-	if (_contextMenu)
+	if (_contextMenu->empty())
 		_contextMenu = nullptr;
 	else {
 		_contextMenu->popup(e->globalPos());

@@ -39,10 +39,8 @@ MediaViewer::MediaViewer(
 		"background-color: rgba(15, 15, 15, 99)\n"
 	"}");
 
-	QString currentPath = QCoreApplication::applicationDirPath();
-	QDir cssDir(currentPath + "/../../assets/images");
 
-	QString arrowPath = cssDir.absolutePath() + "/arrow_right.png";
+	QString arrowPath = ":/assets/images/arrow_right.png";
 
 	_grid = new QGridLayout(this);
 	_mediaPlayer = std::make_unique<MediaPlayer>();

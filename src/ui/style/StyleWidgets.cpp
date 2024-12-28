@@ -67,7 +67,13 @@ namespace style {
 			.textStyle = defaultTextStyle,
 			.textPalette = &defaultTextPalette,
 
-			.borderRadius = 10
+			.borderRadius = 10,
+
+			.maximumWidth = 150,
+			.maximumHeight = 210,
+
+			.minimumWidth = 64,
+			.minimumHeight = 30
 		};
 
 		defaultFlatButtonStyle = new FlatButton{
@@ -77,7 +83,7 @@ namespace style {
 			.textStyle = defaultTextStyle,
 			.textPalette = &defaultTextPalette,
 
-			.borderRadius = 10,
-		}
+			.borderRadius = 10
+		};
 	}
 } // namespace style

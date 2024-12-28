@@ -4,6 +4,8 @@
 #include <QAbstractEventDispatcher>
 
 #include <functional>
+#include "../core/CoreConcurrent.h"
+
 
 Manager::Manager():
 	_state(State::Stopped)
@@ -85,13 +87,12 @@ void Manager::process() {
 			return emit endOfMedia();
 
 		emit positionChanged(_frameGenerator->position());
-		emit needToRepaint(frame.image);
 
 		auto nowMs = Time::now() - ms;
+
+		concurrent::invokeAsync([=] { emit needToRepaint(frame.image, 1000 / nowMs);  });
+
 		const auto timeout = qMax(1, _frameGenerator->frameDelay() - nowMs);
-
-		qDebug() << "_frameGenerator->frameDelay(): " << _frameGenerator->frameDelay() << " timeout: " << _frameGenerator->frameDelay() - nowMs;
-
 		_timer.start(timeout);
 	}
 }
@@ -149,7 +150,7 @@ void Manager::rewind(Time::time position) {
 		_frameGenerator->rewind(position);
 
 		const auto frame = _frameGenerator->renderNext(_size, Qt::IgnoreAspectRatio, _showNormal);
-		emit needToRepaint(frame.image);
+		emit needToRepaint(frame.image, 0);
 
 		if (_frameGenerator->position() >= _frameGenerator->duration() - _frameGenerator->frameDelay())
 			emit endOfMedia();

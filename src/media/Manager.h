@@ -21,7 +21,7 @@ public:
 	};
 Q_SIGNALS:
 	void endOfMedia();
-	void needToRepaint(const QImage& frame);
+	void needToRepaint(const QImage& frame, int timeout);
 
 	void positionChanged(qint64 position);
 	void durationChanged(qint64 duration);

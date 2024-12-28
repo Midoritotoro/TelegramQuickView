@@ -107,7 +107,14 @@ namespace text {
 
 	void String::setLink(uint16 index, const ClickHandlerPtr& link) {
 		const auto extended = _extended.get();
-		// qDebug() << "extended == nullptr: " << (extended == nullptr);
+		// 
+		// 
+		// 
+		// 
+		// 
+		// 
+		// 
+		// () << "extended == nullptr: " << (extended == nullptr);
 
 		if (extended && index > 0 && index <= extended->links.size())
 			extended->links[index - 1] = link;

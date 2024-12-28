@@ -14,6 +14,7 @@
 #include <qopenglfunctions_3_3_core.h>
 
 #include "../images/ImagesPrepare.h"
+#include "../../core/CoreUtility.h"
 
 
 namespace {
@@ -97,8 +98,10 @@ MediaPlayer::MediaPlayer(QWidget* parent):
 
 	_mediaPlayerPanel->setVolume(20);
 
-	connect(_manager.get(), &Manager::needToRepaint, this, [this](const QImage& image) {
+	connect(_manager.get(), &Manager::needToRepaint, this, [this](const QImage& image, int fps) {
+		_currFPS = fps;
 		_current = image;
+
 		update();
 		});
 
@@ -120,8 +123,6 @@ void MediaPlayer::setMedia(const QString& path) {
 	_currentMediaType = Media::detectMediaType(path);
 	_currentMediaPath = path;
 
-	qDebug() << "currentMediaPath: " << _currentMediaPath;
-
 	if (_currentMediaType == Media::Type::Unknown)
 		return;
 
@@ -130,7 +131,7 @@ void MediaPlayer::setMedia(const QString& path) {
 
 	switch (_currentMediaType) {
 		case Media::Type::Video:
-			_manager->setVideo(std::move(std::make_unique<FFmpeg::FrameGenerator>(data)));
+			_manager->setVideo(std::move(std::make_unique<FFmpeg::FrameGenerator>(data, SWS_BICUBIC)));
 			_mediaPlayerPanel->updateStateWidget(VideoStateWidget::State::Pause);
 			play();
 
@@ -196,8 +197,10 @@ void MediaPlayer::resizeEvent(QResizeEvent* event) {
 }
 
 void MediaPlayer::paintEvent(QPaintEvent* event) {
-	QPainter painter(this);
+	auto painter = QPainter(this);
 	paintBackground(painter, event);
+
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
 	const auto center = _current.size().width() < size().width()
 		|| _current.size().height() < size().height()
@@ -209,6 +212,16 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 		painter.drawImage(center, _current);
 	else
 		painter.drawImage(QRect(QPoint(0, 0), size()), _current);
+
+	const auto text = QString::number(_currFPS);
+	const auto frameTopLeft = _currentFrameRect.topLeft();
+
+	const auto textSize = core::utility::TextSize(text, painter.font());
+
+	painter.setPen(Qt::black);
+	painter.drawText(QPoint(
+		frameTopLeft.x() + textSize.width(),
+		frameTopLeft.y() + textSize.height()), text);
 }
 
 void MediaPlayer::mousePressEvent(QMouseEvent* event) {

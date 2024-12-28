@@ -60,8 +60,8 @@ namespace style {
 
 	struct Separator {
 		int width = 0;
-		int padding;
 
+		margins padding = { 0, 0, 0, 0 };
 		color colorFg;
 	};
 
@@ -77,6 +77,12 @@ namespace style {
 		const TextPalette* textPalette = nullptr;
 
 		int borderRadius = 0;
+
+		int maximumWidth = 0;
+		int maximumHeight = 0;
+
+		int minimumWidth = 0;
+		int minimumHeight = 0;
 	};
 
 
