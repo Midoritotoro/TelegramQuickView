@@ -208,17 +208,17 @@ void MediaPlayer::paintEvent(QPaintEvent* event) {
 
 	_currentFrameRect = QRect(center, _current.size());
 
-	if (_current.size().width() <= size().width() && _current.size().height() <= size().height())
-		painter.drawImage(center, _current);
-	else
-		painter.drawImage(QRect(QPoint(0, 0), size()), _current);
+	//if (_current.size().width() <= size().width() && _current.size().height() <= size().height())
+	//	painter.drawImage(center, _current);
+	//else
+	//	painter.drawImage(QRect(QPoint(0, 0), size()), _current);
 
-	const auto text = QString::number(_currFPS);
+	const auto text = "Fps: " + QString::number(_currFPS);
 	const auto frameTopLeft = _currentFrameRect.topLeft();
 
 	const auto textSize = core::utility::TextSize(text, painter.font());
 
-	painter.setPen(Qt::black);
+	painter.setPen(Qt::red);
 	painter.drawText(QPoint(
 		frameTopLeft.x() + textSize.width(),
 		frameTopLeft.y() + textSize.height()), text);

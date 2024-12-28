@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QScreen>
 
+#include "../../images/ImagesBuffer.h"
 #include <qDebug>
 
 #ifdef min
@@ -85,7 +86,7 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 	Qt::AspectRatioMode mode,
 	bool fullScreen)
 {
-	const auto screenSize = core::utility::screenResolution();
+	measureExecutionTime("FrameGenerator::renderCurrent")
 	const auto frame = _current.frame.get();
 
 	const auto width = frame->width;
@@ -94,28 +95,13 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 	if (!width || !height)
 		return {};
 
-	auto scaledFrameSize = !size.isEmpty()
-		? QSize(width, height).scaled(size, mode) 
-		: QSize(width, height);
-
+	auto scaledFrameSize = QSize(width, height);
 	auto requiredSize = !size.isEmpty() ? size : scaledFrameSize;
 
-	if (fullScreen) {
-		double scale = qMin(static_cast<double>(screenSize.width()) / width,
-			static_cast<double>(screenSize.height()) / height);
+	if (fullScreen)
+		scaledFrameSize = requiredSize = recountMaximumFrameSize(requiredSize);
 
-		if (width * scale > (screenSize.width() * 0.7)) {
-			const auto maximumWidthScale = (screenSize.width() * 0.7) / width;
-			scale = qMin(scale, maximumWidthScale);
-		}
-
-		const auto totalSize = QSize(width * scale, height * scale);
-
-		scaledFrameSize = scaledFrameSize.scaled(totalSize, mode);
-		requiredSize = requiredSize.scaled(totalSize, mode);
-	}
-	
-	auto storage = CreateFrameStorage(requiredSize);
+	auto storage = images::CreateFrameStorage(requiredSize);
 
 	const auto dx = (requiredSize.width() - scaledFrameSize.width()) / 2;
 	const auto dy = (requiredSize.height() - scaledFrameSize.height()) / 2;
@@ -193,12 +179,11 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 			dstPerLine * (requiredSize.height() - scaledFrameSize.height() - dy));
 	}
 	if (withAlpha)
-		PremultiplyInplace(storage);
+		images::PremultiplyInplace(storage);
 
 	const auto duration = _next.frame
 		? (_next.position - _current.position)
 		: _current.duration;
-
 
 	ClearFrameMemory(frame);
 
@@ -235,6 +220,8 @@ void FrameGenerator::setSpeed(float speed) {
 }
 
 void FrameGenerator::rewind(Time::time positionMs) {
+	measureExecutionTime("FrameGenerator::rewind")
+
 	if (_codec == nullptr)
 		return;
 
@@ -295,13 +282,15 @@ Time::time FrameGenerator::frameDelay() const noexcept {
 
 int FrameGenerator::Read(void* opaque, 
 	uint8_t* buffer,
-	int bufferSize) {
+	int bufferSize) 
+{
 	return static_cast<FrameGenerator*>(opaque)->read(buffer, bufferSize);
 }
 
 int64_t FrameGenerator::Seek(void* opaque,
 	int64_t offset, 
-	int whence) {
+	int whence) 
+{
 	return static_cast<FrameGenerator*>(opaque)->seek(offset, whence);
 }
 
@@ -345,8 +334,25 @@ int64_t FrameGenerator::seek(
 	return now;
 }
 
+QSize FrameGenerator::recountMaximumFrameSize(const QSize& targetSize) {
+	const auto width = targetSize.width();
+	const auto height = targetSize.height();
+
+	const auto screenSize = core::utility::screenResolution();
+	double scale = qMin(static_cast<double>(screenSize.width()) / width,
+		static_cast<double>(screenSize.height()) / height);
+
+	if (width * scale > (screenSize.width() * 0.7)) {
+		const auto maximumWidthScale = (screenSize.width() * 0.7) / width;
+		scale = qMin(scale, maximumWidthScale);
+	}
+
+	return QSize(width * scale, height * scale);
+}
+
 
 void FrameGenerator::readNextFrame() {
+	measureExecutionTime("FrameGenerator::readNextFrame")
 	//	const auto milliseconds = Time::now();
 	//	const auto time = gsl::finally([&milliseconds] { qDebug() << "readNextFrame: " << Time::now() - milliseconds << " ms";  });
 
@@ -418,6 +424,8 @@ void FrameGenerator::readNextFrame() {
 }
 
 void FrameGenerator::resolveNextFrameTiming() {
+	measureExecutionTime("FrameGenerator::resolveNextFrameTiming")
+
 	const auto base = _format->streams[_bestVideoStreamId]->time_base;
 
 #if DA_FFMPEG_HAVE_DURATION

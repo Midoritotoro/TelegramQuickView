@@ -68,6 +68,8 @@ private:
 		int64_t offset,
 		int whence);
 
+	[[nodiscard]] QSize recountMaximumFrameSize(const QSize& targetSize);
+
 	FormatPointer _format = nullptr;
 	CodecPointer _codec = nullptr;
 

@@ -1,8 +1,7 @@
 #pragma once 
 
 #include <QOpenGlFunctions>
-
-
+#include <QImage>
 
 namespace gl {
 	class Image {

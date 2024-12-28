@@ -46,6 +46,8 @@ SET(MAIN_SOURCES main.cpp
 	src/Application.cpp
 	src/Application.h
 
+    src/media/ffmpeg/video/Types.h
+
     src/core/utility/Size.h
     src/core/utility/Round.h
 
@@ -55,8 +57,14 @@ SET(MAIN_SOURCES main.cpp
     src/media/MediaCommon.h
     src/media/MediaCommon.cpp
 
-    src/media/MediaCache.h
-    src/media/MediaCache.cpp
+    src/media/cache/MediaCache.h
+    src/media/cache/MediaCache.cpp
+
+    src/media/cache/MediaCacheGeneral.h
+    src/media/cache/MediaCacheGeneral.cpp
+
+    src/media/cache/MediaCachePrivate.h
+    src/media/cache/MediaCachePrivate.cpp
 
     src/media/ffmpeg/video/ThumbnailGenerator.h
     src/media/ffmpeg/video/ThumbnailGenerator.cpp
@@ -66,6 +74,9 @@ SET(MAIN_SOURCES main.cpp
 
     src/ui/widgets/Separator.h
     src/ui/widgets/Separator.cpp
+
+    src/media/images/ImagesBuffer.h
+    src/media/images/ImagesBuffer.cpp
 
     src/core/concurrent/common/CommonGuards.h
 
@@ -271,8 +282,8 @@ SET(MAIN_SOURCES main.cpp
     src/ui/effects/shaders/dual_kawase_up.frag
     src/ui/effects/shaders/simple.vert
 
-    src/ui/gl/GlImage.cpp
-    src/ui/gl/GlImage.h
+    src/gl/GlImage.cpp
+    src/gl/GlImage.h
 
 	src/ui/effects/vertex.h
 
