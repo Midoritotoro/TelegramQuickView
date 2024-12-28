@@ -74,6 +74,11 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/ThumbnailGenerator.h
     src/media/ffmpeg/video/ThumbnailGenerator.cpp
 
+    src/media/ffmpeg/video/ColorSpace.h
+    src/media/ffmpeg/video/ColorSpace.cpp
+
+    src/media/ffmpeg/video/Types.h
+
     src/ui/widgets/PopupMenu.h
     src/ui/widgets/PopupMenu.cpp
 
