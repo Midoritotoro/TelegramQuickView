@@ -33,4 +33,8 @@ namespace FFmpeg {
 	void VideoFormatCopyCrop(
 		video_format_t* p_dst,
 		const video_format_t* p_src);
+
+	int VideoFormatCopy(
+		video_format_t* p_dst,
+		const video_format_t* p_src);
 } // namespace FFmpeg

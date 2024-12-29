@@ -8,6 +8,13 @@
 #include "Picture.h"
 
 #include "Fourcc.h"
+#include "VideoFormat.h"
+
+#include "Tools.h"
+#include "ColorSpace.h"
+
+#include "VideoFormat.h"
+#include "Chroma.h"
 
 
 extern "C" {
@@ -16,6 +23,12 @@ extern "C" {
 }
 
 #include <Windows.h>
+
+#ifdef min
+#undef min
+#endif // min
+
+#define ALLOW_YUVP (false)
 
 namespace FFmpeg {
     int GetCpuCount() {
@@ -57,6 +70,107 @@ namespace FFmpeg {
         p_sys->p_dst_e = NULL;
     }
 
+    void FixParameters(enum AVPixelFormat* pi_fmt, bool* pb_has_a, fourcc_t fmt)
+    {
+        switch (fmt)
+        {
+        case CODEC_YUV422A:
+            *pi_fmt = AV_PIX_FMT_YUVA422P;
+            *pb_has_a = true;
+            break;
+        case CODEC_YUV420A:
+            *pi_fmt = AV_PIX_FMT_YUVA420P;
+            *pb_has_a = true;
+            break;
+        case CODEC_YUVA:
+            *pi_fmt = AV_PIX_FMT_YUV444P;
+            *pb_has_a = true;
+            break;
+        case CODEC_RGBA:
+            *pi_fmt = AV_PIX_FMT_RGBA;
+            *pb_has_a = true;
+            break;
+        case CODEC_ARGB:
+            *pi_fmt = AV_PIX_FMT_ARGB;
+            *pb_has_a = true;
+            break;
+        case CODEC_BGRA:
+            *pi_fmt = AV_PIX_FMT_BGRA;
+            *pb_has_a = true;
+            break;
+        case CODEC_ABGR:
+            *pi_fmt = AV_PIX_FMT_ABGR;
+            *pb_has_a = true;
+            break;
+        default:
+            break;
+        }
+    }
+
+    int GetParameters(ScalerConfiguration* p_cfg,
+        const video_format_t* p_fmti,
+        const video_format_t* p_fmto,
+        int i_sws_flags_default)
+    {
+        enum AVPixelFormat i_fmti;
+        enum AVPixelFormat i_fmto;
+
+        bool b_has_ai = false;
+        bool b_has_ao = false;
+        int i_sws_flags = i_sws_flags_default;
+        bool b_swap_uvi = false;
+        bool b_swap_uvo = false;
+
+        i_fmti = FindFfmpegChroma(p_fmti->i_chroma, &b_swap_uvi);
+        i_fmto = FindFfmpegChroma(p_fmto->i_chroma, &b_swap_uvo);
+
+        if (p_fmti->i_chroma == p_fmto->i_chroma)
+        {
+            if (p_fmti->i_chroma == CODEC_YUVP && ALLOW_YUVP)
+            {
+                i_fmti = i_fmto = AV_PIX_FMT_GRAY8;
+                i_sws_flags = SWS_POINT;
+            }
+        }
+
+        FixParameters(&i_fmti, &b_has_ai, p_fmti->i_chroma);
+        FixParameters(&i_fmto, &b_has_ao, p_fmto->i_chroma);
+
+#if !defined (__ANDROID__) && !defined(TARGET_OS_IPHONE)
+        /* FIXME TODO removed when ffmpeg is fixed
+         * Without SWS_ACCURATE_RND the quality is really bad for some conversions */
+        switch (i_fmto)
+        {
+        case AV_PIX_FMT_ARGB:
+        case AV_PIX_FMT_RGBA:
+        case AV_PIX_FMT_ABGR:
+            i_sws_flags |= SWS_ACCURATE_RND;
+            break;
+        default:
+            break;
+        }
+#endif
+
+        if (p_cfg)
+        {
+            p_cfg->i_fmti = i_fmti;
+            p_cfg->i_fmto = i_fmto;
+            p_cfg->b_has_a = b_has_ai && b_has_ao;
+            p_cfg->b_add_a = (!b_has_ai) && b_has_ao;
+            p_cfg->b_copy = i_fmti == i_fmto &&
+                p_fmti->i_visible_width == p_fmto->i_visible_width &&
+                p_fmti->i_visible_height == p_fmto->i_visible_height;
+            p_cfg->b_swap_uvi = b_swap_uvi;
+            p_cfg->b_swap_uvo = b_swap_uvo;
+            p_cfg->i_sws_flags = i_sws_flags;
+        }
+
+        if (i_fmti < 0 || i_fmto < 0)
+            return EGENERIC;
+
+        return SUCCESS;
+    }
+
     int Init(filter_t* p_filter)
     {
         filter_sys_t* p_sys = (filter_sys_t*)p_filter->p_sys;
@@ -95,25 +209,25 @@ namespace FFmpeg {
             return EGENERIC;
         }
 
-        p_sys->desc_in = vlc_fourcc_GetChromaDescription(p_fmti->i_chroma);
-        p_sys->desc_out = vlc_fourcc_GetChromaDescription(p_fmto->i_chroma);
+        p_sys->desc_in = FourccGetChromaDescription(p_fmti->i_chroma);
+        p_sys->desc_out = FourccGetChromaDescription(p_fmto->i_chroma);
         if (p_sys->desc_in == NULL || p_sys->desc_out == NULL)
-            return GENERIC;
+            return EGENERIC;
 
         if (p_sys->desc_in->plane_count == 0 || p_sys->desc_out->plane_count == 0)
             return EGENERIC;
 
         /* swscale does not like too small width */
         p_sys->i_extend_factor = 1;
-        while (__MIN(p_fmti->i_visible_width, p_fmto->i_visible_width) * p_sys->i_extend_factor < MINIMUM_WIDTH)
+        while (std::min(p_fmti->i_visible_width, p_fmto->i_visible_width) * p_sys->i_extend_factor < MINIMUM_WIDTH)
             p_sys->i_extend_factor++;
 
         const unsigned i_fmti_visible_width = p_fmti->i_visible_width * p_sys->i_extend_factor;
         const unsigned i_fmto_visible_width = p_fmto->i_visible_width * p_sys->i_extend_factor;
         for (int n = 0; n < (cfg.b_has_a ? 2 : 1); n++)
         {
-            const int i_fmti = n == 0 ? cfg.i_fmti : AV_PIX_FMT_GRAY8;
-            const int i_fmto = n == 0 ? cfg.i_fmto : AV_PIX_FMT_GRAY8;
+            const AVPixelFormat i_fmti = n == 0 ? cfg.i_fmti : AV_PIX_FMT_GRAY8;
+            const AVPixelFormat i_fmto = n == 0 ? cfg.i_fmto : AV_PIX_FMT_GRAY8;
             struct SwsContext* ctx;
 
             ctx = sws_getContext(i_fmti_visible_width, p_fmti->i_visible_height, i_fmti,
@@ -162,10 +276,10 @@ namespace FFmpeg {
              */
             unsigned i_sar_num = p_fmti->i_sar_num * p_fmti->i_visible_width;
             unsigned i_sar_den = p_fmti->i_sar_den * p_fmto->i_visible_width;
-            vlc_ureduce(&i_sar_num, &i_sar_den, i_sar_num, i_sar_den, 65536);
+            UReduce(&i_sar_num, &i_sar_den, i_sar_num, i_sar_den, 65536);
             i_sar_num *= p_fmto->i_visible_height;
             i_sar_den *= p_fmti->i_visible_height;
-            vlc_ureduce(&i_sar_num, &i_sar_den, i_sar_num, i_sar_den, 65536);
+            UReduce(&i_sar_num, &i_sar_den, i_sar_num, i_sar_den, 65536);
             p_fmto->i_sar_num = i_sar_num;
             p_fmto->i_sar_den = i_sar_den;
         }

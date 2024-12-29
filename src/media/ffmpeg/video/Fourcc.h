@@ -1,6 +1,8 @@
 #pragma once 
 
 #include "Types.h"
+#include "FourccHelper.h"
+
 
 namespace FFmpeg {
 	[[nodiscard]] int FourccCmp(
@@ -42,5 +44,4 @@ namespace FFmpeg {
 
     [[nodiscard]] const chroma_description_t* 
         FourccGetChromaDescription(fourcc_t i_fourcc);
-
 } // namespace FFmpeg

@@ -129,5 +129,18 @@ namespace FFmpeg {
         return true;
     }
 
+    int VideoFormatCopy(video_format_t* p_dst, const video_format_t* p_src)
+    {
+        memcpy(p_dst, p_src, sizeof(*p_dst));
+        if (p_src->p_palette)
+        {
+            p_dst->p_palette = (video_palette_t*)malloc(sizeof(video_palette_t));
+            if (!p_dst->p_palette)
+                return ENOMEM;
+            memcpy(p_dst->p_palette, p_src->p_palette, sizeof(*p_dst->p_palette));
+        }
+        return SUCCESS;
+    }
+
 
 } // namespace FFmpeg

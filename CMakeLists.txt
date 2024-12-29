@@ -272,7 +272,6 @@ SET(MAIN_SOURCES main.cpp
     src/media/images/ImagesPrepare.h
     src/media/images/ImagesPrepare.cpp
 
-
     src/media/player/buttons/FullScreenButton.cpp
     src/media/player/buttons/FullScreenButton.h
 
@@ -298,6 +297,7 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/Enums.h 
 
     src/media/ffmpeg/video/FourccHelper.h
+    src/media/ffmpeg/video/Chroma.h
 
     src/media/ffmpeg/audio/AbstractAudioLoader.cpp
     src/media/ffmpeg/audio/AbstractAudioLoader.h

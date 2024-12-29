@@ -68,16 +68,16 @@ __ckd_unsigned(ull, unsigned long long, ULLONG_MAX)
 #endif
 
 #if defined (__GNUC__) || defined (__clang__)
-#define likely(p)                           __builtin_expect(!!(p), 1)
-#define unlikely(p)                         __builtin_expect(!!(p), 0)
+#define likely(p)                           __builtin_expect((p), 1)
+#define unlikely(p)                         __builtin_expect((p), 0)
 #define unreachable()                       __builtin_unreachable()
 #elif defined(_MSC_VER)
-#define likely(p)                           (!!(p))
-#define unlikely(p)                         (!!(p))
+#define likely(p)                           (p)
+#define unlikely(p)                         (p)
 #define unreachable()                       (__assume(0))
 #else
-#define likely(p)                           (!!(p))
-#define unlikely(p)                         (!!(p))
+#define likely(p)                           (p)
+#define unlikely(p)                         (p)
 #define unreachable()                       ((void)0)
 #endif
 
@@ -101,3 +101,5 @@ __ckd_unsigned(ull, unsigned long long, ULLONG_MAX)
         ( (uint16_t)(a) | ( (uint16_t)(b) << 8 ) )
 
 #endif
+
+#define MINIMUM_WIDTH (32)

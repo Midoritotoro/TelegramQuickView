@@ -221,8 +221,16 @@ namespace FFmpeg {
         };
 
         picture_priv_t* priv = &privbuf->priv;
-        if (!PictureInitPrivate(fmt, priv, &pic_res))
-            goto error;
+
+        const auto error = [=] {
+            VideoFormatClean(&priv->picture.format);
+            free(privbuf);
+           };
+
+        if (!PictureInitPrivate(fmt, priv, &pic_res)) {
+            error();
+            return NULL;
+        }
 
         picture_t* pic = &priv->picture;
         if (pic->i_planes == 0) {
@@ -240,16 +248,24 @@ namespace FFmpeg {
             const plane_t* p = &pic->p[i];
 
             if (unlikely(ckd_mul(&plane_sizes[i], p->i_pitch, p->i_lines))
-                || unlikely(ckd_add(&pic_size, pic_size, plane_sizes[i])))
-                goto error;
+                || unlikely(ckd_add(&pic_size, pic_size, plane_sizes[i]))) {
+                error();
+                return NULL;
+            }
+                
         }
 
-        if (unlikely(pic_size >= PICTURE_SW_SIZE_MAX))
-            goto error;
+        if (unlikely(pic_size >= PICTURE_SW_SIZE_MAX)) {
+            error();
+            return NULL;
+        }
 
         unsigned char* buf = (uchar*)PictureAllocate(&res->fd, pic_size);
         if (unlikely(buf == NULL))
-            goto error;
+        {
+            error();
+            return NULL;
+        }
 
         res->base = buf;
         res->size = pic_size;
@@ -263,10 +279,6 @@ namespace FFmpeg {
         }
 
         return pic;
-    error:
-        VideoFormatClean(&priv->picture.format);
-        free(privbuf);
-        return NULL;
     }
 
     void PlaneCopyPixels(plane_t* p_dst, const plane_t* p_src)

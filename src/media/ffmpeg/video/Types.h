@@ -42,22 +42,6 @@ namespace FFmpeg {
          ancillary_free_cb free_cb;
      };
 
-
-     struct picture_priv_t
-     {
-         picture_t picture;
-         struct
-         {
-             void (*destroy)(picture_t*);
-             void* opaque;
-         } gc;
-
-         /** Private ancillary struct. Don't use it directly, but use it via
-          * picture_AttachAncillary() and picture_GetAncillary(). */
-         struct ancillary** ancillaries;
-     };
-
-
      struct plugin_t
      {
          struct plugin_t* next;
@@ -547,6 +531,21 @@ namespace FFmpeg {
         bool b_swap_uvi;
         bool b_swap_uvo;
     };
+
+    struct picture_priv_t
+    {
+        picture_t picture;
+        struct
+        {
+            void (*destroy)(picture_t*);
+            void* opaque;
+        } gc;
+
+        /** Private ancillary struct. Don't use it directly, but use it via
+         * picture_AttachAncillary() and picture_GetAncillary(). */
+        struct ancillary** ancillaries;
+    };
+
 
     struct decoder_device_priv
     {

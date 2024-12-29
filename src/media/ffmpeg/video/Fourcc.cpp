@@ -1,8 +1,6 @@
 #include "Fourcc.h"
 
 #include "Tools.h"
-#include "FourccHelper.h"
-
 
 namespace FFmpeg {
     static const chroma_description_t p_list_chroma_description[] = {
@@ -322,6 +320,4 @@ namespace FFmpeg {
         }
         return NULL;
     }
-
-
 } // namespace FFmpeg
