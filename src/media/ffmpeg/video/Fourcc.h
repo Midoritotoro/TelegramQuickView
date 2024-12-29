@@ -38,7 +38,7 @@ namespace FFmpeg {
 
 	[[nodiscard]] int LCM(int a, int b);
 
-	[[nodiscard]] bool UReduce(
+	bool UReduce(
 		unsigned* pi_dst_nom, unsigned* pi_dst_den,
 		uint64_t i_nom, uint64_t i_den, uint64_t i_max);
 

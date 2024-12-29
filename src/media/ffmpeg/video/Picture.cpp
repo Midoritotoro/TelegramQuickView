@@ -247,8 +247,8 @@ namespace FFmpeg {
         {
             const plane_t* p = &pic->p[i];
 
-            if (unlikely(ckd_mul(&plane_sizes[i], p->i_pitch, p->i_lines))
-                || unlikely(ckd_add(&pic_size, pic_size, plane_sizes[i]))) {
+            if (unlikely(ckd_mul(&plane_sizes[i], static_cast<size_t>(p->i_pitch), static_cast<size_t>(p->i_lines)))
+                || (unlikely(ckd_add(&pic_size, pic_size, plane_sizes[i])))) {
                 error();
                 return NULL;
             }

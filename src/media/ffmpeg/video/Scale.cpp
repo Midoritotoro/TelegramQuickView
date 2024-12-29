@@ -22,6 +22,8 @@ extern "C" {
     #include <libswscale/version.h>
 }
 
+#include <qDebug>
+
 #include <Windows.h>
 
 #ifdef min

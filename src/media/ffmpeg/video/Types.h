@@ -14,6 +14,15 @@ extern "C" {
 
 namespace FFmpeg {
     using fourcc_t = uint32_t;
+    typedef void (*ancillary_free_cb)(void* data);
+
+    struct module_t;
+    struct plagin_t;
+    struct video_format_t;
+
+    struct atomic_rc_t {
+        std::atomic_uintptr_t refs;
+    };
 
     struct video_palette_t {
         int i_entries;                                  /**< number of in-use palette entries */
@@ -27,12 +36,8 @@ namespace FFmpeg {
         float fov;   /* field of view in degrees */
     };
 
-     struct atomic_rc_t {
-        std::atomic_uintptr_t refs;
-    };
 
-     
-     typedef void (*ancillary_free_cb)(void* data);
+
      struct ancillary
      {
          atomic_rc_t rc;
@@ -89,7 +94,7 @@ namespace FFmpeg {
          void* pf_activate;
      }; 
    
-          struct extra_languages_t
+     struct extra_languages_t
      {
          char* psz_language;
          char* psz_description;
@@ -130,7 +135,7 @@ namespace FFmpeg {
             uint8_t      i_channels; /* must be <=32 */
         };
 
-        typedef struct
+        struct audio_replay_gain_t
         {
             /* true if we have the peak value */
             bool pb_peak[AUDIO_REPLAY_GAIN_MAX];
@@ -141,7 +146,7 @@ namespace FFmpeg {
             bool pb_gain[AUDIO_REPLAY_GAIN_MAX];
             /* gain value in dB */
             float      pf_gain[AUDIO_REPLAY_GAIN_MAX];
-        } audio_replay_gain_t;
+        } ;
 
         struct subs_format_t
         {
@@ -180,6 +185,69 @@ namespace FFmpeg {
                 /* Reorder depth of transport video, -1 for no reordering */
                 int i_reorder_depth;
             } cc;
+        };
+
+        struct video_format_t
+        {
+            fourcc_t i_chroma;                               /**< picture chroma */
+
+            unsigned int i_width;                                 /**< picture width */
+            unsigned int i_height;                               /**< picture height */
+
+            unsigned int i_x_offset;               /**< start offset of visible area */
+            unsigned int i_y_offset;               /**< start offset of visible area */
+
+            unsigned int i_visible_width;                 /**< width of visible area */
+            unsigned int i_visible_height;               /**< height of visible area */
+
+            unsigned int i_sar_num;                   /**< sample/pixel aspect ratio */
+            unsigned int i_sar_den;
+
+            unsigned int i_frame_rate;                     /**< frame rate numerator */
+            unsigned int i_frame_rate_base;              /**< frame rate denominator */
+
+            video_palette_t* p_palette;              /**< video palette from demuxer */
+            video_orientation_t orientation;                /**< picture orientation */
+
+            video_color_primaries_t primaries;                  /**< color primaries */
+
+            video_transfer_func_t transfer;                   /**< transfer function */
+            video_color_space_t space;                        /**< YCbCr color space */
+
+            video_color_range_t color_range;            /**< 0-255 instead of 16-235 */
+            video_chroma_location_t chroma_location;      /**< YCbCr chroma location */
+
+            video_multiview_mode_t multiview_mode;        /** Multiview mode, 2D, 3D */
+            bool b_multiview_right_eye_first;   /** Multiview left or right eye first*/
+
+            video_projection_mode_t projection_mode;            /**< projection mode */
+            viewpoint_t pose;
+            struct {
+                /* similar to SMPTE ST 2086 mastering display color volume */
+                uint16_t primaries[3 * 2]; /* G,B,R / x,y */
+                uint16_t white_point[2]; /* x,y */
+
+                uint32_t max_luminance;
+                uint32_t min_luminance;
+            } mastering;
+            struct {
+                /* similar to CTA-861.3 content light level */
+                uint16_t MaxCLL;  /* max content light level */
+                uint16_t MaxFALL; /* max frame average light level */
+            } lighting;
+            struct {
+                uint8_t version_major;
+                uint8_t version_minor;
+
+                unsigned profile : 7;
+
+                unsigned level : 6;
+                unsigned rpu_present : 1;
+
+                unsigned el_present : 1;
+                unsigned bl_present : 1;
+            } dovi;
+            uint32_t i_cubemap_padding; /**< padding in pixels of the cube map faces */
         };
 
      struct es_format_t
@@ -302,6 +370,7 @@ namespace FFmpeg {
          void* p_data;
      };
 
+     struct filter_t;
      struct filter_owner_t
      {
          union
@@ -343,70 +412,6 @@ namespace FFmpeg {
          /** Private structure for the owner of the filter */
          filter_owner_t      owner;
      };
-
-    struct video_format_t
-    {
-        fourcc_t i_chroma;                               /**< picture chroma */
-
-        unsigned int i_width;                                 /**< picture width */
-        unsigned int i_height;                               /**< picture height */
-
-        unsigned int i_x_offset;               /**< start offset of visible area */
-        unsigned int i_y_offset;               /**< start offset of visible area */
-
-        unsigned int i_visible_width;                 /**< width of visible area */
-        unsigned int i_visible_height;               /**< height of visible area */
-
-        unsigned int i_sar_num;                   /**< sample/pixel aspect ratio */
-        unsigned int i_sar_den;
-
-        unsigned int i_frame_rate;                     /**< frame rate numerator */
-        unsigned int i_frame_rate_base;              /**< frame rate denominator */
-
-        video_palette_t* p_palette;              /**< video palette from demuxer */
-        video_orientation_t orientation;                /**< picture orientation */
-
-        video_color_primaries_t primaries;                  /**< color primaries */
-
-        video_transfer_func_t transfer;                   /**< transfer function */
-        video_color_space_t space;                        /**< YCbCr color space */
-
-        video_color_range_t color_range;            /**< 0-255 instead of 16-235 */
-        video_chroma_location_t chroma_location;      /**< YCbCr chroma location */
-
-        video_multiview_mode_t multiview_mode;        /** Multiview mode, 2D, 3D */
-        bool b_multiview_right_eye_first;   /** Multiview left or right eye first*/
-
-        video_projection_mode_t projection_mode;            /**< projection mode */
-        viewpoint_t pose;
-        struct {
-            /* similar to SMPTE ST 2086 mastering display color volume */
-            uint16_t primaries[3 * 2]; /* G,B,R / x,y */
-            uint16_t white_point[2]; /* x,y */
-
-            uint32_t max_luminance;
-            uint32_t min_luminance;
-        } mastering;
-        struct {
-            /* similar to CTA-861.3 content light level */
-            uint16_t MaxCLL;  /* max content light level */
-            uint16_t MaxFALL; /* max frame average light level */
-        } lighting;
-        struct {
-            uint8_t version_major;
-            uint8_t version_minor;
-
-            unsigned profile : 7;
-
-            unsigned level : 6;
-            unsigned rpu_present : 1;
-
-            unsigned el_present : 1;
-            unsigned bl_present : 1;
-        } dovi;
-        uint32_t i_cubemap_padding; /**< padding in pixels of the cube map faces */
-    };
-
 
      struct picture_context_t
     {

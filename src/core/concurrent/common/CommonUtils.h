@@ -19,13 +19,8 @@ struct false_t {
 
 template <typename Return, typename ...Args>
 struct check_plain_function {
-	#pragma warning(push)
-	#pragma warning(disable: 1698)
-
 	static false_t check(...);
 	static true_t check(Return(*)(Args...));
-
-	#pragma warning(pop)
 };
 
 template <typename Callable, typename Return, typename ...Args>

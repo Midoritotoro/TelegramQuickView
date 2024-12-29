@@ -3,54 +3,30 @@
 #include <cstdlib>
 #include <cstdint>
 
-#ifndef __STDC_VERSION_STDCKDINT_H__
-# define __STDC_VERSION_STDCKDINT_H__ 202311L
+#include <limits.h>
 
-# if defined(__GNUC__) || defined(__clang__)
-#  define ckd_add(r, a, b) __builtin_add_overflow(a, b, r)
-#  define ckd_sub(r, a, b) __builtin_sub_overflow(a, b, r)
-#  define ckd_mul(r, a, b) __builtin_mul_overflow(a, b, r)
-# else
-#  include <numeric>
-
-#  define __ckd_unsigned(suffix, type, MAX) \
-inline bool __ckd_add_##suffix(type *r, type a, type b) \
-{ \
-    *r = a + b; \
-    return ((type)(a + b)) < a; \
-} \
-\
-inline bool __ckd_sub_##suffix(type *r, type a, type b) \
-{ \
-    *r = a - b; \
-    return a < b; \
-} \
-\
-inline bool __ckd_mul_##suffix(type *r, type a, type b) \
-{ \
-    *r = a * b; \
-    return b > 0 && a > (MAX / b); \
+template <typename type>
+bool ckd_add(type *r, type a, type b)
+{
+    *r = a + b;
+    return ((type)(a + b)) < a;
 }
 
-#  define __ckd_func(op, r, a, b) \
-    _Generic (*(r), \
-        unsigned char:      __ckd_##op##_uc((unsigned char *)(r), a, b), \
-        unsigned short:     __ckd_##op##_us((unsigned short *)(r), a, b), \
-        unsigned int:       __ckd_##op##_ui((unsigned int *)(r), a, b), \
-        unsigned long:      __ckd_##op##_ul((unsigned long *)(r), a, b), \
-        unsigned long long: __ckd_##op##_ull((unsigned long long *)(r), a, b))
+template <typename type>
+bool ckd_sub(type *r, type a, type b)
+{
+    *r = a - b;
+    return a < b;
+}
 
-__ckd_unsigned(uc, unsigned char, UCHAR_MAX)
-__ckd_unsigned(us, unsigned short, USHRT_MAX)
-__ckd_unsigned(ui, unsigned int, UINT_MAX)
-__ckd_unsigned(ul, unsigned long, ULONG_MAX)
-__ckd_unsigned(ull, unsigned long long, ULLONG_MAX)
+template <typename type>
+bool ckd_mul(type *r, type a, type b)
+{
+    if (b == 0) return true;
+    *r = a * b;
+    return a > (INT_MAX / b);
+}
 
-#  define ckd_add(r, a, b) __ckd_func(add, r, a, b)
-#  define ckd_sub(r, a, b) __ckd_func(sub, r, a, b)
-#  define ckd_mul(r, a, b) __ckd_func(mul, r, a, b)
-# endif
-#endif /* __STDC_VERSION_STDCKDINT_H__ */
 
 
 #define container_of(ptr, type, member) \
