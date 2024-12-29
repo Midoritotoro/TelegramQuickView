@@ -18,6 +18,31 @@
 #define FIELD_OF_VIEW_DEGREES_MAX 150.f
 #define FIELD_OF_VIEW_DEGREES_MIN 20.f
 
+#define VLC_TICK_INVALID INT64_C(0)
+#define VLC_TICK_0 INT64_C(1)
+
+#if defined (_WIN32)
+#define aligned_free(ptr)  _aligned_free(ptr)
+#else
+#define aligned_free(ptr)  free(ptr)
+#endif
+
+#if defined (__GNUC__) || defined (__clang__)
+    #define likely(p)     __builtin_expect(!!(p), 1)
+    #define unlikely(p)   __builtin_expect(!!(p), 0)
+    #define unreachable() __builtin_unreachable()
+#elif defined(_MSC_VER)
+    #define likely(p)     (!!(p))
+    #define unlikely(p)   (!!(p))
+    #define unreachable() (__assume(0))
+#else
+    #define likely(p)     (!!(p))
+    #define unlikely(p)   (!!(p))
+    #define unreachable() ((void)0)
+#endif
+
+#define PICTURE_SW_SIZE_MAX (UINT32_C(1) << 28) /* 256MB: 8K * 8K * 4*/
+
 #define SUCCESS        0
 /** Unspecified error */
 #define EGENERIC       (-2 * (1 << (sizeof (int) * 8 - 2))) /* INT_MIN */
@@ -742,4 +767,66 @@ namespace FFmpeg {
         struct decoder_device device;
         atomic_rc_t rc;
     };
-}
+
+    static const struct fourcc_desc desc_audio[] = {
+ {{'a','a','c',' '}, "AAC audio"},
+  {{'m','p','4','a'}, "MP4A audio"},
+  {{'m','p','3',' '}, "MP3 audio"},
+  {{'a','c','3',' '}, "AC3 audio"}
+    };
+    static const struct fourcc_mapping mapping_audio[] = {
+      {{'m','p','4','a'},{'a'}},
+       {{'m','p','3',' '},{'m'}}
+    };
+
+    // video format
+    static const struct fourcc_desc desc_video[] = {
+      {{'h','2','6','4'}, "H264 codec"},
+      {{'x','2','6','4'}, "X264 codec"},
+       {{'m','p','e','g'}, "MPEG codec"},
+      {{'a','v','c','1'}, "AVC1 codec"}
+    };
+    static const struct fourcc_mapping mapping_video[] = {
+     {{'x','2','6','4'},{'h'}}
+    };
+
+    // spu format
+    static const struct fourcc_desc desc_spu[] = {
+      {{'s','r','t',' '}, "srt sub"},
+      {{'s','u','b',' '}, "sub sub"},
+       {{'t','x','t',' '}, "txt sub"},
+    };
+    static const struct fourcc_mapping mapping_spu[] = {
+        {}
+    };
+
+    struct picture_buffer_t
+    {
+        int fd;
+        void* base;
+        size_t size;
+        off_t offset;
+    };
+
+    struct picture_priv_buffer_t {
+        picture_priv_t   priv;
+        picture_buffer_t res;
+    };
+
+    struct picture_resource_t
+    {
+        void* p_sys;
+        void (*pf_destroy)(picture_t*);
+
+        /* Plane resources
+         * XXX all fields MUST be set to the right value.
+         */
+        struct
+        {
+            uint8_t* p_pixels;  /**< Start of the plane's data */
+            int i_lines;        /**< Number of lines, including margins */
+            int i_pitch;        /**< Number of bytes in a line, including margins */
+        } p[PICTURE_PLANE_MAX];
+
+    };
+} // namespace FFmpeg

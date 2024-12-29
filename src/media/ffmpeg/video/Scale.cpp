@@ -1,6 +1,14 @@
 #include "Scale.h"
 
 #include <cassert>
+#include <cstdlib>
+#include <malloc.h>
+
+#include "Atomic.h"
+#include "Picture.h"
+
+#include "Fourcc.h"
+
 
 extern "C" {
     #include <libswscale/swscale.h>
@@ -26,20 +34,6 @@ namespace FFmpeg {
         return 1;
     }
 
-    bool AtomicRcDec(atomic_rc_t* rc)
-    {
-        uintptr_t prev = atomic_fetch_sub_explicit(&rc->refs, (uintptr_t)1,
-            std::memory_order_acq_rel);
-        assert(prev);
-
-        return prev == 1;
-    }
-
-    void PictureRelease(picture_t* picture)
-    {
-        if (AtomicRcDec(&picture->refs))
-            PictureDestroy(picture);
-    }
 
     void DecoderDeviceRelease(decoder_device* device)
     {
@@ -53,94 +47,6 @@ namespace FFmpeg {
             //  vlc_object_delete(device);
         }
     }
-
-
-    int FourccCmp(
-        const void* key,
-        const void* ent) 
-    {
-        return memcmp(key, ent, 4);
-    }
-
-    fourcc_t Lookup(
-        fourcc_t fourcc,
-        const char** dsc,
-        const struct fourcc_mapping* mapv, size_t mapc,
-        const struct fourcc_desc* dscv, size_t dscc)
-    {
-        const struct fourcc_mapping* mapping;
-        const struct fourcc_desc* desc;
-
-        mapping = (fourcc_mapping*)bsearch(&fourcc, mapv, mapc, sizeof(*mapv), fourcc_cmp);
-        if (mapping != NULL)
-        {
-            if (dsc != NULL)
-            {
-                desc = (fourcc_desc*)bsearch(&fourcc, dscv, dscc, sizeof(*dscv), fourcc_cmp);
-                if (desc != NULL)
-                {
-                    *dsc = desc->desc;
-                    return mapping->fourcc;
-                }
-            }
-            fourcc = mapping->fourcc;
-        }
-
-        desc = (fourcc_desc*)bsearch(&fourcc, dscv, dscc, sizeof(*dscv), fourcc_cmp);
-        if (desc == NULL)
-            return 0; /* Unknown FourCC */
-        if (dsc != NULL)
-            *dsc = desc->desc;
-        return fourcc; /* Known FourCC (has a description) */
-    }
-
-    fourcc_t LookupVideo(
-        fourcc_t fourcc,
-        const char** dsc)
-    {
-        return Lookup(fourcc, dsc, mapping_video, ARRAY_SIZE(mapping_video),
-            desc_video, ARRAY_SIZE(desc_video));
-    }
-
-    fourcc_t LookupAudio(
-        fourcc_t fourcc,
-        const char** dsc)
-    {
-        return Lookup(fourcc, dsc, mapping_audio, ARRAY_SIZE(mapping_audio),
-            desc_audio, ARRAY_SIZE(desc_audio));
-    }
-
-    fourcc_t LookupSpu(
-        fourcc_t fourcc,
-        const char** dsc)
-    {
-        return Lookup(fourcc, dsc, mapping_spu, ARRAY_SIZE(mapping_spu),
-            desc_spu, ARRAY_SIZE(desc_spu));
-    }
-
-    fourcc_t LookupCat(
-        fourcc_t fourcc,
-        const char** dsc,
-        int cat)
-    {
-        switch (cat)
-        {
-        case VIDEO_ES:
-            return LookupVideo(fourcc, dsc);
-        case AUDIO_ES:
-            return LookupAudio(fourcc, dsc);
-        case SPU_ES:
-            return LookupSpu(fourcc, dsc);
-        }
-
-        fourcc_t ret = LookupVideo(fourcc, dsc);
-        if (!ret)
-            ret = LookupAudio(fourcc, dsc);
-        if (!ret)
-            ret = LookupSpu(fourcc, dsc);
-        return ret;
-    }
-
 
     void* VideoContextGetPrivate(
         video_context* vctx,
@@ -164,19 +70,7 @@ namespace FFmpeg {
         }
     }
 
-    void PictureDestroyContext(picture_t* p_picture)
-    {
-        picture_context_t* ctx = p_picture->context;
-        if (ctx != NULL)
-        {
-            video_context* vctx = ctx->vctx;
-            ctx->destroy(ctx);
-            if (vctx)
-                VideoContextRelease(vctx);
-            p_picture->context = NULL;
-        }
-    }
-
+   
     void AncillaryRelease(struct ancillary* ancillary)
     {
         if (AtomicRcDec(&ancillary->rc))
@@ -201,13 +95,7 @@ namespace FFmpeg {
             *array = NULL;
         }
     }
-
-    fourcc_t FourccGetCodec(int cat, fourcc_t fourcc)
-    {
-        fourcc_t codec = LookupCat(fourcc, NULL, cat);
-        return codec ? codec : fourcc;
-    }
-
+   
     void VideoFormatSetup(
         video_format_t* p_fmt, fourcc_t i_chroma,
         int i_width, int i_height,
@@ -222,7 +110,7 @@ namespace FFmpeg {
         p_fmt->i_x_offset =
             p_fmt->i_y_offset = 0;
         p_fmt->orientation = ORIENT_NORMAL;
-        vlc_ureduce(&p_fmt->i_sar_num, &p_fmt->i_sar_den,
+        UReduce(&p_fmt->i_sar_num, &p_fmt->i_sar_den,
             i_sar_num, i_sar_den, 0);
 
     }
@@ -230,6 +118,48 @@ namespace FFmpeg {
     {
         p_vp->yaw = p_vp->pitch = p_vp->roll = 0.0f;
         p_vp->fov = FIELD_OF_VIEW_DEGREES_DEFAULT;
+    }
+
+    void PictureDestroyFromFormat(picture_t* pic)
+    {
+        picture_buffer_t* res = (picture_buffer_t*)pic->p_sys;
+
+        if (res != NULL)
+            PictureDeallocate(res->fd, res->base, res->size);
+    }
+
+
+    bool PictureInitPrivate(
+        const video_format_t* p_fmt,
+        picture_priv_t* priv,
+        const picture_resource_t* p_resource)
+    {
+        picture_t* p_picture = &priv->picture;
+
+        memset(p_picture, 0, sizeof(*p_picture));
+        p_picture->date = VLC_TICK_INVALID;
+
+        VideoFormatCopy(&p_picture->format, p_fmt);
+        /* Make sure the real dimensions are a multiple of 16 */
+        if (PictureSetup(p_picture, p_fmt))
+        {
+            VideoFormatClean(&p_picture->format);
+            return false;
+        }
+
+        AtomicRcInit(&p_picture->refs);
+        priv->gc.opaque = NULL;
+
+        p_picture->p_sys = p_resource->p_sys;
+
+        if (p_resource->pf_destroy != NULL)
+            priv->gc.destroy = p_resource->pf_destroy;
+        else
+            priv->gc.destroy = PictureDestroyDummy;
+
+        AncillaryArrayInit(&priv->ancillaries);
+
+        return true;
     }
 
      void VideoFormatInit(
@@ -242,37 +172,14 @@ namespace FFmpeg {
          ViewpointInit(&p_src->pose);
      }
 
-     picture_t* PictureNew(
-        fourcc_t i_chroma, int i_width,
-        int i_height, int i_sar_num,
-        int i_sar_den)
+
+     void VideoFormatClean(video_format_t* p_src)
      {
-         video_format_t fmt;
-
-         VideoFormatInit(&fmt, 0);
-         VideoFormatSetup(&fmt, i_chroma, i_width, i_height,
-             i_width, i_height, i_sar_num, i_sar_den);
-
-         return picture_NewFromFormat(&fmt);
+         free(p_src->p_palette);
+         memset(p_src, 0, sizeof(video_format_t));
      }
 
-
-
-    void PictureDestroy(picture_t* picture)
-    {
-        assert(AtomicRcDec(&picture->refs) == 0);
-
-        PictureDestroyContext(picture);
-
-        picture_priv_t* priv = container_of(picture, picture_priv_t, picture);
-        assert(priv->gc.destroy != NULL);
-
-        priv->gc.destroy(picture);
-
-        AncillaryArrayClear(&priv->ancillaries);
-        VideoFormatClean(&picture->format);
-        free(priv);
-    }
+ 
 
     void Clean(filter_t* p_filter)
     {
@@ -461,92 +368,5 @@ namespace FFmpeg {
         SetColorspace(p_sys);
 
         return SUCCESS;
-    }
-
-    picture_t* FilterPicture(filter_t* p_filter, picture_t* p_pic)
-    {
-        filter_sys_t* p_sys = (filter_sys_t*)p_filter->p_sys;
-
-        const video_format_t* p_fmti = &p_filter->fmt_in.video;
-        const video_format_t* p_fmto = &p_filter->fmt_out.video;
-
-        picture_t* p_pic_dst;
-
-        /* Check if format properties changed */
-        if (Init(p_filter))
-        {
-            PictureRelease(p_pic);
-            return NULL;
-        }
-
-        /* Request output picture */
-        p_pic_dst = filter_NewPicture(p_filter);
-        if (!p_pic_dst)
-        {
-            picture_Release(p_pic);
-            return NULL;
-        }
-
-        /* */
-        picture_t* p_src = p_pic;
-        picture_t* p_dst = p_pic_dst;
-        if (p_sys->i_extend_factor != 1)
-        {
-            p_src = p_sys->p_src_e;
-            p_dst = p_sys->p_dst_e;
-
-            CopyPad(p_src, p_pic);
-        }
-
-        if (p_sys->b_copy && p_sys->b_swap_uvi == p_sys->b_swap_uvo)
-            picture_CopyPixels(p_dst, p_src);
-        else if (p_sys->b_copy)
-            SwapUV(p_dst, p_src);
-        else
-        {
-            /* Even if alpha is unused, swscale expects the pointer to be set */
-            const int n_planes = !p_sys->ctxA && (p_src->i_planes == 4 ||
-                p_dst->i_planes == 4) ? 4 : 3;
-            Convert(p_filter, p_sys->ctx, p_dst, p_src, p_fmti->i_visible_height,
-                n_planes, p_sys->b_swap_uvi, p_sys->b_swap_uvo);
-        }
-        if (p_sys->ctxA)
-        {
-            /* We extract the A plane to rescale it, and then we reinject it. */
-            if (p_fmti->i_chroma == VLC_CODEC_RGBA || p_fmti->i_chroma == VLC_CODEC_BGRA)
-                ExtractA(p_sys->p_src_a, p_src, OFFSET_A);
-            else if (p_fmti->i_chroma == VLC_CODEC_ARGB || p_fmti->i_chroma == VLC_CODEC_ABGR)
-                ExtractA(p_sys->p_src_a, p_src, 0);
-            else
-                plane_CopyPixels(p_sys->p_src_a->p, p_src->p + A_PLANE);
-
-            Convert(p_filter, p_sys->ctxA, p_sys->p_dst_a, p_sys->p_src_a,
-                p_fmti->i_visible_height, 1, false, false);
-            if (p_fmto->i_chroma == VLC_CODEC_RGBA || p_fmto->i_chroma == VLC_CODEC_BGRA)
-                InjectA(p_dst, p_sys->p_dst_a, OFFSET_A);
-            else if (p_fmto->i_chroma == VLC_CODEC_ARGB || p_fmto->i_chroma == VLC_CODEC_ABGR)
-                InjectA(p_dst, p_sys->p_dst_a, 0);
-            else
-                plane_CopyPixels(p_dst->p + A_PLANE, p_sys->p_dst_a->p);
-        }
-        else if (p_sys->b_add_a)
-        {
-            /* We inject a complete opaque alpha plane */
-            if (p_fmto->i_chroma == VLC_CODEC_RGBA || p_fmto->i_chroma == VLC_CODEC_BGRA)
-                FillA(&p_dst->p[0], OFFSET_A);
-            else if (p_fmto->i_chroma == VLC_CODEC_ARGB || p_fmto->i_chroma == VLC_CODEC_ABGR)
-                FillA(&p_dst->p[0], 0);
-            else
-                FillA(&p_dst->p[A_PLANE], 0);
-        }
-
-        if (p_sys->i_extend_factor != 1)
-        {
-            picture_CopyPixels(p_pic_dst, p_dst);
-        }
-
-        picture_CopyProperties(p_pic_dst, p_pic);
-        picture_Release(p_pic);
-        return p_pic_dst;
     }
 }
