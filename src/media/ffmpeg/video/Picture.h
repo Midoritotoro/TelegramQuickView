@@ -34,7 +34,8 @@ namespace FFmpeg {
 		int i_height, int i_sar_num,
 		int i_sar_den);
 
-	[[nodiscard]] picture_t* FilterPicture(
-		filter_t* p_filter,
-		picture_t* p_pic);
+	void PictureCopyPixels(
+		picture_t* p_dst,
+		const picture_t* p_src);
+	void PlaneCopyPixels(plane_t* p_dst, const plane_t* p_src);
 } // namespace FFmpeg

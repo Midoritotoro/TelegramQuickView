@@ -247,7 +247,7 @@ namespace FFmpeg {
         if (unlikely(pic_size >= PICTURE_SW_SIZE_MAX))
             goto error;
 
-        unsigned char* buf = picture_Allocate(&res->fd, pic_size);
+        unsigned char* buf = (uchar*)PictureAllocate(&res->fd, pic_size);
         if (unlikely(buf == NULL))
             goto error;
 
@@ -264,96 +264,57 @@ namespace FFmpeg {
 
         return pic;
     error:
-        video_format_Clean(&priv->picture.format);
+        VideoFormatClean(&priv->picture.format);
         free(privbuf);
         return NULL;
     }
 
-    picture_t* FilterPicture(filter_t* p_filter, picture_t* p_pic)
+    void PlaneCopyPixels(plane_t* p_dst, const plane_t* p_src)
     {
-        filter_sys_t* p_sys = (filter_sys_t*)p_filter->p_sys;
+        const unsigned i_width = std::min(p_dst->i_visible_pitch,
+            p_src->i_visible_pitch);
+        const unsigned i_height = std::min(p_dst->i_visible_lines,
+            p_src->i_visible_lines);
 
-        const video_format_t* p_fmti = &p_filter->fmt_in.video;
-        const video_format_t* p_fmto = &p_filter->fmt_out.video;
-
-        picture_t* p_pic_dst;
-
-        /* Check if format properties changed */
-        if (Init(p_filter))
+        /* The 2x visible pitch check does two things:
+           1) Makes field plane_t's work correctly (see the deinterlacer module)
+           2) Moves less data if the pitch and visible pitch differ much.
+        */
+        if (p_src->i_pitch == p_dst->i_pitch &&
+            p_src->i_pitch < 2 * p_src->i_visible_pitch)
         {
-            PictureRelease(p_pic);
-            return NULL;
+            /* There are margins, but with the same width : perfect ! */
+            memcpy(p_dst->p_pixels, p_src->p_pixels,
+                p_src->i_pitch * i_height);
         }
-
-        /* Request output picture */
-        p_pic_dst = filter_NewPicture(p_filter);
-        if (!p_pic_dst)
-        {
-            picture_Release(p_pic);
-            return NULL;
-        }
-
-        /* */
-        picture_t* p_src = p_pic;
-        picture_t* p_dst = p_pic_dst;
-        if (p_sys->i_extend_factor != 1)
-        {
-            p_src = p_sys->p_src_e;
-            p_dst = p_sys->p_dst_e;
-
-            CopyPad(p_src, p_pic);
-        }
-
-        if (p_sys->b_copy && p_sys->b_swap_uvi == p_sys->b_swap_uvo)
-            picture_CopyPixels(p_dst, p_src);
-        else if (p_sys->b_copy)
-            SwapUV(p_dst, p_src);
         else
         {
-            /* Even if alpha is unused, swscale expects the pointer to be set */
-            const int n_planes = !p_sys->ctxA && (p_src->i_planes == 4 ||
-                p_dst->i_planes == 4) ? 4 : 3;
-            Convert(p_filter, p_sys->ctx, p_dst, p_src, p_fmti->i_visible_height,
-                n_planes, p_sys->b_swap_uvi, p_sys->b_swap_uvo);
-        }
-        if (p_sys->ctxA)
-        {
-            /* We extract the A plane to rescale it, and then we reinject it. */
-            if (p_fmti->i_chroma == VLC_CODEC_RGBA || p_fmti->i_chroma == VLC_CODEC_BGRA)
-                ExtractA(p_sys->p_src_a, p_src, OFFSET_A);
-            else if (p_fmti->i_chroma == VLC_CODEC_ARGB || p_fmti->i_chroma == VLC_CODEC_ABGR)
-                ExtractA(p_sys->p_src_a, p_src, 0);
-            else
-                plane_CopyPixels(p_sys->p_src_a->p, p_src->p + A_PLANE);
+            /* We need to proceed line by line */
+            uint8_t* p_in = p_src->p_pixels;
+            uint8_t* p_out = p_dst->p_pixels;
 
-            Convert(p_filter, p_sys->ctxA, p_sys->p_dst_a, p_sys->p_src_a,
-                p_fmti->i_visible_height, 1, false, false);
-            if (p_fmto->i_chroma == VLC_CODEC_RGBA || p_fmto->i_chroma == VLC_CODEC_BGRA)
-                InjectA(p_dst, p_sys->p_dst_a, OFFSET_A);
-            else if (p_fmto->i_chroma == VLC_CODEC_ARGB || p_fmto->i_chroma == VLC_CODEC_ABGR)
-                InjectA(p_dst, p_sys->p_dst_a, 0);
-            else
-                plane_CopyPixels(p_dst->p + A_PLANE, p_sys->p_dst_a->p);
-        }
-        else if (p_sys->b_add_a)
-        {
-            /* We inject a complete opaque alpha plane */
-            if (p_fmto->i_chroma == VLC_CODEC_RGBA || p_fmto->i_chroma == VLC_CODEC_BGRA)
-                FillA(&p_dst->p[0], OFFSET_A);
-            else if (p_fmto->i_chroma == VLC_CODEC_ARGB || p_fmto->i_chroma == VLC_CODEC_ABGR)
-                FillA(&p_dst->p[0], 0);
-            else
-                FillA(&p_dst->p[A_PLANE], 0);
-        }
+            assert(p_in);
+            assert(p_out);
 
-        if (p_sys->i_extend_factor != 1)
-        {
-            picture_CopyPixels(p_pic_dst, p_dst);
+            for (int i_line = i_height; i_line--; )
+            {
+                memcpy(p_out, p_in, i_width);
+                p_in += p_src->i_pitch;
+                p_out += p_dst->i_pitch;
+            }
         }
-
-        picture_CopyProperties(p_pic_dst, p_pic);
-        picture_Release(p_pic);
-        return p_pic_dst;
     }
 
+    void PictureCopyPixels(
+        picture_t* p_dst,
+        const picture_t* p_src)
+    {
+        for (int i = 0; i < p_src->i_planes; i++)
+            PlaneCopyPixels(p_dst->p + i, p_src->p + i);
+
+        assert(p_dst->context == NULL);
+
+        if (p_src->context != NULL)
+            p_dst->context = p_src->context->copy(p_src->context);
+    }
 } // namespace FFmpeg

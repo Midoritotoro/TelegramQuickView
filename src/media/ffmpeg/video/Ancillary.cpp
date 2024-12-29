@@ -3,7 +3,7 @@
 
 
 namespace FFmpeg {
-    void AncillaryRelease(struct ancillary* ancillary)
+    void AncillaryRelease(ancillary* ancillary)
     {
         if (AtomicRcDec(&ancillary->rc))
         {
@@ -13,7 +13,7 @@ namespace FFmpeg {
         }
     };
 
-    void AncillaryArrayClear(struct ancillary*** array)
+    void AncillaryArrayClear(ancillary*** array)
     {
         if (*array != NULL)
         {
@@ -26,5 +26,9 @@ namespace FFmpeg {
             free(*array);
             *array = NULL;
         }
+    }
+
+    void AncillaryArrayInit(ancillary*** array) {
+        *array = NULL;
     }
 } // namespace FFmpeg

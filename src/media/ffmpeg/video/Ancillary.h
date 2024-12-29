@@ -4,6 +4,8 @@
 
 
 namespace FFmpeg {
-	void AncillaryRelease(struct ancillary* ancillary);
-	void AncillaryArrayClear(struct ancillary*** array);
+	void AncillaryRelease(ancillary* ancillary);
+	void AncillaryArrayClear(ancillary*** array);
+
+	void AncillaryArrayInit(ancillary*** array);
 } // namespace FFmpeg
