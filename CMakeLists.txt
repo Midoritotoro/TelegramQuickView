@@ -238,7 +238,22 @@ SET(MAIN_SOURCES main.cpp
 
 	src/media/ffmpeg/video/FrameGenerator.h
     src/media/ffmpeg/video/FrameGenerator.cpp
-        
+
+    src/media/ffmpeg/video/Ancillary.h
+    src/media/ffmpeg/video/Ancillary.cpp
+
+    src/media/ffmpeg/video/Atomic.cpp
+    src/media/ffmpeg/video/Atomic.h
+
+    src/media/ffmpeg/video/Fourcc.h
+    src/media/ffmpeg/video/Fourcc.cpp
+
+    src/media/ffmpeg/video/Picture.h
+    src/media/ffmpeg/video/Picture.cpp
+
+    src/media/ffmpeg/video/VideoFormat.h
+    src/media/ffmpeg/video/VideoFormat.cpp
+    
     src/media/ffmpeg/video/HardwareAcceleration.cpp
     src/media/ffmpeg/video/HardwareAcceleration.h
         
