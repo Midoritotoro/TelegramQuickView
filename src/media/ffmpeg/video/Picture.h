@@ -18,6 +18,10 @@ namespace FFmpeg {
 		void* base,
 		size_t size);
 
+	[[nodiscard]] int PictureSetup(
+		picture_t* p_picture,
+		const video_format_t* fmt);
+
 	[[nodiscard]] picture_t* PictureNewFromFormat(const video_format_t* fmt);
 
 	[[nodiscard]] bool PictureInitPrivate(

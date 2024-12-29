@@ -294,6 +294,11 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/Scale.cpp
     src/media/ffmpeg/video/Scale.h 
 
+    src/media/ffmpeg/video/Tools.h 
+    src/media/ffmpeg/video/Enums.h 
+
+    src/media/ffmpeg/video/FourccHelper.h
+
     src/media/ffmpeg/audio/AbstractAudioLoader.cpp
     src/media/ffmpeg/audio/AbstractAudioLoader.h
 

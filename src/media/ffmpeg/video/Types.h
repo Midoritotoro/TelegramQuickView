@@ -3,65 +3,9 @@
 #include "../../../core/Types.h"
 #include "../../../core/Time.h"
 
+#include "Enums.h"
+
 #include <atomic>
-
-#define PICTURE_PLANE_MAX                   5
-
-#define VIDEO_PALETTE_COLORS_MAX            256
-#define VIDEO_PALETTE_CLUT_COUNT            16
-
-#define AUDIO_REPLAY_GAIN_MAX               (2)
-#define AUDIO_REPLAY_GAIN_TRACK             (0)
-#define AUDIO_REPLAY_GAIN_ALBUM             (1)
-
-#define FIELD_OF_VIEW_DEGREES_DEFAULT  80.f
-#define FIELD_OF_VIEW_DEGREES_MAX 150.f
-#define FIELD_OF_VIEW_DEGREES_MIN 20.f
-
-#define VLC_TICK_INVALID INT64_C(0)
-#define VLC_TICK_0 INT64_C(1)
-
-#if defined (_WIN32)
-#define aligned_free(ptr)  _aligned_free(ptr)
-#else
-#define aligned_free(ptr)  free(ptr)
-#endif
-
-#if defined (__GNUC__) || defined (__clang__)
-    #define likely(p)     __builtin_expect(!!(p), 1)
-    #define unlikely(p)   __builtin_expect(!!(p), 0)
-    #define unreachable() __builtin_unreachable()
-#elif defined(_MSC_VER)
-    #define likely(p)     (!!(p))
-    #define unlikely(p)   (!!(p))
-    #define unreachable() (__assume(0))
-#else
-    #define likely(p)     (!!(p))
-    #define unlikely(p)   (!!(p))
-    #define unreachable() ((void)0)
-#endif
-
-#define PICTURE_SW_SIZE_MAX (UINT32_C(1) << 28) /* 256MB: 8K * 8K * 4*/
-
-#define SUCCESS        0
-/** Unspecified error */
-#define EGENERIC       (-2 * (1 << (sizeof (int) * 8 - 2))) /* INT_MIN */
-
-using fourcc_t = uint32_t;
-
-#ifdef WORDS_BIGENDIAN
-#   define FOURCC( a, b, c, d ) \
-        ( ((uint32_t)d) | ( ((uint32_t)c) << 8 ) \
-           | ( ((uint32_t)b) << 16 ) | ( ((uint32_t)a) << 24 ) )
-#   define TWOCC( a, b ) \
-        ( (uint16_t)(b) | ( (uint16_t)(a) << 8 ) )
-
-#else
-#   define FOURCC( a, b, c, d ) \
-        ( ((uint32_t)a) | ( ((uint32_t)b) << 8 ) \
-           | ( ((uint32_t)c) << 16 ) | ( ((uint32_t)d) << 24 ) )
-#   define TWOCC( a, b ) \
-        ( (uint16_t)(a) | ( (uint16_t)(b) << 8 ) )
 
 extern "C" {
     #include <libswscale/swscale.h>
@@ -69,143 +13,11 @@ extern "C" {
 
 
 namespace FFmpeg {
+    using fourcc_t = uint32_t;
 
-
-#endif
-
-
-    struct video_palette_t
-    {
-        int i_entries;                         /**< number of in-use palette entries */
-        uint8_t palette[VIDEO_PALETTE_COLORS_MAX][4];  /**< 4-byte RGBA/YUVA palette */
-    };
-
-    enum video_orientation_t
-    {
-        ORIENT_TOP_LEFT = 0, /**< Top line represents top, left column left. */
-        ORIENT_TOP_RIGHT, /**< Flipped horizontally */
-        ORIENT_BOTTOM_LEFT, /**< Flipped vertically */
-        ORIENT_BOTTOM_RIGHT, /**< Rotated 180 degrees */
-        ORIENT_LEFT_TOP, /**< Transposed */
-        ORIENT_LEFT_BOTTOM, /**< Rotated 90 degrees anti-clockwise */
-        ORIENT_RIGHT_TOP, /**< Rotated 90 degrees clockwise */
-        ORIENT_RIGHT_BOTTOM, /**< Anti-transposed */
-#define ORIENT_MAX ((size_t)ORIENT_RIGHT_BOTTOM)
-
-        ORIENT_NORMAL = ORIENT_TOP_LEFT,
-        ORIENT_TRANSPOSED = ORIENT_LEFT_TOP,
-        ORIENT_ANTI_TRANSPOSED = ORIENT_RIGHT_BOTTOM,
-        ORIENT_HFLIPPED = ORIENT_TOP_RIGHT,
-        ORIENT_VFLIPPED = ORIENT_BOTTOM_LEFT,
-        ORIENT_ROTATED_180 = ORIENT_BOTTOM_RIGHT,
-        ORIENT_ROTATED_270 = ORIENT_LEFT_BOTTOM,
-        ORIENT_ROTATED_90 = ORIENT_RIGHT_TOP,
-    };
-
-    enum video_color_primaries_t
-    {
-        COLOR_PRIMARIES_UNDEF,
-        COLOR_PRIMARIES_BT601_525,
-        COLOR_PRIMARIES_BT601_625,
-        COLOR_PRIMARIES_BT709,
-        COLOR_PRIMARIES_BT2020,
-        COLOR_PRIMARIES_DCI_P3,
-        COLOR_PRIMARIES_FCC1953,
-#define COLOR_PRIMARIES_SRGB            COLOR_PRIMARIES_BT709
-#define COLOR_PRIMARIES_SMTPE_170       COLOR_PRIMARIES_BT601_525
-#define COLOR_PRIMARIES_SMTPE_240       COLOR_PRIMARIES_BT601_525 /* Only differs from 1e10-4 in white Y */
-#define COLOR_PRIMARIES_SMTPE_RP145     COLOR_PRIMARIES_BT601_525
-#define COLOR_PRIMARIES_EBU_3213        COLOR_PRIMARIES_BT601_625
-#define COLOR_PRIMARIES_BT470_BG        COLOR_PRIMARIES_BT601_625
-#define COLOR_PRIMARIES_BT470_M         COLOR_PRIMARIES_FCC1953
-#define COLOR_PRIMARIES_MAX             COLOR_PRIMARIES_FCC1953
-    };
-
-    enum video_transfer_func_t
-    {
-        TRANSFER_FUNC_UNDEF,
-        TRANSFER_FUNC_LINEAR,
-        TRANSFER_FUNC_SRGB /**< Gamma 2.2 */,
-        TRANSFER_FUNC_BT470_BG,
-        TRANSFER_FUNC_BT470_M,
-        TRANSFER_FUNC_BT709,
-        TRANSFER_FUNC_SMPTE_ST2084,
-        TRANSFER_FUNC_SMPTE_240,
-        TRANSFER_FUNC_HLG,
-#define TRANSFER_FUNC_BT2020            TRANSFER_FUNC_BT709
-#define TRANSFER_FUNC_SMPTE_170         TRANSFER_FUNC_BT709
-#define TRANSFER_FUNC_SMPTE_274         TRANSFER_FUNC_BT709
-#define TRANSFER_FUNC_SMPTE_293         TRANSFER_FUNC_BT709
-#define TRANSFER_FUNC_SMPTE_296         TRANSFER_FUNC_BT709
-#define TRANSFER_FUNC_ARIB_B67          TRANSFER_FUNC_HLG
-#define TRANSFER_FUNC_MAX               TRANSFER_FUNC_HLG
-    };
-
-    enum video_color_space_t
-    {
-        COLOR_SPACE_UNDEF,
-        COLOR_SPACE_BT601,
-        COLOR_SPACE_BT709,
-        COLOR_SPACE_BT2020,
-#define COLOR_SPACE_SRGB      COLOR_SPACE_BT709
-#define COLOR_SPACE_SMPTE_170 COLOR_SPACE_BT601
-#define COLOR_SPACE_SMPTE_240 COLOR_SPACE_SMPTE_170
-#define COLOR_SPACE_MAX       COLOR_SPACE_BT2020
-    };
-
-    enum video_color_range_t
-    {
-        COLOR_RANGE_UNDEF,
-        COLOR_RANGE_FULL,
-        COLOR_RANGE_LIMITED,
-#define COLOR_RANGE_STUDIO COLOR_RANGE_LIMITED
-#define COLOR_RANGE_MAX    COLOR_RANGE_LIMITED
-    };
-
-    enum video_chroma_location_t
-    {
-        CHROMA_LOCATION_UNDEF,
-        CHROMA_LOCATION_LEFT,   /**< Most common in MPEG-2 Video, H.264/265 */
-        CHROMA_LOCATION_CENTER, /**< Most common in MPEG-1 Video, JPEG */
-        CHROMA_LOCATION_TOP_LEFT,
-        CHROMA_LOCATION_TOP_CENTER,
-        CHROMA_LOCATION_BOTTOM_LEFT,
-        CHROMA_LOCATION_BOTTOM_CENTER,
-#define CHROMA_LOCATION_MAX CHROMA_LOCATION_BOTTOM_CENTER
-    };
-
-    enum video_multiview_mode_t
-    {
-        /* No stereoscopy: 2D picture. */
-        MULTIVIEW_2D = 0,
-
-        /* Side-by-side with left eye first. */
-        MULTIVIEW_STEREO_SBS,
-
-        /* Top-bottom with left eye first. */
-        MULTIVIEW_STEREO_TB,
-
-        /* Row sequential with left eye first. */
-        MULTIVIEW_STEREO_ROW,
-
-        /* Column sequential with left eye first. */
-        MULTIVIEW_STEREO_COL,
-
-        /* Frame sequential with left eye first. */
-        MULTIVIEW_STEREO_FRAME,
-
-        /* Checkerboard pattern with left eye first. */
-        MULTIVIEW_STEREO_CHECKERBOARD,
-
-#define MULTIVIEW_STEREO_MAX  MULTIVIEW_STEREO_CHECKERBOARD
-    };
-
-     enum video_projection_mode_t
-    {
-        PROJECTION_MODE_RECTANGULAR = 0,
-        PROJECTION_MODE_EQUIRECTANGULAR,
-
-        PROJECTION_MODE_CUBEMAP_LAYOUT_STANDARD = 0x100,
+    struct video_palette_t {
+        int i_entries;                                  /**< number of in-use palette entries */
+        uint8_t palette[VIDEO_PALETTE_COLORS_MAX][4];   /**< 4-byte RGBA/YUVA palette */
     };
 
     struct viewpoint_t {
@@ -292,27 +104,13 @@ namespace FFmpeg {
          const char* deactivate_name;
          void* pf_activate;
      }; 
-     enum es_format_category_e
-     {
-         UNKNOWN_ES = 0x00,
-         VIDEO_ES,
-         AUDIO_ES,
-         SPU_ES,
-         DATA_ES,
-     };
-     
+   
           struct extra_languages_t
      {
          char* psz_language;
          char* psz_description;
      };
-
-          enum audio_channel_type_t
-         {
-             AUDIO_CHANNEL_TYPE_BITMAP,
-             AUDIO_CHANNEL_TYPE_AMBISONICS,
-         };
-
+          
         struct audio_format_t
         {
             fourcc_t i_format;                          /**< audio format fourcc */
@@ -487,18 +285,6 @@ namespace FFmpeg {
      struct video_context_operations
      {
          void (*destroy)(void* priv);
-     };
-     enum video_context_type
-     {
-         VIDEO_CONTEXT_VAAPI = 1, //!< private: vaapi_vctx* or empty
-         VIDEO_CONTEXT_VDPAU,     //!< private: chroma type (YUV) or empty (RGB)
-         VIDEO_CONTEXT_DXVA2,     //!< private: d3d9_video_context_t*
-         VIDEO_CONTEXT_D3D11VA,   //!< private: d3d11_video_context_t*
-         VIDEO_CONTEXT_AWINDOW,   //!< private: android_video_context_t*
-         VIDEO_CONTEXT_NVDEC,     //!< empty
-         VIDEO_CONTEXT_CVPX,      //!< private: cvpx_video_context*
-         VIDEO_CONTEXT_MMAL,      //!< empty
-         VIDEO_CONTEXT_GSTDECODE, //!< empty
      };
 
      struct fourcc_desc {

@@ -1,5 +1,6 @@
 #include "Fourcc.h"
 
+#include "Tools.h"
 
 namespace FFmpeg {
 
@@ -109,6 +110,10 @@ namespace FFmpeg {
         return a;
     }
 
+    int LCM(int a, int b) {
+        return a * b / GCD(a, b);
+    }
+
     bool UReduce(
         unsigned* pi_dst_nom, unsigned* pi_dst_den,
         uint64_t i_nom, uint64_t i_den, uint64_t i_max)
@@ -157,6 +162,16 @@ namespace FFmpeg {
         *pi_dst_den = i_den;
 
         return b_exact;
+    }
+
+    const chroma_description_t* FourccGetChromaDescription(fourcc_t i_fourcc)
+    {
+        for (size_t i = 0; i < ARRAY_SIZE(p_list_chroma_description); i++)
+        {
+            if (p_list_chroma_description[i].fcc == i_fourcc)
+                return &p_list_chroma_description[i];
+        }
+        return NULL;
     }
 
 

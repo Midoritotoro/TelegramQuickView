@@ -1,5 +1,9 @@
 #include "VideoFormat.h"
 
+#include "Tools.h"
+#include "Fourcc.h"
+
+#include "Atomic.h"
 
 namespace FFmpeg {
     void DecoderDeviceRelease(decoder_device* device)
@@ -56,6 +60,17 @@ namespace FFmpeg {
             i_sar_num, i_sar_den, 0);
 
     }
+
+    void VideoFormatCopyCrop(
+        video_format_t* p_dst, 
+        const video_format_t* p_src)
+    {
+        p_dst->i_x_offset = p_src->i_x_offset;
+        p_dst->i_y_offset = p_src->i_y_offset;
+        p_dst->i_visible_width = p_src->i_visible_width;
+        p_dst->i_visible_height = p_src->i_visible_height;
+    }
+
     void ViewpointInit(viewpoint_t* p_vp)
     {
         p_vp->yaw = p_vp->pitch = p_vp->roll = 0.0f;

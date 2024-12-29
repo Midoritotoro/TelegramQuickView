@@ -15,12 +15,6 @@ extern "C" {
     #include <libswscale/version.h>
 }
 
-#define container_of(ptr, type, member) \
-    ((type *)(((char *)(ptr)) - offsetof(type, member)))
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-
-
 #include <Windows.h>
 
 namespace FFmpeg {

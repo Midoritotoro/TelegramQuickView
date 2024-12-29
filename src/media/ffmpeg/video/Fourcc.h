@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "Types.h"
 
 namespace FFmpeg {
 	[[nodiscard]] int FourccCmp(
@@ -33,7 +34,13 @@ namespace FFmpeg {
 		int64_t a,
 		int64_t b);
 
+	[[nodiscard]] int LCM(int a, int b);
+
 	[[nodiscard]] bool UReduce(
 		unsigned* pi_dst_nom, unsigned* pi_dst_den,
 		uint64_t i_nom, uint64_t i_den, uint64_t i_max);
+
+    [[nodiscard]] const chroma_description_t* 
+        FourccGetChromaDescription(fourcc_t i_fourcc);
+
 } // namespace FFmpeg

@@ -30,4 +30,7 @@ namespace FFmpeg {
 		int i_width, int i_height,
 		int i_visible_width, int i_visible_height,
 		int i_sar_num, int i_sar_den);
+	void VideoFormatCopyCrop(
+		video_format_t* p_dst,
+		const video_format_t* p_src);
 } // namespace FFmpeg
