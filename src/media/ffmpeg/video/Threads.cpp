@@ -7,72 +7,10 @@
 #include <Windows.h>
 #include <thread>
 
-
 namespace FFmpeg {
-    struct threadvar
-    {
-        PULONG                id;
-        void                (*destroy) (void*);
-        struct threadvar* prev;
-        struct threadvar* next;
-    } *threadvar_last = NULL;
-
-    int threadvar_create(threadvar_t* p_tls, void(*destr) (void*))
-    {
-        ULONG rc;
-
-        struct threadvar* var = malloc(sizeof(*var));
-        if (unlikely(var == NULL))
-            return errno;
-
-        rc = DosAllocThreadLocalMemory(1, &var->id);
-        if (rc)
-        {
-            free(var);
-            return EAGAIN;
-        }
-
-        var->destroy = destr;
-        var->next = NULL;
-        *p_tls = var;
-
-        if (destr != NULL)
-        {
-            mutex_lock(&super_mutex);
-            var->prev = threadvar_last;
-            if (var->prev != NULL)
-                var->prev->next = var;
-
-            threadvar_last = var;
-            mutex_unlock(&super_mutex);
-        }
-        return 0;
-    }
-
-    void threadvar_delete(threadvar_t* p_tls)
-    {
-        struct threadvar* var = *p_tls;
-
-        if (var->destroy != NULL)
-        {
-            mutex_lock(&super_mutex);
-            if (var->prev != NULL)
-                var->prev->next = var->next;
-
-            if (var->next != NULL)
-                var->next->prev = var->prev;
-            else
-                threadvar_last = var->prev;
-
-            mutex_unlock(&super_mutex);
-        }
-        DosFreeThreadLocalMemory(var->id);
-        free(var);
-    }
-
     int threadvar_set(threadvar_t key, void* value)
     {
-        *key->id = (ULONG)value;
+        *key->id= (ULONG)value;
         return 0;
     }
 
@@ -80,133 +18,6 @@ namespace FFmpeg {
     {
         return (void*)*key->id;
     }
-
-    static struct wait_bucket
-    {
-        HMTX lock;
-        HEV wait;
-        unsigned waiters;
-    } wait_buckets[32];
-
-    static void wait_bucket_init(void)
-    {
-        for (size_t i = 0; i < ARRAY_SIZE(wait_buckets); i++)
-        {
-            struct wait_bucket* bucket = wait_buckets + i;
-
-            DosCreateMutexSem(NULL, &bucket->lock, 0L, FALSE);
-            DosCreateEventSem(NULL, &bucket->wait, 0L, FALSE);
-        }
-    }
-
-    static void wait_bucket_destroy(void)
-    {
-        for (size_t i = 0; i < ARRAY_SIZE(wait_buckets); i++)
-        {
-            struct wait_bucket* bucket = wait_buckets + i;
-
-            DosCloseMutexSem(bucket->lock);
-            DosCloseEventSem(bucket->wait);
-        }
-    }
-
-    static struct wait_bucket* wait_bucket_get(std::atomic_uint* addr)
-    {
-        uintptr_t u = (uintptr_t)addr;
-        size_t idx = (u / alignof (*addr)) % ARRAY_SIZE(wait_buckets);
-
-        return &wait_buckets[idx];
-    }
-
-    static struct wait_bucket* wait_bucket_enter(atomic_uint* addr)
-    {
-        struct wait_bucket* bucket = wait_bucket_get(addr);
-
-        DosRequestMutexSem(bucket->lock, SEM_INDEFINITE_WAIT);
-        bucket->waiters++;
-
-        return bucket;
-    }
-
-    static void wait_bucket_leave(void* data)
-    {
-        struct wait_bucket* bucket = data;
-
-        bucket->waiters--;
-        DosReleaseMutexSem(bucket->lock);
-    }
-
-    void atomic_wait(void* addr, unsigned value)
-    {
-        atomic_uint* futex = addr;
-        struct wait_bucket* bucket = wait_bucket_enter(futex);
-
-        cleanup_push(wait_bucket_leave, bucket);
-
-        if (value == atomic_load_explicit(futex, memory_order_relaxed))
-        {
-            ULONG count;
-
-            DosReleaseMutexSem(bucket->lock);
-            WaitForSingleObject(bucket->wait, SEM_INDEFINITE_WAIT);
-            DosResetEventSem(bucket->wait, &count);
-            DosRequestMutexSem(bucket->lock, SEM_INDEFINITE_WAIT);
-        }
-        else
-            testcancel();
-
-        wait_bucket_leave(bucket);
-        cleanup_pop();
-    }
-
-    int atomic_timedwait(void* addr, unsigned value, tick_t deadline)
-    {
-        atomic_uint* futex = addr;
-        struct wait_bucket* bucket = wait_bucket_enter(futex);
-
-        ULONG rc = 0;
-
-        cleanup_push(wait_bucket_leave, bucket);
-
-        if (value == atomic_load_explicit(futex, memory_order_relaxed))
-        {
-            tick_t delay;
-
-            DosReleaseMutexSem(bucket->lock);
-
-            do
-            {
-                ULONG ms;
-                ULONG count;
-
-                delay = deadline - tick_now();
-
-                if (delay < 0)
-                    ms = 0;
-                else if (delay >= TICK_FROM_MS(LONG_MAX))
-                    ms = LONG_MAX;
-                else
-                    ms = MS_FROM_TICK(delay);
-
-                rc = WaitForSingleObject(bucket->wait, ms);
-                if (rc == 0)
-                {
-                    DosResetEventSem(bucket->wait, &count);
-                    break;
-                }
-            } while (delay > 0);
-
-            DosRequestMutexSem(bucket->lock, SEM_INDEFINITE_WAIT);
-        }
-        else
-            testcancel();
-
-        wait_bucket_leave(bucket);
-        cleanup_pop();
-
-        return rc == 0 ? 0 : ETIMEDOUT;
-    }
-
 
     tick_t mdate_wall()
     {
@@ -518,7 +329,7 @@ namespace FFmpeg {
         assert(atomic_load_explicit(&mutex->recursion, memory_order_relaxed) <= 1);
 
         cond_wait_prepare(&waiter, cond, mutex);
-        ret = std::atomic_timedwait(&waiter.value, 0, deadline);
+        ret = atomic_timedwait(&waiter.value, 0, deadline);
         cond_wait_finish(&waiter, cond, mutex);
 
         return ret;
@@ -624,7 +435,7 @@ namespace FFmpeg {
                 return ETIMEDOUT; // deadline passed
 
             DWORD ms;
-            int64_t idelay = FROM_TICK(delay);
+            int64_t idelay = MS_FROM_TICK(delay);
             static_assert(sizeof(unsigned long) <= sizeof(DWORD), "unknown max DWORD");
             if (unlikely(idelay > ULONG_MAX))
                 ms = ULONG_MAX;

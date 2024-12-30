@@ -4,6 +4,18 @@
 #include "Atomic.h"
 
 
+#include <Windows.h>
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <errno.h>
+#include <sys/locking.h>
+#include <sys/utime.h>
+#include <sys/timeb.h>
+
+
+
 namespace FFmpeg {
 #define STATIC_MUTEX { \
     0, \
@@ -69,28 +81,13 @@ namespace FFmpeg {
             mutex_unlock(lock);
     }
 
-    int threadvar_create(threadvar_t* p_tls, void(*destr) (void*));
-    void threadvar_delete(threadvar_t* p_tls);
+    typedef void(*destroy)(void*);
+
+    threadvar_t* threadvar_last = nullptr;
 
     int threadvar_set(threadvar_t key, void* value);
     void* threadvar_get(threadvar_t key);
 
-    static struct wait_bucket
-    {
-        HMTX lock;
-        HEV wait;
-        unsigned waiters;
-    } wait_buckets[32];
-
-    void wait_bucket_init();
-
-    void wait_bucket_destroy();
-
-    struct wait_bucket* wait_bucket_get(std::atomic_uint* addr);
-    struct wait_bucket* wait_bucket_enter(std::atomic_uint* addr);
-
-    void wait_bucket_leave(void* data);
-    void atomic_wait(void* addr, unsigned value);
     int atomic_timedwait(void* addr, unsigned value, tick_t deadline);
     tick_t mdate_wall();
 
@@ -136,7 +133,7 @@ namespace FFmpeg {
     int cond_timedwait_daytime(cond_t* cond, mutex_t* mutex,
         time_t deadline);
 
-    /*** Generic semaphores ***/
+    /* Generic semaphores */
 
     void sem_init(sem_t* sem, unsigned value);
     int sem_post(sem_t* sem);

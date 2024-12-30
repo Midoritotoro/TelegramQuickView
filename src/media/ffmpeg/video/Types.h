@@ -5,7 +5,12 @@
 
 #include "Enums.h"
 
-#include <atomic>
+#include <stdatomic.h>
+
+#ifdef __STDC_NO_ATOMICS__ 
+#undef __STDC_NO_ATOMICS__ 
+#endif // __STDC_NO_ATOMICS__ 
+
 
 extern "C" {
     #include <libswscale/swscale.h>
@@ -21,6 +26,14 @@ namespace FFmpeg {
     struct module_t;
     struct plagin_t;
     struct video_format_t;
+
+    struct threadvar
+    {
+        PULONG                id;
+        void                (*destroy) (void*);
+        struct threadvar* prev;
+        struct threadvar* next;
+    };
 
     struct sem_t
     {
@@ -111,7 +124,39 @@ namespace FFmpeg {
          const char* deactivate_name;
          void* pf_activate;
      }; 
+
+     union module_value_t
+     {
+         char* psz;
+         int64_t     i;
+         float       f;
+     };
    
+     struct module_config_t
+     {
+         uint8_t     i_type; /**< Configuration type */
+
+         const char* psz_type; /**< Configuration subtype */
+         const char* psz_name; /**< Option name */
+         const char* psz_text; /**< Short comment on the configuration option */
+         const char* psz_longtext; /**< Long comment on the configuration option */
+
+         module_value_t value; /**< Current value */
+         module_value_t orig; /**< Default value */
+         module_value_t min; /**< Minimum value (for scalars only) */
+         module_value_t max; /**< Maximum value (for scalars only) */
+
+         /* Values list */
+         uint16_t list_count; /**< Choices count */
+         union
+         {
+             const char** psz; /**< Table of possible string choices */
+             const int* i; /**< Table of possible integer choices */
+         } list; /**< Possible choices */
+         const char** list_text; /**< Human-readable names for list values */
+     };
+
+
      struct extra_languages_t
      {
          char* psz_language;
@@ -419,6 +464,40 @@ namespace FFmpeg {
          mutex_t lock;
      };
 
+     struct object_t;
+     struct object_internals_t
+     {
+         object_t* parent; /**< Parent object (or NULL) */
+         const char* _typename; /**< Object type human-readable name */
+
+         /* Object variables */
+         void* var_root;
+         mutex_t     var_lock;
+
+         /* Object resources */
+         struct res* resources;
+     };
+
+
+     struct object_t
+     {
+         logger* logger;
+         union {
+             struct object_internals_t* priv;
+             struct object_marker* obj;
+         };
+
+         bool no_interact;
+
+         /** Module probe flag
+          *
+          * A boolean during module probing when the probe is "forced".
+          * See \ref module_need().
+          */
+         bool force;
+     };
+
+
      typedef int (*callback_t) (object_t*,      /* variable's object */
          char const*,            /* variable name */
          value_t,                 /* old value */
@@ -430,7 +509,7 @@ namespace FFmpeg {
       *****************************************************************************/
      typedef int (*list_callback_t) (object_t*,      /* variable's object */
          char const*,            /* variable name */
-         int,                  /* VLC_VAR_* action */
+         int,                  /* VAR_* action */
          value_t*,      /* new/deleted value  */
          void*);                 /* callback data */
 
@@ -488,39 +567,6 @@ namespace FFmpeg {
          void (*release)(void*);
          max_align_t payload[];
      };
-
-     struct object_t;
-     struct object_internals_t
-     {
-         object_t* parent; /**< Parent object (or NULL) */
-         const char* _typename; /**< Object type human-readable name */
-
-         /* Object variables */
-         void* var_root;
-         mutex_t     var_lock;
-
-         /* Object resources */
-         struct res* resources;
-     };
-
-     struct object_t
-     {
-         logger* logger;
-         union {
-             struct object_internals_t* priv;
-             struct object_marker* obj;
-         };
-
-         bool no_interact;
-
-         /** Module probe flag
-          *
-          * A boolean during module probing when the probe is "forced".
-          * See \ref module_need().
-          */
-         bool force;
-     };
-
 
      struct video_context
      {
@@ -648,6 +694,32 @@ namespace FFmpeg {
 
         atomic_rc_t refs;
     };
+
+     struct rcu_generation {
+         std::atomic_uintptr_t readers;
+         std::atomic_uint writer;
+     };
+
+     struct rcu_thread {
+         rcu_generation* generation;
+         uintptr_t recursion;
+     };
+
+     struct param {
+         union {
+             /*_Atomic*/ std::atomic<int64_t> i; /**< Current value (if integer or boolean) */
+             /*_Atomic*/ std::atomic<float> f; /**< Current value (if floating point) */
+             std::atomic<char*> /*_Atomic*/ str; /**< Current value (if character string) */
+         } value;
+
+         struct vlc_plugin_t* owner;
+         unsigned char shortname; /**< Optional short option name */
+         unsigned internal:1; /**< Hidden from preferences and help */
+         unsigned unsaved : 1; /**< Not stored in persistent configuration */
+         unsigned safe : 1; /**< Safe for untrusted provisioning (playlists) */
+         unsigned obsolete : 1; /**< Ignored for backward compatibility */
+         struct module_config_t item;
+     };
 
     struct rational_t {
         unsigned num, den;
