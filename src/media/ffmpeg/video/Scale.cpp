@@ -16,6 +16,8 @@
 #include "VideoFormat.h"
 #include "Chroma.h"
 
+#include "Object.h"
+
 
 extern "C" {
     #include <libswscale/swscale.h>

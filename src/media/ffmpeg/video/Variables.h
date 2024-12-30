@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "Object.h"
 
 #define CONFIG_HINT_CATEGORY                0x02  /* Start of new category */
 
@@ -62,3 +63,132 @@
 #define VAR_GETCHOICES          0x0024
 #define VAR_CHOICESCOUNT        0x0026
 #define VAR_SETMINMAX           0x0027
+
+
+namespace FFmpeg {
+    union value_t
+    {
+        int64_t         i_int;
+        bool            b_bool;
+        float           f_float;
+        char* psz_string;
+        void* p_address;
+        struct { int32_t x; int32_t y; } coords;
+
+    };
+
+    struct variable_ops_t
+    {
+        int  (*pf_cmp) (value_t, value_t);
+        void (*pf_dup) (value_t*);
+        void (*pf_free) (value_t*);
+    };
+
+    typedef int (*callback_t) (object_t*,      /* variable's object */
+        char const*,            /* variable name */
+        value_t,                 /* old value */
+        value_t,                 /* new value */
+        void*);                /* callback data */
+
+    /*****************************************************************************
+     * List callbacks: called when elements are added/removed from the list
+     *****************************************************************************/
+    typedef int (*list_callback_t) (object_t*,      /* variable's object */
+        char const*,            /* variable name */
+        int,                  /* VAR_* action */
+        value_t*,      /* new/deleted value  */
+        void*);                 /* callback data */
+
+
+    struct callback_entry_t
+    {
+        struct callback_entry_t* next;
+        union
+        {
+            callback_t       pf_value_callback;
+            list_callback_t  pf_list_callback;
+            void* p_callback;
+        };
+        void* p_data;
+    };
+
+    struct variable_t
+    {
+        char* psz_name; /**< The variable unique name (must be first) */
+
+        /** The variable's exported value */
+        value_t  val;
+
+        /** The variable display name, mainly for use by the interfaces */
+        char* psz_text;
+
+        const variable_ops_t* ops;
+
+        int          i_type;   /**< The type of the variable */
+        unsigned     i_usage;  /**< Reference count */
+
+        /** If the variable has min/max/step values */
+        value_t  min, max, step;
+
+        /** List of choices */
+        value_t* choices;
+        /** List of friendly names for the choices */
+        char** choices_text;
+        size_t       choices_count;
+
+        /** Set to TRUE if the variable is in a callback */
+        bool   b_incallback;
+
+        /** Registered value callbacks */
+        callback_entry_t* value_callbacks;
+        /** Registered list callbacks */
+        callback_entry_t* list_callbacks;
+
+        Threads::cond_t   wait;
+    };
+
+
+    int CmpBool(value_t v, value_t w);
+    int CmpInt(value_t v, value_t w);
+  
+    int CmpString(value_t v, value_t w);
+
+    int CmpFloat(value_t v, value_t w);
+    int CmpAddress(value_t v, value_t w);
+
+    void DupDummy(value_t* p_val);
+    void DupString(value_t* p_val);
+
+    void FreeDummy(value_t* p_val);
+    void FreeString(value_t* p_val);
+
+    static const struct variable_ops_t
+        void_ops =      {   NULL,       DupDummy,  FreeDummy, },
+        addr_ops =      {   CmpAddress, DupDummy,  FreeDummy, },
+        bool_ops =      {   CmpBool,    DupDummy,  FreeDummy, },
+        float_ops =     {   CmpFloat,   DupDummy,  FreeDummy, },
+        int_ops =       {   CmpInt,     DupDummy,  FreeDummy, },
+        string_ops =    {   CmpString,  DupString, FreeString, },
+        coords_ops =    {   NULL,       DupDummy,  FreeDummy, };
+
+    struct node_t {
+        char* key;
+        struct node_t* llink, * rlink;
+    };
+
+    int varcmp(const void* a, const void* b);
+    variable_t* LookupVar(object_t* obj, const char* psz_name);
+
+    static struct
+    {
+        struct param** list;
+        size_t count;
+    } config = { NULL, 0 };
+
+
+    param* param_Find(const char* name);
+    variable_t* LookupVariable(object_t* obj, const char* psz_name);
+
+    int var_GetChecked(object_t* p_this, const char* psz_name,
+        int expected_type, value_t* p_val);
+}

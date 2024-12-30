@@ -1,5 +1,7 @@
 #pragma once 
 
+#include "Types.h"
+
 
 namespace FFmpeg {
     enum video_orientation_t {
@@ -95,6 +97,20 @@ namespace FFmpeg {
         VIDEO_CONTEXT_CVPX,      //!< private: cvpx_video_context*
         VIDEO_CONTEXT_MMAL,      //!< empty
         VIDEO_CONTEXT_GSTDECODE, //!< empty
+    };
+
+
+    enum es_format_category_e {
+        UNKNOWN_ES = 0x00,
+        VIDEO_ES,
+        AUDIO_ES,
+        SPU_ES,
+        DATA_ES,
+    };
+
+    enum audio_channel_type_t {
+        AUDIO_CHANNEL_TYPE_BITMAP,
+        AUDIO_CHANNEL_TYPE_AMBISONICS,
     };
 
 

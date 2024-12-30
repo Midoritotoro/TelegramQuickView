@@ -22,16 +22,7 @@ namespace FFmpeg {
     struct plagin_t;
     struct video_format_t;
 
-    union value_t
-    {
-        int64_t         i_int;
-        bool            b_bool;
-        float           f_float;
-        char* psz_string;
-        void* p_address;
-        struct { int32_t x; int32_t y; } coords;
 
-    };
 
      struct plugin_t
      {
@@ -205,81 +196,7 @@ namespace FFmpeg {
             } cc;
         };
 
-        struct video_format_t
-        {
-            fourcc_t i_chroma;                               /**< picture chroma */
-
-            unsigned int i_width;                                 /**< picture width */
-            unsigned int i_height;                               /**< picture height */
-
-            unsigned int i_x_offset;               /**< start offset of visible area */
-            unsigned int i_y_offset;               /**< start offset of visible area */
-
-            unsigned int i_visible_width;                 /**< width of visible area */
-            unsigned int i_visible_height;               /**< height of visible area */
-
-            unsigned int i_sar_num;                   /**< sample/pixel aspect ratio */
-            unsigned int i_sar_den;
-
-            unsigned int i_frame_rate;                     /**< frame rate numerator */
-            unsigned int i_frame_rate_base;              /**< frame rate denominator */
-
-            video_palette_t* p_palette;              /**< video palette from demuxer */
-            video_orientation_t orientation;                /**< picture orientation */
-
-            video_color_primaries_t primaries;                  /**< color primaries */
-
-            video_transfer_func_t transfer;                   /**< transfer function */
-            video_color_space_t space;                        /**< YCbCr color space */
-
-            video_color_range_t color_range;            /**< 0-255 instead of 16-235 */
-            video_chroma_location_t chroma_location;      /**< YCbCr chroma location */
-
-            video_multiview_mode_t multiview_mode;        /** Multiview mode, 2D, 3D */
-            bool b_multiview_right_eye_first;   /** Multiview left or right eye first*/
-
-            video_projection_mode_t projection_mode;            /**< projection mode */
-            viewpoint_t pose;
-            struct {
-                /* similar to SMPTE ST 2086 mastering display color volume */
-                uint16_t primaries[3 * 2]; /* G,B,R / x,y */
-                uint16_t white_point[2]; /* x,y */
-
-                uint32_t max_luminance;
-                uint32_t min_luminance;
-            } mastering;
-            struct {
-                /* similar to CTA-861.3 content light level */
-                uint16_t MaxCLL;  /* max content light level */
-                uint16_t MaxFALL; /* max frame average light level */
-            } lighting;
-            struct {
-                uint8_t version_major;
-                uint8_t version_minor;
-
-                unsigned profile : 7;
-
-                unsigned level : 6;
-                unsigned rpu_present : 1;
-
-                unsigned el_present : 1;
-                unsigned bl_present : 1;
-            } dovi;
-            uint32_t i_cubemap_padding; /**< padding in pixels of the cube map faces */
-        };
-
-    enum es_format_category_e {
-        UNKNOWN_ES = 0x00,
-        VIDEO_ES,
-        AUDIO_ES,
-        SPU_ES,
-        DATA_ES,
-    };
-
-    enum audio_channel_type_t {
-        AUDIO_CHANNEL_TYPE_BITMAP,
-        AUDIO_CHANNEL_TYPE_AMBISONICS,
-    };
+     
 
      struct es_format_t
      {
@@ -380,75 +297,6 @@ namespace FFmpeg {
          uint32_t fourcc;
      };
 
-     struct variable_ops_t
-     {
-         int  (*pf_cmp) (value_t, value_t);
-         void (*pf_dup) (value_t*);
-         void (*pf_free) (value_t*);
-     };
-
-     typedef int (*callback_t) (object_t*,      /* variable's object */
-         char const*,            /* variable name */
-         value_t,                 /* old value */
-         value_t,                 /* new value */
-         void*);                /* callback data */
-
-     /*****************************************************************************
-      * List callbacks: called when elements are added/removed from the list
-      *****************************************************************************/
-     typedef int (*list_callback_t) (object_t*,      /* variable's object */
-         char const*,            /* variable name */
-         int,                  /* VAR_* action */
-         value_t*,      /* new/deleted value  */
-         void*);                 /* callback data */
-
-
-     struct callback_entry_t
-     {
-         struct callback_entry_t* next;
-         union
-         {
-             callback_t       pf_value_callback;
-             list_callback_t  pf_list_callback;
-             void* p_callback;
-         };
-         void* p_data;
-     };
-
-     struct variable_t
-     {
-         char* psz_name; /**< The variable unique name (must be first) */
-
-         /** The variable's exported value */
-         value_t  val;
-
-         /** The variable display name, mainly for use by the interfaces */
-         char* psz_text;
-
-         const variable_ops_t* ops;
-
-         int          i_type;   /**< The type of the variable */
-         unsigned     i_usage;  /**< Reference count */
-
-         /** If the variable has min/max/step values */
-         value_t  min, max, step;
-
-         /** List of choices */
-         value_t* choices;
-         /** List of friendly names for the choices */
-         char** choices_text;
-         size_t       choices_count;
-
-         /** Set to TRUE if the variable is in a callback */
-         bool   b_incallback;
-
-         /** Registered value callbacks */
-         callback_entry_t* value_callbacks;
-         /** Registered list callbacks */
-         callback_entry_t* list_callbacks;
-
-         Threads::cond_t   wait;
-     };
 
      struct video_context
      {

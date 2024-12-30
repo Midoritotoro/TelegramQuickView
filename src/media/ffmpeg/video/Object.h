@@ -1,9 +1,11 @@
 #pragma once 
 
-#include <cstddef>
-#include "Config.h"
 
+#include "Config.h"
 #include "Threads.h"
+
+#include <cstddef>
+#include <type_traits>
 
 
 namespace FFmpeg {
@@ -141,5 +143,4 @@ namespace FFmpeg {
     inline object_t* object_parent(object_t* object) {
         return objectPrivate(object)->parent;
     }
-
 } // namespace FFmpeg
