@@ -110,6 +110,19 @@ namespace FFmpeg {
         VIDEO_CONTEXT_GSTDECODE, //!< empty
     };
 
+    enum mutex_type_t
+    {
+        AVCODEC_MUTEX = 0,
+        GCRYPT_MUTEX,
+        XLIB_MUTEX,
+        MOSAIC_MUTEX,
+#ifdef _WIN32
+        MTA_MUTEX,
+#endif
+        /* Insert new entry HERE */
+        MAX_MUTEX
+    };
+
     #define MULTIVIEW_STEREO_MAX                    MULTIVIEW_STEREO_CHECKERBOARD
     #define ORIENT_MAX                              ((size_t)ORIENT_RIGHT_BOTTOM)
     #define COLOR_PRIMARIES_SRGB                    COLOR_PRIMARIES_BT709

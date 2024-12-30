@@ -3,29 +3,26 @@
 
 
 namespace FFmpeg {
-    void AncillaryRelease(ancillary* ancillary)
-    {
-        if (AtomicRcDec(&ancillary->rc))
-        {
-            if (ancillary->free_cb != NULL)
-                ancillary->free_cb(ancillary->data);
-            free(ancillary);
-        }
+    void AncillaryRelease(ancillary* ancillary) {
+        if (AtomicRcDec(&ancillary->rc) == false)
+            return;
+
+        if (ancillary->free_cb != NULL)
+            ancillary->free_cb(ancillary->data);
+
+        free(ancillary);
     };
 
-    void AncillaryArrayClear(ancillary*** array)
-    {
-        if (*array != NULL)
-        {
-            for (struct ancillary** ancillary = *array;
-                *ancillary != NULL; ancillary++)
-            {
-                AncillaryRelease(*ancillary);
-            }
+    void AncillaryArrayClear(ancillary*** array) {
+        if (*array == NULL)
+            return;
 
-            free(*array);
-            *array = NULL;
-        }
+        for (struct ancillary** ancillary = *array;
+            *ancillary != NULL; ancillary++)
+            AncillaryRelease(*ancillary);
+
+        free(*array);
+        *array = NULL;
     }
 
     void AncillaryArrayInit(ancillary*** array) {

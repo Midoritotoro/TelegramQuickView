@@ -17,8 +17,6 @@ namespace FFmpeg {
 #define container_of(ptr, type, member) \
     ((type *)(((char *)(ptr)) - offsetof(type, member)))
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-
 #define TICK_INVALID                    INT64_C(0)
 #define TICK_0                          INT64_C(1)
 
@@ -133,11 +131,11 @@ typedef int64_t msftime_t;
 #  define ETIMEDOUT 10060 /* This is the value in winsock.h. */
 # endif
 
-typedef struct thread* thread_t;
+typedef _thread* thread_t;
 # define THREAD_CANCELED ((void*) UINTPTR_MAX)
 
-typedef struct threadvar* threadvar_t;
-typedef struct timer* timer_t;
+typedef threadvar* threadvar_t;
+typedef timer* timer_t;
 #endif
 
 #define MINIMUM_WIDTH               (32)
@@ -303,10 +301,10 @@ typedef struct timer* timer_t;
                 &(*rootp)->rlink;		/* T4: follow right branch */
         }
 
-        q = malloc(sizeof(node_t));		/* T5: key not found */
+        q = (node_t*)malloc(sizeof(node_t));		/* T5: key not found */
         if (q != 0) {				/* make new node */
             *rootp = q;			/* link new node to old */
-            q->key = (void*)(vkey);	/* initialize new node */
+            q->key = (char*)(vkey);	/* initialize new node */
             q->llink = q->rlink = NULL;
         }
         return q;
@@ -347,8 +345,17 @@ typedef struct timer* timer_t;
         return (p != NULL) ? *p : NULL;
     }
 
+    variable_t* LookupVariable(object_t* obj, const char* psz_name)
+    {
+        object_internals_t* priv = objectPrivate(obj);
+        void** pp_var;
 
-    int (var_GetChecked)(object_t* p_this, const char* psz_name,
+        mutex_lock(&priv->var_lock);
+        pp_var = (void**)tfind(&psz_name, &priv->var_root, varcmp);
+        return (pp_var != NULL) ? (variable_t*)*pp_var : NULL;
+    }
+
+    int var_GetChecked(object_t* p_this, const char* psz_name,
         int expected_type, value_t* p_val)
     {
         assert(p_this);
@@ -357,7 +364,7 @@ typedef struct timer* timer_t;
         variable_t* p_var;
         int err = SUCCESS;
 
-        p_var = Lookup(p_this, psz_name);
+        p_var = LookupVariable(p_this, psz_name);
         if (p_var != NULL)
         {
             assert(expected_type == 0 ||
@@ -625,10 +632,10 @@ typedef struct timer* timer_t;
 
         mutex_lock(&p_priv->var_lock);
 
-        pp_var = tsearch(p_var, &p_priv->var_root, varcmp);
+        pp_var = (void**)tsearch(p_var, &p_priv->var_root, varcmp);
         if (unlikely(pp_var == NULL))
             ret = ENOMEM;
-        else if ((p_oldvar = *pp_var) == p_var) /* Variable create */
+        else if ((p_oldvar = ((variable_t*)(*pp_var))) == p_var) /* Variable create */
             p_var = NULL; /* Variable created */
         else /* Variable already exists */
         {

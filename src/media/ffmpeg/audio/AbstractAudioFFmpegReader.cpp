@@ -6,6 +6,14 @@ extern "C" {
 	#include <libavutil/opt.h>
 } // extern "C"
 
+#ifdef min
+#undef min
+#endif // min
+
+#ifdef max
+#undef max
+#endif // max
+
 
 namespace FFmpeg {
 	AbstractAudioFFmpegReader::AbstractAudioFFmpegReader(const QByteArray& data):

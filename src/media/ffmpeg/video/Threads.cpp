@@ -54,6 +54,16 @@ namespace FFmpeg {
         return mdate_selected();
     }
 
+     int savecancel()
+    {
+        if (!thread) /* not created by VLC, can't be cancelled */
+            return true;
+
+        int oldstate = thread->killable;
+        thread->killable = false;
+        return oldstate;
+    }
+
     void global_mutex(unsigned n, bool acquire)
     {
         static mutex_t locks[] = {
@@ -207,11 +217,6 @@ namespace FFmpeg {
         mutex_init(&cond->lock);
     }
 
-    struct cond_waiter {
-        struct cond_waiter** pprev, * next;
-        std::atomic_uint value;
-    };
-
     static void cond_signal_waiter(struct cond_waiter* waiter)
     {
         waiter->pprev = &waiter->next;
@@ -326,6 +331,8 @@ namespace FFmpeg {
         int ret;
 
         // wait on a multiply locked mutex not supported
+        assert(atomic_load_explicit(&mutex->recursion, memory_order_relaxed) <= 1);
+        assert(atomic_load_explicit(&mutex->recursion, memory_order_relaxed) <= 1);
         assert(atomic_load_explicit(&mutex->recursion, memory_order_relaxed) <= 1);
 
         cond_wait_prepare(&waiter, cond, mutex);

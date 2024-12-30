@@ -10,6 +10,7 @@
 #include <sys/types.h>
 
 #include <errno.h>
+
 #include <sys/locking.h>
 #include <sys/utime.h>
 #include <sys/timeb.h>
@@ -17,69 +18,17 @@
 
 
 namespace FFmpeg {
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define STATIC_MUTEX { \
     0, \
     0, \
     0 \
 }
 
-    enum mutex_type_t
-    {
-        AVCODEC_MUTEX = 0,
-        GCRYPT_MUTEX,
-        XLIB_MUTEX,
-        MOSAIC_MUTEX,
-#ifdef _WIN32
-        MTA_MUTEX,
-#endif
-        /* Insert new entry HERE */
-        MAX_MUTEX
-    };
+    static /*thread_local*/ thread_t thread = NULL;
 
-    struct thread
-    {
-        int      thread;
-
-        void* (*entry)(void*);
-        void* data;
-
-        std::atomic_uint killed;
-        bool killable;
-    };
-
-    static thread_local struct thread* thread = NULL;
-
-    int savecancel()
-    {
-        if (!thread) /* not created by VLC, can't be cancelled */
-            return true;
-
-        int oldstate = thread->killable;
-        thread->killable = false;
-        return oldstate;
-    }
-
-    void global_mutex(unsigned n, bool acquire)
-    {
-        static mutex_t locks[] = {
-            STATIC_MUTEX,
-            STATIC_MUTEX,
-            STATIC_MUTEX,
-            STATIC_MUTEX,
-    #ifdef _WIN32
-            STATIC_MUTEX, // For MTA holder
-    #endif
-        };
-        static_assert (mutex_type_t::MAX_MUTEX == ARRAY_SIZE(locks),
-            "Wrong number of global mutexes");
-        assert(n < ARRAY_SIZE(locks));
-
-        mutex_t* lock = locks + n;
-        if (acquire)
-            mutex_lock(lock);
-        else
-            mutex_unlock(lock);
-    }
+    int savecancel();
+    void global_mutex(unsigned n, bool acquire);
 
     typedef void(*destroy)(void*);
 
@@ -95,7 +44,6 @@ namespace FFmpeg {
     void mutex_init_common(mutex_t* mtx, bool recursive);
 
 
-    int savecancel();
     void restorecancel(int state);
 
     void mutex_init(mutex_t* mtx);
@@ -110,10 +58,6 @@ namespace FFmpeg {
     void mutex_unlock(mutex_t* mtx);
 
     void cond_init(cond_t* cond);
-    struct cond_waiter {
-        struct cond_waiter** pprev, * next;
-        std::atomic_uint value;
-    };
 
     static void cond_signal_waiter(struct cond_waiter* waiter);
     void cond_signal(cond_t* cond);

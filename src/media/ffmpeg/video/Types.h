@@ -6,6 +6,7 @@
 #include "Enums.h"
 
 #include <stdatomic.h>
+#include <Windows.h>
 
 #ifdef __STDC_NO_ATOMICS__ 
 #undef __STDC_NO_ATOMICS__ 
@@ -21,6 +22,14 @@ namespace FFmpeg {
     using fourcc_t = uint32_t;
     using tick_t = int64_t;
 
+    typedef void (*timer_func) (void*);
+    struct timer
+    {
+        PTP_TIMER t;
+        timer_func func;
+        void* data;
+    };
+
     typedef void (*ancillary_free_cb)(void* data);
 
     struct module_t;
@@ -33,6 +42,22 @@ namespace FFmpeg {
         void                (*destroy) (void*);
         struct threadvar* prev;
         struct threadvar* next;
+    };
+
+    struct cond_waiter {
+        struct cond_waiter** pprev, * next;
+        std::atomic_uint value;
+    };
+
+    struct _thread
+    {
+        int      thread;
+
+        void* (*entry)(void*);
+        void* data;
+
+        std::atomic_uint killed;
+        bool killable;
     };
 
     struct sem_t
@@ -445,11 +470,6 @@ namespace FFmpeg {
             std::atomic_ulong owner;
         };
     };
-
-     struct cond_waiter {
-         struct cond_waiter** pprev, * next;
-         std::atomic_uint value;
-     };
 
      struct variable_ops_t
      {

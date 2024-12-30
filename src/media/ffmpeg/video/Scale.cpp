@@ -30,6 +30,10 @@ extern "C" {
 #undef min
 #endif // min
 
+#ifdef max
+#undef max
+#endif // max
+
 #define ALLOW_YUVP (false)
 
 namespace FFmpeg {

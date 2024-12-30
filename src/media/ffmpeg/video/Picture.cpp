@@ -8,6 +8,15 @@
 
 #include "Fourcc.h"
 
+#ifdef min
+#undef min
+#endif // min
+
+#ifdef max
+#undef max
+#endif // max
+
+
 
 namespace FFmpeg {
     picture_t* PictureNew(
@@ -178,7 +187,7 @@ namespace FFmpeg {
         picture_t* p_picture = &priv->picture;
 
         memset(p_picture, 0, sizeof(*p_picture));
-        p_picture->date = VLC_TICK_INVALID;
+        p_picture->date = TICK_INVALID;
 
         VideoFormatCopy(&p_picture->format, p_fmt);
         /* Make sure the real dimensions are a multiple of 16 */
