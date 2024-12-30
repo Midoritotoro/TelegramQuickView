@@ -14,125 +14,10 @@
 
 #include <stdatomic.h>
 
-
-namespace FFmpeg {
 #define container_of(ptr, type, member) \
     ((type *)(((char *)(ptr)) - offsetof(type, member)))
 
-#define TICK_INVALID                    INT64_C(0)
-#define TICK_0                          INT64_C(1)
-
-#if defined (_WIN32)
-#define aligned_free(ptr)                   _aligned_free(ptr)
-#else
-#define aligned_free(ptr)                   free(ptr)
-#endif
-
-#define CLOCK_FREQ INT64_C(1000000)
-#if (CLOCK_FREQ % 1000) == 0
-#define TICK_FROM_MS(ms)  ((CLOCK_FREQ / INT64_C(1000)) * (ms))
-#define MS_FROM_TICK(vtk) ((vtk) / (CLOCK_FREQ / INT64_C(1000)))
-#elif (1000 % CLOCK_FREQ) == 0
-#define TICK_FROM_MS(ms)  ((ms)  / (INT64_C(1000) / CLOCK_FREQ))
-#define MS_FROM_TICK(vtk) ((vtk) * (INT64_C(1000) / CLOCK_FREQ))
-#else /* rounded overflowing conversion */
-#define TICK_FROM_MS(ms)  (CLOCK_FREQ * (ms) / 1000)
-#define MS_FROM_TICK(vtk) ((vtk) * 1000 / CLOCK_FREQ)
-#endif /* CLOCK_FREQ / 1000 */
-
-typedef int64_t msftime_t;
-
-#define MSFTIME_FROM_SEC(sec)       (INT64_C(10000000) * (sec))  /* seconds in msftime_t */
-#define MSFTIME_FROM_MS(sec)        (INT64_C(10000) * (sec))     /* milliseconds in msftime_t */
-
-#if (CLOCK_FREQ % 10000000) == 0
-#define TICK_FROM_MSFTIME(msft) ((msft) * (CLOCK_FREQ / INT64_C(10000000))
-#define MSFTIME_FROM_TICK(vtk)  ((vtk)  / (CLOCK_FREQ / INT64_C(10000000))
-#elif (10000000 % CLOCK_FREQ) == 0
-#define TICK_FROM_MSFTIME(msft) ((msft) / (INT64_C(10000000) / CLOCK_FREQ))
-#define MSFTIME_FROM_TICK(vtk)  ((vtk)  * (INT64_C(10000000) / CLOCK_FREQ))
-#else /* rounded overflowing conversion */
-#define TICK_FROM_MSFTIME(msft) (CLOCK_FREQ * (msft) / INT64_C(10000000))
-#define MSFTIME_FROM_TICK(vtk)  ((vtk)  * INT64_C(10000000) / CLOCK_FREQ)
-#endif /* CLOCK_FREQ / 10000000 */
-
-#if defined (__GNUC__) || defined (__clang__)
-#define likely(p)                           __builtin_expect((p), 1)
-#define unlikely(p)                         __builtin_expect((p), 0)
-#define unreachable()                       __builtin_unreachable()
-#elif defined(_MSC_VER)
-#define likely(p)                           (p)
-#define unlikely(p)                         (p)
-#define unreachable()                       (__assume(0))
-#else
-#define likely(p)                           (p)
-#define unlikely(p)                         (p)
-#define unreachable()                       ((void)0)
-#endif
-
-#define PICTURE_SW_SIZE_MAX                 (UINT32_C(1) << 28) /* 256MB: 8K * 8K * 4*/
-
-#define SUCCESS                             0
-/** Unspecified error */
-#define EGENERIC                            (-2 * (1 << (sizeof (int) * 8 - 2))) /* INT_MIN */
-
-#if defined (_WIN32)
-# include <process.h>
-# ifndef ETIMEDOUT
-#  define ETIMEDOUT 10060 /* This is the value in winsock.h. */
-# endif
-
-typedef _thread* thread_t;
-# define THREAD_CANCELED ((void*) UINTPTR_MAX)
-
-typedef threadvar* threadvar_t;
-typedef timer* timer_t;
-#endif
-
-#define MINIMUM_WIDTH               (32)
-
-
-    template <typename type>
-    bool ckd_add(type* r, type a, type b)
-    {
-        *r = a + b;
-        return ((type)(a + b)) < a;
-    }
-
-    template <typename type>
-    bool ckd_sub(type* r, type a, type b)
-    {
-        *r = a - b;
-        return a < b;
-    }
-
-    template <typename type>
-    bool ckd_mul(type* r, type a, type b)
-    {
-        if (b == 0) return true;
-        *r = a * b;
-        return a > (INT_MAX / b);
-    }
-
-    inline object_t* OBJECT(object_t* o)
-    {
-        return o;
-    }
-
-    template<typename T>
-    static inline object_t* OBJECT(T* d)
-    {
-        return &d->obj;
-    }
-
-    object_internals_t*objectPrivate(object_t* object) {
-        return (object->priv);
-    }
-
-    object_t* object_parent(object_t* object) {
-        return objectPrivate(object)->parent;
-    }
-
+namespace FFmpeg {
     static int CmpBool(value_t v, value_t w)
     {
         return v.b_bool ? w.b_bool ? 0 : 1 : w.b_bool ? -1 : 0;
@@ -312,16 +197,6 @@ typedef timer* timer_t;
         gen = atomic_load_explicit(&generation, std::memory_order_acquire);
         self->generation = gen;
         atomic_fetch_add_explicit(&gen->readers, 1, std::memory_order_relaxed);
-    }
-
-    void atomic_notify_one(void* addr)
-    {
-        WakeByAddressSingle(addr);
-    }
-
-    void atomic_notify_all(void* addr)
-    {
-        WakeByAddressAll(addr);
     }
 
     void rcu_read_unlock(void)

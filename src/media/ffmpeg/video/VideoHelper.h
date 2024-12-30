@@ -85,19 +85,6 @@ namespace FFmpeg {
         PROJECTION_MODE_CUBEMAP_LAYOUT_STANDARD = 0x100,
     };
 
-    enum es_format_category_e {
-        UNKNOWN_ES = 0x00,
-        VIDEO_ES,
-        AUDIO_ES,
-        SPU_ES,
-        DATA_ES,
-    };
-
-    enum audio_channel_type_t {
-        AUDIO_CHANNEL_TYPE_BITMAP,
-        AUDIO_CHANNEL_TYPE_AMBISONICS,
-    };
-
     enum video_context_type {
         VIDEO_CONTEXT_VAAPI = 1, //!< private: vaapi_vctx* or empty
         VIDEO_CONTEXT_VDPAU,     //!< private: chroma type (YUV) or empty (RGB)
@@ -110,50 +97,37 @@ namespace FFmpeg {
         VIDEO_CONTEXT_GSTDECODE, //!< empty
     };
 
-    enum mutex_type_t
-    {
-        AVCODEC_MUTEX = 0,
-        GCRYPT_MUTEX,
-        XLIB_MUTEX,
-        MOSAIC_MUTEX,
-#ifdef _WIN32
-        MTA_MUTEX,
-#endif
-        /* Insert new entry HERE */
-        MAX_MUTEX
-    };
 
-    #define MULTIVIEW_STEREO_MAX                    MULTIVIEW_STEREO_CHECKERBOARD
-    #define ORIENT_MAX                              ((size_t)ORIENT_RIGHT_BOTTOM)
-    #define COLOR_PRIMARIES_SRGB                    COLOR_PRIMARIES_BT709
-    #define COLOR_PRIMARIES_SMTPE_170               COLOR_PRIMARIES_BT601_525
-    #define COLOR_PRIMARIES_SMTPE_240               COLOR_PRIMARIES_BT601_525 /* Only differs from 1e10-4 in white Y */
-    #define COLOR_PRIMARIES_SMTPE_RP145             COLOR_PRIMARIES_BT601_525
-    #define COLOR_PRIMARIES_EBU_3213                COLOR_PRIMARIES_BT601_625
-    #define COLOR_PRIMARIES_BT470_BG                COLOR_PRIMARIES_BT601_625
-    #define COLOR_PRIMARIES_BT470_M                 COLOR_PRIMARIES_FCC1953
-    #define COLOR_PRIMARIES_MAX                     COLOR_PRIMARIES_FCC1953
-    #define TRANSFER_FUNC_BT2020                    TRANSFER_FUNC_BT709
-    #define TRANSFER_FUNC_SMPTE_170                 TRANSFER_FUNC_BT709
-    #define TRANSFER_FUNC_SMPTE_274                 TRANSFER_FUNC_BT709
-    #define TRANSFER_FUNC_SMPTE_293                 TRANSFER_FUNC_BT709
-    #define TRANSFER_FUNC_SMPTE_296                 TRANSFER_FUNC_BT709
-    #define TRANSFER_FUNC_ARIB_B67                  TRANSFER_FUNC_HLG
-    #define TRANSFER_FUNC_MAX                       TRANSFER_FUNC_HLG
-    #define COLOR_SPACE_SRGB                        COLOR_SPACE_BT709
-    #define COLOR_SPACE_SMPTE_170                   COLOR_SPACE_BT601
-    #define COLOR_SPACE_SMPTE_240                   COLOR_SPACE_SMPTE_170
-    #define COLOR_SPACE_MAX                         COLOR_SPACE_BT2020
-    #define COLOR_RANGE_STUDIO                      COLOR_RANGE_LIMITED
-    #define COLOR_RANGE_MAX                         COLOR_RANGE_LIMITED
-    #define CHROMA_LOCATION_MAX                     CHROMA_LOCATION_BOTTOM_CENTER
-    #define PICTURE_PLANE_MAX                       5
-    #define VIDEO_PALETTE_COLORS_MAX                256
-    #define VIDEO_PALETTE_CLUT_COUNT                16
-    #define AUDIO_REPLAY_GAIN_MAX                   (2)
-    #define AUDIO_REPLAY_GAIN_TRACK                 (0)
-    #define AUDIO_REPLAY_GAIN_ALBUM                 (1)
-    #define FIELD_OF_VIEW_DEGREES_DEFAULT           80.f
-    #define FIELD_OF_VIEW_DEGREES_MAX               150.f
-    #define FIELD_OF_VIEW_DEGREES_MIN               20.f
-}
+#define MULTIVIEW_STEREO_MAX                    MULTIVIEW_STEREO_CHECKERBOARD
+#define ORIENT_MAX                              ((size_t)ORIENT_RIGHT_BOTTOM)
+#define COLOR_PRIMARIES_SRGB                    COLOR_PRIMARIES_BT709
+#define COLOR_PRIMARIES_SMTPE_170               COLOR_PRIMARIES_BT601_525
+#define COLOR_PRIMARIES_SMTPE_240               COLOR_PRIMARIES_BT601_525 /* Only differs from 1e10-4 in white Y */
+#define COLOR_PRIMARIES_SMTPE_RP145             COLOR_PRIMARIES_BT601_525
+#define COLOR_PRIMARIES_EBU_3213                COLOR_PRIMARIES_BT601_625
+#define COLOR_PRIMARIES_BT470_BG                COLOR_PRIMARIES_BT601_625
+#define COLOR_PRIMARIES_BT470_M                 COLOR_PRIMARIES_FCC1953
+#define COLOR_PRIMARIES_MAX                     COLOR_PRIMARIES_FCC1953
+#define TRANSFER_FUNC_BT2020                    TRANSFER_FUNC_BT709
+#define TRANSFER_FUNC_SMPTE_170                 TRANSFER_FUNC_BT709
+#define TRANSFER_FUNC_SMPTE_274                 TRANSFER_FUNC_BT709
+#define TRANSFER_FUNC_SMPTE_293                 TRANSFER_FUNC_BT709
+#define TRANSFER_FUNC_SMPTE_296                 TRANSFER_FUNC_BT709
+#define TRANSFER_FUNC_ARIB_B67                  TRANSFER_FUNC_HLG
+#define TRANSFER_FUNC_MAX                       TRANSFER_FUNC_HLG
+#define COLOR_SPACE_SRGB                        COLOR_SPACE_BT709
+#define COLOR_SPACE_SMPTE_170                   COLOR_SPACE_BT601
+#define COLOR_SPACE_SMPTE_240                   COLOR_SPACE_SMPTE_170
+#define COLOR_SPACE_MAX                         COLOR_SPACE_BT2020
+#define COLOR_RANGE_STUDIO                      COLOR_RANGE_LIMITED
+#define COLOR_RANGE_MAX                         COLOR_RANGE_LIMITED
+#define CHROMA_LOCATION_MAX                     CHROMA_LOCATION_BOTTOM_CENTER
+#define VIDEO_PALETTE_COLORS_MAX                256
+#define VIDEO_PALETTE_CLUT_COUNT                16
+#define AUDIO_REPLAY_GAIN_MAX                   (2)
+#define AUDIO_REPLAY_GAIN_TRACK                 (0)
+#define AUDIO_REPLAY_GAIN_ALBUM                 (1)
+#define FIELD_OF_VIEW_DEGREES_DEFAULT           80.f
+#define FIELD_OF_VIEW_DEGREES_MAX               150.f
+#define FIELD_OF_VIEW_DEGREES_MIN               20.f
+} // namespace FFmpeg

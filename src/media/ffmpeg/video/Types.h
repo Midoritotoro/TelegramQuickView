@@ -3,8 +3,6 @@
 #include "../../../core/Types.h"
 #include "../../../core/Time.h"
 
-#include "Enums.h"
-
 #include <stdatomic.h>
 #include <Windows.h>
 
@@ -19,51 +17,10 @@ extern "C" {
 
 
 namespace FFmpeg {
-    using fourcc_t = uint32_t;
-    using tick_t = int64_t;
-
-    typedef void (*timer_func) (void*);
-    struct timer
-    {
-        PTP_TIMER t;
-        timer_func func;
-        void* data;
-    };
-
-    typedef void (*ancillary_free_cb)(void* data);
 
     struct module_t;
     struct plagin_t;
     struct video_format_t;
-
-    struct threadvar
-    {
-        PULONG                id;
-        void                (*destroy) (void*);
-        struct threadvar* prev;
-        struct threadvar* next;
-    };
-
-    struct cond_waiter {
-        struct cond_waiter** pprev, * next;
-        std::atomic_uint value;
-    };
-
-    struct _thread
-    {
-        int      thread;
-
-        void* (*entry)(void*);
-        void* data;
-
-        std::atomic_uint killed;
-        bool killable;
-    };
-
-    struct sem_t
-    {
-        std::atomic_uint value;
-    };
 
     union value_t
     {
@@ -75,33 +32,6 @@ namespace FFmpeg {
         struct { int32_t x; int32_t y; } coords;
 
     };
-
-    struct atomic_rc_t {
-        std::atomic_uintptr_t refs;
-    };
-
-    struct video_palette_t {
-        int i_entries;                                  /**< number of in-use palette entries */
-        uint8_t palette[VIDEO_PALETTE_COLORS_MAX][4];   /**< 4-byte RGBA/YUVA palette */
-    };
-
-    struct viewpoint_t {
-        float yaw;   /* yaw in degrees */
-        float pitch; /* pitch in degrees */
-        float roll;  /* roll in degrees */
-        float fov;   /* field of view in degrees */
-    };
-
-
-
-     struct ancillary
-     {
-         atomic_rc_t rc;
-
-         uint32 id;
-         void* data;
-         ancillary_free_cb free_cb;
-     };
 
      struct plugin_t
      {
@@ -338,6 +268,19 @@ namespace FFmpeg {
             uint32_t i_cubemap_padding; /**< padding in pixels of the cube map faces */
         };
 
+    enum es_format_category_e {
+        UNKNOWN_ES = 0x00,
+        VIDEO_ES,
+        AUDIO_ES,
+        SPU_ES,
+        DATA_ES,
+    };
+
+    enum audio_channel_type_t {
+        AUDIO_CHANNEL_TYPE_BITMAP,
+        AUDIO_CHANNEL_TYPE_AMBISONICS,
+    };
+
      struct es_format_t
      {
          enum es_format_category_e i_cat;    /**< ES category */
@@ -437,86 +380,12 @@ namespace FFmpeg {
          uint32_t fourcc;
      };
 
-     struct log_t
-     {
-         uintptr_t   i_object_id; /**< Emitter (temporarily) unique object ID or 0 */
-         const char* psz_object_type; /**< Emitter object type name */
-         const char* psz_module; /**< Emitter module (source code) */
-         const char* psz_header; /**< Additional header (used by VLM media) */
-         const char* file; /**< Source code file name or NULL */
-         int line; /**< Source code file line number or -1 */
-         const char* func; /**< Source code calling function name or NULL */
-         unsigned long tid; /**< Emitter thread ID */
-     };
-
-     typedef void (*log_cb) (void* data, int type, const log_t* item,
-         const char* fmt, va_list args);
-
-     struct logger_operations
-     {
-         log_cb log;
-         void (*destroy)(void* data);
-     };
-
-     struct logger {
-         const logger_operations* ops;
-     };
-
-     struct mutex_t
-     {
-        struct {
-            std::atomic_uint value;
-            std::atomic_uint recursion;
-            std::atomic_ulong owner;
-        };
-    };
-
      struct variable_ops_t
      {
          int  (*pf_cmp) (value_t, value_t);
          void (*pf_dup) (value_t*);
          void (*pf_free) (value_t*);
      };
-
-     struct cond_t
-     {
-         cond_waiter* head;
-         mutex_t lock;
-     };
-
-     struct object_t;
-     struct object_internals_t
-     {
-         object_t* parent; /**< Parent object (or NULL) */
-         const char* _typename; /**< Object type human-readable name */
-
-         /* Object variables */
-         void* var_root;
-         mutex_t     var_lock;
-
-         /* Object resources */
-         struct res* resources;
-     };
-
-
-     struct object_t
-     {
-         logger* logger;
-         union {
-             struct object_internals_t* priv;
-             struct object_marker* obj;
-         };
-
-         bool no_interact;
-
-         /** Module probe flag
-          *
-          * A boolean during module probing when the probe is "forced".
-          * See \ref module_need().
-          */
-         bool force;
-     };
-
 
      typedef int (*callback_t) (object_t*,      /* variable's object */
          char const*,            /* variable name */
@@ -578,19 +447,12 @@ namespace FFmpeg {
          /** Registered list callbacks */
          callback_entry_t* list_callbacks;
 
-         cond_t   wait;
-     };
-
-     struct res
-     {
-         struct res* prev;
-         void (*release)(void*);
-         max_align_t payload[];
+         Threads::cond_t   wait;
      };
 
      struct video_context
      {
-         atomic_rc_t    rc;
+         Threads::atomic_rc_t    rc;
          decoder_device* device;
          const struct video_context_operations* ops;
          enum video_context_type private_type;
@@ -651,70 +513,7 @@ namespace FFmpeg {
          filter_owner_t      owner;
      };
 
-     struct picture_context_t
-    {
-        void (*destroy)(struct picture_context_t*);
-        struct picture_context_t* (*copy)(struct picture_context_t*);
-        struct video_context* vctx;
-    };
-
-    struct plane_t {
-        uint8_t* p_pixels;                        /**< Start of the plane's data */
-
-        /* Variables used for fast memcpy operations */
-        int i_lines;           /**< Number of lines, including margins */
-        int i_pitch;           /**< Number of bytes in a line, including margins */
-
-        /** Size of a macropixel, defaults to 1 */
-        int i_pixel_pitch;
-
-        /* Variables used for pictures with margins */
-        int i_visible_lines;            /**< How many visible lines are there? */
-        int i_visible_pitch;            /**< How many bytes for visible pixels are there? */
-
-    };
-
-     struct picture_t {
-        /**
-         * The properties of the picture
-         */
-        video_format_t format;
-
-        plane_t         p[PICTURE_PLANE_MAX];     /**< description of the planes */
-        int             i_planes;                /**< number of allocated planes */
-
-        /** \name Picture management properties
-         * These properties can be modified using the video output thread API,
-         * but should never be written directly */
-         /**@{*/
-        Time::time      date;                                  /**< display date */
-        bool            b_force;
-        bool            b_still;
-        /**@}*/
-
-        /** \name Picture dynamic properties
-         * Those properties can be changed by the decoder
-         * @{
-         */
-        bool            b_progressive;          /**< is it a progressive frame? */
-        bool            b_top_field_first;             /**< which field is first */
-
-        bool            b_multiview_left_eye; /**< left eye or right eye in multiview */
-
-        unsigned int    i_nb_fields;                  /**< number of displayed fields */
-        picture_context_t* context;      /**< video format-specific data pointer */
-        /**@}*/
-
-        /** Private data - the video output plugin might want to put stuff here to
-         * keep track of the picture */
-        void* p_sys;
-
-        /** Next picture in a FIFO a pictures */
-        struct picture_t* p_next;
-
-        atomic_rc_t refs;
-    };
-
+ 
      struct rcu_generation {
          std::atomic_uintptr_t readers;
          std::atomic_uint writer;
@@ -744,146 +543,9 @@ namespace FFmpeg {
          struct module_config_t item;
      };
 
-    struct rational_t {
-        unsigned num, den;
-    };
-
-     struct chroma_description_t {
-        fourcc_t fcc;
-
-        unsigned plane_count;
-
-        struct {
-            rational_t w;
-            rational_t h;
-        } p[4];
-
-        unsigned pixel_size;        /* Number of bytes per pixel for a plane */
-        unsigned pixel_bits;        /* Number of bits actually used bits per pixel for a plane */
-    } ;
-
-    struct filter_sys_t {
-        SwsFilter* p_filter;
-        int i_sws_flags;
-
-        video_format_t fmt_in;
-        video_format_t fmt_out;
-
-        const chroma_description_t* desc_in;
-        const chroma_description_t* desc_out;
-
-        struct SwsContext* ctx;
-        struct SwsContext* ctxA;
-
-        picture_t* p_src_a;
-        picture_t* p_dst_a;
-
-        int i_extend_factor;
-
-        picture_t* p_src_e;
-        picture_t* p_dst_e;
-
-        bool b_add_a;
-        bool b_copy;
-
-        bool b_swap_uvi;
-        bool b_swap_uvo;
-    } ;
-
-    struct ScalerConfiguration {
-        enum AVPixelFormat i_fmti;
-        enum AVPixelFormat i_fmto;
-
-        bool b_has_a;
-        bool b_add_a;
-
-        int  i_sws_flags;
-        bool b_copy;
-
-        bool b_swap_uvi;
-        bool b_swap_uvo;
-    };
-
-    struct picture_priv_t
-    {
-        picture_t picture;
-        struct
-        {
-            void (*destroy)(picture_t*);
-            void* opaque;
-        } gc;
-
-        /** Private ancillary struct. Don't use it directly, but use it via
-         * picture_AttachAncillary() and picture_GetAncillary(). */
-        struct ancillary** ancillaries;
-    };
-
-
     struct decoder_device_priv
     {
         struct decoder_device device;
-        atomic_rc_t rc;
-    };
-
-    static const struct fourcc_desc desc_audio[] = {
- {{'a','a','c',' '}, "AAC audio"},
-  {{'m','p','4','a'}, "MP4A audio"},
-  {{'m','p','3',' '}, "MP3 audio"},
-  {{'a','c','3',' '}, "AC3 audio"}
-    };
-    static const struct fourcc_mapping mapping_audio[] = {
-      {{'m','p','4','a'},{'a'}},
-       {{'m','p','3',' '},{'m'}}
-    };
-
-    // video format
-    static const struct fourcc_desc desc_video[] = {
-      {{'h','2','6','4'}, "H264 codec"},
-      {{'x','2','6','4'}, "X264 codec"},
-       {{'m','p','e','g'}, "MPEG codec"},
-      {{'a','v','c','1'}, "AVC1 codec"}
-    };
-    static const struct fourcc_mapping mapping_video[] = {
-     {{'x','2','6','4'},{'h'}}
-    };
-
-    // spu format
-    static const struct fourcc_desc desc_spu[] = {
-      {{'s','r','t',' '}, "srt sub"},
-      {{'s','u','b',' '}, "sub sub"},
-       {{'t','x','t',' '}, "txt sub"},
-    };
-    static const struct fourcc_mapping mapping_spu[] = {
-        {}
-    };
-
-    struct picture_buffer_t
-    {
-        int fd;
-        void* base;
-        size_t size;
-        off_t offset;
-    };
-
-    struct picture_priv_buffer_t {
-        picture_priv_t   priv;
-        picture_buffer_t res;
-    };
-
-    struct picture_resource_t
-    {
-        void* p_sys;
-        void (*pf_destroy)(picture_t*);
-
-        /* Plane resources
-         * XXX all fields MUST be set to the right value.
-         */
-        struct
-        {
-            uint8_t* p_pixels;  /**< Start of the plane's data */
-            int i_lines;        /**< Number of lines, including margins */
-            int i_pitch;        /**< Number of bytes in a line, including margins */
-        } p[PICTURE_PLANE_MAX];
-
+        Threads::atomic_rc_t rc;
     };
 } // namespace FFmpeg

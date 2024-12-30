@@ -1,9 +1,13 @@
 #pragma once 
 
-#include "Types.h"
+#include <stdatomic.h>
 
 
-namespace FFmpeg {
+namespace Threads {
+	struct atomic_rc_t {
+		std::atomic_uintptr_t refs;
+	};
+
 	[[nodiscard]] bool AtomicRcDec(atomic_rc_t* rc);
 	void AtomicRcInit(atomic_rc_t* rc);
-} // namespace FFmpeg
+} // namespace Threads

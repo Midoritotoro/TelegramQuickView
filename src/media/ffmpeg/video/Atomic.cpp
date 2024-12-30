@@ -1,7 +1,10 @@
 #include "Atomic.h"
 
+#include <Windows.h>
+#include <cassert>
 
-namespace FFmpeg {
+
+namespace Threads {
     bool AtomicRcDec(atomic_rc_t* rc) {
         uintptr_t prev = atomic_fetch_sub_explicit(&rc->refs, (uintptr_t)1,
             std::memory_order_acq_rel);
@@ -13,4 +16,15 @@ namespace FFmpeg {
     void AtomicRcInit(atomic_rc_t* rc) {
         atomic_init(&rc->refs, (uintptr_t)1);
     }
-} // namespace FFmpeg
+
+
+    void atomic_notify_one(void* addr)
+    {
+        WakeByAddressSingle(addr);
+    }
+
+    void atomic_notify_all(void* addr)
+    {
+        WakeByAddressAll(addr);
+    }
+} // namespace Threads

@@ -1,9 +1,126 @@
 #pragma once 
 
-#include "Types.h"
+#include "VideoFormat.h"
+#include "Ancillary.h"
 
+#include "Ancillary.h"
+#include "Atomic.h"
+
+#include "../../../core/Time.h"
+
+#define PICTURE_SW_SIZE_MAX                 (UINT32_C(1) << 28) /* 256MB: 8K * 8K * 4*/
+#define PICTURE_PLANE_MAX					(5)
 
 namespace FFmpeg {
+	struct picture_context_t
+	{
+		void (*destroy)(struct picture_context_t*);
+		struct picture_context_t* (*copy)(struct picture_context_t*);
+		struct video_context* vctx;
+	};
+
+	struct plane_t {
+		uint8_t* p_pixels;                        /**< Start of the plane's data */
+
+		/* Variables used for fast memcpy operations */
+		int i_lines;           /**< Number of lines, including margins */
+		int i_pitch;           /**< Number of bytes in a line, including margins */
+
+		/** Size of a macropixel, defaults to 1 */
+		int i_pixel_pitch;
+
+		/* Variables used for pictures with margins */
+		int i_visible_lines;            /**< How many visible lines are there? */
+		int i_visible_pitch;            /**< How many bytes for visible pixels are there? */
+
+	};
+
+	struct picture_t {
+		/**
+		 * The properties of the picture
+		 */
+		video_format_t format;
+
+		plane_t         p[PICTURE_PLANE_MAX];     /**< description of the planes */
+		int             i_planes;                /**< number of allocated planes */
+
+		/** \name Picture management properties
+		 * These properties can be modified using the video output thread API,
+		 * but should never be written directly */
+		 /**@{*/
+		Time::time      date;                                  /**< display date */
+		bool            b_force;
+		bool            b_still;
+		/**@}*/
+
+		/** \name Picture dynamic properties
+		 * Those properties can be changed by the decoder
+		 * @{
+		 */
+		bool            b_progressive;          /**< is it a progressive frame? */
+		bool            b_top_field_first;             /**< which field is first */
+
+		bool            b_multiview_left_eye; /**< left eye or right eye in multiview */
+
+		unsigned int    i_nb_fields;                  /**< number of displayed fields */
+		picture_context_t* context;      /**< video format-specific data pointer */
+		/**@}*/
+
+		/** Private data - the video output plugin might want to put stuff here to
+		 * keep track of the picture */
+		void* p_sys;
+
+		/** Next picture in a FIFO a pictures */
+		struct picture_t* p_next;
+
+		Threads::atomic_rc_t refs;
+	};
+
+
+	struct picture_priv_t
+	{
+		picture_t picture;
+		struct
+		{
+			void (*destroy)(picture_t*);
+			void* opaque;
+		} gc;
+
+		/** Private ancillary struct. Don't use it directly, but use it via
+		 * picture_AttachAncillary() and picture_GetAncillary(). */
+		Threads::ancillary** ancillaries;
+	};
+
+	struct picture_buffer_t
+	{
+		int fd;
+		void* base;
+		size_t size;
+		off_t offset;
+	};
+
+	struct picture_priv_buffer_t {
+		picture_priv_t   priv;
+		picture_buffer_t res;
+	};
+
+	struct picture_resource_t
+	{
+		void* p_sys;
+		void (*pf_destroy)(picture_t*);
+
+		/* Plane resources
+		 * XXX all fields MUST be set to the right value.
+		 */
+		struct
+		{
+			uint8_t* p_pixels;  /**< Start of the plane's data */
+			int i_lines;        /**< Number of lines, including margins */
+			int i_pitch;        /**< Number of bytes in a line, including margins */
+		} p[PICTURE_PLANE_MAX];
+
+	};
+
 	void PictureRelease(picture_t* picture);
 	void PictureDestroyContext(picture_t* p_picture);
 

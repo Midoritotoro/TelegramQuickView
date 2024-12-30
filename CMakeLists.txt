@@ -302,10 +302,22 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/Scale.h 
 
     src/media/ffmpeg/video/Tools.h 
-    src/media/ffmpeg/video/Enums.h 
+    
+    src/media/ffmpeg/video/Object.h
+    src/media/ffmoeg/video/Object.cpp
 
-    src/media/ffmpeg/video/FourccHelper.h
+    src/media/ffmpeg/video/FourccCodecs.h
+    src/media/ffmpeg/video/Config.h
+
+    src/media/ffmpeg/video/Windows.h
+
+    src/media/ffmpeg/video/Math.h
+    src/media/ffmpeg/video/Math.cpp
+
+    src/media/ffmpeg/video/VideoHelper.h
+
     src/media/ffmpeg/video/Chroma.h
+    src/media/ffmpeg/video/Chroma.cpp
 
     src/media/ffmpeg/video/Threads.h
     src/media/ffmpeg/video/Threads.cpp

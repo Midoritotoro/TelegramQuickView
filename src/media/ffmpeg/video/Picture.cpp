@@ -44,7 +44,7 @@ namespace FFmpeg {
 
         priv->gc.destroy(picture);
 
-        AncillaryArrayClear(&priv->ancillaries);
+        Threads::AncillaryArrayClear(&priv->ancillaries);
         VideoFormatClean(&picture->format);
         free(priv);
     }
@@ -207,7 +207,7 @@ namespace FFmpeg {
         else
             priv->gc.destroy = PictureDestroyDummy;
 
-        AncillaryArrayInit(&priv->ancillaries);
+        Threads::AncillaryArrayInit(&priv->ancillaries);
 
         return true;
     }

@@ -7,7 +7,7 @@
 #include <Windows.h>
 #include <thread>
 
-namespace FFmpeg {
+namespace Threads {
     int threadvar_set(threadvar_t key, void* value)
     {
         *key->id= (ULONG)value;
@@ -480,4 +480,4 @@ namespace FFmpeg {
                 return ETIMEDOUT;
         }
     }
-} // namespace FFmpeg
+} // namespace Threads

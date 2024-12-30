@@ -1,5 +1,7 @@
 #pragma once 
 
+#include "Tools.h"
+
 
 namespace FFmpeg {
     [[nodiscard]] void* tfind(

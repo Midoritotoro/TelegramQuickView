@@ -1,8 +1,7 @@
 #include "Ancillary.h"
-#include "Atomic.h"
 
 
-namespace FFmpeg {
+namespace Threads {
     void AncillaryRelease(ancillary* ancillary) {
         if (AtomicRcDec(&ancillary->rc) == false)
             return;
@@ -28,4 +27,4 @@ namespace FFmpeg {
     void AncillaryArrayInit(ancillary*** array) {
         *array = NULL;
     }
-} // namespace FFmpeg
+} // namespace Threads

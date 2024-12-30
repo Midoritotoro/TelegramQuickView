@@ -1,202 +1,39 @@
-#pragma once 
+#pragma once
 
-#include "Types.h"
-#include "FourccHelper.h"
+#include "Fourcc.h"
 
 extern "C" {
-#include <libavutil/pixfmt.h>
-#include <libavutil/avutil.h>
+    #include <libavutil/pixfmt.h>
+    #include <libavutil/avutil.h>
 }
+
 
 namespace FFmpeg {
-    static const struct
-    {
-        fourcc_t  i_chroma;
-        enum AVPixelFormat i_chroma_id;
-        video_color_range_t range;
-
-    } chroma_table[] =
-    {
-        /* Planar YUV formats */
-        {CODEC_I444, AV_PIX_FMT_YUV444P,  COLOR_RANGE_UNDEF },
-        {CODEC_I444, AV_PIX_FMT_YUVJ444P,  COLOR_RANGE_FULL },
-
-        {CODEC_I440, AV_PIX_FMT_YUV440P,  COLOR_RANGE_UNDEF },
-        {CODEC_I440, AV_PIX_FMT_YUVJ440P,  COLOR_RANGE_FULL },
-
-        {CODEC_I422, AV_PIX_FMT_YUV422P,  COLOR_RANGE_UNDEF },
-        {CODEC_I422, AV_PIX_FMT_YUVJ422P,  COLOR_RANGE_FULL },
-
-        {CODEC_I420, AV_PIX_FMT_YUV420P,  COLOR_RANGE_UNDEF },
-        {CODEC_YV12, AV_PIX_FMT_YUV420P,  COLOR_RANGE_UNDEF },
-        {CODEC_I420, AV_PIX_FMT_YUVJ420P,  COLOR_RANGE_FULL },
-        {CODEC_I411, AV_PIX_FMT_YUV411P,  COLOR_RANGE_UNDEF },
-        {CODEC_I411, AV_PIX_FMT_YUVJ411P,  COLOR_RANGE_FULL },
-        {CODEC_I410, AV_PIX_FMT_YUV410P,  COLOR_RANGE_UNDEF },
-
-        {CODEC_NV12, AV_PIX_FMT_NV12,  COLOR_RANGE_UNDEF },
-        {CODEC_NV21, AV_PIX_FMT_NV21,  COLOR_RANGE_UNDEF },
-
-        {CODEC_I420_9L, AV_PIX_FMT_YUV420P9LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I420_9B, AV_PIX_FMT_YUV420P9BE,  COLOR_RANGE_UNDEF },
-        {CODEC_I420_10L, AV_PIX_FMT_YUV420P10LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I420_10B, AV_PIX_FMT_YUV420P10BE,  COLOR_RANGE_UNDEF },
-    #ifdef AV_PIX_FMT_YUV420P12 /* 54, 17, 100 */
-        {CODEC_I420_12L, AV_PIX_FMT_YUV420P12LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I420_12B, AV_PIX_FMT_YUV420P12BE,  COLOR_RANGE_UNDEF },
-    #endif
-        {CODEC_I420_16L, AV_PIX_FMT_YUV420P16LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I420_16B, AV_PIX_FMT_YUV420P16BE,  COLOR_RANGE_UNDEF },
-    #ifdef AV_PIX_FMT_P010LE
-        {CODEC_P010, AV_PIX_FMT_P010LE,  COLOR_RANGE_UNDEF },
-    #endif
-    #ifdef AV_PIX_FMT_P016LE
-        {CODEC_P016, AV_PIX_FMT_P016LE,  COLOR_RANGE_UNDEF },
-    #endif
-
-        {CODEC_I422_9L, AV_PIX_FMT_YUV422P9LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I422_9B, AV_PIX_FMT_YUV422P9BE,  COLOR_RANGE_UNDEF },
-        {CODEC_I422_10L, AV_PIX_FMT_YUV422P10LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I422_10B, AV_PIX_FMT_YUV422P10BE,  COLOR_RANGE_UNDEF },
-        {CODEC_I422_16L, AV_PIX_FMT_YUV422P16LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I422_16B, AV_PIX_FMT_YUV422P16BE,  COLOR_RANGE_UNDEF },
-    #ifdef AV_PIX_FMT_YUV422P12 /* 54, 17, 100 */
-        {CODEC_I422_12L, AV_PIX_FMT_YUV422P12LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I422_12B, AV_PIX_FMT_YUV422P12BE,  COLOR_RANGE_UNDEF },
-    #endif
-
-        {CODEC_YUV420A, AV_PIX_FMT_YUVA420P,  COLOR_RANGE_UNDEF },
-        {CODEC_YUV422A, AV_PIX_FMT_YUVA422P,  COLOR_RANGE_UNDEF },
-        {CODEC_YUVA,    AV_PIX_FMT_YUVA444P,  COLOR_RANGE_UNDEF },
-
-        {CODEC_YUVA_444_10L, AV_PIX_FMT_YUVA444P10LE,  COLOR_RANGE_UNDEF },
-        {CODEC_YUVA_444_10B, AV_PIX_FMT_YUVA444P10BE,  COLOR_RANGE_UNDEF },
-
-        {CODEC_YUVA_444_12L, AV_PIX_FMT_YUVA444P12LE,  COLOR_RANGE_UNDEF },
-        {CODEC_YUVA_444_12B, AV_PIX_FMT_YUVA444P12BE,  COLOR_RANGE_UNDEF },
-
-        {CODEC_I444_9L, AV_PIX_FMT_YUV444P9LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I444_9B, AV_PIX_FMT_YUV444P9BE,  COLOR_RANGE_UNDEF },
-        {CODEC_I444_10L, AV_PIX_FMT_YUV444P10LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I444_10B, AV_PIX_FMT_YUV444P10BE,  COLOR_RANGE_UNDEF },
-    #ifdef AV_PIX_FMT_YUV444P12 /* 54, 17, 100 */
-        {CODEC_I444_12L, AV_PIX_FMT_YUV444P12LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I444_12B, AV_PIX_FMT_YUV444P12BE,  COLOR_RANGE_UNDEF },
-    #endif
-        {CODEC_I444_16L, AV_PIX_FMT_YUV444P16LE,  COLOR_RANGE_UNDEF },
-        {CODEC_I444_16B, AV_PIX_FMT_YUV444P16BE,  COLOR_RANGE_UNDEF },
-
-        /* Packed YUV formats */
-        {CODEC_YUYV, AV_PIX_FMT_YUYV422,  COLOR_RANGE_UNDEF },
-        {CODEC_UYVY, AV_PIX_FMT_UYVY422,  COLOR_RANGE_UNDEF },
-        {CODEC_YVYU, AV_PIX_FMT_YVYU422,  COLOR_RANGE_UNDEF },
-        /* Packed RGB formats */
-        {CODEC_RGB233, AV_PIX_FMT_RGB8,  COLOR_RANGE_UNDEF },
-        {CODEC_BGR233, AV_PIX_FMT_BGR8,  COLOR_RANGE_UNDEF },
-
-        {CODEC_RGB565BE, AV_PIX_FMT_RGB565BE,  COLOR_RANGE_UNDEF },
-        {CODEC_RGB565LE, AV_PIX_FMT_RGB565LE,  COLOR_RANGE_UNDEF },
-        {CODEC_BGR565BE, AV_PIX_FMT_BGR565BE,  COLOR_RANGE_UNDEF },
-        {CODEC_BGR565LE, AV_PIX_FMT_BGR565LE,  COLOR_RANGE_UNDEF },
-
-        {CODEC_RGB555BE, AV_PIX_FMT_RGB555BE,  COLOR_RANGE_UNDEF },
-        {CODEC_RGB555LE, AV_PIX_FMT_RGB555LE,  COLOR_RANGE_UNDEF },
-        {CODEC_BGR555BE, AV_PIX_FMT_BGR555BE,  COLOR_RANGE_UNDEF },
-        {CODEC_BGR555LE, AV_PIX_FMT_BGR555LE,  COLOR_RANGE_UNDEF },
-
-        {CODEC_RGB24, AV_PIX_FMT_RGB24,  COLOR_RANGE_UNDEF },
-        {CODEC_BGR24, AV_PIX_FMT_BGR24,  COLOR_RANGE_UNDEF },
-
-        {CODEC_RGBX, AV_PIX_FMT_RGB0,  COLOR_RANGE_UNDEF },
-        {CODEC_XRGB, AV_PIX_FMT_0RGB,  COLOR_RANGE_UNDEF },
-        {CODEC_BGRX, AV_PIX_FMT_BGR0,  COLOR_RANGE_UNDEF },
-        {CODEC_XBGR, AV_PIX_FMT_0BGR,  COLOR_RANGE_UNDEF },
-
-        {CODEC_RGBA, AV_PIX_FMT_RGBA,  COLOR_RANGE_UNDEF },
-        {CODEC_ARGB, AV_PIX_FMT_ARGB,  COLOR_RANGE_UNDEF },
-        {CODEC_BGRA, AV_PIX_FMT_BGRA,  COLOR_RANGE_UNDEF },
-        {CODEC_ABGR, AV_PIX_FMT_ABGR,  COLOR_RANGE_UNDEF },
-
-    #ifdef WORDS_BIGENDIAN
-        {CODEC_RGBA64, AV_PIX_FMT_RGBA64BE,  COLOR_RANGE_UNDEF },
-    #else /* !WORDS_BIGENDIAN */
-        {CODEC_RGBA64, AV_PIX_FMT_RGBA64LE,  COLOR_RANGE_UNDEF },
-    #endif /* !WORDS_BIGENDIAN */
-
-    #ifdef AV_PIX_FMT_X2BGR10
-        {CODEC_RGBA10LE, AV_PIX_FMT_X2BGR10,  COLOR_RANGE_UNDEF },
-    #endif
-
-        {CODEC_GREY, AV_PIX_FMT_GRAY8,  COLOR_RANGE_UNDEF},
-    #ifdef AV_PIX_FMT_GRAY10
-        {CODEC_GREY_10L, AV_PIX_FMT_GRAY10LE,  COLOR_RANGE_UNDEF},
-        {CODEC_GREY_10B, AV_PIX_FMT_GRAY10BE,  COLOR_RANGE_UNDEF},
-    #endif
-    #ifdef AV_PIX_FMT_GRAY12
-        {CODEC_GREY_12L, AV_PIX_FMT_GRAY12LE,  COLOR_RANGE_UNDEF},
-        {CODEC_GREY_12B, AV_PIX_FMT_GRAY12BE,  COLOR_RANGE_UNDEF},
-    #endif
-        {CODEC_GREY_16L, AV_PIX_FMT_GRAY16LE,  COLOR_RANGE_UNDEF},
-        {CODEC_GREY_16B, AV_PIX_FMT_GRAY16BE,  COLOR_RANGE_UNDEF},
-
-        /* Paletized RGB */
-       {CODEC_RGBP, AV_PIX_FMT_PAL8,  COLOR_RANGE_UNDEF},
-
-       {CODEC_GBR_PLANAR, AV_PIX_FMT_GBRP,  COLOR_RANGE_UNDEF },
-       {CODEC_GBR_PLANAR_9L, AV_PIX_FMT_GBRP9LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBR_PLANAR_9B, AV_PIX_FMT_GBRP9BE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBR_PLANAR_10L, AV_PIX_FMT_GBRP10LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBR_PLANAR_10B, AV_PIX_FMT_GBRP10BE,  COLOR_RANGE_UNDEF },
-   #ifdef AV_PIX_FMT_GBRP12 /* 55, 24, 0 / 51, 74, 100 */
-       {CODEC_GBR_PLANAR_12L, AV_PIX_FMT_GBRP12LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBR_PLANAR_12B, AV_PIX_FMT_GBRP12BE,  COLOR_RANGE_UNDEF },
-   #endif
-   #ifdef AV_PIX_FMT_GBRP14 /* ffmpeg only */
-       {CODEC_GBR_PLANAR_14L, AV_PIX_FMT_GBRP14LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBR_PLANAR_14B, AV_PIX_FMT_GBRP14BE,  COLOR_RANGE_UNDEF },
-   #endif
-       {CODEC_GBR_PLANAR_16L, AV_PIX_FMT_GBRP16LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBR_PLANAR_16B, AV_PIX_FMT_GBRP16BE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBRA_PLANAR, AV_PIX_FMT_GBRAP,  COLOR_RANGE_UNDEF },
-   #ifdef AV_PIX_FMT_GBRAP10 /* 56, 1, 0 / 55, 25, 100 */
-       {CODEC_GBRA_PLANAR_10L, AV_PIX_FMT_GBRAP10LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBRA_PLANAR_10B, AV_PIX_FMT_GBRAP10BE,  COLOR_RANGE_UNDEF },
-   #endif
-   #ifdef AV_PIX_FMT_GBRAP12 /* 55, 25, 0, 19, 100 */
-       {CODEC_GBRA_PLANAR_12L, AV_PIX_FMT_GBRAP12LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBRA_PLANAR_12B, AV_PIX_FMT_GBRAP12BE,  COLOR_RANGE_UNDEF },
-   #endif
-       {CODEC_GBRA_PLANAR_16L, AV_PIX_FMT_GBRAP16LE,  COLOR_RANGE_UNDEF },
-       {CODEC_GBRA_PLANAR_16B, AV_PIX_FMT_GBRAP16BE,  COLOR_RANGE_UNDEF },
-
-       /* XYZ */
-       {CODEC_XYZ_12L, AV_PIX_FMT_XYZ12LE,  COLOR_RANGE_UNDEF },
-       {CODEC_XYZ_12B, AV_PIX_FMT_XYZ12BE,  COLOR_RANGE_UNDEF },
+    struct rational_t {
+        unsigned num, den;
     };
 
-   [[nodiscard]] int GetVlcChroma(video_format_t* fmt, enum AVPixelFormat i_ffmpeg_chroma)
-    {
-        for (size_t i = 0; i < ARRAY_SIZE(chroma_table); i++)
-        {
-            if (chroma_table[i].i_chroma_id == i_ffmpeg_chroma)
-            {
-                fmt->i_chroma = chroma_table[i].i_chroma;
-                if (chroma_table[i].range != COLOR_RANGE_UNDEF)
-                    fmt->color_range = chroma_table[i].range;
-                return SUCCESS;
-            }
-        }
-        return EGENERIC;
-    }
+    struct chroma_description_t {
+        fourcc_t fcc;
 
-   [[nodiscard]] enum AVPixelFormat FindFfmpegChroma(fourcc_t fourcc, bool* uv_flipped)
-   {
-       for (size_t i = 0; i < ARRAY_SIZE(chroma_table); i++)
-           if (chroma_table[i].i_chroma == fourcc)
-           {
-               *uv_flipped = fourcc == CODEC_YV12;
-               return chroma_table[i].i_chroma_id;
-           }
-       return AV_PIX_FMT_NONE;
-   }
-}
+        unsigned plane_count;
+
+        struct {
+            rational_t w;
+            rational_t h;
+        } p[4];
+
+        unsigned pixel_size;        /* Number of bytes per pixel for a plane */
+        unsigned pixel_bits;        /* Number of bits actually used bits per pixel for a plane */
+    };
+
+    [[nodiscard]] int GetVlcChroma(
+        video_format_t* fmt,
+        enum AVPixelFormat i_ffmpeg_chroma);
+    [[nodiscard]] enum AVPixelFormat FindFfmpegChroma(
+        fourcc_t fourcc,
+        bool* uv_flipped);
+
+    [[nodiscard]] const chroma_description_t*
+        FourccGetChromaDescription(fourcc_t i_fourcc);
+} // namespace FFmpeg

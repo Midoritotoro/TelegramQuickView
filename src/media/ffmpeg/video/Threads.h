@@ -16,8 +16,69 @@
 #include <sys/timeb.h>
 
 
+#define TICK_INVALID                    INT64_C(0)
+#define TICK_0                          INT64_C(1)
 
-namespace FFmpeg {
+
+namespace Threads {
+
+    struct threadvar
+    {
+        PULONG                id;
+        void                (*destroy) (void*);
+        struct threadvar* prev;
+        struct threadvar* next;
+    };
+
+    struct cond_waiter {
+        struct cond_waiter** pprev, * next;
+        std::atomic_uint value;
+    };
+
+    struct _thread
+    {
+        int      thread;
+
+        void* (*entry)(void*);
+        void* data;
+
+        std::atomic_uint killed;
+        bool killable;
+    };
+
+    struct sem_t
+    {
+        std::atomic_uint value;
+    };
+
+    using tick_t = int64_t;
+
+    typedef void (*timer_func) (void*);
+    struct timer
+    {
+        PTP_TIMER t;
+        timer_func func;
+        void* data;
+    };
+
+
+    struct mutex_t
+    {
+        struct {
+            std::atomic_uint value;
+            std::atomic_uint recursion;
+            std::atomic_ulong owner;
+        };
+    };
+
+
+    struct cond_t
+    {
+        cond_waiter* head;
+        mutex_t lock;
+    };
+
+
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define STATIC_MUTEX { \
     0, \
@@ -25,7 +86,33 @@ namespace FFmpeg {
     0 \
 }
 
-    static /*thread_local*/ thread_t thread = NULL;
+#if defined (_WIN32)
+#include <process.h>
+#ifndef ETIMEDOUT
+#define ETIMEDOUT 10060 /* This is the value in winsock.h. */
+#endif
+    typedef _thread* thread_t;
+    typedef threadvar* threadvar_t;
+    typedef timer* timer_t;
+
+    #define THREAD_CANCELED ((void*) UINTPTR_MAX)
+#endif
+
+    enum mutex_type_t
+    {
+        AVCODEC_MUTEX = 0,
+        GCRYPT_MUTEX,
+        XLIB_MUTEX,
+        MOSAIC_MUTEX,
+#ifdef _WIN32
+        MTA_MUTEX,
+#endif
+        /* Insert new entry HERE */
+        MAX_MUTEX
+    };
+
+
+    static  /*thread_local*/ thread_t thread = NULL;
 
     int savecancel();
     void global_mutex(unsigned n, bool acquire);
@@ -88,4 +175,5 @@ namespace FFmpeg {
     int sem_trywait(sem_t* sem);
 
     int atomic_timedwait_daytime(void* addr, unsigned val, time_t deadline);
-}
+
+} // namespace Threads

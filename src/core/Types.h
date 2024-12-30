@@ -1,6 +1,8 @@
 #pragma once 
 
 #include <QString>
+#include <cstdint>
+
 #include <gsl/gsl>
 
 
