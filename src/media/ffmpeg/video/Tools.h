@@ -249,6 +249,69 @@ typedef struct timer* timer_t;
         string_ops = { CmpString,  DupString, FreeString, },
         coords_ops = { NULL,       DupDummy,  FreeDummy, };
 
+    struct node_t {
+        char* key;
+        struct node_t* llink, * rlink;
+    };
+
+
+    void*
+        tfind(const void* vkey, void* const* vrootp,
+            int (*compar)(const void*, const void*))
+    {
+        node_t* const* rootp = (node_t* const*)vrootp;
+
+        assert(vkey != NULL);
+        assert(compar != NULL);
+
+        if (rootp == NULL)
+            return NULL;
+
+        while (*rootp != NULL) {		/* T1: */
+            int r;
+
+            if ((r = (*compar)(vkey, (*rootp)->key)) == 0)	/* T2: */
+                return *rootp;		/* key found */
+            rootp = (r < 0) ?
+                &(*rootp)->llink :		/* T3: follow left branch */
+                &(*rootp)->rlink;		/* T4: follow right branch */
+        }
+        return NULL;
+    }
+
+    void*
+        tsearch(const void* vkey, void** vrootp,
+            int (*compar)(const void*, const void*))
+    {
+        node_t* q;
+        node_t** rootp = (node_t**)vrootp;
+
+        assert(vkey != NULL);
+        assert(compar != NULL);
+
+        if (rootp == NULL)
+            return NULL;
+
+        while (*rootp != NULL) {	/* Knuth's T1: */
+            int r;
+
+            if ((r = (*compar)(vkey, (*rootp)->key)) == 0)	/* T2: */
+                return *rootp;		/* we found it! */
+
+            rootp = (r < 0) ?
+                &(*rootp)->llink :		/* T3: follow left branch */
+                &(*rootp)->rlink;		/* T4: follow right branch */
+        }
+
+        q = malloc(sizeof(node_t));		/* T5: key not found */
+        if (q != 0) {				/* make new node */
+            *rootp = q;			/* link new node to old */
+            q->key = (void*)(vkey);	/* initialize new node */
+            q->llink = q->rlink = NULL;
+        }
+        return q;
+    }
+
     int varcmp(const void* a, const void* b)
     {
         const variable_t* va = (variable_t*)a, * vb = (variable_t*)b;
@@ -264,8 +327,8 @@ typedef struct timer* timer_t;
         void** pp_var;
 
         mutex_lock(&priv->var_lock);
-        pp_var = tfind(&psz_name, &priv->var_root, varcmp);
-        return (pp_var != NULL) ? *pp_var : NULL;
+        pp_var = (void**)tfind(&psz_name, &priv->var_root, varcmp);
+        return (pp_var != NULL) ? (variable_t *)*pp_var : NULL;
     }
 
     static struct
@@ -352,7 +415,7 @@ typedef struct timer* timer_t;
 
     static thread_local struct rcu_thread current;
 
-    bool vlc_rcu_read_held(void)
+    bool rcu_read_held(void)
     {
         const struct rcu_thread* const self = &current;
 
@@ -362,7 +425,7 @@ typedef struct timer* timer_t;
     static std::atomic<rcu_generation*> generation;
 
 
-    void vlc_rcu_read_lock(void)
+    void rcu_read_lock(void)
     {
         rcu_thread* const self = &current;
         rcu_generation* gen;
@@ -376,12 +439,22 @@ typedef struct timer* timer_t;
         atomic_fetch_add_explicit(&gen->readers, 1, std::memory_order_relaxed);
     }
 
-    void vlc_rcu_read_unlock(void)
+    void atomic_notify_one(void* addr)
+    {
+        WakeByAddressSingle(addr);
+    }
+
+    void atomic_notify_all(void* addr)
+    {
+        WakeByAddressAll(addr);
+    }
+
+    void rcu_read_unlock(void)
     {
         rcu_thread* const self = &current;
         rcu_generation* gen;
 
-        assert(vlc_rcu_read_held());
+        assert(rcu_read_held());
 
         if (--self->recursion > 0)
             return; /* recursion: nothing to do */
@@ -398,7 +471,7 @@ typedef struct timer* timer_t;
 
         if (unlikely(atomic_exchange_explicit(&gen->writer, 0,
             std::memory_order_release)))
-            vlc_atomic_notify_one(&gen->writer); /* Last reader wakes writer up */
+            atomic_notify_one(&gen->writer); /* Last reader wakes writer up */
     }
 
     char* config_GetPsz(const char* name)
@@ -411,11 +484,11 @@ typedef struct timer* timer_t;
         assert(IsConfigStringType(_param->item.i_type));
 
         /* return a copy of the string */
-        vlc_rcu_read_lock();
+        rcu_read_lock();
         str = atomic_load_explicit(&_param->value.str, memory_order_acquire);
         if (str != NULL)
             str = strdup(str);
-        vlc_rcu_read_unlock();
+        rcu_read_unlock();
         return str;
     }
 
@@ -451,6 +524,31 @@ typedef struct timer* timer_t;
             return ENOENT;
         }
         return SUCCESS;
+    }
+
+    void Destroy(variable_t* p_var)
+    {
+        p_var->ops->pf_free(&p_var->val);
+
+        for (size_t i = 0, count = p_var->choices_count; i < count; i++)
+        {
+            p_var->ops->pf_free(&p_var->choices[i]);
+            free(p_var->choices_text[i]);
+        }
+        free(p_var->choices);
+        free(p_var->choices_text);
+
+        free(p_var->psz_name);
+        free(p_var->psz_text);
+        while (unlikely(p_var->value_callbacks != NULL))
+        {
+            callback_entry_t* next = p_var->value_callbacks->next;
+
+            free(p_var->value_callbacks);
+            p_var->value_callbacks = next;
+        }
+        assert(p_var->list_callbacks == NULL);
+        free(p_var);
     }
 
     int (var_Create)(object_t* p_this, const char* psz_name, int i_type)
@@ -512,7 +610,7 @@ typedef struct timer* timer_t;
             p_var->ops = &void_ops;
             break;
         default:
-            assert_unreachable();
+            assert("unreachable!", unreachable());
         }
 
         cond_init(&p_var->wait);
@@ -520,7 +618,7 @@ typedef struct timer* timer_t;
         if (i_type & VAR_DOINHERIT)
             var_Inherit(p_this, psz_name, i_type, &p_var->val);
 
-        object_internals_t* p_priv = internals(p_this);
+        object_internals_t* p_priv = objectPrivate(p_this);
         void** pp_var;
         variable_t* p_oldvar;
         int ret = SUCCESS;
@@ -544,6 +642,15 @@ typedef struct timer* timer_t;
         if (p_var != NULL)
             Destroy(p_var);
         return ret;
+    }
+
+    int64_t var_GetInteger(object_t* p_obj, const char* psz_name)
+    {
+        value_t val;
+        if (!var_GetChecked(p_obj, psz_name, VAR_INTEGER, &val))
+            return val.i_int;
+        else
+            return 0;
     }
 
     int64_t var_CreateGetInteger(object_t* p_obj, const char* psz_name)

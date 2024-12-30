@@ -712,7 +712,10 @@ namespace FFmpeg {
              std::atomic<char*> /*_Atomic*/ str; /**< Current value (if character string) */
          } value;
 
-         struct vlc_plugin_t* owner;
+         struct 
+             
+
+         plugin_t* owner;
          unsigned char shortname; /**< Optional short option name */
          unsigned internal:1; /**< Hidden from preferences and help */
          unsigned unsaved : 1; /**< Not stored in persistent configuration */
