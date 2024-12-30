@@ -86,7 +86,7 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 	Qt::AspectRatioMode mode,
 	bool fullScreen)
 {
-	measureExecutionTime("FrameGenerator::renderCurrent")
+	//measureExecutionTime("FrameGenerator::renderCurrent")
 	const auto frame = _current.frame.get();
 
 	const auto width = frame->width;
@@ -220,7 +220,7 @@ void FrameGenerator::setSpeed(float speed) {
 }
 
 void FrameGenerator::rewind(Time::time positionMs) {
-	measureExecutionTime("FrameGenerator::rewind")
+//	measureExecutionTime("FrameGenerator::rewind")
 
 	if (_codec == nullptr)
 		return;
@@ -352,7 +352,7 @@ QSize FrameGenerator::recountMaximumFrameSize(const QSize& targetSize) {
 
 
 void FrameGenerator::readNextFrame() {
-	measureExecutionTime("FrameGenerator::readNextFrame")
+//	measureExecutionTime("FrameGenerator::readNextFrame")
 	//	const auto milliseconds = Time::now();
 	//	const auto time = gsl::finally([&milliseconds] { qDebug() << "readNextFrame: " << Time::now() - milliseconds << " ms";  });
 
@@ -424,7 +424,7 @@ void FrameGenerator::readNextFrame() {
 }
 
 void FrameGenerator::resolveNextFrameTiming() {
-	measureExecutionTime("FrameGenerator::resolveNextFrameTiming")
+	//measureExecutionTime("FrameGenerator::resolveNextFrameTiming")
 
 	const auto base = _format->streams[_bestVideoStreamId]->time_base;
 

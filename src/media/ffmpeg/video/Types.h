@@ -14,11 +14,29 @@ extern "C" {
 
 namespace FFmpeg {
     using fourcc_t = uint32_t;
+    using tick_t = int64_t;
+
     typedef void (*ancillary_free_cb)(void* data);
 
     struct module_t;
     struct plagin_t;
     struct video_format_t;
+
+    struct sem_t
+    {
+        std::atomic_uint value;
+    };
+
+    union value_t
+    {
+        int64_t         i_int;
+        bool            b_bool;
+        float           f_float;
+        char* psz_string;
+        void* p_address;
+        struct { int32_t x; int32_t y; } coords;
+
+    };
 
     struct atomic_rc_t {
         std::atomic_uintptr_t refs;
@@ -347,6 +365,160 @@ namespace FFmpeg {
      struct fourcc_mapping {
          unsigned char alias[4];
          uint32_t fourcc;
+     };
+
+     struct log_t
+     {
+         uintptr_t   i_object_id; /**< Emitter (temporarily) unique object ID or 0 */
+         const char* psz_object_type; /**< Emitter object type name */
+         const char* psz_module; /**< Emitter module (source code) */
+         const char* psz_header; /**< Additional header (used by VLM media) */
+         const char* file; /**< Source code file name or NULL */
+         int line; /**< Source code file line number or -1 */
+         const char* func; /**< Source code calling function name or NULL */
+         unsigned long tid; /**< Emitter thread ID */
+     };
+
+     typedef void (*log_cb) (void* data, int type, const log_t* item,
+         const char* fmt, va_list args);
+
+     struct logger_operations
+     {
+         log_cb log;
+         void (*destroy)(void* data);
+     };
+
+     struct logger {
+         const logger_operations* ops;
+     };
+
+     struct mutex_t
+     {
+        struct {
+            std::atomic_uint value;
+            std::atomic_uint recursion;
+            std::atomic_ulong owner;
+        };
+    };
+
+     struct cond_waiter {
+         struct cond_waiter** pprev, * next;
+         std::atomic_uint value;
+     };
+
+     struct variable_ops_t
+     {
+         int  (*pf_cmp) (value_t, value_t);
+         void (*pf_dup) (value_t*);
+         void (*pf_free) (value_t*);
+     };
+
+     struct cond_t
+     {
+         cond_waiter* head;
+         mutex_t lock;
+     };
+
+     typedef int (*callback_t) (object_t*,      /* variable's object */
+         char const*,            /* variable name */
+         value_t,                 /* old value */
+         value_t,                 /* new value */
+         void*);                /* callback data */
+
+     /*****************************************************************************
+      * List callbacks: called when elements are added/removed from the list
+      *****************************************************************************/
+     typedef int (*list_callback_t) (object_t*,      /* variable's object */
+         char const*,            /* variable name */
+         int,                  /* VLC_VAR_* action */
+         value_t*,      /* new/deleted value  */
+         void*);                 /* callback data */
+
+
+     struct callback_entry_t
+     {
+         struct callback_entry_t* next;
+         union
+         {
+             callback_t       pf_value_callback;
+             list_callback_t  pf_list_callback;
+             void* p_callback;
+         };
+         void* p_data;
+     };
+
+     struct variable_t
+     {
+         char* psz_name; /**< The variable unique name (must be first) */
+
+         /** The variable's exported value */
+         value_t  val;
+
+         /** The variable display name, mainly for use by the interfaces */
+         char* psz_text;
+
+         const variable_ops_t* ops;
+
+         int          i_type;   /**< The type of the variable */
+         unsigned     i_usage;  /**< Reference count */
+
+         /** If the variable has min/max/step values */
+         value_t  min, max, step;
+
+         /** List of choices */
+         value_t* choices;
+         /** List of friendly names for the choices */
+         char** choices_text;
+         size_t       choices_count;
+
+         /** Set to TRUE if the variable is in a callback */
+         bool   b_incallback;
+
+         /** Registered value callbacks */
+         callback_entry_t* value_callbacks;
+         /** Registered list callbacks */
+         callback_entry_t* list_callbacks;
+
+         cond_t   wait;
+     };
+
+     struct res
+     {
+         struct res* prev;
+         void (*release)(void*);
+         max_align_t payload[];
+     };
+
+     struct object_t;
+     struct object_internals_t
+     {
+         object_t* parent; /**< Parent object (or NULL) */
+         const char* _typename; /**< Object type human-readable name */
+
+         /* Object variables */
+         void* var_root;
+         mutex_t     var_lock;
+
+         /* Object resources */
+         struct res* resources;
+     };
+
+     struct object_t
+     {
+         logger* logger;
+         union {
+             struct object_internals_t* priv;
+             struct object_marker* obj;
+         };
+
+         bool no_interact;
+
+         /** Module probe flag
+          *
+          * A boolean during module probing when the probe is "forced".
+          * See \ref module_need().
+          */
+         bool force;
      };
 
 

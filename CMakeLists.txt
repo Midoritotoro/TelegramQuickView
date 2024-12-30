@@ -299,6 +299,9 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/FourccHelper.h
     src/media/ffmpeg/video/Chroma.h
 
+    src/media/ffmpeg/video/Threads.h
+    src/media/ffmpeg/video/Threads.cpp
+
     src/media/ffmpeg/audio/AbstractAudioLoader.cpp
     src/media/ffmpeg/audio/AbstractAudioLoader.h
 
