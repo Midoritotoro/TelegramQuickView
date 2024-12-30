@@ -1,7 +1,5 @@
 #pragma once 
 
-#include "Types.h"
-
 
 namespace FFmpeg {
     enum video_orientation_t {

@@ -3,7 +3,6 @@
 #include "FourccCodecs.h"
 #include "Config.h"
 
-#include "Chroma.h"
 #include "Math.h"
 
 #ifdef WORDS_BIGENDIAN

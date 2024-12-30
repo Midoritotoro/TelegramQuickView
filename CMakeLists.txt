@@ -37,7 +37,6 @@ find_package(Microsoft.GSL CONFIG REQUIRED)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-qt_standard_project_setup()
 
 SET(MAIN_SOURCES main.cpp
 
@@ -82,8 +81,6 @@ SET(MAIN_SOURCES main.cpp
 
     src/media/ffmpeg/video/TFunctions.cpp
     src/media/ffmpeg/video/TFunctions.h
-
-    src/media/ffmpeg/video/Utils.h
 
     src/media/ffmpeg/video/Types.h
 
@@ -304,7 +301,7 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/Tools.h 
     
     src/media/ffmpeg/video/Object.h
-    src/media/ffmoeg/video/Object.cpp
+    src/media/ffmpeg/video/Object.cpp
 
     src/media/ffmpeg/video/FourccCodecs.h
     src/media/ffmpeg/video/Config.h

@@ -1,6 +1,8 @@
 #pragma once 
 
-#include "Types.h"
+#include "VideoFormat.h"
+#include "Scale.h"
+
 
 namespace FFmpeg {
     [[nodiscard]] int GetSwsColorspace(const video_format_t* format);
