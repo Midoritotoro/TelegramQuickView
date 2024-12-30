@@ -77,6 +77,14 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/ColorSpace.h
     src/media/ffmpeg/video/ColorSpace.cpp
 
+    src/media/ffmpeg/video/Variables.h
+    src/media/ffmpeg/video/Variables.cpp
+
+    src/media/ffmpeg/video/TFunctions.cpp
+    src/media/ffmpeg/video/TFunctions.h
+
+    src/media/ffmpeg/video/Utils.h
+
     src/media/ffmpeg/video/Types.h
 
     src/ui/widgets/PopupMenu.h

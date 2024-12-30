@@ -1,9 +1,7 @@
 #pragma once 
 
 #include "Tools.h"
-#include "Types.h"
 
-namespace FFmpeg {
 
 #define CODEC_UNKNOWN         FOURCC('u','n','d','f')
 
@@ -741,4 +739,3 @@ namespace FFmpeg {
 
 #define PLANAR_8(n, w_den, h_den)        PLANAR(n, w_den, h_den, 8)
 #define PLANAR_16(n, w_den, h_den, bits) PLANAR(n, w_den, h_den, bits)
-} // namespace FFmpeg
