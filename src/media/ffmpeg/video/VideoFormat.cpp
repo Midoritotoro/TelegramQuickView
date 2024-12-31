@@ -1,7 +1,5 @@
 #include "VideoFormat.h"
 
-#include "Tools.h"
-
 namespace FFmpeg {
     void DecoderDeviceRelease(decoder_device* device)
     {

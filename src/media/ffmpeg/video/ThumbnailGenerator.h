@@ -11,6 +11,5 @@ namespace FFmpeg {
 			const QString& path,
 			int swscaleFlags = SWS_BICUBIC);
 		[[nodiscard]] static QSize resolution(const QString& path);
-	private:
 	};
 } // namespace FFmpeg

@@ -4,6 +4,9 @@
 #include "../../../core/Types.h"
 
 
+#define container_of(ptr, type, member) \
+    ((type *)(((char *)(ptr)) - offsetof(type, member)))
+
 namespace FFmpeg {
 	[[nodiscard]] int64_t GCD(
 		int64_t a,

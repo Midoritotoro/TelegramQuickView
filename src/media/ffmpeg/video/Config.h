@@ -5,8 +5,8 @@
 
 #include "Windows.h"
 
-#include "Types.h"
 #include "Atomic.h"
+#include "Threads.h"
 
 
 #ifdef Q_BIG_ENDIAN
@@ -66,6 +66,9 @@ typedef int64_t msftime_t;
 #define unreachable()                       ((void)0)
 #endif
 
+
+#define unused(x)                           ((void)(x))
+
 #define SUCCESS                             0
 /** Unspecified error */
 #define EGENERIC                            (-2 * (1 << (sizeof (int) * 8 - 2))) /* INT_MIN */
@@ -107,9 +110,116 @@ typedef int64_t msftime_t;
 
 
 namespace FFmpeg {
+
+    struct plugin_t
+    {
+        struct plugin_t* next;
+        module_t* module;
+        unsigned modules_count;
+
+        const char* textdomain; /**< gettext domain (or NULL) */
+
+        /**
+         * Variables set by the module to store its config options
+         */
+        struct
+        {
+            struct param* params; /**< Table of configuration items */
+            size_t size; /**< Total count of all items */
+            size_t count; /**< Count of real options (excludes hints) */
+            size_t booleans; /**< Count of options that are of boolean type */
+        } conf;
+    };
+
+    struct module_t
+    {
+        plugin_t* plugin; /**< Plug-in/library containing the module */
+        module_t* next;
+
+        /** Shortcuts to the module */
+        unsigned    i_shortcuts;
+        const char** pp_shortcuts;
+
+        /*
+         * Variables set by the module to identify itself
+         */
+        const char* psz_shortname;                              /**< Module name */
+        const char* psz_longname;                   /**< Module descriptive name */
+        const char* psz_help;        /**< Long help plain string for "special" modules */
+        const char* psz_help_html;   /**< Long help HTML string, shown instead of the plain help where it makes sense to render HTML.
+                                          Supports only a limited HTML4 subset, see https://doc.qt.io/qt-6/richtext-html-subset.html */
+
+        const char* psz_capability;                              /**< Capability */
+        int      i_score;                          /**< Score for the capability */
+
+        /* Callbacks */
+        const char* activate_name;
+        const char* deactivate_name;
+        void* pf_activate;
+    };
+
+    union module_value_t
+    {
+        char* psz;
+        int64_t     i;
+        float       f;
+    };
+
+    struct module_config_t
+    {
+        uint8_t     i_type; /**< Configuration type */
+
+        const char* psz_type; /**< Configuration subtype */
+        const char* psz_name; /**< Option name */
+        const char* psz_text; /**< Short comment on the configuration option */
+        const char* psz_longtext; /**< Long comment on the configuration option */
+
+        module_value_t value; /**< Current value */
+        module_value_t orig; /**< Default value */
+        module_value_t min; /**< Minimum value (for scalars only) */
+        module_value_t max; /**< Maximum value (for scalars only) */
+
+        /* Values list */
+        uint16_t list_count; /**< Choices count */
+        union
+        {
+            const char** psz; /**< Table of possible string choices */
+            const int* i; /**< Table of possible integer choices */
+        } list; /**< Possible choices */
+        const char** list_text; /**< Human-readable names for list values */
+    };
+
+    struct config_chain_t
+    {
+        config_chain_t* p_next;     /**< Pointer on the next config_chain_t element */
+
+        char* psz_name;      /**< Option name */
+        char* psz_value;     /**< Option value */
+    };
+
+    struct param {
+        union {
+            /*_Atomic*/ ::std::atomic<int64_t> i; /**< Current value (if integer or boolean) */
+            /*_Atomic*/ ::std::atomic<float> f; /**< Current value (if floating point) */
+            ::std::atomic<char*> /*_Atomic*/ str; /**< Current value (if character string) */
+        } value;
+
+        struct
+
+
+            plugin_t* owner;
+        unsigned char shortname; /**< Optional short option name */
+    unsigned internal:1; /**< Hidden from preferences and help */
+                     unsigned unsaved : 1; /**< Not stored in persistent configuration */
+                     unsigned safe : 1; /**< Safe for untrusted provisioning (playlists) */
+                     unsigned obsolete : 1; /**< Ignored for backward compatibility */
+                     struct module_config_t item;
+    };
+
+
     static struct
     {
-        struct param** list;
+        param** list;
         size_t count;
     } config = { NULL, 0 };
 
@@ -144,7 +254,7 @@ namespace FFmpeg {
         assert(param != NULL);
         assert(IsConfigIntegerType(param->item.i_type));
 
-        return atomic_load_explicit(&param->value.i, std::memory_order_relaxed);
+        return atomic_load_explicit(&param->value.i, ::std::memory_order_relaxed);
     }
 
     inline float config_GetFloat(const char* name)
@@ -155,7 +265,7 @@ namespace FFmpeg {
         assert(_param != NULL);
         assert(IsConfigFloatType(_param->item.i_type));
 
-        return atomic_load_explicit(&_param->value.f, memory_order_relaxed);
+        return atomic_load_explicit(&_param->value.f, ::std::memory_order_relaxed);
     }
 
     inline char* config_GetPsz(const char* name)
@@ -168,11 +278,11 @@ namespace FFmpeg {
         assert(IsConfigStringType(_param->item.i_type));
 
         /* return a copy of the string */
-        rcu_read_lock();
-        str = atomic_load_explicit(&_param->value.str, memory_order_acquire);
+        ::Threads::rcu_read_lock();
+        str = atomic_load_explicit(&_param->value.str, ::std::memory_order_acquire);
         if (str != NULL)
             str = strdup(str);
-        rcu_read_unlock();
+        ::Threads::rcu_read_unlock();
         return str;
     }
 } // namespace FFmpeg

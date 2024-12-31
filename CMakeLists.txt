@@ -45,8 +45,6 @@ SET(MAIN_SOURCES main.cpp
 	src/Application.cpp
 	src/Application.h
 
-    src/media/ffmpeg/video/Types.h
-
     src/core/utility/Size.h
     src/core/utility/Round.h
 
@@ -81,8 +79,6 @@ SET(MAIN_SOURCES main.cpp
 
     src/media/ffmpeg/video/TFunctions.cpp
     src/media/ffmpeg/video/TFunctions.h
-
-    src/media/ffmpeg/video/Types.h
 
     src/ui/widgets/PopupMenu.h
     src/ui/widgets/PopupMenu.cpp
@@ -297,8 +293,6 @@ SET(MAIN_SOURCES main.cpp
 
     src/media/ffmpeg/video/Scale.cpp
     src/media/ffmpeg/video/Scale.h 
-
-    src/media/ffmpeg/video/Tools.h 
     
     src/media/ffmpeg/video/Object.h
     src/media/ffmpeg/video/Object.cpp

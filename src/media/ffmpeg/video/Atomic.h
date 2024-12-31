@@ -1,6 +1,11 @@
 #pragma once 
 
+
 #include <stdatomic.h>
+
+#ifdef __STDC_NO_ATOMICS__ 
+#undef __STDC_NO_ATOMICS__ 
+#endif // __STDC_NO_ATOMICS__ 
 
 
 namespace Threads {
