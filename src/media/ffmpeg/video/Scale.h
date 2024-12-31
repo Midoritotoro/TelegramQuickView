@@ -49,6 +49,50 @@ namespace FFmpeg {
         bool b_swap_uvo;
     };
 
+    struct filter_t;
+    struct filter_owner_t
+    {
+        union
+        {
+            const struct filter_video_callbacks* video;
+            const struct filter_audio_callbacks* audio;
+            const struct filter_subpicture_callbacks* sub;
+        };
+
+        /* Input attachments
+         * XXX use filter_GetInputAttachments */
+        int (*pf_get_attachments)(filter_t*, input_attachment_t***, int*);
+
+        void* sys;
+    };
+
+    struct filter_t
+    {
+        module_t* p_module;
+        void* p_sys;
+
+        /* Input format */
+        es_format_t         fmt_in;
+        video_context* vctx_in;  // video filter, set by owner
+
+        /* Output format of filter */
+        es_format_t         fmt_out;
+        video_context* vctx_out; // video filter, handled by the filter
+        bool                b_allow_fmt_out_change;
+
+        /* Name of the "video filter" shortcut that is requested, can be NULL */
+        const char* psz_name;
+        /* Filter configuration */
+        const config_chain_t* p_cfg;
+
+        /* Implementation of filter API */
+        const struct filter_operations* ops;
+
+        /** Private structure for the owner of the filter */
+        filter_owner_t      owner;
+    };
+
+
 
 	[[nodiscard]] int GetCpuCount();
 

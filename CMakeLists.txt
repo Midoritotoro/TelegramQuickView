@@ -306,6 +306,9 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/FourccCodecs.h
     src/media/ffmpeg/video/Config.h
 
+    src/media/ffmpeg/audio/AudioFormat.cpp
+    src/media/ffmpeg/audio/AudioFormat.h
+
     src/media/ffmpeg/video/Windows.h
 
     src/media/ffmpeg/video/Math.h

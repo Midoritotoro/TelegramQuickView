@@ -1,9 +1,6 @@
 #include "VideoFormat.h"
 
 #include "Tools.h"
-#include "Fourcc.h"
-
-#include "Atomic.h"
 
 namespace FFmpeg {
     void DecoderDeviceRelease(decoder_device* device)

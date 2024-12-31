@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Fourcc.h"
+#include "VideoFormat.h"
 
 extern "C" {
     #include <libavutil/pixfmt.h>
