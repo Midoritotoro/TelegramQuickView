@@ -109,7 +109,7 @@ namespace FFmpeg {
         /** Registered list callbacks */
         callback_entry_t* list_callbacks;
 
-        Threads::cond_t   wait;
+        ::Threads::cond_t   wait;
     };
 
 
@@ -127,7 +127,7 @@ namespace FFmpeg {
     void FreeDummy(value_t* p_val);
     void FreeString(value_t* p_val);
 
-    static const struct variable_ops_t
+    static const variable_ops_t
         void_ops =      {   NULL,       DupDummy,  FreeDummy, },
         addr_ops =      {   CmpAddress, DupDummy,  FreeDummy, },
         bool_ops =      {   CmpBool,    DupDummy,  FreeDummy, },
@@ -135,11 +135,6 @@ namespace FFmpeg {
         int_ops =       {   CmpInt,     DupDummy,  FreeDummy, },
         string_ops =    {   CmpString,  DupString, FreeString, },
         coords_ops =    {   NULL,       DupDummy,  FreeDummy, };
-
-    struct node_t {
-        char* key;
-        struct node_t* llink, * rlink;
-    };
 
     int varcmp(const void* a, const void* b);
     variable_t* LookupVar(object_t* obj, const char* psz_name);

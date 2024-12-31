@@ -1,7 +1,22 @@
 #pragma once 
 
-#include "Tools.h"
+#include <cstdint>
 
+#ifdef WORDS_BIGENDIAN
+#   define FOURCC( a, b, c, d ) \
+        ( ((uint32_t)d) | ( ((uint32_t)c) << 8 ) \
+           | ( ((uint32_t)b) << 16 ) | ( ((uint32_t)a) << 24 ) )
+#   define TWOCC( a, b ) \
+        ( (uint16_t)(b) | ( (uint16_t)(a) << 8 ) )
+
+#else
+#   define FOURCC( a, b, c, d ) \
+        ( ((uint32_t)a) | ( ((uint32_t)b) << 8 ) \
+           | ( ((uint32_t)c) << 16 ) | ( ((uint32_t)d) << 24 ) )
+#   define TWOCC( a, b ) \
+        ( (uint16_t)(a) | ( (uint16_t)(b) << 8 ) )
+
+#endif
 
 #define CODEC_UNKNOWN         FOURCC('u','n','d','f')
 

@@ -97,15 +97,6 @@ namespace FFmpeg {
         VIDEO_CONTEXT_GSTDECODE, //!< empty
     };
 
-
-    enum es_format_category_e {
-        UNKNOWN_ES = 0x00,
-        VIDEO_ES,
-        AUDIO_ES,
-        SPU_ES,
-        DATA_ES,
-    };
-
     enum audio_channel_type_t {
         AUDIO_CHANNEL_TYPE_BITMAP,
         AUDIO_CHANNEL_TYPE_AMBISONICS,

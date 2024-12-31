@@ -2,10 +2,6 @@
 
 #include "Config.h"
 
-#include "Windows.h"
-#include <cassert>
-
-
 
 namespace Threads {
     namespace {

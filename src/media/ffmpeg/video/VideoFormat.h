@@ -274,17 +274,6 @@ namespace FFmpeg {
         void (*destroy)(void* priv);
     };
 
-    struct fourcc_desc {
-        unsigned char alias[4];
-        const char* desc;
-    };
-
-    struct fourcc_mapping {
-        unsigned char alias[4];
-        uint32_t fourcc;
-    };
-
-
     struct video_context
     {
         ::Threads::atomic_rc_t    rc;

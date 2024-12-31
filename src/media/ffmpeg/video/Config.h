@@ -109,7 +109,14 @@ typedef int64_t msftime_t;
     ((type) == CONFIG_ITEM_FLOAT)
 
 
+struct node_t {
+    char* key;
+    struct node_t* llink, * rlink;
+};
+
 namespace FFmpeg {
+    struct module_t;
+    struct plagin_t;
 
     struct plugin_t
     {
@@ -223,15 +230,6 @@ namespace FFmpeg {
         size_t count;
     } config = { NULL, 0 };
 
-    inline param* param_Find(const char* name)
-    {
-        param* const* p;
-
-        assert(name != NULL);
-        p = (param* const*)bsearch(name, config.list, config.count, sizeof(*p), confnamecmp);
-        return (p != NULL) ? *p : NULL;
-    }
-
     inline int confcmp(const void* a, const void* b)
     {
         const param* const* ca = (const param* const*)a, * const* cb = (const param* const*)b;
@@ -246,15 +244,24 @@ namespace FFmpeg {
         return strcmp((const char*)key, (*conf)->item.psz_name);
     }
 
+    inline param* param_Find(const char* name)
+    {
+        param* const* p;
+
+        assert(name != NULL);
+        p = (param* const*)bsearch(name, config.list, config.count, sizeof(*p), confnamecmp);
+        return (p != NULL) ? *p : NULL;
+    }
+
     inline int64_t config_GetInt(const char* name)
     {
-        const struct param* param = param_Find(name);
+        const struct param* _param = param_Find(name);
 
         /* sanity checks */
-        assert(param != NULL);
-        assert(IsConfigIntegerType(param->item.i_type));
+        assert(_param != NULL);
+        assert(IsConfigIntegerType(_param->item.i_type));
 
-        return atomic_load_explicit(&param->value.i, ::std::memory_order_relaxed);
+        return atomic_load_explicit(&_param->value.i, ::std::memory_order_relaxed);
     }
 
     inline float config_GetFloat(const char* name)

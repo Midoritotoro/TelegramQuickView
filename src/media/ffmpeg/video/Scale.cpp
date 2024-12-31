@@ -4,18 +4,7 @@
 #include <cstdlib>
 #include <malloc.h>
 
-#include "Atomic.h"
-#include "Picture.h"
-
-#include "Fourcc.h"
-#include "VideoFormat.h"
-
-#include "Tools.h"
 #include "ColorSpace.h"
-
-#include "VideoFormat.h"
-#include "Chroma.h"
-
 #include "Object.h"
 
 
@@ -25,16 +14,6 @@ extern "C" {
 }
 
 #include <qDebug>
-
-#include <Windows.h>
-
-#ifdef min
-#undef min
-#endif // min
-
-#ifdef max
-#undef max
-#endif // max
 
 #define ALLOW_YUVP (false)
 

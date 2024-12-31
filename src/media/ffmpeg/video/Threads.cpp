@@ -7,6 +7,9 @@
 #include <Windows.h>
 #include <thread>
 
+#include "Config.h"
+
+
 namespace Threads {
     int threadvar_set(threadvar_t key, void* value)
     {

@@ -5,24 +5,26 @@
 
 #include "Math.h"
 
-#ifdef WORDS_BIGENDIAN
-#   define FOURCC( a, b, c, d ) \
-        ( ((uint32_t)d) | ( ((uint32_t)c) << 8 ) \
-           | ( ((uint32_t)b) << 16 ) | ( ((uint32_t)a) << 24 ) )
-#   define TWOCC( a, b ) \
-        ( (uint16_t)(b) | ( (uint16_t)(a) << 8 ) )
-
-#else
-#   define FOURCC( a, b, c, d ) \
-        ( ((uint32_t)a) | ( ((uint32_t)b) << 8 ) \
-           | ( ((uint32_t)c) << 16 ) | ( ((uint32_t)d) << 24 ) )
-#   define TWOCC( a, b ) \
-        ( (uint16_t)(a) | ( (uint16_t)(b) << 8 ) )
-
-#endif
-
 namespace FFmpeg {
 	using fourcc_t = uint32_t;
+
+	struct fourcc_desc {
+		unsigned char alias[4];
+		const char* desc;
+	};
+
+	struct fourcc_mapping {
+		unsigned char alias[4];
+		uint32_t fourcc;
+	};
+
+	enum es_format_category_e {
+		UNKNOWN_ES = 0x00,
+		VIDEO_ES,
+		AUDIO_ES,
+		SPU_ES,
+		DATA_ES,
+	};
 
 	[[nodiscard]] int FourccCmp(
 		const void* key,

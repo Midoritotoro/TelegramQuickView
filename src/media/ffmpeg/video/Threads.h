@@ -1,8 +1,6 @@
 #pragma once 
 
-#include "Tools.h"
 #include "Atomic.h"
-
 
 #include <Windows.h>
 

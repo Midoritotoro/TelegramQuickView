@@ -239,21 +239,6 @@ SET(MAIN_SOURCES main.cpp
 
 	src/media/ffmpeg/video/FrameGenerator.h
     src/media/ffmpeg/video/FrameGenerator.cpp
-
-    src/media/ffmpeg/video/Ancillary.h
-    src/media/ffmpeg/video/Ancillary.cpp
-
-    src/media/ffmpeg/video/Atomic.cpp
-    src/media/ffmpeg/video/Atomic.h
-
-    src/media/ffmpeg/video/Fourcc.h
-    src/media/ffmpeg/video/Fourcc.cpp
-
-    src/media/ffmpeg/video/Picture.h
-    src/media/ffmpeg/video/Picture.cpp
-
-    src/media/ffmpeg/video/VideoFormat.h
-    src/media/ffmpeg/video/VideoFormat.cpp
     
     src/media/ffmpeg/video/HardwareAcceleration.cpp
     src/media/ffmpeg/video/HardwareAcceleration.h
@@ -291,6 +276,43 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/audio/AudioReader.cpp
     src/media/ffmpeg/audio/AudioReader.h
 
+    src/media/ffmpeg/audio/AbstractAudioLoader.cpp
+    src/media/ffmpeg/audio/AbstractAudioLoader.h
+
+    src/media/ffmpeg/audio/AbstractAudioReader.cpp
+    src/media/ffmpeg/audio/AbstractAudioReader.h
+
+    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
+    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
+
+    src/ui/effects/shaders/dual_kawase_down.frag
+    src/ui/effects/shaders/dual_kawase_up.frag
+    src/ui/effects/shaders/simple.vert
+
+    src/opengl/OpenGLImage.cpp
+    src/opengl/OpenGLImage.h
+
+	src/ui/effects/vertex.h
+
+    src/ui/effects/OpenGLBlur.cpp
+	src/ui/effects/OpenGLBlur.h
+
+    
+        src/media/ffmpeg/video/Ancillary.h
+    src/media/ffmpeg/video/Ancillary.cpp
+
+    src/media/ffmpeg/video/Atomic.cpp
+    src/media/ffmpeg/video/Atomic.h
+
+    src/media/ffmpeg/video/Fourcc.h
+    src/media/ffmpeg/video/Fourcc.cpp
+
+    src/media/ffmpeg/video/Picture.h
+    src/media/ffmpeg/video/Picture.cpp
+
+    src/media/ffmpeg/video/VideoFormat.h
+    src/media/ffmpeg/video/VideoFormat.cpp
+
     src/media/ffmpeg/video/Scale.cpp
     src/media/ffmpeg/video/Scale.h 
     
@@ -316,26 +338,6 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/Threads.h
     src/media/ffmpeg/video/Threads.cpp
 
-    src/media/ffmpeg/audio/AbstractAudioLoader.cpp
-    src/media/ffmpeg/audio/AbstractAudioLoader.h
-
-    src/media/ffmpeg/audio/AbstractAudioReader.cpp
-    src/media/ffmpeg/audio/AbstractAudioReader.h
-
-    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.cpp
-    src/media/ffmpeg/audio/AbstractAudioFFmpegReader.h
-
-    src/ui/effects/shaders/dual_kawase_down.frag
-    src/ui/effects/shaders/dual_kawase_up.frag
-    src/ui/effects/shaders/simple.vert
-
-    src/opengl/OpenGLImage.cpp
-    src/opengl/OpenGLImage.h
-
-	src/ui/effects/vertex.h
-
-    src/ui/effects/OpenGLBlur.cpp
-	src/ui/effects/OpenGLBlur.h
 
 	# src/parser/data/UserDataManager.cpp
 	# src/parser/data/UserDataManager.h

@@ -48,7 +48,7 @@ namespace FFmpeg {
 
         /* Object variables */
         void* var_root;
-        Threads::mutex_t     var_lock;
+        ::Threads::mutex_t     var_lock;
 
         /* Object resources */
         struct res* resources;

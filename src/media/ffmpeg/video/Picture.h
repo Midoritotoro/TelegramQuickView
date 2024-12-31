@@ -73,7 +73,7 @@ namespace FFmpeg {
 		/** Next picture in a FIFO a pictures */
 		struct picture_t* p_next;
 
-		Threads::atomic_rc_t refs;
+		::Threads::atomic_rc_t refs;
 	};
 
 

@@ -1,6 +1,5 @@
 #include "Fourcc.h"
 
-#include "Tools.h"
 
 namespace FFmpeg {
     namespace {
@@ -34,7 +33,8 @@ namespace FFmpeg {
         static const struct fourcc_mapping mapping_spu[] = {
             {}
         };
-    }
+    } // namespace FFmpeg
+
     int FourccCmp(
         const void* key,
         const void* ent)
