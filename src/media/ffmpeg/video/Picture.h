@@ -83,9 +83,49 @@ namespace FFmpeg {
 		/** Next picture in a FIFO a pictures */
 		struct picture_t* p_next;
 
-		struct ::Threads::atomic_rc_t refs;
+		::Threads::atomic_rc_t refs;
 
-		picture_t& operator=(const picture_t& picture) = default;
+		picture_t& operator=(const picture_t& other) {
+			if (this != &other) {
+				format = other.format;
+				for (int i = 0; i < PICTURE_PLANE_MAX; i++) {
+					p[i] = other.p[i];
+				}
+				i_planes = other.i_planes;
+				date = other.date;
+				b_force = other.b_force;
+				b_still = other.b_still;
+				b_progressive = other.b_progressive;
+				b_top_field_first = other.b_top_field_first;
+				b_multiview_left_eye = other.b_multiview_left_eye;
+				i_nb_fields = other.i_nb_fields;
+				context = other.context;
+				p_sys = other.p_sys;
+				p_next = other.p_next;
+
+				refs.refs.load();
+			}
+			return *this;
+		}
+		picture_t(const picture_t& other) {
+			format = other.format;
+			for (int i = 0; i < PICTURE_PLANE_MAX; i++) {
+				p[i] = other.p[i];
+			}
+			i_planes = other.i_planes;
+			date = other.date;
+			b_force = other.b_force;
+			b_still = other.b_still;
+			b_progressive = other.b_progressive;
+			b_top_field_first = other.b_top_field_first;
+			b_multiview_left_eye = other.b_multiview_left_eye;
+			i_nb_fields = other.i_nb_fields;
+			context = other.context;
+			p_sys = other.p_sys;
+			p_next = other.p_next;
+			refs.refs.load();
+
+		}
 	};
 
 
@@ -170,19 +210,4 @@ namespace FFmpeg {
 
 	void PictureCopyProperties(picture_t* p_dst, const picture_t* p_src);
 	void PictureCopy(picture_t* p_dst, const picture_t* p_src);
-
-	static inline picture_t* filter_NewPicture(filter_t* p_filter)
-	{
-		picture_t* pic = NULL;
-		if (p_filter->owner.video != NULL && p_filter->owner.video->buffer_new != NULL)
-			pic = p_filter->owner.video->buffer_new(p_filter);
-		if (pic == NULL)
-		{
-			// legacy filter owners not setting a default filter_allocator
-			pic = picture_NewFromFormat(&p_filter->fmt_out.video);
-		}
-		if (pic == NULL)
-			msg_Warn(p_filter, "can't get output picture");
-		return pic;
-	}
 } // namespace FFmpeg

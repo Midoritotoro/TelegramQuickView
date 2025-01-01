@@ -11,6 +11,10 @@
 namespace Threads {
 	struct atomic_rc_t {
 		std::atomic_uintptr_t refs;
+
+        inline atomic_rc_t& operator=(const atomic_rc_t& other) {
+            refs = other.refs.load();
+        }
 	};
 
     struct rcu_generation {

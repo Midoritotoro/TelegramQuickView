@@ -527,7 +527,7 @@ namespace FFmpeg {
         }
 
         /* Request output picture */
-        p_pic_dst = filternewpic(p_filter);
+        p_pic_dst = FilterNewPicture(p_filter);
         if (!p_pic_dst)
         {
             PictureRelease(p_pic);
