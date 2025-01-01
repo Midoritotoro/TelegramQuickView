@@ -5,6 +5,8 @@
 #include "Chroma.h"
 #include "ColorSpace.h"
 
+#include "SubPicture.h"
+
 extern "C" {
     #include <libswscale/swscale.h>
 }
@@ -46,6 +48,8 @@ namespace FFmpeg {
 
     struct filter_t
     {
+        object_t obj;
+
         module_t* p_module;
         void* p_sys;
 
@@ -70,9 +74,83 @@ namespace FFmpeg {
         filter_owner_t      owner;
     };
 
+
+    struct filter_operations
+    {
+        /* Operation depending on the type of filter. */
+        union
+        {
+            /** Filter a picture (video filter) */
+            picture_t* (*filter_video)(filter_t*, picture_t*);
+
+            /** Filter an audio block (audio filter) */
+            frame_t* (*filter_audio)(filter_t*, frame_t*);
+
+            /** Blend a subpicture onto a picture (video blending) */
+            void (*blend_video)(filter_t*, picture_t*, const picture_t*,
+                int, int, int);
+
+            /** Generate a subpicture (sub source) */
+            subpicture_t* (*source_sub)(filter_t*, tick_t);
+
+            /** Filter a subpicture (sub filter) */
+            subpicture_t* (*filter_sub)(filter_t*, subpicture_t*);
+
+            /** Render text (text renderer)
+             *
+             * \return a picture-based region or NULL
+             */
+            subpicture_region_t* (*render)(filter_t*,
+                const subpicture_region_t*, const fourcc_t*);
+        };
+
+        union
+        {
+            /* TODO: video filter drain */
+            /** Drain (audio filter) */
+            frame_t* (*drain_audio)(filter_t*);
+        };
+
+        /** Flush
+         *
+         * Flush (i.e. discard) any internal buffer in a video or audio filter.
+         */
+        void (*flush)(filter_t*);
+
+        /** Change viewpoint
+         *
+         * Pass a new viewpoint to audio filters. Filters like the spatialaudio one
+         * used for Ambisonics rendering will change its output according to this
+         * viewpoint.
+         */
+        void (*change_viewpoint)(filter_t*, const viewpoint_t*);
+
+        /** Filter mouse state (video filter).
+         *
+         * If non-NULL, you must convert from output to input formats:
+         * - If VLC_SUCCESS is returned, the mouse state is propagated.
+         * - Otherwise, the mouse change is not propagated.
+         * If NULL, the mouse state is considered unchanged and will be
+         * propagated. */
+        int (*video_mouse)(filter_t*, struct vlc_mouse_t*,
+            const struct vlc_mouse_t* p_old);
+
+        /** Close the filter and release its resources. */
+        void (*close)(filter_t*);
+    };
+
+    typedef int (*vlc_filter_open)(filter_t*);
+
 	[[nodiscard]] int GetCpuCount();
 
 	void Clean(filter_t* p_filter);
+
+    int OpenScaler(filter_t* p_filter);
+    void CloseScaler(filter_t* p_filter);
+
+    void Convert(filter_t* p_filter, struct SwsContext* ctx,
+        picture_t* p_dst, picture_t* p_src, int i_height,
+        int i_plane_count, bool b_swap_uvi, bool b_swap_uvo);
 
 	void FixParameters(
 		enum AVPixelFormat* pi_fmt,

@@ -37,6 +37,7 @@
 #endif /* CLOCK_FREQ / 1000 */
 
 typedef int64_t msftime_t;
+typedef int64_t tick_t;
 
 #define MSFTIME_FROM_SEC(sec)       (INT64_C(10000000) * (sec))  /* seconds in msftime_t */
 #define MSFTIME_FROM_MS(sec)        (INT64_C(10000) * (sec))     /* milliseconds in msftime_t */

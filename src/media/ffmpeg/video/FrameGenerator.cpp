@@ -145,6 +145,7 @@ FrameGenerator::Frame FrameGenerator::renderCurrent(
 		uint8_t* dstData[AV_NUM_DATA_POINTERS] = { dst };
 		int dstLinesize[AV_NUM_DATA_POINTERS] = { int(dstPerLine) };
 
+		
 		sws_scale(_scale.get(),
 			frame->data,
 			frame->linesize,

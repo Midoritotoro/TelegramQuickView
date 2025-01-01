@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "Picture.h"
+#include "Chroma.h"
 
 extern "C" {
     #include <libswscale/swscale.h>
@@ -15,19 +16,19 @@ namespace FFmpeg {
         video_format_t fmt_in;
         video_format_t fmt_out;
 
-        const struct chroma_description_t* desc_in;
-        const struct chroma_description_t* desc_out;
+        const chroma_description_t* desc_in;
+        const chroma_description_t* desc_out;
 
-        struct SwsContext* ctx;
-        struct SwsContext* ctxA;
+        SwsContext* ctx;
+        SwsContext* ctxA;
 
-        struct picture_t* p_src_a;
-        struct picture_t* p_dst_a;
+        picture_t* p_src_a;
+        picture_t* p_dst_a;
 
         int i_extend_factor;
 
-        struct picture_t* p_src_e;
-        struct picture_t* p_dst_e;
+        picture_t* p_src_e;
+        picture_t* p_dst_e;
 
         bool b_add_a;
         bool b_copy;

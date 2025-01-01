@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include <malloc.h>
 
+#include "Variables.h"
+
+
 extern "C" {
     #include <libswscale/version.h>
 }
@@ -13,6 +16,11 @@ extern "C" {
 #define ALLOW_YUVP (false)
 
 namespace FFmpeg {
+    inline constexpr filter_operations filter_ops = {
+        .filter_video = Filter, .close = CloseScaler,
+    };
+
+
     int GetCpuCount() {
 #if defined Q_OS_WIN
         SYSTEM_INFO info;
@@ -51,6 +59,138 @@ namespace FFmpeg {
         p_sys->p_src_e = NULL;
         p_sys->p_dst_e = NULL;
     }
+
+    int OpenScaler(filter_t* p_filter)
+    {
+        filter_sys_t* p_sys;
+
+        int i_sws_mode;
+
+        if (GetParameters(NULL,
+            &p_filter->fmt_in.video,
+            &p_filter->fmt_out.video, 0))
+            return EGENERIC;
+
+        /* Allocate the memory needed to store the decoder's structure */
+        if ((p_filter->p_sys = p_sys = (filter_sys_t*)calloc(1, sizeof(filter_sys_t))) == NULL)
+            return ENOMEM;
+
+        /* */
+        i_sws_mode = var_CreateGetInteger(OBJECT(p_filter), "swscale-mode");
+        switch (i_sws_mode)
+        {
+        case 0:  p_sys->i_sws_flags = SWS_FAST_BILINEAR; break;
+        case 1:  p_sys->i_sws_flags = SWS_BILINEAR; break;
+        case 2:  p_sys->i_sws_flags = SWS_BICUBIC; break;
+        case 3:  p_sys->i_sws_flags = SWS_X; break;
+        case 4:  p_sys->i_sws_flags = SWS_POINT; break;
+        case 5:  p_sys->i_sws_flags = SWS_AREA; break;
+        case 6:  p_sys->i_sws_flags = SWS_BICUBLIN; break;
+        case 7:  p_sys->i_sws_flags = SWS_GAUSS; break;
+        case 8:  p_sys->i_sws_flags = SWS_SINC; break;
+        case 9:  p_sys->i_sws_flags = SWS_LANCZOS; break;
+        case 10: p_sys->i_sws_flags = SWS_SPLINE; break;
+        default: p_sys->i_sws_flags = SWS_BICUBIC; i_sws_mode = 2; break;
+        }
+
+        /* Misc init */
+        memset(&p_sys->fmt_in, 0, sizeof(p_sys->fmt_in));
+        memset(&p_sys->fmt_out, 0, sizeof(p_sys->fmt_out));
+
+        if (Init(p_filter))
+        {
+            if (p_sys->p_filter)
+                sws_freeFilter(p_sys->p_filter);
+            free(p_sys);
+            return EGENERIC;
+        }
+
+        /* */
+        p_filter->ops = &filter_ops;
+
+       /* msg_Dbg(p_filter, "%ix%i (%ix%i) chroma: %4.4s colorspace: %s -> %ix%i (%ix%i) chroma: %4.4s colorspace: %s with scaling using %s",
+            p_filter->fmt_in.video.i_visible_width, p_filter->fmt_in.video.i_visible_height,
+            p_filter->fmt_in.video.i_width, p_filter->fmt_in.video.i_height,
+            (char*)&p_filter->fmt_in.video.i_chroma, GetColorspaceName(p_filter->fmt_in.video.space),
+            p_filter->fmt_out.video.i_visible_width, p_filter->fmt_out.video.i_visible_height,
+            p_filter->fmt_out.video.i_width, p_filter->fmt_out.video.i_height,
+            (char*)&p_filter->fmt_out.video.i_chroma, GetColorspaceName(p_filter->fmt_out.video.space),
+            ppsz_mode_descriptions[i_sws_mode]);*/
+
+        return SUCCESS;
+    }
+
+    void CloseScaler(filter_t* p_filter)
+    {
+        filter_sys_t* p_sys = (filter_sys_t*)p_filter->p_sys;
+
+        Clean(p_filter);
+        if (p_sys->p_filter)
+            sws_freeFilter(p_sys->p_filter);
+        free(p_sys);
+    }
+
+
+    void Convert(filter_t* p_filter, struct SwsContext* ctx,
+        picture_t* p_dst, picture_t* p_src, int i_height,
+        int i_plane_count, bool b_swap_uvi, bool b_swap_uvo)
+    {
+        filter_sys_t* p_sys = (filter_sys_t*)p_filter->p_sys;
+        uint8_t palette[AVPALETTE_SIZE];
+        uint8_t* src[4], * dst[4];
+        const uint8_t* csrc[4];
+        int src_stride[4], dst_stride[4];
+
+        GetPixels(src, src_stride, p_sys->desc_in, &p_filter->fmt_in.video,
+            p_src, i_plane_count, b_swap_uvi);
+        if (p_filter->fmt_in.video.i_chroma == CODEC_RGBP)
+        {
+            if (p_filter->fmt_in.video.p_palette)
+            {
+                const video_palette_t* p_palette = p_filter->fmt_in.video.p_palette;
+                static_assert(sizeof(p_palette->palette) == AVPALETTE_SIZE,
+                    "Palette size mismatch between vlc and libavutil");
+                uint8_t* dstp = palette;
+                for (int i = 0; i < p_palette->i_entries; i++)
+                {
+                    // we want ARGB in host endianess from RGBA in byte order
+#ifdef WORDS_BIGENDIAN
+                    dstp[0] = p_palette->palette[i][3];
+                    dstp[1] = p_palette->palette[i][0];
+                    dstp[2] = p_palette->palette[i][1];
+                    dstp[3] = p_palette->palette[i][2];
+#else
+                    dstp[0] = p_palette->palette[i][2];
+                    dstp[1] = p_palette->palette[i][1];
+                    dstp[2] = p_palette->palette[i][0];
+                    dstp[3] = p_palette->palette[i][3];
+#endif
+                    dstp += sizeof(p_palette->palette[0]);
+                }
+            }
+            else
+            {
+                memset(&palette, 0, sizeof(palette));
+            }
+            src[1] = palette;
+            src_stride[1] = 4;
+        }
+
+        GetPixels(dst, dst_stride, p_sys->desc_out, &p_filter->fmt_out.video,
+            p_dst, i_plane_count, b_swap_uvo);
+
+        for (size_t i = 0; i < ARRAY_SIZE(src); i++)
+            csrc[i] = src[i];
+
+#if LIBSWSCALE_VERSION_INT  >= ((0<<16)+(5<<8)+0)
+        sws_scale(ctx, csrc, src_stride, 0, i_height,
+            dst, dst_stride);
+#else
+        sws_scale_ordered(ctx, csrc, src_stride, 0, i_height,
+            dst, dst_stride);
+#endif
+    }
+
 
     void FixParameters(enum AVPixelFormat* pi_fmt, bool* pb_has_a, fourcc_t fmt)
     {

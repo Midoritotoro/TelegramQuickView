@@ -338,6 +338,9 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/Threads.h
     src/media/ffmpeg/video/Threads.cpp
 
+    src/media/ffmpeg/video/SubPicture.h
+    src/media/ffmpeg/video/SubPicture.cpp
+
 
 	# src/parser/data/UserDataManager.cpp
 	# src/parser/data/UserDataManager.h

@@ -283,6 +283,35 @@ namespace FFmpeg {
         uint8_t _private[];
     };
 
+    struct frame_t;
+    struct frame_callbacks
+    {
+        void (*free)(frame_t*);
+    };
+
+    struct frame_t
+    {
+        frame_t* p_next;
+
+        uint8_t* p_buffer; /**< Payload start */
+        size_t      i_buffer; /**< Payload length */
+        uint8_t* p_start; /**< Buffer start */
+        size_t      i_size; /**< Buffer total size */
+
+        uint32_t    i_flags;
+        unsigned    i_nb_samples; /* Used for audio */
+
+        tick_t  i_pts;
+        tick_t  i_dts;
+        tick_t  i_length;
+
+        /** Private ancillary struct. Don't use it directly, but use it via
+         * vlc_frame_AttachAncillary() and vlc_frame_GetAncillary(). */
+        ::Threads::ancillary** priv_ancillaries;
+
+        const frame_callbacks* cbs;
+    };
+
 	void DecoderDeviceRelease(decoder_device* device);
 	[[nodiscard]] void* VideoContextGetPrivate(
 		video_context* vctx,
