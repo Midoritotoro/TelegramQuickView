@@ -8,6 +8,10 @@
     ((type *)(((char *)(ptr)) - offsetof(type, member)))
 
 namespace FFmpeg {
+	struct rational_t {
+		unsigned num, den;
+	};
+
 	[[nodiscard]] int64_t GCD(
 		int64_t a,
 		int64_t b);

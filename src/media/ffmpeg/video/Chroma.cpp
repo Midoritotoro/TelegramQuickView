@@ -1,5 +1,5 @@
 #include "Chroma.h"
-
+#include "Fourcc.h"
 
 namespace FFmpeg {
     namespace {

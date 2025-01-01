@@ -1,11 +1,9 @@
 #pragma once 
 
-#include "Fourcc.h"
 #include "VideoHelper.h"
+#include "Fourcc.h"
 
-#include "Threads.h"
-#include "Atomic.h"
-
+#include "Object.h"
 
 namespace FFmpeg {
     struct video_palette_t {
@@ -25,8 +23,9 @@ namespace FFmpeg {
         void (*close)(struct decoder_device*);
     };
 
-    typedef struct decoder_device
+    struct decoder_device
     {
+        object_t obj;
         const struct decoder_device_operations* ops;
 
         /** Private context that could be used by the "decoder device" module
@@ -51,7 +50,7 @@ namespace FFmpeg {
          * MMAL: MMAL_PORT_T*
          */
         void* opaque;
-    } decoder_device;
+    };
 
     struct input_attachment_t
     {
@@ -67,7 +66,7 @@ namespace FFmpeg {
     struct decoder_device_priv
     {
         struct decoder_device device;
-        ::Threads::atomic_rc_t rc;
+        Threads::atomic_rc_t rc;
     };
 
     struct video_format_t
@@ -267,7 +266,7 @@ namespace FFmpeg {
         bool     b_packetized;  /**< whether the data is packetized (ie. not truncated) */
         int     i_extra;        /**< length in bytes of extra data pointer */
         void* p_extra;       /**< extra data needed by some decoders or muxers */
-
+    };
 
     struct video_context_operations
     {
@@ -276,7 +275,7 @@ namespace FFmpeg {
 
     struct video_context
     {
-        ::Threads::atomic_rc_t    rc;
+        Threads::atomic_rc_t    rc;
         decoder_device* device;
         const struct video_context_operations* ops;
         enum video_context_type private_type;

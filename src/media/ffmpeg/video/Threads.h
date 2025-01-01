@@ -118,7 +118,7 @@ namespace Threads {
 
     typedef void(*destroy)(void*);
 
-    threadvar_t* threadvar_last = nullptr;
+    inline threadvar_t* threadvar_last = nullptr;
 
     int threadvar_set(threadvar_t key, void* value);
     void* threadvar_get(threadvar_t key);

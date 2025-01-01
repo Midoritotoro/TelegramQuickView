@@ -1,17 +1,19 @@
 #pragma once 
 
-#include "VideoFormat.h"
-#include "Ancillary.h"
-
-#include "Ancillary.h"
-#include "Atomic.h"
 
 #include "../../../core/Time.h"
+#include "VideoFormat.h"
 
 #define PICTURE_SW_SIZE_MAX                 (UINT32_C(1) << 28) /* 256MB: 8K * 8K * 4*/
 #define PICTURE_PLANE_MAX					(5)
 
+namespace Threads {
+	struct ancillary;
+	struct atomic_rc_t;
+}
+
 namespace FFmpeg {
+	struct video_format_t;
 	struct picture_context_t
 	{
 		void (*destroy)(struct picture_context_t*);
@@ -39,7 +41,7 @@ namespace FFmpeg {
 		/**
 		 * The properties of the picture
 		 */
-		video_format_t format;
+		struct video_format_t format;
 
 		plane_t         p[PICTURE_PLANE_MAX];     /**< description of the planes */
 		int             i_planes;                /**< number of allocated planes */
@@ -63,7 +65,7 @@ namespace FFmpeg {
 		bool            b_multiview_left_eye; /**< left eye or right eye in multiview */
 
 		unsigned int    i_nb_fields;                  /**< number of displayed fields */
-		picture_context_t* context;      /**< video format-specific data pointer */
+		struct picture_context_t* context;      /**< video format-specific data pointer */
 		/**@}*/
 
 		/** Private data - the video output plugin might want to put stuff here to
@@ -73,7 +75,7 @@ namespace FFmpeg {
 		/** Next picture in a FIFO a pictures */
 		struct picture_t* p_next;
 
-		::Threads::atomic_rc_t refs;
+		struct ::Threads::atomic_rc_t refs;
 	};
 
 

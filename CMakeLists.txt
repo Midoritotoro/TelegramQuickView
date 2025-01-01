@@ -71,15 +71,6 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/ThumbnailGenerator.h
     src/media/ffmpeg/video/ThumbnailGenerator.cpp
 
-    src/media/ffmpeg/video/ColorSpace.h
-    src/media/ffmpeg/video/ColorSpace.cpp
-
-    src/media/ffmpeg/video/Variables.h
-    src/media/ffmpeg/video/Variables.cpp
-
-    src/media/ffmpeg/video/TFunctions.cpp
-    src/media/ffmpeg/video/TFunctions.h
-
     src/ui/widgets/PopupMenu.h
     src/ui/widgets/PopupMenu.cpp
 
@@ -298,7 +289,16 @@ SET(MAIN_SOURCES main.cpp
 	src/ui/effects/OpenGLBlur.h
 
     
-        src/media/ffmpeg/video/Ancillary.h
+    src/media/ffmpeg/video/ColorSpace.h
+    src/media/ffmpeg/video/ColorSpace.cpp
+
+    src/media/ffmpeg/video/Variables.h
+    src/media/ffmpeg/video/Variables.cpp
+
+    src/media/ffmpeg/video/TFunctions.cpp
+    src/media/ffmpeg/video/TFunctions.h
+    
+     src/media/ffmpeg/video/Ancillary.h
     src/media/ffmpeg/video/Ancillary.cpp
 
     src/media/ffmpeg/video/Atomic.cpp
@@ -435,8 +435,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if (WIN32)
         target_link_libraries(${PROJECT_NAME}
         PRIVATE
+            Synchronization.dll
             winmm.dll
-            kernel32.dll
             user32.dll
             bcrypt.dll
             shlwapi.dll

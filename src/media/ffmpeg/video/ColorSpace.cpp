@@ -1,9 +1,5 @@
 #include "ColorSpace.h"
 
-extern "C" {
-#include <libswscale/swscale.h>
-}
-
 namespace FFmpeg {
     int GetSwsColorspace(const video_format_t* format)
     {

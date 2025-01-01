@@ -1,8 +1,6 @@
 #pragma once 
 
 #include "FourccCodecs.h"
-#include "Config.h"
-
 #include "Math.h"
 
 namespace FFmpeg {

@@ -110,6 +110,7 @@ namespace FFmpeg {
         return SUCCESS;
     }
 
+
     void Destroy(variable_t* p_var)
     {
         p_var->ops->pf_free(&p_var->val);
@@ -134,6 +135,20 @@ namespace FFmpeg {
         assert(p_var->list_callbacks == NULL);
         free(p_var);
     }
+
+    void CleanupVar(void* var)
+    {
+        Destroy((variable_t*)var);
+    }
+
+    void var_DestroyAll(object_t* obj)
+    {
+        object_internals_t* priv = objectPrivate(obj);
+
+        tdestroy(priv->var_root, CleanupVar);
+        priv->var_root = NULL;
+    }
+
 
     int (var_Create)(object_t* p_this, const char* psz_name, int i_type)
     {

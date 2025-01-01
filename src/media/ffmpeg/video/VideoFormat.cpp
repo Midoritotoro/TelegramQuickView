@@ -1,16 +1,20 @@
 #include "VideoFormat.h"
 
+#include "Ancillary.h"
+#include "Object.h"
+
+
 namespace FFmpeg {
     void DecoderDeviceRelease(decoder_device* device)
     {
-        struct decoder_device_priv* priv =
-            container_of(device, struct decoder_device_priv, device);
+        decoder_device_priv* priv =
+            container_of(device, decoder_device_priv, device);
         if (AtomicRcDec(&priv->rc))
         {
             if (device->ops->close != NULL)
                 device->ops->close(device);
-            //  vlc_objres_clear(VLC_OBJECT(device));
-            //  vlc_object_delete(device);
+            objres_clear(OBJECT(device));
+            object_delete(OBJECT(device));
         }
     }
 

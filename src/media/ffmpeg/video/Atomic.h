@@ -1,7 +1,7 @@
 #pragma once 
 
-
 #include <stdatomic.h>
+#include "Windows.h"
 
 #ifdef __STDC_NO_ATOMICS__ 
 #undef __STDC_NO_ATOMICS__ 

@@ -31,22 +31,15 @@
 
 
 namespace FFmpeg {
-    union value_t
-    {
-        int64_t         i_int;
-        bool            b_bool;
-        float           f_float;
-        char* psz_string;
-        void* p_address;
-        struct { int32_t x; int32_t y; } coords;
-
-    };
+    typedef int (*variable_ops_cmp) (value_t, value_t);
+    typedef void (*variable_ops_dup) (value_t*);
+    typedef void (*variable_ops_free) (value_t*);
 
     struct variable_ops_t
     {
-        int  (*pf_cmp) (value_t, value_t);
-        void (*pf_dup) (value_t*);
-        void (*pf_free) (value_t*);
+        variable_ops_cmp pf_cmp;
+        variable_ops_dup pf_dup;
+        variable_ops_free pf_free;
     };
 
     typedef int (*callback_t) (object_t*,      /* variable's object */
@@ -144,7 +137,12 @@ namespace FFmpeg {
     int var_Inherit(object_t* p_this, const char* psz_name, int i_type,
         value_t* p_val);
 
+
     void Destroy(variable_t* p_var);
+
+    void CleanupVar(void* var);
+    void var_DestroyAll(object_t* obj);
+
     int (var_Create)(object_t* p_this, const char* psz_name, int i_type);
 
     int64_t var_GetInteger(object_t* p_obj, const char* psz_name);

@@ -1,7 +1,5 @@
 #include "Atomic.h"
-
 #include "Config.h"
-
 
 namespace Threads {
     namespace {

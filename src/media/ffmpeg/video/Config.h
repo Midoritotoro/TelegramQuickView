@@ -4,9 +4,9 @@
 #include <cassert>
 
 #include "Windows.h"
-
-#include "Atomic.h"
 #include "Threads.h"
+
+#include "TFunctions.h"
 
 
 #ifdef Q_BIG_ENDIAN
@@ -108,15 +108,21 @@ typedef int64_t msftime_t;
 #define IsConfigFloatType(type) \
     ((type) == CONFIG_ITEM_FLOAT)
 
-
-struct node_t {
-    char* key;
-    struct node_t* llink, * rlink;
-};
-
 namespace FFmpeg {
     struct module_t;
     struct plagin_t;
+
+    union value_t
+    {
+        int64_t         i_int;
+        bool            b_bool;
+        float           f_float;
+        char* psz_string;
+        void* p_address;
+        struct { int32_t x; int32_t y; } coords;
+
+    };
+
 
     struct plugin_t
     {

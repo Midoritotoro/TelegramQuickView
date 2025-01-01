@@ -1,21 +1,12 @@
 #include "Picture.h"
-
 #include "Ancillary.h"
-#include "Tools.h"
-
-#include "VideoFormat.h"
-#include "Atomic.h"
 
 #include "Fourcc.h"
 
-#ifdef min
-#undef min
-#endif // min
+#include "Windows.h"
+#include "Object.h"
 
-#ifdef max
-#undef max
-#endif // max
-
+#include "Chroma.h"
 
 
 namespace FFmpeg {

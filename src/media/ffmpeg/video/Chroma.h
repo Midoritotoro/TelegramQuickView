@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VideoFormat.h"
+#include "Math.h"
 
 extern "C" {
     #include <libavutil/pixfmt.h>
@@ -9,10 +10,6 @@ extern "C" {
 
 
 namespace FFmpeg {
-    struct rational_t {
-        unsigned num, den;
-    };
-
     struct chroma_description_t {
         fourcc_t fcc;
 

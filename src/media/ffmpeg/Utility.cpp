@@ -220,7 +220,7 @@ CodecPointer MakeCodecPointer(CodecDescriptor descriptor) {
 	context->codec = codec;
 
 	av_opt_set(context, "refcounted_frames", "1", 0);
-	av_opt_set_int(context, "threads", GetCpuCount() - 2, 0);
+	av_opt_set(context, "threads", "auto", 0);
 
 	if (codec->capabilities & AV_CODEC_CAP_FRAME_THREADS)
 		context->thread_type = FF_THREAD_FRAME;

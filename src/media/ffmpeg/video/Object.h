@@ -2,7 +2,6 @@
 
 
 #include "Config.h"
-#include "Threads.h"
 
 #include <cstddef>
 #include <type_traits>
@@ -32,12 +31,6 @@ namespace FFmpeg {
 
     struct logger {
         const logger_operations* ops;
-    };
-    struct variable_ops_t
-    {
-        int  (*pf_cmp) (value_t, value_t);
-        void (*pf_dup) (value_t*);
-        void (*pf_free) (value_t*);
     };
 
     struct object_t;
@@ -95,13 +88,13 @@ namespace FFmpeg {
 
     bool ptrcmp(void* a, void* b);
 
-    void* (obj_malloc)(object_t* obj, size_t size);
-    void* (obj_calloc)(object_t* obj, size_t nmemb, size_t size);
+    void* obj_malloc(object_t* obj, size_t size);
+    void* obj_calloc(object_t* obj, size_t nmemb, size_t size);
 
     void* obj_memdup(object_t* obj, const void* base, size_t len);
-    char* (obj_strdup)(object_t* obj, const char* str);
+    char* obj_strdup(object_t* obj, const char* str);
 
-    void (obj_free)(object_t* obj, void* ptr);
+    void obj_free(object_t* obj, void* ptr);
 
     template <typename type>
     inline bool ckd_add(type* r, type a, type b)
@@ -143,4 +136,13 @@ namespace FFmpeg {
     inline object_t* object_parent(object_t* object) {
         return objectPrivate(object)->parent;
     }
+
+    void object_deinit(object_t* obj);
+
+
+    void object_delete(object_t* obj);
+
+    template<typename O>
+    void object_delete(O* obj);
+
 } // namespace FFmpeg

@@ -23,7 +23,9 @@ extern "C" {
 #include <QSize>
 #include <qDebug>
 
-#include "video/Scale.h"
+#include <QImage>
+
+// #include "video/Scale.h"
 
 
 #define DA_FFMPEG_NEW_CHANNEL_LAYOUT (LIBAVUTIL_VERSION_INT >= \

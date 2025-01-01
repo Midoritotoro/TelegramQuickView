@@ -1,42 +1,18 @@
 #pragma once
 
 #include "Fourcc.h"
-#include "Picture.h"
 
 #include "Chroma.h"
+#include "ColorSpace.h"
+
+extern "C" {
+    #include <libswscale/swscale.h>
+}
 
 
 #define MINIMUM_WIDTH               (32)
 
 namespace FFmpeg {
-    struct filter_sys_t {
-        SwsFilter* p_filter;
-        int i_sws_flags;
-
-        video_format_t fmt_in;
-        video_format_t fmt_out;
-
-        const struct chroma_description_t* desc_in;
-        const struct chroma_description_t* desc_out;
-
-        struct SwsContext* ctx;
-        struct SwsContext* ctxA;
-
-        struct picture_t* p_src_a;
-        struct picture_t* p_dst_a;
-
-        int i_extend_factor;
-
-        struct picture_t* p_src_e;
-        struct picture_t* p_dst_e;
-
-        bool b_add_a;
-        bool b_copy;
-
-        bool b_swap_uvi;
-        bool b_swap_uvo;
-    };
-
     struct ScalerConfiguration {
         enum AVPixelFormat i_fmti;
         enum AVPixelFormat i_fmto;
@@ -51,7 +27,23 @@ namespace FFmpeg {
         bool b_swap_uvo;
     };
 
-    struct filter_owner_t;
+    struct filter_t;
+    struct filter_owner_t
+    {
+        union
+        {
+            const struct filter_video_callbacks* video;
+            const struct filter_audio_callbacks* audio;
+            const struct filter_subpicture_callbacks* sub;
+        };
+
+        /* Input attachments
+         * XXX use filter_GetInputAttachments */
+        int (*pf_get_attachments)(struct filter_t*, input_attachment_t***, int*);
+
+        void* sys;
+    };
+
     struct filter_t
     {
         module_t* p_module;
@@ -75,23 +67,7 @@ namespace FFmpeg {
         const struct filter_operations* ops;
 
         /** Private structure for the owner of the filter */
-        struct filter_owner_t      owner;
-    };
-
-    struct filter_owner_t
-    {
-        union
-        {
-            const struct filter_video_callbacks* video;
-            const struct filter_audio_callbacks* audio;
-            const struct filter_subpicture_callbacks* sub;
-        };
-
-        /* Input attachments
-         * XXX use filter_GetInputAttachments */
-        int (*pf_get_attachments)(struct filter_t*, input_attachment_t***, int*);
-
-        void* sys;
+        filter_owner_t      owner;
     };
 
 	[[nodiscard]] int GetCpuCount();

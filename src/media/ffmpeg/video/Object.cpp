@@ -1,10 +1,13 @@
 #include "Object.h"
 
+#include "Math.h"
+#include "Variables.h"
+
 
 namespace FFmpeg {
     res** obj_res(object_t* obj)
     {
-        return &internals(obj)->resources;
+        return &objectPrivate(obj)->resources;
     }
 
     void* objres_new(size_t size, void (*release)(void*))
@@ -15,32 +18,32 @@ namespace FFmpeg {
             return NULL;
         }
 
-        struct res* res = malloc(size);
-        if (unlikely(res == NULL))
+        struct res* _res = (struct res*)malloc(size);
+        if (unlikely(_res == NULL))
             return NULL;
 
-        res->release = release;
-        return res->payload;
+        _res->release = release;
+        return _res->payload;
     }
 
     void objres_push(object_t* obj, void* data)
     {
-        struct res** restrict pp = obj_res(obj);
-        struct res* res = container_of(data, struct res, payload);
+        struct res** pp = obj_res(obj);
+        struct res* _res = container_of(data, struct res, payload);
 
-        res->prev = *pp;
-        *pp = res;
+        _res->prev = *pp;
+        *pp = _res;
     }
 
-    static void* objres_pop(object_t* obj)
+    void* objres_pop(object_t* obj)
     {
-        struct res** restrict pp = obj_res(obj);
-        struct res* res = *pp;
+        struct res** pp = obj_res(obj);
+        struct res* _res = *pp;
 
-        if (res == NULL)
+        if (_res == NULL)
             return NULL;
-        *pp = res->prev;
-        return res->payload;
+        *pp = _res->prev;
+        return _res->payload;
     }
 
     void objres_clear(object_t* obj)
@@ -49,17 +52,17 @@ namespace FFmpeg {
 
         while ((data = objres_pop(obj)) != NULL)
         {
-            struct res* res = container_of(data, struct res, payload);
+            struct res* _res = container_of(data, struct res, payload);
 
-            res->release(res->payload);
-            free(res);
+            _res->release(_res->payload);
+            free(_res);
         }
     }
 
     void objres_remove(object_t* obj, void* data,
         bool (*match)(void*, void*))
     {
-        struct res** restrict pp = obj_res(obj);
+        struct res** pp = obj_res(OBJECT(obj));
 
         /* With a doubly-linked list, this function could have constant complexity.
          * But that would require one more pointer per resource.
@@ -70,19 +73,19 @@ namespace FFmpeg {
          */
         for (;;)
         {
-            struct res* res = *pp;
+            struct res* _res = *pp;
 
-            assert(res != NULL); /* invalid free? */
+            assert(_res != NULL); /* invalid free? */
 
-            if (match(res->payload, data))
+            if (match(_res->payload, data))
             {
-                *pp = res->prev;
-                res->release(res->payload);
-                free(res);
+                *pp = _res->prev;
+                _res->release(_res->payload);
+                free(_res);
                 return;
             }
 
-            pp = &res->prev;
+            pp = &_res->prev;
         }
     }
 
@@ -96,7 +99,7 @@ namespace FFmpeg {
         return a == b;
     }
 
-    void* (obj_malloc)(object_t* obj, size_t size)
+    void* obj_malloc(object_t* obj, size_t size)
     {
         void* ptr = objres_new(size, dummy_release);
         if (likely(ptr != NULL))
@@ -104,7 +107,7 @@ namespace FFmpeg {
         return ptr;
     }
 
-    void* (obj_calloc)(object_t* obj, size_t nmemb, size_t size)
+    void* obj_calloc(object_t* obj, size_t nmemb, size_t size)
     {
         size_t tabsize;
         if (unlikely(ckd_mul(&tabsize, nmemb, size)))
@@ -119,6 +122,34 @@ namespace FFmpeg {
         return ptr;
     }
 
+    void object_deinit(object_t* obj)
+    {
+        object_internals_t* priv = objectPrivate(obj);
+
+        assert(priv->resources == NULL);
+
+        /* Destroy the associated variables. */
+        int canc = Threads::savecancel();
+        var_DestroyAll(obj);
+        Threads::restorecancel(canc);
+
+        free(priv);
+    }
+
+    void object_delete(object_t* obj)
+    {
+        object_deinit(obj);
+        free(obj);
+    }
+
+    template<typename O>
+    void object_delete(O* obj)
+    {
+        if (!std::is_trivially_destructible<O>::value)
+            obj->~O();
+        object_delete(OBJECT(obj));
+    }
+
     void* obj_memdup(object_t* obj, const void* base, size_t len)
     {
         void* ptr = obj_malloc(obj, len);
@@ -127,12 +158,12 @@ namespace FFmpeg {
         return ptr;
     }
 
-    char* (obj_strdup)(object_t* obj, const char* str)
+    char* obj_strdup(object_t* obj, const char* str)
     {
-        return obj_memdup(obj, str, strlen(str) + 1);
+        return (char*)obj_memdup(obj, str, strlen(str) + 1);
     }
 
-    void (obj_free)(object_t* obj, void* ptr)
+    void obj_free(object_t* obj, void* ptr)
     {
         objres_remove(obj, ptr, ptrcmp);
     }
