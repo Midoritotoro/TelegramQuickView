@@ -14,6 +14,7 @@ namespace Threads {
 
         inline atomic_rc_t& operator=(const atomic_rc_t& other) {
             refs = other.refs.load();
+            return *this;
         }
 	};
 

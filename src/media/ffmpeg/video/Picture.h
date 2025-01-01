@@ -85,28 +85,6 @@ namespace FFmpeg {
 
 		::Threads::atomic_rc_t refs;
 
-		picture_t& operator=(const picture_t& other) {
-			if (this != &other) {
-				format = other.format;
-				for (int i = 0; i < PICTURE_PLANE_MAX; i++) {
-					p[i] = other.p[i];
-				}
-				i_planes = other.i_planes;
-				date = other.date;
-				b_force = other.b_force;
-				b_still = other.b_still;
-				b_progressive = other.b_progressive;
-				b_top_field_first = other.b_top_field_first;
-				b_multiview_left_eye = other.b_multiview_left_eye;
-				i_nb_fields = other.i_nb_fields;
-				context = other.context;
-				p_sys = other.p_sys;
-				p_next = other.p_next;
-
-				refs.refs.load();
-			}
-			return *this;
-		}
 		picture_t(const picture_t& other) {
 			format = other.format;
 			for (int i = 0; i < PICTURE_PLANE_MAX; i++) {
@@ -123,8 +101,7 @@ namespace FFmpeg {
 			context = other.context;
 			p_sys = other.p_sys;
 			p_next = other.p_next;
-			refs.refs.load();
-
+			refs = refs;
 		}
 	};
 
