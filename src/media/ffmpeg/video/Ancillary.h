@@ -19,4 +19,14 @@ namespace Threads {
 	void AncillaryArrayClear(ancillary*** array);
 
 	void AncillaryArrayInit(ancillary*** array);
+
+
+    ancillary* AncillatyHold(ancillary* ancillary);
+    void* AncillaryGetData(const ancillary* ancillary);
+
+    size_t AncillaryArrayCount(ancillary** array);
+    int AncillaryArrayDup(
+        ancillary*** dst_arrayp,
+        ancillary** const* src_arrayp);
+
 } // namespace Threads

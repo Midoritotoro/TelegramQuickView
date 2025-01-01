@@ -317,6 +317,30 @@ namespace FFmpeg {
         }
     }
 
+    void PictureCopyProperties(picture_t* p_dst, const picture_t* p_src)
+    {
+        p_dst->date = p_src->date;
+        p_dst->b_force = p_src->b_force;
+        p_dst->b_still = p_src->b_still;
+
+        p_dst->b_progressive = p_src->b_progressive;
+        p_dst->i_nb_fields = p_src->i_nb_fields;
+        p_dst->b_top_field_first = p_src->b_top_field_first;
+
+        const picture_priv_t* src_priv = container_of(p_src, picture_priv_t, picture);
+        picture_priv_t* dst_priv = container_of(p_dst, picture_priv_t, picture);
+
+        Threads::AncillaryArrayDup(&dst_priv->ancillaries, &src_priv->ancillaries);
+    }
+
+    void PictureCopy(
+        picture_t* p_dst,
+        const picture_t* p_src)
+    {
+        PictureCopyPixels(p_dst, p_src);
+        PictureCopyProperties(p_dst, p_src);
+    }
+
     void PictureCopyPixels(
         picture_t* p_dst,
         const picture_t* p_src)

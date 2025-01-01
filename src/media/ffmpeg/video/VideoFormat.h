@@ -4,6 +4,8 @@
 #include "Fourcc.h"
 
 #include "Object.h"
+#include "Ancillary.h"
+
 
 namespace FFmpeg {
     struct video_palette_t {
@@ -307,7 +309,7 @@ namespace FFmpeg {
 
         /** Private ancillary struct. Don't use it directly, but use it via
          * vlc_frame_AttachAncillary() and vlc_frame_GetAncillary(). */
-        ::Threads::ancillary** priv_ancillaries;
+        Threads::ancillary** priv_ancillaries;
 
         const frame_callbacks* cbs;
     };

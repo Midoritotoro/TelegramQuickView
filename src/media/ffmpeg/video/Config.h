@@ -67,7 +67,7 @@ typedef int64_t tick_t;
 #define unreachable()                       ((void)0)
 #endif
 
-
+#define always_inline __forceinline
 #define unused(x)                           ((void)(x))
 
 #define SUCCESS                             0
@@ -108,6 +108,7 @@ typedef int64_t tick_t;
     (((type) & CONFIG_ITEM_INTEGER) != 0)
 #define IsConfigFloatType(type) \
     ((type) == CONFIG_ITEM_FLOAT)
+
 
 namespace FFmpeg {
     struct module_t;

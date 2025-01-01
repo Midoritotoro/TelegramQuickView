@@ -25,6 +25,8 @@ namespace Threads {
 
 
 	[[nodiscard]] bool AtomicRcDec(atomic_rc_t* rc);
+    void AtomicRcInc(atomic_rc_t* rc);
+
 	void AtomicRcInit(atomic_rc_t* rc);
 
     void atomic_notify_one(void* addr);

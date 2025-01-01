@@ -25,6 +25,13 @@ namespace FFmpeg {
         video_format_t dst;
     };
 
+    struct spu_updater_ops;
+    struct subpicture_updater_t
+    {
+        void* sys;
+        const spu_updater_ops* ops;
+    };
+
     struct subpicture_t
     {
         /** \name Channel ID */
@@ -84,9 +91,4 @@ namespace FFmpeg {
         void (*destroy)(subpicture_t*);
 
     };
-    typedef struct
-    {
-        void* sys;
-        const struct spu_updater_ops* ops;
-    } subpicture_updater_t;
 }

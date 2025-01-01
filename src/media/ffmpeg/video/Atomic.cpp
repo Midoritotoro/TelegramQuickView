@@ -15,6 +15,15 @@ namespace Threads {
         return prev == 1;
     }
 
+    void AtomicRcInc(atomic_rc_t* rc)
+    {
+        uintptr_t prev = atomic_fetch_add_explicit(&rc->refs, (uintptr_t)1,
+            memory_order_relaxed);
+        assert(prev);
+        unused(prev);
+    }
+
+
     void AtomicRcInit(atomic_rc_t* rc) {
         atomic_init(&rc->refs, (uintptr_t)1);
     }

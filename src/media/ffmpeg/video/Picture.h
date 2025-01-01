@@ -13,6 +13,14 @@ namespace Threads {
 }
 
 namespace FFmpeg {
+	enum
+	{
+		Y_PLANE = 0,
+		U_PLANE = 1,
+		V_PLANE = 2,
+		A_PLANE = 3,
+	};
+
 	struct video_format_t;
 	struct picture_context_t
 	{
@@ -76,6 +84,8 @@ namespace FFmpeg {
 		struct picture_t* p_next;
 
 		struct ::Threads::atomic_rc_t refs;
+
+		picture_t& operator=(const picture_t& picture) = default;
 	};
 
 
@@ -157,4 +167,22 @@ namespace FFmpeg {
 		picture_t* p_dst,
 		const picture_t* p_src);
 	void PlaneCopyPixels(plane_t* p_dst, const plane_t* p_src);
+
+	void PictureCopyProperties(picture_t* p_dst, const picture_t* p_src);
+	void PictureCopy(picture_t* p_dst, const picture_t* p_src);
+
+	static inline picture_t* filter_NewPicture(filter_t* p_filter)
+	{
+		picture_t* pic = NULL;
+		if (p_filter->owner.video != NULL && p_filter->owner.video->buffer_new != NULL)
+			pic = p_filter->owner.video->buffer_new(p_filter);
+		if (pic == NULL)
+		{
+			// legacy filter owners not setting a default filter_allocator
+			pic = picture_NewFromFormat(&p_filter->fmt_out.video);
+		}
+		if (pic == NULL)
+			msg_Warn(p_filter, "can't get output picture");
+		return pic;
+	}
 } // namespace FFmpeg

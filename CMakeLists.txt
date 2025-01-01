@@ -341,6 +341,8 @@ SET(MAIN_SOURCES main.cpp
     src/media/ffmpeg/video/SubPicture.h
     src/media/ffmpeg/video/SubPicture.cpp
 
+    src/media/ffmpeg/video/OverflowCheck.h
+
 
 	# src/parser/data/UserDataManager.cpp
 	# src/parser/data/UserDataManager.h

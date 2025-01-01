@@ -5,6 +5,7 @@
 #include <malloc.h>
 
 #include "Variables.h"
+#include "Picture.h"
 
 
 extern "C" {
@@ -13,7 +14,9 @@ extern "C" {
 
 #include <qDebug>
 
-#define ALLOW_YUVP (false)
+#define ALLOW_YUVP  (false)
+#define OFFSET_A    (3)
+
 
 namespace FFmpeg {
     inline constexpr filter_operations filter_ops = {
@@ -128,6 +131,39 @@ namespace FFmpeg {
         if (p_sys->p_filter)
             sws_freeFilter(p_sys->p_filter);
         free(p_sys);
+    }
+
+    void GetPixels(uint8_t* pp_pixel[4], int pi_pitch[4],
+        const chroma_description_t* desc,
+        const video_format_t* fmt,
+        const picture_t* p_picture, unsigned planes,
+        bool b_swap_uv)
+    {
+        unsigned i = 0;
+
+        if (planes > (unsigned)p_picture->i_planes)
+            planes = p_picture->i_planes;
+        assert(!b_swap_uv || planes >= 3);
+
+        for (; i < planes; i++)
+        {
+            const plane_t* p = p_picture->p + i;
+            if (b_swap_uv && (i == 1 || i == 2))
+                p = p_picture->p + 3 - i;
+
+            pp_pixel[i] = p->p_pixels
+                + (((fmt->i_x_offset * desc->p[i].w.num) / desc->p[i].w.den)
+                    * p->i_pixel_pitch)
+                + (((fmt->i_y_offset * desc->p[i].h.num) / desc->p[i].h.den)
+                    * p->i_pitch);
+            pi_pitch[i] = p->i_pitch;
+        }
+
+        for (; i < 4; i++)
+        {
+            pp_pixel[i] = NULL;
+            pi_pitch[i] = 0;
+        }
     }
 
 
@@ -293,6 +329,64 @@ namespace FFmpeg {
         return SUCCESS;
     }
 
+    void ExtractA(picture_t* p_dst, const picture_t* p_src,
+        unsigned offset)
+    {
+        plane_t* d = &p_dst->p[0];
+        const plane_t* s = &p_src->p[0];
+
+        for (unsigned y = 0; y < p_dst->format.i_height; y++)
+            for (unsigned x = 0; x < p_dst->format.i_width; x++)
+                d->p_pixels[y * d->i_pitch + x] = s->p_pixels[y * s->i_pitch + 4 * x + offset];
+    }
+
+    void InjectA(picture_t* p_dst, const picture_t* p_src,
+        unsigned offset)
+    {
+        plane_t* d = &p_dst->p[0];
+        const plane_t* s = &p_src->p[0];
+
+        for (unsigned y = 0; y < p_src->format.i_height; y++)
+            for (unsigned x = 0; x < p_src->format.i_width; x++)
+                d->p_pixels[y * d->i_pitch + 4 * x + offset] = s->p_pixels[y * s->i_pitch + x];
+    }
+
+    void FillA(plane_t* d, unsigned i_offset)
+    {
+        for (int y = 0; y < d->i_visible_lines; y++)
+            for (int x = 0; x < d->i_visible_pitch; x += d->i_pixel_pitch)
+                d->p_pixels[y * d->i_pitch + x + i_offset] = 0xff;
+    }
+
+    void CopyPad(picture_t* p_dst, const picture_t* p_src)
+    {
+        PictureCopy(p_dst, p_src);
+        for (int n = 0; n < p_dst->i_planes; n++)
+        {
+            const plane_t* s = &p_src->p[n];
+            plane_t* d = &p_dst->p[n];
+
+            for (int y = 0; y < s->i_lines && y < d->i_lines; y++)
+            {
+                for (int x = s->i_visible_pitch; x < d->i_visible_pitch; x += s->i_pixel_pitch)
+                    memcpy(&d->p_pixels[y * d->i_pitch + x], &d->p_pixels[y * d->i_pitch + s->i_visible_pitch - s->i_pixel_pitch], s->i_pixel_pitch);
+            }
+        }
+    }
+
+    void SwapUV(
+        picture_t* p_dst,
+        const picture_t* p_src)
+    {
+        picture_t tmp = *p_src;
+
+        tmp.p[1] = p_src->p[2];
+        tmp.p[2] = p_src->p[1];
+
+        PictureCopyPixels(p_dst, &tmp);
+    }
+
+
     int Init(filter_t* p_filter)
     {
         filter_sys_t* p_sys = (filter_sys_t*)p_filter->p_sys;
@@ -417,4 +511,90 @@ namespace FFmpeg {
 
         return SUCCESS;
     }
-}
+
+    picture_t* Filter(filter_t* p_filter, picture_t* p_pic)
+    {
+        filter_sys_t* p_sys = (filter_sys_t*)p_filter->p_sys;
+        const video_format_t* p_fmti = &p_filter->fmt_in.video;
+        const video_format_t* p_fmto = &p_filter->fmt_out.video;
+        picture_t* p_pic_dst;
+
+        /* Check if format properties changed */
+        if (Init(p_filter))
+        {
+            PictureRelease(p_pic);
+            return NULL;
+        }
+
+        /* Request output picture */
+        p_pic_dst = filternewpic(p_filter);
+        if (!p_pic_dst)
+        {
+            PictureRelease(p_pic);
+            return NULL;
+        }
+
+        /* */
+        picture_t* p_src = p_pic;
+        picture_t* p_dst = p_pic_dst;
+        if (p_sys->i_extend_factor != 1)
+        {
+            p_src = p_sys->p_src_e;
+            p_dst = p_sys->p_dst_e;
+
+            CopyPad(p_src, p_pic);
+        }
+
+        if (p_sys->b_copy && p_sys->b_swap_uvi == p_sys->b_swap_uvo)
+            PictureCopyPixels(p_dst, p_src);
+        else if (p_sys->b_copy)
+            SwapUV(p_dst, p_src);
+        else
+        {
+            /* Even if alpha is unused, swscale expects the pointer to be set */
+            const int n_planes = !p_sys->ctxA && (p_src->i_planes == 4 ||
+                p_dst->i_planes == 4) ? 4 : 3;
+            Convert(p_filter, p_sys->ctx, p_dst, p_src, p_fmti->i_visible_height,
+                n_planes, p_sys->b_swap_uvi, p_sys->b_swap_uvo);
+        }
+        if (p_sys->ctxA)
+        {
+            /* We extract the A plane to rescale it, and then we reinject it. */
+            if (p_fmti->i_chroma == CODEC_RGBA || p_fmti->i_chroma == CODEC_BGRA)
+                ExtractA(p_sys->p_src_a, p_src, OFFSET_A);
+            else if (p_fmti->i_chroma == CODEC_ARGB || p_fmti->i_chroma == CODEC_ABGR)
+                ExtractA(p_sys->p_src_a, p_src, 0);
+            else
+                PlaneCopyPixels(p_sys->p_src_a->p, p_src->p + A_PLANE);
+
+            Convert(p_filter, p_sys->ctxA, p_sys->p_dst_a, p_sys->p_src_a,
+                p_fmti->i_visible_height, 1, false, false);
+            if (p_fmto->i_chroma == CODEC_RGBA || p_fmto->i_chroma == CODEC_BGRA)
+                InjectA(p_dst, p_sys->p_dst_a, OFFSET_A);
+            else if (p_fmto->i_chroma == CODEC_ARGB || p_fmto->i_chroma == CODEC_ABGR)
+                InjectA(p_dst, p_sys->p_dst_a, 0);
+            else
+                PlaneCopyPixels(p_dst->p + A_PLANE, p_sys->p_dst_a->p);
+        }
+        else if (p_sys->b_add_a)
+        {
+            /* We inject a complete opaque alpha plane */
+            if (p_fmto->i_chroma == CODEC_RGBA || p_fmto->i_chroma == CODEC_BGRA)
+                FillA(&p_dst->p[0], OFFSET_A);
+            else if (p_fmto->i_chroma == CODEC_ARGB || p_fmto->i_chroma == CODEC_ABGR)
+                FillA(&p_dst->p[0], 0);
+            else
+                FillA(&p_dst->p[A_PLANE], 0);
+        }
+
+        if (p_sys->i_extend_factor != 1)
+        {
+            PictureCopyPixels(p_pic_dst, p_dst);
+        }
+
+        PictureCopyProperties(p_pic_dst, p_pic);
+        PictureRelease(p_pic);
+
+        return p_pic_dst;
+    }
+} // namespace FFmpeg
