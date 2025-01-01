@@ -105,7 +105,6 @@ static always_inline bool UnsignedLongLongMultiplyOverflow(
 #endif
 }
 
-
 [[nodiscard]] always_inline bool MultiplyOverflow(
     unsigned a, 
     unsigned b,
@@ -155,5 +154,7 @@ static always_inline bool UnsignedLongLongMultiplyOverflow(
 }
 
 [[nodiscard]] inline void* MemoryAllocate(size_t count, size_t size) {
-    return MultiplyOverflow(count, size, &size) ? nullptr : malloc(count);
+    return MultiplyOverflow(count, size, &size) 
+        ? nullptr 
+        : malloc(count);
 }

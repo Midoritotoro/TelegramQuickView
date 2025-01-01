@@ -288,15 +288,21 @@ SET(MAIN_SOURCES main.cpp
     src/ui/effects/OpenGLBlur.cpp
 	src/ui/effects/OpenGLBlur.h
 
-    
+        
+    src/core/TFunctions.cpp
+    src/core/TFunctions.h
+
+    src/core/Windows.h
+    src/core/OverflowCheck.h
+
+    src/core/Math.h
+    src/core/Math.cpp
+
     src/media/ffmpeg/video/ColorSpace.h
     src/media/ffmpeg/video/ColorSpace.cpp
 
     src/media/ffmpeg/video/Variables.h
     src/media/ffmpeg/video/Variables.cpp
-
-    src/media/ffmpeg/video/TFunctions.cpp
-    src/media/ffmpeg/video/TFunctions.h
     
      src/media/ffmpeg/video/Ancillary.h
     src/media/ffmpeg/video/Ancillary.cpp
@@ -324,12 +330,6 @@ SET(MAIN_SOURCES main.cpp
 
     src/media/ffmpeg/audio/AudioFormat.cpp
     src/media/ffmpeg/audio/AudioFormat.h
-
-    src/media/ffmpeg/video/Windows.h
-
-    src/media/ffmpeg/video/Math.h
-    src/media/ffmpeg/video/Math.cpp
-
     src/media/ffmpeg/video/VideoHelper.h
 
     src/media/ffmpeg/video/Chroma.h
@@ -340,8 +340,6 @@ SET(MAIN_SOURCES main.cpp
 
     src/media/ffmpeg/video/SubPicture.h
     src/media/ffmpeg/video/SubPicture.cpp
-
-    src/media/ffmpeg/video/OverflowCheck.h
 
     src/media/ffmpeg/video/Filter.cpp
     src/media/ffmpeg/video/Filter.h

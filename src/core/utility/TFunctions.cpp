@@ -32,10 +32,10 @@ static const void* smallest;
         int r;
 
         if ((r = (*compar)(vkey, (*rootp)->key)) == 0)	/* T2: */
-            return *rootp;		/* key found */
+            return *rootp;		/* Ключ найден */
         rootp = (r < 0) ?
-            &(*rootp)->llink :		/* T3: follow left branch */
-            &(*rootp)->rlink;		/* T4: follow right branch */
+            &(*rootp)->llink :		/* T3: Идем на левую ветку */
+            &(*rootp)->rlink;		/* T4: Идем на правую ветку */
     }
     return NULL;
 }
@@ -55,29 +55,30 @@ static const void* smallest;
     if (rootp == NULL)
         return NULL;
 
-    while (*rootp != NULL) {	/* Knuth's T1: */
+    while (*rootp != NULL) {	/* T1: */
         int r;
 
         if ((r = (*compar)(vkey, (*rootp)->key)) == 0)	/* T2: */
-            return *rootp;		/* we found it! */
+            return *rootp;		/* Ключ найден */
 
         rootp = (r < 0) ?
             &(*rootp)->llink :		/* T3: follow left branch */
             &(*rootp)->rlink;		/* T4: follow right branch */
     }
 
-    q = (node_t*)malloc(sizeof(node_t));		/* T5: key not found */
-    if (q != 0) {				/* make new node */
-        *rootp = q;			/* link new node to old */
-        q->key = (char*)(vkey);	/* initialize new node */
+    q = (node_t*)malloc(sizeof(node_t));		/* T5: Ключ не найден */
+    if (q != 0) {				/* Создаем новый узел */
+        *rootp = q;			/* Связываем его со старым */
+        q->key = (char*)(vkey);	/* Инициализируем новый узел */
         q->llink = q->rlink = NULL;
     }
     return q;
 }
 
 void trecurse(
-    const node_t* root,	/* Root of the tree to be walked */
-    cmp_fn_t action, int level)
+    const node_t* root,
+    cmp_fn_t action,
+    int level)
 {
     assert(root != NULL);
     assert(action != NULL);
@@ -95,10 +96,14 @@ void trecurse(
     }
 }
 
-/* Walk the nodes of a tree */
+/**
+ *Обходит узлы дерева 
+ *\param vroot - Дерево
+ *\param action - Узел дерева для обхода
+ */
 void twalk(
     const void* vroot,
-    cmp_fn_t action) /* Root of the tree to be walked */
+    cmp_fn_t action)
 {
     if (vroot != NULL && action != NULL)
         trecurse((const node_t*)vroot, action, 0);
