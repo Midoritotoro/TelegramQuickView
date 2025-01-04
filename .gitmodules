@@ -1,0 +1,3 @@
+[submodule "modules/lib_base"]
+	path = modules/lib_base
+	url = https://github.com/midoritotoro/lib_base

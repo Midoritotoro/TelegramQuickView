@@ -21,7 +21,7 @@
 */
 #define measureExecutionTime(name) \
 	 const auto ms = Time::now(); \
-	 const auto timer = gsl::finally([] { \
+	 const auto timer = gsl::finally([=] { \
 		std::cout << name << " completed for: " \
 		<< Time::now() - ms << " ms" << '\n'; }); \
 

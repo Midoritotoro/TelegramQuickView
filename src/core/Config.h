@@ -4,7 +4,6 @@
 #include <cassert>
 
 #include "Windows.h"
-
 #include "TFunctions.h"
 
 

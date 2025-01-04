@@ -289,14 +289,14 @@ SET(MAIN_SOURCES main.cpp
 	src/ui/effects/OpenGLBlur.h
 
         
-    src/core/TFunctions.cpp
-    src/core/TFunctions.h
+   # src/core/TFunctions.cpp
+   # src/core/TFunctions.h
 
-    src/core/Windows.h
-    src/core/OverflowCheck.h
+   # src/core/Windows.h
+   # src/core/OverflowCheck.h
 
-    src/core/Math.h
-    src/core/Math.cpp
+   # src/core/Math.h
+   # src/core/Math.cpp
 
     src/media/ffmpeg/video/ColorSpace.h
     src/media/ffmpeg/video/ColorSpace.cpp
